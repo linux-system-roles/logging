@@ -1,0 +1,70 @@
+---
+- name: "If output plugin is elasticsearch, validate host address is set"
+  debug:
+    msg: "Metrics store is not configured. This host will not be configured to send logs"
+  when:
+    - fluentd_elasticsearch_host == "elasticsearch-server.example.com" or fluentd_elasticsearch_host == "" or fluentd_elasticsearch_host is undefined
+    - fluentd_output_plugin|default("elasticsearch") == "elasticsearch"
+  changed_when: true
+  notify: set failed validation
+
+- name: "Validate env-name parameter is set"
+  debug:
+    msg: "Metrics store is not configured. This host will not be configured to send logs"
+  when:
+    - env_name is undefined
+  changed_when: true
+  notify: set failed validation
+
+- name: "If output plugin is fluentd, validate host address is set"
+  debug:
+    msg: "Metrics store is not configured. This host will not be configured to send logs"
+  when:
+    - fluentd_fluentd_host is undefined
+    - fluentd_output_plugin|default("elasticsearch") == "fluentd"
+  changed_when: true
+  notify: set failed validation
+
+- name: force all notified handlers to run at this point, not waiting for normal sync points
+  meta: flush_handlers
+
+- block:
+    - name: Check environment name length
+      debug:
+        msg: "ERROR '{{ env_name }}' length must be up to 49 characters. Please update env_name in the config.yml file"
+      when:  env_name | length > 49
+      changed_when: true
+      notify:  set failed validation
+
+    - name: Check environment name does not start with a number
+      debug:
+        msg: "ERROR '{{ env_name }}' can not begin with a number. Please update env_name in the config.yml file"
+      when: env_name is match('^[0-9]')
+      changed_when: true
+      notify:  set failed validation
+
+    - name: Check environment name does not start a with dash
+      debug:
+        msg: "ERROR '{{ env_name }}' can not begin with a hyphen ('-'). Please update env_name in the config.yml file"
+      when: env_name.startswith('-')
+      changed_when: true
+      notify:  set failed validation
+
+    - name: Check environment name does not end a with dash
+      debug:
+        msg: "ERROR '{{ env_name }}' can not end with a hyphen ('-'). Please update env_name in the config.yml file"
+      when: env_name.endswith('-')
+      changed_when: true
+      notify:  set failed validation
+
+    - name: Check environment name includes only alphanum and dashes
+      debug:
+        msg: "ERROR '{{ env_name }}' can include only alpahnumerics and hyphens ('-'). Please update env_name in the config.yml file"
+      when: env_name is match('.*[^a-zA-Z0-9-].*')
+      changed_when: true
+      notify:  set failed validation
+
+    - name: force all notified handlers to run at this point, not waiting for normal sync points
+      meta: flush_handlers
+
+  when: failed_validation is undefined

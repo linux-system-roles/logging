@@ -1,0 +1,79 @@
+---
+- name: Ensure fluentd configuration directory exists
+  file:
+    path: '{{ fluentd_config_dir }}'
+    state: directory
+    owner: '{{ fluentd_owner }}'
+    group: '{{ fluentd_group }}'
+    mode: '{{ fluentd_config_dir_mode }}'
+
+- name: Ensure fluentd config.d directory exists
+  file:
+    path: '{{ fluentd_config_parts_dir }}'
+    state: directory
+    owner: '{{ fluentd_owner }}'
+    group: '{{ fluentd_group }}'
+    mode: '{{ fluentd_config_dir_mode }}'
+
+- name: Create fluentd.conf
+  template:
+    src: fluentd.conf
+    dest: '{{ fluentd_config_file }}'
+    owner: '{{ fluentd_owner }}'
+    group: '{{ fluentd_group }}'
+    mode: '{{ fluentd_config_mode }}'
+  notify: restart fluentd
+
+- name: Install fluentd certificate
+  copy:
+    content: '{{ fluentd_ca_cert }}'
+    dest: '{{ fluentd_ca_cert_path }}'
+    owner: '{{ fluentd_owner }}'
+    group: '{{ fluentd_group }}'
+    mode: '{{ fluentd_config_mode }}'
+  when:
+    - fluentd_use_ssl
+    - fluentd_output_plugin == fluentd_output_plugin_fluentd
+  notify: restart fluentd
+
+- name: Install fluentd elasticsearch CA certificate
+  copy:
+    content: '{{ fluentd_elasticsearch_ca_cert }}'
+    dest: '{{ fluentd_elasticsearch_ca_cert_path }}'
+    owner: '{{ fluentd_owner }}'
+    group: '{{ fluentd_group }}'
+    mode: '{{ fluentd_config_mode }}'
+  when:
+    - fluentd_use_ssl
+    - fluentd_output_plugin == fluentd_output_plugin_elasticsearch
+  notify: restart fluentd
+
+- name: Install fluentd elasticsearch client certificate
+  copy:
+    content: '{{ fluentd_elasticsearch_client_cert }}'
+    dest: '{{ fluentd_elasticsearch_client_cert_path }}'
+    owner: '{{ fluentd_owner }}'
+    group: '{{ fluentd_group }}'
+    mode: '{{ fluentd_config_mode }}'
+  when:
+    - fluentd_use_ssl
+    - fluentd_output_plugin == fluentd_output_plugin_elasticsearch
+  notify: restart fluentd
+
+- name: Install fluentd elasticsearch client key
+  copy:
+    content: '{{ fluentd_elasticsearch_client_key }}'
+    dest: '{{ fluentd_elasticsearch_client_key_path }}'
+    owner: '{{ fluentd_owner }}'
+    group: '{{ fluentd_group }}'
+    mode: '{{ fluentd_config_mode }}'
+  when:
+    - fluentd_use_ssl
+    - fluentd_output_plugin == fluentd_output_plugin_elasticsearch
+  notify: restart fluentd
+
+- name: Enable fluentd service
+  service:
+    name: '{{ fluentd_service_name }}'
+    enabled: true
+  when: manage_services|default(true)

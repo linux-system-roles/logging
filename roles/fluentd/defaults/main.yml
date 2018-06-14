@@ -1,0 +1,72 @@
+---
+# Fluentd service name.
+fluentd_service_name: fluentd
+
+# Path to the Fluentd configuration directory.
+fluentd_config_dir: /etc/fluentd
+
+# Path to the main Fluentd configuration file.
+fluentd_config_file: '{{ fluentd_config_dir }}/fluent.conf'
+
+# Path to the directory containing Fluentd configuration snippets.
+fluentd_config_parts_dir: '{{ fluentd_config_dir }}/config.d'
+
+# User that will own Fluentd config files.
+fluentd_owner: root
+
+# Group that will own Fluentd config files.
+fluentd_group: root
+
+# File mode for Fluentd configuration files.
+fluentd_config_mode: 0640
+
+# File mode for Fluentd configuration directories.
+fluentd_config_dir_mode: 0750
+
+# Fluentd default output plugin
+fluentd_output_plugin: elasticsearch
+
+# Names of the available output plugins
+fluentd_output_plugin_elasticsearch: elasticsearch
+
+fluentd_output_plugin_fluentd: fluentd
+
+fluentd_output_plugin_file: file
+
+# Set to true if Fluentd should use SSL.
+fluentd_use_ssl: true
+
+# Relevant only to secure forward output plugin
+
+# Shared secret key for SSL connections.
+fluentd_shared_key:
+
+# Where to find the Fluentd server certificate authority certificate.
+fluentd_ca_cert_path: '{{ fluentd_config_dir }}/ca_cert.pem'
+
+# Content of an x509 certificate that will be used to identify the
+# server to clients.
+fluentd_ca_cert:
+
+# Relevant only to elasticsearch output plugin
+
+# Where to find the Fluentd CA certificate used to communicate with Elasticsearch
+fluentd_elasticsearch_ca_cert_path: '{{ fluentd_config_dir }}/elasticsearch_ca_cert.pem'
+
+# Where to find the Fluentd client certificate used to communicate with Elasticsearch
+fluentd_elasticsearch_client_cert_path: '{{ fluentd_config_dir }}/elasticsearch_client_cert.pem'
+
+# Where to find the Fluentd client certificate used to communicate with Elasticsearch
+fluentd_elasticsearch_client_key_path: '{{ fluentd_config_dir }}/elasticsearch_client_key.pem'
+
+# Content of an x509 Fluentd Elasticsearch CA certificate that will be used to identify the
+# server to clients.
+fluentd_elasticsearch_ca_cert:
+
+# Content of an x509 Fluentd Elasticsearch client certificate that will be used to
+# authenicate to Elasticsearch.
+fluentd_elasticsearch_client_cert:
+
+# Content of an x509 Fluentd Elasticsearch client key that will be used to
+# authenicate to Elasticsearch.
+fluentd_elasticsearch_client_key:

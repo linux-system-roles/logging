@@ -1,0 +1,21 @@
+---
+- name: Check if logging config.yml file exist
+  stat:
+    path: "{{ logging_config_yml_file }}"
+  register: stat_result
+  run_once: true
+  delegate_to: localhost
+
+- name: Include logging config.yml file
+  include_vars:
+    file: '{{ logging_config_yml_file }}'
+  when: stat_result.stat.exists == True
+  run_once: true
+  delegate_to: localhost
+
+- name: Include logging config.yml.d vars directory
+  include_vars:
+    dir: '{{ logging_config_yml_dir }}'
+    ignore_files: ['README.md']
+  run_once: true
+  delegate_to: localhost

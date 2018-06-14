@@ -1,0 +1,8 @@
+- name: Configure post processing
+  template:
+    src: post-processing-common.conf
+    dest: '{{ fluentd_config_parts_dir }}/25-post-processing-common.conf'
+    owner: '{{ fluentd_owner }}'
+    group: '{{ fluentd_group }}'
+    mode: '{{ fluentd_config_mode }}'
+  notify: restart fluentd

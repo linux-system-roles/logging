@@ -1,0 +1,66 @@
+- block:
+    - name: Log into logging project
+      shell: oc project logging
+
+    - name: Remove logs index uuid files
+      file:
+        state: absent
+        path: '{{ item }}'
+      with_items:
+        - /root/logs-{{ env_name }}-uuid
+
+    - name: Getting the logs-{{ env_name}} uuid
+      shell: oc get project logs-{{ env_name}} -o jsonpath='{.metadata.uid}' > /tmp/logs-{{ env_name}}-uuid
+
+    - name: Getting CA cert
+      shell: |
+        {% raw %}
+        oc get secret logging-fluentd --template='{{ index .data "ca" }}' | base64 -d > /tmp/fluentd-ca
+        {% endraw %}
+
+    - name: Getting SSL client certificate
+      shell: |
+        {% raw %}
+        oc get secret logging-fluentd --template='{{index .data "cert"}}' | base64 -d > /tmp/fluentd-cert
+        {% endraw %}
+
+    - name: GettingSSL client key
+      shell: |
+        {% raw %}
+        oc get secret logging-fluentd --template='{{index .data "key"}}' | base64 -d > /tmp/fluentd-key
+        {% endraw %}
+
+    - name: Copy certificates to engine machine
+      fetch:
+        src: '/tmp/{{ item }}'
+        dest: '{{ logging_pkg_sysconf_dir }}/{{ item }}'
+        flat: yes
+      with_items:
+        - logs-{{ env_name}}-uuid
+        - fluentd-ca
+        - fluentd-cert
+        - fluentd-key
+
+    - name: Read logs index uuid
+      delegate_to: localhost
+      run_once: true
+      set_fact:
+        logs_index_uuid: "{{ lookup('file',  logging_pkg_sysconf_dir+'/logs-'+env_name+'-uuid') }}"
+
+    - name: Install Viaq logging store config file
+      delegate_to: localhost
+      run_once: true
+      template:
+        src: viaq_post_install_params.conf
+        dest: '{{ logging_config_yml_dir }}/10-viaq_config.yml'
+        owner: '{{ logging_config_yml_d_owner }}'
+        group: '{{ logging_config_yml_d_group }}'
+        mode: '{{ logging_config_yml_d_mode }}'
+
+    - name: Include logging config.yml.d vars directory
+      include_vars:
+        dir: '{{ logging_config_yml_dir }}'
+        ignore_files: ['README.md']
+      run_once: true
+
+  when: viaq_metrics_store|default(true)|bool and fluentd_output_plugin|default("elasticsearch") == "elasticsearch"

@@ -1,0 +1,69 @@
+---
+- name: Check if local fluentd certificate exists
+  delegate_to: localhost
+  run_once: true
+  stat:
+    path: "{{ local_fluentd_ca_cert_path }}"
+  register: local_fluentd_ca_cert_path_exists
+  when: fluentd_output_plugin == fluentd_output_plugin_fluentd
+
+- name: Read fluentd certificate
+  delegate_to: localhost
+  run_once: true
+  set_fact:
+    fluentd_ca_cert: "{{ lookup('file', local_fluentd_ca_cert_path) }}"
+  when:
+    - fluentd_output_plugin == fluentd_output_plugin_fluentd
+    - local_fluentd_ca_cert_path_exists.stat.exists
+
+- name: Check if local fluentd elasticsearch CA certificate exists
+  delegate_to: localhost
+  run_once: true
+  stat:
+    path: "{{ local_fluentd_elasticsearch_ca_cert_path }}"
+  register: local_fluentd_elasticsearch_ca_cert_path_exists
+  when: fluentd_output_plugin == fluentd_output_plugin_elasticsearch
+
+- name: Read fluentd elasticsearch CA certificate
+  delegate_to: localhost
+  run_once: true
+  set_fact:
+    fluentd_elasticsearch_ca_cert: "{{ lookup('file', local_fluentd_elasticsearch_ca_cert_path) }}"
+  when:
+    - fluentd_output_plugin == fluentd_output_plugin_elasticsearch
+    - local_fluentd_elasticsearch_ca_cert_path_exists.stat.exists
+
+- name: Check if local fluentd elasticsearch client certificate exists
+  delegate_to: localhost
+  run_once: true
+  stat:
+    path: "{{ local_fluentd_elasticsearch_client_cert_path }}"
+  register: local_fluentd_elasticsearch_client_cert_path_exists
+  when: fluentd_output_plugin == fluentd_output_plugin_elasticsearch
+
+- name: Read fluentd elasticsearch client certificate
+  delegate_to: localhost
+  run_once: true
+  set_fact:
+    fluentd_elasticsearch_client_cert: "{{ lookup('file', local_fluentd_elasticsearch_client_cert_path) }}"
+  when:
+    - fluentd_output_plugin == fluentd_output_plugin_elasticsearch
+    - local_fluentd_elasticsearch_client_cert_path_exists.stat.exists
+
+- name: Check if local fluentd elasticsearch client key exists
+  delegate_to: localhost
+  run_once: true
+  stat:
+    path: "{{ local_fluentd_elasticsearch_client_key_path }}"
+  register: local_fluentd_elasticsearch_client_key_path_exists
+  when: fluentd_output_plugin == fluentd_output_plugin_elasticsearch
+
+- name: Read fluentd elasticsearch client key
+  delegate_to: localhost
+  run_once: true
+  set_fact:
+    fluentd_elasticsearch_client_key: "{{ lookup('file', local_fluentd_elasticsearch_client_key_path) }}"
+  no_log: true
+  when:
+    - fluentd_output_plugin == fluentd_output_plugin_elasticsearch
+    - local_fluentd_elasticsearch_client_key_path_exists.stat.exists

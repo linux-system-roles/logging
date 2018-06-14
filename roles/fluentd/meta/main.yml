@@ -1,0 +1,9 @@
+---
+dependencies:
+  - include-vars-files
+  - fluentd/read-local-pki-files
+  - fluentd/fluentd-package
+  - fluentd/fluentd-setup
+  - fluentd/set-fluentd-system-configurations
+  - fluentd/client
+  - fluentd/post-processing-common

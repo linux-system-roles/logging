@@ -1,0 +1,7 @@
+---
+# Where to find the Fluentd server certificate authority certificate
+# on the control machine.
+local_fluentd_ca_cert_path: 'fluentd_ca_cert.pem'
+local_fluentd_elasticsearch_ca_cert_path: 'fluentd_elasticsearch_ca_cert.pem'
+local_fluentd_elasticsearch_client_cert_path: 'fluentd_elasticsearch_cert.pem'
+local_fluentd_elasticsearch_client_key_path: 'fluentd_elasticsearch_key.pem'

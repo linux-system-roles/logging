@@ -1,0 +1,13 @@
+---
+- name: Initial validations
+  hosts: localhost
+
+  roles:
+    - role: logging/roles/initial-validations
+
+- name: Configure Metrics
+  hosts: localhost
+
+  roles:
+    - role: logging/roles/fluentd
+      when: hostvars['localhost']['failed_validation'] is undefined
