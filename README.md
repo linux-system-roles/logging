@@ -55,6 +55,17 @@ Please see the `rsyslog-outputs` or `fluentd-outputs` role README files for addi
 - `collect_ovirt_engine_log:`(default: `"false"`)
   Set this parameter to `true` if you wish to collect the oVirt engine.log.
 
+# Deploying the Logging Role
+
+For deploying default logging simply run:
+
+    ansible-playbook ${PATH_TO_LINUX_SYSTEM_ROLES}/logging/playbooks/configure-logging.yml
+
+# Example
+
+For example, deploying logging for `oVirt host` - Collects VDSM.log using `Fluentd` and ships them to `Elasticsearch` (OpenShift Logging)
+
+    ansible-playbook -i ${PATH_TO_LINUX_SYSTEM_ROLES}/logging/examples/ovirt-host ${PATH_TO_LINUX_SYSTEM_ROLES}/logging/playbooks/configure-logging.yml
 
 License
 -------

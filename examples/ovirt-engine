@@ -1,0 +1,12 @@
+---
+# oVirt host Fluentd to Elasticsearch (OpenShift Logging - Viaq)
+
+logging_collector: fluentd
+
+rsyslog_output_plugin: elasticsearch
+
+ovirt_env_name: myenvname
+
+collect_ovirt_engine_log: true
+
+fluentd_elasticsearch_host: elasticsearch.example.com

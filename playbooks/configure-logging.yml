@@ -2,8 +2,6 @@
 - name: Initial validations
   hosts: localhost
 
-  roles:
-    - role: logging/roles/initial-validations
 
 - name: Configure Logging
   hosts: all
