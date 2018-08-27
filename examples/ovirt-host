@@ -3,7 +3,7 @@
 
 logging_collector: fluentd
 
-rsyslog_output_plugin: elasticsearch
+fluentd_output_plugin: elasticsearch
 
 ovirt_env_name: myenvname
 
