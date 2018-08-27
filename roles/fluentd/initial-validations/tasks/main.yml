@@ -1,0 +1,73 @@
+---
+- name: "If output plugin is elasticsearch, validate host address is set"
+  debug:
+    msg: "Metrics store is not configured. This host will not be configured to send logs"
+  when:
+    - fluentd_elasticsearch_host is undefined
+    - fluentd_output_plugin|default("elasticsearch") == "elasticsearch"
+  changed_when: true
+  notify: set failed validation
+
+- name: "Validate oVirt env-name parameter is set"
+  debug:
+    msg: "Metrics store is not configured. This host will not be configured to send logs"
+  when:
+    - ovirt_env_name is undefined
+    - collect_ovirt_vdsm_log or collect_ovirt_engine_log
+  changed_when: true
+  notify: set failed validation
+
+- name: "If output plugin is fluentd, validate host address is set"
+  debug:
+    msg: "Metrics store is not configured. This host will not be configured to send logs"
+  when:
+    - fluentd_fluentd_host is undefined
+    - fluentd_output_plugin|default("elasticsearch") == fluentd_output_plugin_fluentd
+  changed_when: true
+  notify: set failed validation
+
+- name: force all notified handlers to run at this point, not waiting for normal sync points
+  meta: flush_handlers
+
+- block:
+    - name: Check environment name length
+      debug:
+        msg: "ERROR '{{ ovirt_env_name }}' length must be up to 49 characters. Please update ovirt_env_name in the config.yml file"
+      when:  ovirt_env_name | length > 49
+      changed_when: true
+      notify:  set failed validation
+
+    - name: Check environment name does not start with a number
+      debug:
+        msg: "ERROR '{{ ovirt_env_name }}' can not begin with a number. Please update ovirt_env_name in the config.yml file"
+      when: ovirt_env_name is match('^[0-9]')
+      changed_when: true
+      notify:  set failed validation
+
+    - name: Check environment name does not start a with dash
+      debug:
+        msg: "ERROR '{{ ovirt_env_name }}' can not begin with a hyphen ('-'). Please update ovirt_env_name in the config.yml file"
+      when: ovirt_env_name.startswith('-')
+      changed_when: true
+      notify:  set failed validation
+
+    - name: Check environment name does not end a with dash
+      debug:
+        msg: "ERROR '{{ ovirt_env_name }}' can not end with a hyphen ('-'). Please update ovirt_env_name in the config.yml file"
+      when: ovirt_env_name.endswith('-')
+      changed_when: true
+      notify:  set failed validation
+
+    - name: Check environment name includes only alphanum and dashes
+      debug:
+        msg: "ERROR '{{ ovirt_env_name }}' can include only alpahnumerics and hyphens ('-'). Please update ovirt_env_name in the config.yml file"
+      when: ovirt_env_name is match('.*[^a-zA-Z0-9-].*')
+      changed_when: true
+      notify:  set failed validation
+
+    - name: force all notified handlers to run at this point, not waiting for normal sync points
+      meta: flush_handlers
+
+  when:
+    - ovirt_env_name is defined
+    - collect_ovirt_vdsm_log or collect_ovirt_engine_log

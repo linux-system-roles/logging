@@ -1,0 +1,33 @@
+# oVirt vdsm log
+<source>
+  @type tail
+    path /var/log/vdsm/vdsm.log
+    pos_file {{ fluentd_ovirt_vdsm_log_pos_file }}
+    tag ovirt.vdsm
+    format multiline
+    format_firstline /(\d{4})-(\d{2})-(\d{2})/
+    format1 /(?<time>((\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2}),(\d{3})(.+?)))\s+(?<level>[^ ]+)\s+\((?<thread>.+?)\)\s+\[(?<module>.+?)\]\s+(?<message>.*)\s+\((?<module_lineno>.+?)\)/
+    time_format %F %T,%L %z
+    time_key time
+    keep_time_key true
+</source>
+
+<filter ovirt.vdsm>
+  @type record_transformer
+  enable_ruby
+  auto_typecast true
+  <record>
+    service ovirt.vdsm
+    tag project.ovirt-logs-{{ ovirt_env_name }}
+    hostname #{Socket.gethostname}
+    ipaddr4 {{ ansible_default_ipv4.address }}
+    ovirt {"class": "${record['thread']}", "thread":"${record['module']}", "module_lineno":"${record['module_lineno']}", "engine_fqdn":"{{ ovirt_engine_fqdn }}", "cluster_name":"{{ ovirt_vds_cluster_name }}"}
+    time ${time.iso8601}
+  </record>
+    remove_keys thread,module,module_lineno
+</filter>
+
+<match ovirt.vdsm>
+  @type rewrite_tag_filter
+  rewriterule1 tag ^(\w+\S+) $1
+</match>

@@ -1,9 +1,0 @@
-- name: Run initial validations sub-role
-  include_role:
-    name: "logging/roles/initial-validations"
-
-- name: Run fluentd sub-role
-  include_role:
-    name: "logging/roles/fluentd"
-  when:
-    - failed_validation is undefined

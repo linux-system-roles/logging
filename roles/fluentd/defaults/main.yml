@@ -23,16 +23,6 @@ fluentd_config_mode: 0640
 # File mode for Fluentd configuration directories.
 fluentd_config_dir_mode: 0750
 
-# Fluentd default output plugin
-fluentd_output_plugin: elasticsearch
-
-# Names of the available output plugins
-fluentd_output_plugin_elasticsearch: elasticsearch
-
-fluentd_output_plugin_fluentd: fluentd
-
-fluentd_output_plugin_file: file
-
 # Set to true if Fluentd should use SSL.
 fluentd_use_ssl: true
 

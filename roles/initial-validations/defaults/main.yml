@@ -1,3 +1,0 @@
----
-# Fluentd output plugin that will be used.
-fluentd_output_plugin: elasticsearch

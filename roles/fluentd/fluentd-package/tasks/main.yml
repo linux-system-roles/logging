@@ -6,23 +6,13 @@
   when: manage_packages|default(true)
   notify: restart fluentd
 
-- name: Install fluentd engine plugins
+- name: Install oVirt fluentd plugins
   yum:
     name: '{{ item }}'
     state: latest
   with_items:
-    - '{{ fluentd_engine_plugin_packages }}'
+    - '{{ fluentd_ovirt_plugin_packages }}'
   when:
     - manage_packages|default(true)
     - inventory_hostname in groups.engine
-  notify: restart fluentd
-
-- name: Install fluentd host plugins
-  yum:
-    name: '{{ item }}'
-    state: latest
-  with_items:
-    - '{{ fluentd_host_plugin_packages }}'
-  when:
-    - manage_packages|default(true)
   notify: restart fluentd

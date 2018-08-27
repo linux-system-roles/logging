@@ -1,0 +1,46 @@
+---
+
+- name: Ensure fluentd pos_files directory exists
+  file:
+    path: '{{ fluentd_pos_files_dir }}'
+    state: directory
+    owner: '{{ fluentd_owner }}'
+    group: '{{ fluentd_group }}'
+    mode: '{{ fluentd_pos_files_dir_mode }}'
+
+# oVirt vdsm.log handling
+
+- name: Create ovirt-vdsm.log.pos
+  copy:
+    content: ""
+    dest: '{{ fluentd_ovirt_vdsm_log_pos_file }}'
+    force: no
+    owner: '{{ fluentd_owner }}'
+    group: '{{ fluentd_group }}'
+    mode: '{{ fluentd_pos_files_mode }}'
+  when: collect_ovirt_vdsm_log
+  notify: restart fluentd
+
+- name: Configure oVirt vdsm log input
+  template:
+    src: ovirt-vdsm-log.template
+    dest: '{{ fluentd_config_parts_dir }}/20-ovirt-vdsm-log.conf'
+    owner: '{{ fluentd_owner }}'
+    group: '{{ fluentd_group }}'
+    mode: '{{ fluentd_config_mode }}'
+  when: collect_ovirt_vdsm_log
+  notify: restart fluentd
+
+- name: Remove vdsm log configuration file when collection is disabled
+  file:
+    state: absent
+    path: '{{ fluentd_config_parts_dir }}/20-ovirt-vdsm-log.conf'
+  when: not collect_ovirt_vdsm_log
+  notify: restart fluentd
+
+- name: Remove vdsm logs configuration file when collection is disabled (For legacy file)
+  file:
+    state: absent
+    path: '{{ fluentd_config_parts_dir }}/20-ovirt-host-logs-processing.conf'
+  when: not collect_ovirt_vdsm_log
+  notify: restart fluentd

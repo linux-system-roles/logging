@@ -1,0 +1,18 @@
+---
+logging_pkg_sysconf_dir: /etc/logging
+
+logging_config_yml_dir: "{{ logging_pkg_sysconf_dir }}/config.yml.d"
+
+logging_config_yml_file: "{{ logging_pkg_sysconf_dir }}/config.yml"
+
+# User that will own oVirt config.yml.d vars files.
+logging_config_yml_d_owner: root
+
+# Group that will own config.yml.d vars files.
+logging_config_yml_d_group: root
+
+# File mode for config.yml.d vars files.
+logging_config_yml_d_mode: 0644
+
+# File mode for config.yml.d vars directories.
+logging_config_yml_d_dir_mode: 0750

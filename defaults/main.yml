@@ -1,0 +1,38 @@
+---
+# Default logging collector is Rsyslog
+logging_collector: rsyslog
+
+# Names of the available collectors
+logging_collector_rsyslog: rsyslog
+
+logging_collector_fluentd: fluentd
+
+# Default Rsyslog output is local
+rsyslog_output_plugin: local
+
+# Names of the available Rsyslog output plugins
+rsyslog_output_plugin_rsyslog_local: local
+
+rsyslog_output_plugin_elasticsearch: elasticsearch
+
+rsyslog_output_plugin_rsyslog: rsyslog
+
+rsyslog_output_plugin_ampq: ampq
+
+rsyslog_output_plugin_kafka: kafka
+
+# Default Fluentd output is Elasticsearch
+fluentd_output_plugin: elasticsearch
+
+# Names of the available Fluents output plugins
+fluentd_output_plugin_elasticsearch: elasticsearch
+
+fluentd_output_plugin_fluentd: fluentd
+
+fluentd_output_plugin_file: file
+
+
+# oVirt Specifics
+
+# oVirt default environment name.
+ovirt_env_name: engine

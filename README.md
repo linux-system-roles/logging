@@ -4,26 +4,52 @@ Logging
 The `logging` role enables you to deploy required log collectors, logs parsing and adding additional metadata, and shipping them
 to the desired location.
 
+For logs collection and processing you can either:
+-  Add configuration files to /etc/rsyslog.d/ for Rsyslog
+-  Add configuration files to /etc/fluentd/config.d/ for Fluentd
+-  Select logs from the optional supported logs.
+
+The default setup is Rsyslog logs collector saved to local machine.
+
+
 Role Variables
 --------------
 
 ### Configure logging
 
-Before you run this role, you will need to set the following variables:
+In order to run this role you may want to update the following variables:
 
-- `env_name:` (required - default: `"server"`)
+- `collect_ovirt_vdsm_log:`(default: `"false"`)
+  Set this parameter to `true` if you wish to collect the oVirt vdsm.log.
 
-  Environment name. Is used to identify where the data was collected from.
-  Maximum field length is 49 characters.
+- `collect_ovirt_engine_log:`(default: `"false"`)
+  Set this parameter to `true` if you wish to collect the oVirt engine.log.
 
-- `fluentd_elasticsearch_host:` (required - no default value)
+- `logging_collector:`  (default: `"rsyslog"`)
 
-  Address or hostname (FQDN) of the Elasticsearch server host.
+   The supported logging collectors that can be used.
+   Valid options are:
+   `"rsyslog"`, `"fluentd"`.
 
-In order to set these variable add the required variables to the config.yml
-or in the command line.
+- `rsyslog_output_plugin:`  (default: `"local"`)
 
-You don't need to update the configuration file if you wish to use default options.
+   The output plugin that will be used.
+   Valid options are `"local"` to send data to local machine (RHEL Default),
+   `"elasticsearch"` to send data to a remote elasticsearch server,
+   `"rsyslog"` to send the remote central rsyslog,
+   `"ampq"` to send the logs to a remote AMQP instance,
+   `"kafka"` to send the logs to a remote Kafka instance.
+
+- `fluentd_output_plugin:`  (default: `"elasticsearch"`)
+
+   The output plugin that will be used.
+   Valid options are `"file"` to send data to a local file (Use only for debugging),
+   `"elasticsearch"` to send data to a remote elasticsearch server,
+   `"fluentd"` to send the remote central fluentd aggregator (mux).
+
+For target outputs other then `local` and `file` additional parameters are required.
+
+Please see the `rsyslog-outputs` or `fluentd-outputs` role README files for additional information.
 
 License
 -------
