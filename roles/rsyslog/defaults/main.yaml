@@ -78,6 +78,12 @@ rsyslog__tls_packages: [ 'rsyslog-gnutls', 'ca-certificates' ]
 # List of additional rpm packages to install.
 rsyslog__packages: []
 
+# .. envvar:: rsyslog__custom_config_files
+#
+# List of additional custom config files.
+# Each element: full paths to the files to be deployed.
+rsyslog__custom_config_files: []
+
 
 # User, group, home, file ownership
 # ---------------------------------
@@ -303,16 +309,21 @@ rsyslog__host_forward: [ '*.* @other.{{ ansible_domain }}' ]
 # See :ref:`rsyslog__rules` for more details.
 rsyslog__weight_map:
   'global':    '05'
+  'globals':   '05'
   'module':    '10'
   'modules':   '10'
   'template':  '20'
   'templates': '20'
   'output':    '30'
+  'outputs':   '30'
   'service':   '30'
+  'services':  '30'
   'rule':      '50'
   'rules':     '50'
   'ruleset':   '50'
+  'rulesets':  '50'
   'input':     '90'
+  'inputs':    '90'
 
 # .. envvar:: rsyslog__rules
 #
@@ -799,6 +810,9 @@ rsyslog__conf_stop_remote:
       http://comments.gmane.org/gmane.comp.sysutils.rsyslog/15616
     options: |-
       stop
+
+logging_mmk8s_ca_cert: ''
+logging_mmk8s_token: ''
 
 rsyslog__conf_viaq_main_modules:
 
