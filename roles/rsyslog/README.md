@@ -130,6 +130,8 @@ rsyslog__user: root
 - `rsyslog__viaq` : When 'True' rsyslog role will deploy the viaq configuration set.  In this case, rsyslog works as a collector of OpenShift logs, normalizes them, then sends to the ElasticSearch.  Default to 'False'.
 - `rsyslog__example` : When 'True' rsyslog role will deploy the example configuration set.  Default to 'False'.
 
+- `rsyslog__capabilities` : List of capabilities to configure.  [ 'network', 'remote-files', 'tls', 'viaq', 'viaq-k8s' ] are predefined.
+
 - `rsyslog__system_log_dir`: System log directory.  Default to '/var/log'.
 - `rsyslog__config_dir`: Directory to store configuration files.  Default to '/etc/rsyslog.d'.
 - `rsyslog__viaq_config_dir`: Directory to store viaq configuration files.  Default to '/etc/rsyslog.d/viaq'.
