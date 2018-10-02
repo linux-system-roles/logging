@@ -944,7 +944,7 @@ rsyslog__conf_viaq_elasticsearch:
                   retryfailures="on"
                   retryruleset="try_es"
                   usehttps="on"
-              {% if use_omelastcsearch_cert | default(False) %}
+              {% if use_omelasticsearch_cert | default(False) %}
                   tls.cacert="{{logging_elasticsearch_ca_cert}}"
                   tls.mycert="{{logging_elasticsearch_cert}}"
                   tls.myprivkey="{{logging_elasticsearch_key}}"
@@ -967,7 +967,7 @@ rsyslog__conf_viaq_elasticsearch:
                   retryfailures="on"
                   retryruleset="try_es"
                   usehttps="on"
-              {% if use_omelastcsearch_cert | default(False) %}
+              {% if use_omelasticsearch_cert | default(False) %}
                   tls.cacert="{{logging_elasticsearch_ca_cert}}"
                   tls.mycert="{{logging_elasticsearch_cert}}"
                   tls.myprivkey="{{logging_elasticsearch_key}}"

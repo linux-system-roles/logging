@@ -49,7 +49,7 @@ rsyslog__user: root
 logging_mmk8s_token: "{{rsyslog__viaq_config_dir}}/mmk8s.token"
 logging_mmk8s_ca_cert: "{{rsyslog__viaq_config_dir}}/mmk8s.ca.crt"
 # If use_omelasticsearch_cert is True, logging_elasticsearch_* need to be specified.
-use_omelastcsearch_cert: True
+use_omelasticsearch_cert: True
 logging_elasticsearch_ca_cert: "{{rsyslog__viaq_config_dir}}/es-ca.crt"
 logging_elasticsearch_cert: "{{rsyslog__viaq_config_dir}}/es-cert.pem"
 logging_elasticsearch_key: "{{rsyslog__viaq_config_dir}}/es-key.pem"
