@@ -35,7 +35,8 @@ rsyslog__work_dir: '/var/lib/rsyslog'
 # .. envvar:: rsyslog__capabilities
 #
 # List of different capabilities to configure. See :ref:`rsyslog__capabilities`
-rsyslog__capabilities: [ 'network', 'remote-files', 'tls', 'viaq', 'viaq-k8s' ]
+# rsyslog__capabilities: [ 'network', 'remote-files', 'tls', 'viaq', 'viaq-k8s' ]
+rsyslog__capabilities: []
 
 # .. envvar:: rsyslog__unprivileged
 #
@@ -818,6 +819,9 @@ rsyslog__conf_viaq_main_modules:
 
   - name: 'viaq_main'
     type: 'modules'
+    state: "{{ 'present'
+               if ('viaq' in rsyslog__capabilities)
+               else 'absent' }}"
     sections:
 
       - options: |-
@@ -849,6 +853,9 @@ rsyslog__conf_viaq_mmk8s:
   - name: 'mmk8s'
     type: 'modules'
     path: '{{rsyslog__viaq_config_dir }}'
+    state: "{{ 'present'
+               if ('viaq-k8s' in rsyslog__capabilities)
+               else 'absent' }}"
     sections:
 
       - options: |-
@@ -872,15 +879,15 @@ rsyslog__conf_viaq_mmk8s:
                  tls.cacert="{{logging_mmk8s_ca_cert}}"
                  tokenfile="{{logging_mmk8s_token}}" annotation_match=["."])
           }
-        state: '{{ "present"
-               if ("viaq-k8s" in rsyslog__capabilities)
-               else "absent" }}'
 
 rsyslog__conf_viaq_elasticsearch:
 
   - name: 'elasticsearch'
     type: 'output'
     path: '{{rsyslog__viaq_config_dir }}'
+    state: "{{ 'present'
+               if ('viaq' in rsyslog__capabilities)
+               else 'absent' }}"
     sections:
 
       - options: |-
@@ -998,6 +1005,9 @@ rsyslog__conf_viaq_viaq_formatting:
   - name: 'viaq_formatting'
     type: 'template'
     path: '{{rsyslog__viaq_config_dir }}'
+    state: "{{ 'present'
+               if ('viaq' in rsyslog__capabilities)
+               else 'absent' }}"
     sections:
 
       - options: |-
@@ -1299,6 +1309,9 @@ rsyslog__rulebase_viaq_k8s_filename:
     filename: 'k8s_filename.rulebase'
     nocomment: 'true'
     path: '{{rsyslog__viaq_config_dir }}'
+    state: "{{ 'present'
+               if ('viaq-k8s' in rsyslog__capabilities)
+               else 'absent' }}"
     sections:
 
       - options: |-
@@ -1311,6 +1324,9 @@ rsyslog__rulebase_viaq_parse_json:
     filename: 'parse_json.rulebase'
     nocomment: 'true'
     path: '{{rsyslog__viaq_config_dir }}'
+    state: "{{ 'present'
+               if ('viaq' in rsyslog__capabilities)
+               else 'absent' }}"
     sections:
 
       - options: |-
@@ -1323,6 +1339,9 @@ rsyslog__rulebase_viaq_k8s_container_name:
     filename: 'k8s_container_name.rulebase'
     nocomment: 'true'
     path: '{{rsyslog__viaq_config_dir }}'
+    state: "{{ 'present'
+               if ('viaq-k8s' in rsyslog__capabilities)
+               else 'absent' }}"
     sections:
 
       - options: |-
@@ -1338,6 +1357,9 @@ rsyslog__json_viaq_normalize_level:
     filename: 'normalize_level.json'
     nocomment: 'true'
     path: '{{rsyslog__viaq_config_dir }}'
+    state: "{{ 'present'
+               if ('viaq' in rsyslog__capabilities)
+               else 'absent' }}"
     sections:
 
       - options: |-
@@ -1368,6 +1390,9 @@ rsyslog__json_viaq_prio_to_level:
     filename: 'prio_to_level.json'
     nocomment: 'true'
     path: '{{rsyslog__viaq_config_dir }}'
+    state: "{{ 'present'
+               if ('viaq' in rsyslog__capabilities)
+               else 'absent' }}"
     sections:
 
       - options: |-
@@ -1393,6 +1418,9 @@ rsyslog__rulebase_viaq_crio:
     filename: 'crio.rulebase'
     nocomment: 'true'
     path: '{{rsyslog__viaq_config_dir }}'
+    state: "{{ 'present'
+               if ('viaq-k8s' in rsyslog__capabilities)
+               else 'absent' }}"
     sections:
       - options: |-
           version=2

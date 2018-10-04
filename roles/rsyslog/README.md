@@ -15,10 +15,10 @@ Two files - inventory_file and vars.yaml - in the command line is to be updated 
    Sample inventory file for the es-ops enabled case
 ```
 [masters]
-localhost ansible_ssh_user=${RSYSLOG_ANSIBLE_SSH_USER} openshift_logging_use_ops=True
+localhost ansible_user=YOUR_ANSIBLE_USER openshift_logging_use_ops=True
 
 [nodes]
-localhost ansible_ssh_user=${RSYSLOG_ANSIBLE_SSH_USER} openshift_logging_use_ops=True
+localhost ansible_user=YOUR_ANSIBLE_USER openshift_logging_use_ops=True
 ```
 
 2. vars.yaml stores variables which are passed to ansible to control the tasks.
@@ -35,6 +35,8 @@ rsyslog__viaq: true
 rsyslog__capabilities: [ 'viaq' ]
 rsyslog__group: root
 rsyslog__user: root
+elasticsearch_server_host: es_hostname
+elasticsearch_server_port: 9200
 ```
 
 2.1  vars.yaml to configure to handle the inputs from openshift containers
@@ -54,6 +56,15 @@ logging_elasticsearch_ca_cert: "{{rsyslog__viaq_config_dir}}/es-ca.crt"
 logging_elasticsearch_cert: "{{rsyslog__viaq_config_dir}}/es-cert.pem"
 logging_elasticsearch_key: "{{rsyslog__viaq_config_dir}}/es-key.pem"
 
+```
+
+2.2  vars.yaml to configure custom config files.
+
+   To include existing config files in the new ansible deployment, add the paths to rsyslog__custom_config_files as follows.  The specified files are copied to /etc/rsyslog.d.
+```
+rsyslog__enabled: true
+....
+rsyslog__custom_config_files: [ '/path/to/custom_A.conf', '/path/to/custom_B.conf' ]
 ```
 
 3. playbook.yaml
