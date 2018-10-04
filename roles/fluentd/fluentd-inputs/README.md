@@ -6,14 +6,6 @@ and add additional metadata before sending them to the defined target.
 For logs collection and processing you can either add a configuration file for Rsyslog or Fluentd or
 select from the optional predefined logs to collect.
 
-The following are the available pre-defined logs:
-
-- `collect_ovirt_vdsm_log:`(default: `"false"`)
-  Set this parameter to `true` if you wish to collect the oVirt vdsm.log.
-
-- `collect_ovirt_engine_log:`(default: `"false"`)
-  Set this parameter to `true` if you wish to collect the oVirt engine.log.
-
 
 The following metadata is added to the oVirt logs:
 

@@ -11,7 +11,7 @@ The available variables for this role are:
    `"elasticsearch"` to send data to a remote elasticsearch server,
    `"fluentd"` to send the remote central fluentd aggregator (mux).
 
-- `env_name:` (default: `"engine"`)
+- `ovirt_env_name:` (default: `"engine"`)
 
   Environment name. Is used to identify the source of the data collected at the defined destination.
   Maximum field length is 49 characters.
@@ -26,7 +26,7 @@ The available variables for this role are:
 
   UUID of the project/namespace used to store log records.
   This is used to construct the index name in Elasticsearch.
-  For example, if you have env_name: myenvname,
+  For example, if you have ovirt_env_name: myenvname,
   then in logging OpenShift you will have a project named logs-myenvname.
   You need to get the UUID of this project like this:
   oc get project logs-myenvname -o jsonpath='{.metadata.uid}'
@@ -112,7 +112,7 @@ Events are gathered to chunks by the output plugins.
 
   Directory of the output files when file output plugin is used.
 
-- `fluentd_logs_file_output:` (default: `"logs-{{ env_name }}"`)
+- `fluentd_logs_file_output:` (default: `"logging"`)
 
   The file name for logs data.
 
@@ -172,7 +172,7 @@ Events are gathered to chunks by the output plugins.
   Note that parameter type is float, not time.
 
 
-In order to set these variable add the required variables to the config.yml
+In order to set these variable add the required variables to the vars.yaml
 or in the command line.
 
 You don't need to update the configuration file if you wish to use default options.

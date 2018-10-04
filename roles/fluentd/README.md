@@ -2,10 +2,6 @@
 
 This role runs dependent fluentd roles, Roles list is located in the meta directory.
 
-It is run as part of the `Configure Metrics` play and the default `configure` tag.
-It also includes the `restart fluentd` handler.
-
-
 The available variables for this role are:
 
 - `fluentd_service_name:`  (default: `"fluentd"`)
@@ -86,7 +82,7 @@ The available variables for this role are:
   authenicate to Elasticsearch.
 
 
-In order to set these variable add the required variables to the config.yml
+In order to set these variable add the required variables to the vars.yaml
 or in the command line.
 
 You don't need to update the configuration file if you wish to use default options.

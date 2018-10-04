@@ -1,20 +1,11 @@
 ---
-- name: Initial validations
-  hosts: localhost
+- name: Run initial validations
+  include_role:
+    name: initial-validations
+  with_items: '{{ logging_logs_list }}'
 
-
-- name: Configure Logging
-  hosts: all
-
-  roles:
-    - role: logging/roles/rsyslog
-      when: logging_collector == logging_collector_rsyslog
-
-    - role: logging/roles/fluentd/initial-validations
-      when: logging_collector == logging_collector_fluentd
-
-    - role: logging/roles/fluentd
-      when:
-        - logging_collector == logging_collector_fluentd
-        - failed_validation is undefined
-
+- name: Configure log collection
+  include_role:
+    name: '{{ item.logging_collector }}
+  with_items: '{{ logging_logs_list }}'
+  when: failed_validation is undefined

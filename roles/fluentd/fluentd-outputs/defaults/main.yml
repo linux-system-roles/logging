@@ -17,7 +17,7 @@ fluentd_fluentd_host: ""
 
 fluentd_file_output_dir: /var/log/fluentd
 
-fluentd_logs_file_output: "{{ fluentd_file_output_dir }}/logs-{{ env_name }}"
+fluentd_logs_file_output: "{{ fluentd_file_output_dir }}/logging"
 
 # Logs buffer configurations
 

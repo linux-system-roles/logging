@@ -1,9 +1,6 @@
 ---
 dependencies:
-  - fluentd/include-vars-files
   - fluentd/read-local-pki-files
-  - fluentd/fluentd-package
-  - fluentd/fluentd-system-configurations
   - fluentd/fluentd-setup
   - fluentd/fluentd-inputs
   - fluentd/fluentd-outputs

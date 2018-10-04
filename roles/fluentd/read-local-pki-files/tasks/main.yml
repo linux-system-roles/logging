@@ -1,5 +1,5 @@
 ---
--block:
+- block:
 
     - name: Check if local fluentd certificate exists
       delegate_to: localhost

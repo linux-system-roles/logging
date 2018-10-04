@@ -1,0 +1,81 @@
+---
+rsyslog__enabled: true
+# install example packages & config files
+rsyslog__example: true
+rsyslog__capabilities: [ 'network', 'remote-files', 'tls' ]
+rsyslog__group: root
+rsyslog__user: root
+
+logging_logs_list:
+# User provided conf file
+  - custom_log:
+      logging_collector: rsyslog
+      custom_config_path: /path/to/config
+
+# oVirt host Fluentd to Elasticsearch
+  - ovirt_vdsm_log:
+      logging_collector: fluentd
+      output_plugin: elasticsearch_ovirt
+      ovirt_env_name: engine
+
+# oVirt engine Fluentd to Elasticsearch
+  - ovirt_engine_log:
+      logging_collector: fluentd
+      output_plugin: elasticsearch_ovirt
+      ovirt_env_name: engine
+# oVirt engine Fluentd to Elasticsearch
+  - ovirt_engine_log:
+      logging_collector: fluentd
+      output_plugin: fluentd_ovirt
+      ovirt_env_name: engine
+
+logging_targets_list:
+
+# Elasticsearch output plugin variables (OpenShift Logging - Viaq)
+  - elasticsearch_output:
+      output_plugin: elasticsearch
+      elasticsearch_host: hostname.example.com
+      ovirt_env_name: engine
+      ovirt_env_uuid:
+      # If use_omelasticsearch_cert is True, logging_elasticsearch_* need to be specified.
+      use_omelastcsearch_cert: True
+      logging_elasticsearch_ca_cert: "{{fluentd_viaq_config_dir}}/es-ca.crt"
+      logging_elasticsearch_cert: "{{fluentd_viaq_config_dir}}/es-cert.pem"
+      logging_elasticsearch_key: "{{fluentd_viaq_config_dir}}/es-key.pem"
+
+# Secure Fluentd output plugin variables (OpenShift Logging - Viaq)
+  - fluentd_output:
+      output_plugin: fluentd
+      elasticsearch_host: hostname.example.com
+      ovirt_env_name: engine
+      ovirt_env_uuid:
+      # If use_omelasticsearch_cert is True, logging_elasticsearch_* need to be specified.
+      use_omelastcsearch_cert: True
+      logging_elasticsearch_ca_cert: "{{fluentd_viaq_config_dir}}/es-ca.crt"
+      logging_elasticsearch_cert: "{{fluentd_viaq_config_dir}}/es-cert.pem"
+      logging_elasticsearch_key: "{{fluentd_viaq_config_dir}}/es-key.pem"
+
+# oVirt Specific
+# Elasticsearch output plugin variables (OpenShift Logging - Viaq)
+  - elasticsearch_output:
+      output_plugin: elasticsearch
+      elasticsearch_host: hostname.example.com
+      ovirt_env_name: engine
+      ovirt_env_uuid:
+      # If use_omelasticsearch_cert is True, logging_elasticsearch_* need to be specified.
+      use_omelastcsearch_cert: True
+      logging_elasticsearch_ca_cert: "{{fluentd_viaq_config_dir}}/es-ca.crt"
+      logging_elasticsearch_cert: "{{fluentd_viaq_config_dir}}/es-cert.pem"
+      logging_elasticsearch_key: "{{fluentd_viaq_config_dir}}/es-key.pem"
+
+# Secure Fluentd output plugin variables (OpenShift Logging - Viaq)
+  - fluentd_output:
+      output_plugin: fluentd
+      elasticsearch_host: hostname.example.com
+      ovirt_env_name: engine
+      ovirt_env_uuid:
+      # If use_omelasticsearch_cert is True, logging_elasticsearch_* need to be specified.
+      use_omelastcsearch_cert: True
+      logging_elasticsearch_ca_cert: "{{fluentd_viaq_config_dir}}/es-ca.crt"
+      logging_elasticsearch_cert: "{{fluentd_viaq_config_dir}}/es-cert.pem"
+      logging_elasticsearch_key: "{{fluentd_viaq_config_dir}}/es-key.pem"

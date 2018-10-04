@@ -1,0 +1,33 @@
+# oVirt engine log
+<source>
+  @type tail
+    path /var/log/ovirt-engine/engine.log
+    pos_file {{ fluentd_ovirt_engine_log_pos_file }}
+    tag ovirt.engine
+    format multiline
+    format_firstline /(\d{4})-(\d{2})-(\d{2})/
+    format1 /(?<time>((\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2}),\d{3})(.+?))\s+(?<level>[^ ]+)\s+\[(?<class>.+?)\]\s+\((?<thread>.+?)\)\s+\[(?<correlationid>.*?)\]\s+(?<message>.*)/
+    time_format %F %T,%L %z
+    time_key time
+    keep_time_key true
+</source>
+
+<filter ovirt.engine>
+  @type record_transformer
+  enable_ruby
+  auto_typecast true
+  <record>
+    service ovirt.engine
+    tag project.ovirt-logs-{{ ovirt_env_name }}
+    hostname #{Socket.gethostname}
+    ipaddr4 {{ ansible_default_ipv4.address }}
+    ovirt {"class": "${record['class']}", "thread":"${record['thread']}", "correlationid":"${record['correlationid']}","engine_fqdn":"{{ ovirt_engine_fqdn }}"}
+    time ${time.iso8601}
+  </record>
+    remove_keys class,thread,correlationid
+</filter>
+
+<match ovirt.engine>
+  @type rewrite_tag_filter
+  rewriterule1 tag ^(\w+\S+) $1
+</match>

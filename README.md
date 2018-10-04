@@ -1,71 +1,75 @@
-Logging
-====================
+# Guidelines for Using Logging Ansible Roles
 
-The `logging` role enables you to deploy required log collectors, logs parsing and adding additional metadata, and shipping them
-to the desired location.
+The `logging` role allowa a RHEL admin/developer to deploy logging collectors on the local host, remote host or set of remote hosts,
+process these logs if needed to add additional metadata and ship it to a remote location to be saved and analyzed.
 
-For logs collection and processing you can either:
--  Select logs from the optional supported logs.
--  Add configuration files to `/etc/rsyslog.d/` for Rsyslog
--  Add configuration files to `/etc/fluentd/config.d/` for Fluentd
+The logging role currently supports 2 log collectors. `Rsyslog` and `Fluentd`.
 
+## Definitions
 
-The default setup is Rsyslog logs collector saved to local machine.
+  - [`Rsyslog`](https://www.rsyslog.com/) - The logging role default log collector used for log processing.
+  - [`Fluentd`](https://www.fluentd.org/) - log collector used for log processing.
+  - [`Viaq`](https://docs.okd.io/latest/install_config/aggregate_logging.html)- Common Logging based on OpenShift Aggregated Logging (OCP/Origin)
+  - [`Elasticsearch`](https://www.elastic.co/) - Non-OpenShift standalone Elasticsearch.
+  - `Local` - Output the collected logs to a local file.
+  - `Remote Rsyslog` - Output logs to a remote Rsyslog server.
+  - `Fluentd Forward` - Output logs to a remote Fluentd server.
 
+## Supported flows:
 
-Role Variables
---------------
+  - `Rsyslog` -> `Local` (RHEL Default) / `Viaq` [1] / `Elasticsearch` / `Remote Rsyslog`
+  - `Fluentd` -> `Local` (File) / Viaq / `Viaq` [1] / `Elasticsearch` / `Fluentd Forward`
 
-### Configure logging
+[1] Rsyslog to Viaq currently means doing output to the OCP Elasticsearch using client cert auth.
+    In the future we want to support Rsyslog to OCP rsyslog using RELP, or Rsyslog to mux using fluent relp input plugin, or message queue.
 
-In order to run this role you may want to update the following variables:
-
-- `logging_collector:`  (default: `"rsyslog"`)
-
-   The supported logging collectors that can be used.
-   Valid options are:
-   `"rsyslog"`, `"fluentd"`.
-
-- `rsyslog_output_plugin:`  (default: `"local"`)
-
-   The output plugin that will be used.
-   Valid options are `"local"` to send the logs to local machine (RHEL Default),
-   `"elasticsearch"` to send the logs to a remote elasticsearch server,
-   `"rsyslog"` to send the logs to a remote central rsyslog,
-   `"ampq"` to send the logs to a remote AMQP instance,
-   `"kafka"` to send the logs to a remote Kafka instance.
-
-- `fluentd_output_plugin:`  (default: `"elasticsearch"`)
-
-   The output plugin that will be used.
-   Valid options are `"file"` to send the logs to a local file (Use only for debugging),
-   `"elasticsearch"` to send the logs to a remote elasticsearch server,
-   `"fluentd"` to send the logs to a remote central fluentd aggregator (mux).
-
-For target outputs other then `local` and `file` additional parameters are required.
-
-Please see the `rsyslog-outputs` or `fluentd-outputs` role README files for additional information.
+## Supported log collectors, Processors and Outputs:
 
 
-### Optional logs to collect
+### Collectors
 
-- `collect_ovirt_vdsm_log:`(default: `"false"`)
-  Set this parameter to `true` if you wish to collect the oVirt vdsm.log.
+    Initial conf will be supplied by default.
+    User can supply another conf to be used.
 
-- `collect_ovirt_engine_log:`(default: `"false"`)
-  Set this parameter to `true` if you wish to collect the oVirt engine.log.
+    Collectors are used for data collection, processing, enrichment and shipping.
 
-### Deploying the Logging Role
+Collectors list:
+  - `Fluentd`
+  - `Rsyslog`
 
-For deploying default logging simply run:
+### Outputs
 
-    ansible-playbook ${PATH_TO_LINUX_SYSTEM_ROLES}/logging/playbooks/configure-logging.yml
+   The user will configure what is the required output and output conf will be configured accordingly.
 
-### Example
+Output list:
+  - Viaq
+  - Local (File/Journal)
+  - Elasticsearch
+  - Fluentd Forward
+  - Remote Rsyslog - Not yet supported
+  - Message Queue (kafka, amqp) - Not yet supported.
 
-For example, deploying logging for `oVirt host` - Collects VDSM.log using `Fluentd` and ships them to `Elasticsearch` (OpenShift Logging)
+Low level output list:
 
-    ansible-playbook -i ${PATH_TO_LINUX_SYSTEM_ROLES}/logging/examples/ovirt-host ${PATH_TO_LINUX_SYSTEM_ROLES}/logging/playbooks/configure-logging.yml
+  These are the mechanisms by which the items in the output list will be implemented.
+  For example, output to Viaq currently is implemented by using Fluentd Elasticsearch output with client cert auth, or secure_forward to mux(Fluentd Aggregator).
+
+  - syslog - rfc5424 wire protocol - used by rsyslog imfwd/omfwd, fluentd remote-syslog.
+  - secure_forward - fluentd only, currently.
+  - RELP - rsyslog only, although there is an fluentd RELP input plugin that is under development.
+  - Elasticsearch - http rest api.
+  - kafka
+  - amqp
+
+## How to use
+
+   * [User Guide](https://github.com/linux-system-roles/logging/docs/README.md)
+
+## Additional Resources
+
+
+   * [Rsyslog vars.yaml examples](https://github.com/linux-system-roles/logging/docs/vars_yaml_rsyslog.md)
+   * [Fluentd vars.yaml examples](https://github.com/linux-system-roles/logging/docs/vars_yaml_fluentd.md)
 
 License
 -------
