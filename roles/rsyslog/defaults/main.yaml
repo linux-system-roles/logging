@@ -291,7 +291,8 @@ rsyslog__group_forward: []
 #
 # List of ``rsyslogd`` options that configure log forwarding for specific hosts
 # in Ansible inventory. See :ref:`rsyslog__forward` for more details.
-rsyslog__host_forward: [ '*.* @other.{{ ansible_domain }}' ]
+# rsyslog__host_forward: [ '*.* @other.{{ ansible_domain }}' ]
+rsyslog__host_forward: []
 
 
 # Rsyslog configuration rules

@@ -116,18 +116,40 @@ rsyslog__user: root
 ```
 /etc/rsyslog.conf
      rsyslog.d/00-global.conf
+               05-common-defaults.conf
                10-local-modules.conf
                10-network-modules.conf
-               05-common-defaults.conf
                20-templates.conf
-               20-remote-forward.system
+               40-cron.system
+               40-dynamic-cron.remote
                50-default-rulesets.conf
                50-default-rules.system
-               40-cron.system
-               90-network-input.conf
-               40-dynamic-cron.remote
                50-dynamic-logs.remote
+               90-network-input.conf
                zz-stop.remote
+```
+
+   Sample vars.yaml file for the example case with rsyslog__forward
+
+```
+rsyslog__enabled: true
+# install example packages & config files
+rsyslog__example: true
+rsyslog__capabilities: [ 'network', 'remote-files', 'tls' ]
+rsyslog__forward: [ '*.info @10.10.10.1:514' ]
+rsyslog__group: root
+rsyslog__user: root
+```
+
+   Once ansible-playbook is run with the above vars.yaml, in addition to the files deployed in the example case, 20-remote-forward.system is also deployed.  The rule is used by the imtcp plugin.
+
+```
+# Ansible managed
+
+#
+# Forward logs to specified hosts
+#
+*.info @@10.10.10.1:514
 ```
 
     If both variables are set to false, the default rsyslog.conf is placed in /etc.  The "default" contents are stored in ./roles/rsyslog/templates/etc/rsyslog.conf.j2.
