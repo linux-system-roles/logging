@@ -9,8 +9,8 @@
 {{ element.comment | comment }}
 {%       endif %}
 {%       if element.selector|d() and element.action|d() %}
-{%         set rsyslog__tpl_selector = element.selector | trim %}
-{{ "%-30s %s" | format(rsyslog__tpl_selector, element.action) }}
+{%         set rsyslog_tpl_selector = element.selector | trim %}
+{{ "%-30s %s" | format(rsyslog_tpl_selector, element.action) }}
 
 {%       elif element.options|d() %}
 {{ element.options }}

@@ -2,314 +2,327 @@
 # General configuration
 # ---------------------
 
-# .. envvar:: rsyslog__enabled
+# .. envvar:: rsyslog_enabled
 #
 # Enable or disable ``rsyslog`` management.
-rsyslog__enabled: True
+rsyslog_enabled: True
 
-# .. envvar:: rsyslog__system_log_dir
+# .. envvar:: rsyslog_system_log_dir
 #
 # Top directory to place logs
-rsyslog__system_log_dir: '/var/log'
+rsyslog_system_log_dir: '/var/log'
 
-# .. envvar:: rsyslog__config_dir
+# .. envvar:: rsyslog_config_dir
 #
 # Configuration directory
-rsyslog__config_dir: '/etc/rsyslog.d'
+rsyslog_config_dir: '/etc/rsyslog.d'
 
-# .. envvar:: rsyslog__viaq_config_dir
+# .. envvar:: rsyslog_viaq_config_dir
 #
 # Viaq configuration directory
-rsyslog__viaq_config_dir: '{{rsyslog__config_dir}}/viaq'
+rsyslog_viaq_config_dir: '{{rsyslog_config_dir}}/viaq'
 
-# .. envvar:: rsyslog__viaq_log_dir
+# .. envvar:: rsyslog_viaq_log_dir
 #
 # Viaq log directory
-rsyslog__viaq_log_dir: '{{rsyslog__system_log_dir}}/containers'
+rsyslog_viaq_log_dir: '{{rsyslog_system_log_dir}}/containers'
 
-# .. envvar:: rsyslog__work_dir
+# .. envvar:: rsyslog_work_dir
 #
 # Rsyslog work directory
-rsyslog__work_dir: '/var/lib/rsyslog'
+rsyslog_work_dir: '/var/lib/rsyslog'
 
-# .. envvar:: rsyslog__capabilities
+# .. envvar:: rsyslog_capabilities
 #
-# List of different capabilities to configure. See :ref:`rsyslog__capabilities`
-# rsyslog__capabilities: [ 'network', 'remote-files', 'tls', 'viaq', 'viaq-k8s' ]
-rsyslog__capabilities: []
+# List of different capabilities to configure. See :ref:`rsyslog_capabilities`
+# rsyslog_capabilities: [ 'network', 'remote-files', 'tls', 'viaq', 'viaq-k8s' ]
+rsyslog_capabilities: []
 
-# .. envvar:: rsyslog__unprivileged
+# .. envvar:: rsyslog_unprivileged
 #
 # Enable or disable unprivileged ``rsyslogd`` operation. Warning, enabling this
 # option requires additional configuration outside of the ``rsyslog``
 # role. 
-rsyslog__unprivileged: '{{ "True"
+rsyslog_unprivileged: '{{ "True"
                            if (ansible_distribution in [ "CentOS", "RedHat", "Fedora" ])
                            else "False" }}'
 
-# .. envvar:: rsyslog__message_reduction
+# .. envvar:: rsyslog_message_reduction
 #
 # Enable or disable message reduction. This is disabled by default so that log
 # parsers like :program:`fail2ban` can work correctly.
-rsyslog__message_reduction: False
+rsyslog_message_reduction: False
 
+# .. envvar:: rsyslog_purge_original_conf
+#
+# The pre-existing config files are archived in the tempdir and purged if the
+# rsyslog_purge_original_conf is set to `True`.  Default to 'False`.
+rsyslog_purge_original_conf: False
 
 # rpm packages
-# adding rsyslog__logging_packages
+# adding rsyslog_logging_packages
 # ------------------
 
-# .. envvar:: rsyslog__base_packages
+# .. envvar:: rsyslog_base_packages
 #
 # List of default rpm packages to install.
-rsyslog__base_packages: [ 'rsyslog' ]
+rsyslog_base_packages: [ 'rsyslog', 'libselinux-python' ]
 
-# .. envvar:: rsyslog__logging_packages
+# .. envvar:: rsyslog_logging_packages
 #
 # List of rpm packages for Common Logging.
-rsyslog__viaq_prereq_packages: [ 'nmap-ncat', 'systemd-python', 'policycoreutils', 'checkpolicy', 'policycoreutils-python' ]
-rsyslog__viaq_packages: [ 'rsyslog-elasticsearch', 'rsyslog-mmjsonparse', 'rsyslog-mmkubernetes', 'rsyslog-mmnormalize' ]
+rsyslog_viaq_prereq_packages: [ 'nmap-ncat', 'systemd-python', 'policycoreutils', 'checkpolicy', 'policycoreutils-python' ]
+rsyslog_viaq_packages: [ 'rsyslog-elasticsearch', 'rsyslog-mmjsonparse', 'rsyslog-mmkubernetes', 'rsyslog-mmnormalize' ]
 
-# .. envvar:: rsyslog__tls_packages
+# .. envvar:: rsyslog_tls_packages
 #
 # List of rpm packages required for TLS support.
-rsyslog__tls_packages: [ 'rsyslog-gnutls', 'ca-certificates' ]
+rsyslog_tls_packages: [ 'rsyslog-gnutls', 'ca-certificates' ]
 
-# .. envvar:: rsyslog__packages
+# .. envvar:: rsyslog_packages
 #
 # List of additional rpm packages to install.
-rsyslog__packages: []
+rsyslog_packages: []
 
-# .. envvar:: rsyslog__custom_config_files
+# .. envvar:: rsyslog_custom_config_files
 #
 # List of additional custom config files.
 # Each element: full paths to the files to be deployed.
-rsyslog__custom_config_files: []
+rsyslog_custom_config_files: []
 
 
 # User, group, home, file ownership
 # ---------------------------------
 
-# .. envvar:: rsyslog__user
+# .. envvar:: rsyslog_user
 #
 # The unprivileged system user account used by the ``rsyslogd`` daemon, when
 # unprivileged operation is enabled.
-rsyslog__user: '{{ "syslog" if rsyslog__unprivileged|bool else "root" }}'
+rsyslog_user: '{{ "syslog" if rsyslog_unprivileged|bool else "root" }}'
 
-# .. envvar:: rsyslog__group
+# .. envvar:: rsyslog_group
 #
 # The unprivileged system group account used by the ``rsyslogd`` daemon, when
 # unprivileged operation is enabled.
-rsyslog__group: '{{ "syslog" if rsyslog__unprivileged|bool else "root" }}'
+rsyslog_group: '{{ "syslog" if rsyslog_unprivileged|bool else "root" }}'
 
-# .. envvar:: rsyslog__file_owner
+# .. envvar:: rsyslog_file_owner
 #
 # The account which will be set as the owner of the log files generated by
 # ``rsyslogd``. When an unprivileged mode is enabled, it should be the same as
 # the ``rsyslogd`` user account.
-rsyslog__file_owner: '{{ rsyslog__user }}'
+rsyslog_file_owner: '{{ rsyslog_user }}'
 
-# .. envvar:: rsyslog__file_group
+# .. envvar:: rsyslog_file_group
 #
 # The system group which will be set as the default group of the log files
 # generated by ``rsyslogd``.
-rsyslog__file_group: 'root'
+rsyslog_file_group: 'root'
 
 # Available configuration set
 # ----------------------------
 
 # Enable or disable defined rsyslog config sets
-rsyslog__example: 'False'
-rsyslog__viaq: 'False'
+rsyslog_example: 'False'
+rsyslog_viaq: 'False'
+
+rsyslog_elasticsearch_viaq:
+  - name: viaq-elasticsearch
+    server_host: logging-es
+    server_port: 9200
+    ca_cert: "{{rsyslog_viaq_config_dir}}/es-ca.crt"
+    cert: "{{rsyslog_viaq_config_dir}}/es-cert.pem"
+    key: "{{rsyslog_viaq_config_dir}}/es-key.pem"
 
 # Encrypted communication
 # ------------------------
 
-# .. envvar:: rsyslog__pki
+# .. envvar:: rsyslog_pki
 #
 # Enable or disable support for X.509 certificates managed by pki_role,
 # used for TLS connections.
-rsyslog__pki: '{{ True
+rsyslog_pki: '{{ True
                   if (ansible_local|d() and ansible_local.pki|d() and
                       ansible_local.pki.enabled|bool)
                   else False }}'
 
-# .. envvar:: rsyslog__pki_path
+# .. envvar:: rsyslog_pki_path
 #
 # Path to the directory with PKI realms.
 # (??? - do we set the path to some other place???)
-rsyslog__pki_path: '{{ ansible_local.pki.path
+rsyslog_pki_path: '{{ ansible_local.pki.path
                        if (ansible_local|d() and ansible_local.pki|d() and
                            ansible_local.pki.path|d())
                        else "/etc/pki" }}'
 
-# .. envvar:: rsyslog__pki_realm
+# .. envvar:: rsyslog_pki_realm
 #
 # Name of the PKi realm to use with ``rsyslogd``.
-rsyslog__pki_realm: '{{ ansible_local.pki.realm
+rsyslog_pki_realm: '{{ ansible_local.pki.realm
                         if (ansible_local|d() and ansible_local.pki|d() and
                             ansible_local.pki.realm|d())
                         else "domain" }}'
 
-# .. envvar:: rsyslog__pki_ca
+# .. envvar:: rsyslog_pki_ca
 #
 # Name of the root CA certificate used by the ``rsyslog`` role.
-rsyslog__pki_ca: '{{ ansible_local.pki.ca
+rsyslog_pki_ca: '{{ ansible_local.pki.ca
                       if (ansible_local|d() and ansible_local.pki|d() and
                           ansible_local.pki.ca|d())
                       else "CA.crt" }}'
 
-# .. envvar:: rsyslog__pki_crt
+# .. envvar:: rsyslog_pki_crt
 #
 # Name of the client certificate file used by the ``rsyslog`` role.
-rsyslog__pki_crt: '{{ ansible_local.pki.crt
+rsyslog_pki_crt: '{{ ansible_local.pki.crt
                       if (ansible_local|d() and ansible_local.pki|d() and
                           ansible_local.pki.crt|d())
                       else "default.crt" }}'
 
-# .. envvar:: rsyslog__pki_key
+# .. envvar:: rsyslog_pki_key
 #
 # Name of the private key file used by the ``rsyslog`` role.
-rsyslog__pki_key: '{{ ansible_local.pki.key
+rsyslog_pki_key: '{{ ansible_local.pki.key
                       if (ansible_local|d() and ansible_local.pki|d() and
                           ansible_local.pki.key|d())
                       else "default.key" }}'
 
-# .. envvar:: rsyslog__default_netstream_driver
+# .. envvar:: rsyslog_default_netstream_driver
 #
 # Specify the default netstrap driver used by the ``imtcp`` module. The
 # ``gtls`` will be enabled by default if the support for PKI is enabled,
 # otherwise ``ptcp`` will be used.
-rsyslog__default_netstream_driver: '{{ "gtls"
-                                       if (rsyslog__pki|bool and
-                                           "tls" in rsyslog__capabilities)
+rsyslog_default_netstream_driver: '{{ "gtls"
+                                       if (rsyslog_pki|bool and
+                                           "tls" in rsyslog_capabilities)
                                        else "ptcp" }}'
 
-# .. envvar:: rsyslog__default_driver_authmode
+# .. envvar:: rsyslog_default_driver_authmode
 #
 # Specify the default network driver authetication mode. Actualy only
 # `x509/name` or `anon` are available:
-rsyslog__default_driver_authmode: "x509/name"
+rsyslog_default_driver_authmode: "x509/name"
 
-# .. envvar:: rsyslog__send_over_tls
+# .. envvar:: rsyslog_send_over_tls
 #
 # This configuration is added to the forward options when ``tls`` capability is
 # enabled. It's used to configure TLS options.
-rsyslog__send_over_tls: |-
+rsyslog_send_over_tls: |-
   $ActionSendStreamDriver gtls
-  $ActionSendStreamDriverAuthMode {{ rsyslog__default_driver_authmode }}
-  {% if rsyslog__default_driver_authmode != "anon" %}
-  {%   if rsyslog__send_permitted_peers is string %}
-  $ActionSendStreamDriverPermittedPeer {{ rsyslog__send_permitted_peers }}
+  $ActionSendStreamDriverAuthMode {{ rsyslog_default_driver_authmode }}
+  {% if rsyslog_default_driver_authmode != "anon" %}
+  {%   if rsyslog_send_permitted_peers is string %}
+  $ActionSendStreamDriverPermittedPeer {{ rsyslog_send_permitted_peers }}
   {%   else %}
-  {%     for peer in rsyslog__send_permitted_peers %}
+  {%     for peer in rsyslog_send_permitted_peers %}
   $ActionSendStreamDriverPermittedPeer {{ peer }}
   {%     endfor %}
   {%   endif %}
   {% endif %}
   $ActionSendStreamDriverMode 1
 
-# .. envvar:: rsyslog__send_over_tls_only
+# .. envvar:: rsyslog_send_over_tls_only
 #
 # Specify if you want only TLS communications.
-rsyslog__send_over_tls_only: False
+rsyslog_send_over_tls_only: False
 
-# .. envvar:: rsyslog__domain
+# .. envvar:: rsyslog_domain
 #
 # The default DNS domain used to accept remote incoming logs from remote hosts.
-rsyslog__domain: '{{ ansible_domain if ansible_domain else ansible_hostname }}'
+rsyslog_domain: '{{ ansible_domain if ansible_domain else ansible_hostname }}'
 
-# .. envvar:: rsyslog__permitted_peers
+# .. envvar:: rsyslog_permitted_peers
 #
 # List of hostnames, IP addresses or wildcard DNS domains which will be allowed
 # by the ``rsyslogd`` server to connect and send logs over TLS.
-rsyslog__permitted_peers: [ '*.{{ rsyslog__domain }}' ]
+rsyslog_permitted_peers: [ '*.{{ rsyslog_domain }}' ]
 
-# .. envvar:: rsyslog__send_permitted_peers
+# .. envvar:: rsyslog_send_permitted_peers
 #
 # List of hostnames, IP addresses or wildcard DNS domains which will be
 # verified by the ``rsyslogd`` client and will allow to send logs to the remote
 # server over TLS.
-rsyslog__send_permitted_peers: '{{ rsyslog__permitted_peers }}'
+rsyslog_send_permitted_peers: '{{ rsyslog_permitted_peers }}'
 
 
 # Firewall, UDP, TCP ports
 # ------------------------
 
-# .. envvar:: rsyslog__udp_port
+# .. envvar:: rsyslog_udp_port
 #
 # The incoming UDP port used for remote logging.
-rsyslog__udp_port: '514'
+rsyslog_udp_port: '514'
 
-# .. envvar:: rsyslog__tcp_port
+# .. envvar:: rsyslog_tcp_port
 #
 # The incoming TCP port used for remote logging.
-rsyslog__tcp_port: '514'
+rsyslog_tcp_port: '514'
 
-# .. envvar:: rsyslog__tcp_tls_port
+# .. envvar:: rsyslog_tcp_tls_port
 #
 # The incoming TCP TLS port used for remote logging.
-rsyslog__tcp_tls_port: '6514'
+rsyslog_tcp_tls_port: '6514'
 
-# .. envvar:: rsyslog__allow
+# .. envvar:: rsyslog_allow
 #
 # List of IP addresses or CIDR subnets which should be allowed to connect to
 # ``rsyslogd`` ports by the firewall. This variable should be used for all
 # hosts in the inventory.
-rsyslog__allow: []
+rsyslog_allow: []
 
-# .. envvar:: rsyslog__group_allow
+# .. envvar:: rsyslog_group_allow
 #
 # List of IP addresses or CIDR subnets which should be allowed to connect to
 # ``rsyslogd`` ports by the firewall. This variable should be used for specific
 # group of hosts in the inventory.
-rsyslog__group_allow: []
+rsyslog_group_allow: []
 
-# .. envvar:: rsyslog__host_allow
+# .. envvar:: rsyslog_host_allow
 #
 # List of IP addresses or CIDR subnets which should be allowed to connect to
 # ``rsyslogd`` ports by the firewall. This variable should be used for specific
 # hosts in the inventory.
-rsyslog__host_allow: [ '192.168.122.100/24' ]
+rsyslog_host_allow: [ '192.168.122.100/24' ]
 
 
 # Log forwarding
 # --------------
 
-# .. envvar:: rsyslog__forward
+# .. envvar:: rsyslog_forward
 #
 # List of ``rsyslogd`` options that configure log forwarding for all hosts in
-# the inventory. See :ref:`rsyslog__forward` for more details.
-rsyslog__forward: []
+# the inventory.
+rsyslog_forward: []
 
-# .. envvar:: rsyslog__group_forward
+# .. envvar:: rsyslog_group_forward
 #
 # List of ``rsyslogd`` options that configure log forwarding for hosts in
-# a specific group. See :ref:`rsyslog__forward` for more details.
-rsyslog__group_forward: []
+# a specific group.
+rsyslog_group_forward: []
 
-# .. envvar:: rsyslog__host_forward
+# .. envvar:: rsyslog_host_forward
 #
 # List of ``rsyslogd`` options that configure log forwarding for specific hosts
-# in Ansible inventory. See :ref:`rsyslog__forward` for more details.
-# rsyslog__host_forward: [ '*.* @other.{{ ansible_domain }}' ]
-rsyslog__host_forward: []
+# in Ansible inventory.
+# rsyslog_host_forward: [ '*.* @other.{{ ansible_domain }}' ]
+rsyslog_host_forward: []
 
 
 # Rsyslog configuration rules
 # ---------------------------
 
-# .. envvar:: rsyslog__weight_map
+# .. envvar:: rsyslog_weight_map
 #
 # This is a dictionary map of different configuration "types" corresponding to
-# numbers used to sort configuration files in :file:`{{rsyslog__config_dir}}` directory
+# numbers used to sort configuration files in :file:`{{rsyslog_config_dir}}` directory
 # (configuration order is important). You can specify a type in the
 # configuration by using the ``item.type`` parameter.
 #
 # If you change the default weight map values, you will most likely need to
-# remove all files from :file:`{{rsyslog__config_dir}}` to reset the configuration.
+# remove all files from :file:`{{rsyslog_config_dir}}` to reset the configuration.
 #
-# See :ref:`rsyslog__rules` for more details.
-rsyslog__weight_map:
+# See :ref:`rsyslog_rules` for more details.
+rsyslog_weight_map:
   'global':    '05'
   'globals':   '05'
   'module':    '10'
@@ -327,105 +340,105 @@ rsyslog__weight_map:
   'input':     '90'
   'inputs':    '90'
 
-# .. envvar:: rsyslog__rules
+# .. envvar:: rsyslog_rules
 #
 # List of YAML dictionaries, each dictionary should contain ``rsyslogd``
-# configuration in a special format. See :ref:`rsyslog__rules` for more
+# configuration in a special format. See :ref:`rsyslog_rules` for more
 # details. This list should be used for configuration of all hosts in the
 # inventory.
-rsyslog__rules: []
+rsyslog_rules: []
 
-# .. envvar:: rsyslog__group_rules
+# .. envvar:: rsyslog_group_rules
 #
 # List of YAML dictionaries, each dictionary should contain ``rsyslogd``
-# configuration in a special format. See :ref:`rsyslog__rules` for more
+# configuration in a special format. See :ref:`rsyslog_rules` for more
 # details. This list should be used for configuration of a group of hosts in
 # the inventory.
-rsyslog__group_rules: []
+rsyslog_group_rules: []
 
-# .. envvar:: rsyslog__host_rules
+# .. envvar:: rsyslog_host_rules
 #
 # List of YAML dictionaries, each dictionary should contain ``rsyslogd``
-# configuration in a special format. See :ref:`rsyslog__rules` for more
+# configuration in a special format. See :ref:`rsyslog_rules` for more
 # details. This list should be used for configuration of specific hosts in the
 # inventory.
-rsyslog__host_rules: []
+rsyslog_host_rules: []
 
-# .. envvar:: rsyslog__dependent_rules
+# .. envvar:: rsyslog_dependent_rules
 #
 # List of YAML dictionaries, each dictionary should contain ``rsyslogd``
-# configuration in a special format. See :ref:`rsyslog__rules` for more
+# configuration in a special format. See :ref:`rsyslog_rules` for more
 # details. This list should be used for configuration by other Ansible roles.
-rsyslog__dependent_rules: []
+rsyslog_dependent_rules: []
 
-# .. envvar:: rsyslog__default_rules
+# .. envvar:: rsyslog_default_rules
 #
 # List of YAML dictionaries, each dictionary should contain ``rsyslogd``
-# configuration in a special format. See :ref:`rsyslog__rules` for more
+# configuration in a special format. See :ref:`rsyslog_rules` for more
 # details. This lis specifies default ``rsyslogd`` configuration enabled in the
 # role.
-rsyslog__default_rules:
+rsyslog_default_rules:
 
-  - '{{ rsyslog__conf_global_options }}'
-  - '{{ rsyslog__conf_local_modules }}'
-  - '{{ rsyslog__conf_network_modules }}'
-  - '{{ rsyslog__conf_common_defaults }}'
-  - '{{ rsyslog__conf_filename_templates }}'
-  - '{{ rsyslog__conf_remote_forward }}'
-  - '{{ rsyslog__conf_default_rulesets }}'
-  - '{{ rsyslog__conf_system_rules }}'
-  - '{{ rsyslog__conf_system_cron }}'
-  - '{{ rsyslog__conf_network_input }}'
-  - '{{ rsyslog__conf_dynamic_logs }}'
-  - '{{ rsyslog__conf_stop_remote }}'
+  - '{{ rsyslog_conf_global_options }}'
+  - '{{ rsyslog_conf_local_modules }}'
+  - '{{ rsyslog_conf_network_modules }}'
+  - '{{ rsyslog_conf_common_defaults }}'
+  - '{{ rsyslog_conf_filename_templates }}'
+  - '{{ rsyslog_conf_remote_forward }}'
+  - '{{ rsyslog_conf_default_rulesets }}'
+  - '{{ rsyslog_conf_system_rules }}'
+  - '{{ rsyslog_conf_system_cron }}'
+  - '{{ rsyslog_conf_network_input }}'
+  - '{{ rsyslog_conf_dynamic_logs }}'
+  - '{{ rsyslog_conf_stop_remote }}'
 
-rsyslog__viaq_rules:
+rsyslog_viaq_rules:
 
-  - '{{ rsyslog__conf_global_options }}'
-  - '{{ rsyslog__conf_local_modules }}'
-  - '{{ rsyslog__conf_network_modules }}'
-  - '{{ rsyslog__conf_common_defaults }}'
-  - '{{ rsyslog__conf_viaq_main_modules }}'
-  - '{{ rsyslog__conf_viaq_mmk8s }}'
-  - '{{ rsyslog__conf_viaq_elasticsearch }}'
-  - '{{ rsyslog__conf_viaq_viaq_formatting }}'
-  - '{{ rsyslog__rulebase_viaq_k8s_filename }}'
-  - '{{ rsyslog__rulebase_viaq_parse_json }}'
-  - '{{ rsyslog__rulebase_viaq_k8s_container_name }}'
-  - '{{ rsyslog__json_viaq_normalize_level }}'
-  - '{{ rsyslog__json_viaq_prio_to_level }}'
-  - '{{ rsyslog__rulebase_viaq_crio }}'
+  - '{{ rsyslog_conf_global_options }}'
+  - '{{ rsyslog_conf_local_modules }}'
+  - '{{ rsyslog_conf_network_modules }}'
+  - '{{ rsyslog_conf_common_defaults }}'
+  - '{{ rsyslog_conf_viaq_main_modules }}'
+  - '{{ rsyslog_conf_viaq_mmk8s }}'
+  - '{{ rsyslog_conf_viaq_elasticsearch }}'
+  - '{{ rsyslog_conf_viaq_viaq_formatting }}'
+  - '{{ rsyslog_rulebase_viaq_k8s_filename }}'
+  - '{{ rsyslog_rulebase_viaq_parse_json }}'
+  - '{{ rsyslog_rulebase_viaq_k8s_container_name }}'
+  - '{{ rsyslog_json_viaq_normalize_level }}'
+  - '{{ rsyslog_json_viaq_prio_to_level }}'
+  - '{{ rsyslog_rulebase_viaq_crio }}'
 
 # Default configuration options [[[
 # ---------------------------------
 
-# .. envvar:: rsyslog__conf_global_options
+# .. envvar:: rsyslog_conf_global_options
 #
 # Some of the global ``rsyslogd`` configuration options. See
 # http://www.rsyslog.com/doc/v8-stable/rainerscript/global.html for more
 # details.
-rsyslog__conf_global_options:
+rsyslog_conf_global_options:
 
   - filename: '00-global.conf'
     comment: 'Global options'
     options: |-
       global(
-        defaultNetstreamDriver="{{ rsyslog__default_netstream_driver }}"
-        workDirectory="{{ rsyslog__work_dir }}"
-      {% if rsyslog__pki|bool and "tls" in rsyslog__capabilities %}
-        defaultNetstreamDriverCAFile="{{ rsyslog__pki_path + '/' + rsyslog__pki_realm + '/' + rsyslog__pki_ca }}"
-      {%   if rsyslog__default_driver_authmode != "anon" or "network" in rsyslog__capabilities %}
-        defaultNetstreamDriverCertFile="{{ rsyslog__pki_path + '/' + rsyslog__pki_realm + '/' + rsyslog__pki_crt }}"
-        defaultNetstreamDriverKeyFile="{{ rsyslog__pki_path + '/' + rsyslog__pki_realm + '/' + rsyslog__pki_key }}"
+        defaultNetstreamDriver="{{ rsyslog_default_netstream_driver }}"
+        workDirectory="{{ rsyslog_work_dir }}"
+      {% if rsyslog_pki|bool and "tls" in rsyslog_capabilities %}
+        defaultNetstreamDriverCAFile="{{ rsyslog_pki_path + '/' + rsyslog_pki_realm + '/' + rsyslog_pki_ca }}"
+      {%   if rsyslog_default_driver_authmode != "anon" or "network" in rsyslog_capabilities %}
+        defaultNetstreamDriverCertFile="{{ rsyslog_pki_path + '/' + rsyslog_pki_realm + '/' + rsyslog_pki_crt }}"
+        defaultNetstreamDriverKeyFile="{{ rsyslog_pki_path + '/' + rsyslog_pki_realm + '/' + rsyslog_pki_key }}"
       {%   endif %}
       {% endif %}
       )
 
-# .. envvar:: rsyslog__conf_local_modules
+# .. envvar:: rsyslog_conf_local_modules
 #
 # List of ``rsyslogd`` modules that enable logs from the local system to be
 # received and parsed by the ``rsyslogd`` daemon.
-rsyslog__conf_local_modules:
+rsyslog_conf_local_modules:
 
   - name: 'local-modules'
     type: 'modules'
@@ -447,19 +460,19 @@ rsyslog__conf_local_modules:
         options: |-
           module(load="immark" interval={{ (60 * 60) }})
         state: '{{ "present"
-                  if ("mark" in rsyslog__capabilities)
+                  if ("mark" in rsyslog_capabilities)
                   else "absent" }}'
 
-# .. envvar:: rsyslog__conf_network_modules
+# .. envvar:: rsyslog_conf_network_modules
 #
 # List of ``rsyslogd`` modules that receive logs from remote systems over the
 # network. They are enabled by the ``network`` capability.
-rsyslog__conf_network_modules:
+rsyslog_conf_network_modules:
 
   - name: 'network-modules'
     type: 'modules'
     state: '{{ "present"
-              if ("network" in rsyslog__capabilities)
+              if ("network" in rsyslog_capabilities)
               else "absent" }}'
     sections:
 
@@ -467,14 +480,14 @@ rsyslog__conf_network_modules:
         options: |-
           module(load="imudp")
         state: '{{ "present"
-                  if (rsyslog__send_over_tls_only)
+                  if (rsyslog_send_over_tls_only)
                   else "absent" }}'
 
       - comment: 'Enable TCP support'
         options: |-
           module(load="imptcp")
         state: '{{ "present"
-                  if (rsyslog__send_over_tls_only)
+                  if (rsyslog_send_over_tls_only)
                   else "absent" }}'
 
       - comment: 'Enable GnuTLS TCP support'
@@ -483,30 +496,30 @@ rsyslog__conf_network_modules:
             load="imtcp"
             streamDriver.name="gtls"
             streamDriver.mode="1"
-            streamDriver.authMode="{{ rsyslog__default_driver_authmode }}"
-          {% if rsyslog__default_driver_authmode != "anon" %}
-            {% if rsyslog__permitted_peers is string %}
-              permittedPeer="{{ rsyslog__permitted_peers }}"
+            streamDriver.authMode="{{ rsyslog_default_driver_authmode }}"
+          {% if rsyslog_default_driver_authmode != "anon" %}
+            {% if rsyslog_permitted_peers is string %}
+              permittedPeer="{{ rsyslog_permitted_peers }}"
             {% else %}
-              permittedPeer=["{{ rsyslog__permitted_peers | join('","') }}"]
+              permittedPeer=["{{ rsyslog_permitted_peers | join('","') }}"]
             {% endif %}
           {% endif %}
           )
         state: '{{ "present"
-                  if ("tls" in rsyslog__capabilities)
+                  if ("tls" in rsyslog_capabilities)
                   else "absent" }}'
 
                                                                    # ]]]
-# .. envvar:: rsyslog__conf_network_input [[[
+# .. envvar:: rsyslog_conf_network_input [[[
 #
 # Configuration of UDP, TCP and TCP over TLS inputs to receive logs from remote
 # hosts, enabled by the ``network`` capability.
-rsyslog__conf_network_input:
+rsyslog_conf_network_input:
 
   - name: 'network-input'
     type: 'input'
     state: '{{ "present"
-              if ("network" in rsyslog__capabilities)
+              if ("network" in rsyslog_capabilities)
               else "absent" }}'
     sections:
 
@@ -514,22 +527,22 @@ rsyslog__conf_network_input:
         options: |-
           input(
             type="imudp"
-            port="{{ rsyslog__udp_port }}"
+            port="{{ rsyslog_udp_port }}"
             ruleset="remote"
           )
         state: '{{ "present"
-                  if (not rsyslog__send_over_tls_only)
+                  if (not rsyslog_send_over_tls_only)
                   else "absent" }}'
 
       - comment: 'Log messages from remote hosts over TCP'
         options: |-
           input(
             type="imptcp"
-            port="{{ rsyslog__tcp_port }}"
+            port="{{ rsyslog_tcp_port }}"
             ruleset="remote"
           )
         state: '{{ "present"
-                  if (not rsyslog__send_over_tls_only)
+                  if (not rsyslog_send_over_tls_only)
                   else "absent" }}'
 
       - comment: 'Log messages from remote hosts over TLS'
@@ -537,18 +550,18 @@ rsyslog__conf_network_input:
           input(
             type="imtcp"
             name="imtls"
-            port="{{ rsyslog__tcp_tls_port }}"
+            port="{{ rsyslog_tcp_tls_port }}"
             ruleset="remote"
           )
         state: '{{ "present"
-                  if ("tls" in rsyslog__capabilities)
+                  if ("tls" in rsyslog_capabilities)
                   else "absent" }}'
 
-# .. envvar:: rsyslog__conf_common_defaults
+# .. envvar:: rsyslog_conf_common_defaults
 #
 # List of common ``rsyslogd`` configuration, like new file owner/group and
 # permissions, work directory, configuration of message reduction.
-rsyslog__conf_common_defaults:
+rsyslog_conf_common_defaults:
 
   - name: 'common-defaults'
     type: 'global'
@@ -556,27 +569,27 @@ rsyslog__conf_common_defaults:
 
       - comment: 'Set default permissions for all log files'
         options: |-
-          $FileOwner {{ rsyslog__file_owner }}
-          $FileGroup {{ rsyslog__file_group }}
+          $FileOwner {{ rsyslog_file_owner }}
+          $FileGroup {{ rsyslog_file_group }}
           $FileCreateMode 0640
           $DirCreateMode 0755
           $Umask 0022
-          {% if rsyslog__unprivileged|bool %}
-          $PrivDropToUser {{ rsyslog__user }}
-          $PrivDropToGroup {{ rsyslog__group }}
+          {% if rsyslog_unprivileged|bool %}
+          $PrivDropToUser {{ rsyslog_user }}
+          $PrivDropToGroup {{ rsyslog_group }}
           {% endif %}
 
       - comment: 'Log every message'
         options: |-
-          $RepeatedMsgReduction {{ "on" if rsyslog__message_reduction|bool else "off" }}
+          $RepeatedMsgReduction {{ "on" if rsyslog_message_reduction|bool else "off" }}
 
-# .. envvar:: rsyslog__conf_filename_templates
+# .. envvar:: rsyslog_conf_filename_templates
 #
 # List of ``rsyslogd`` templates which are used to generate dynamic filenames
 # for remote logs, based on hostnames. You can add additional template
-# configuration by writing it in the :file:`{{rsyslog__config_dir}}/*.template` files, they
+# configuration by writing it in the :file:`{{rsyslog_config_dir}}/*.template` files, they
 # will be included by the main configuration.
-rsyslog__conf_filename_templates:
+rsyslog_conf_filename_templates:
 
   - name: 'templates'
     type: 'template'
@@ -587,7 +600,7 @@ rsyslog__conf_filename_templates:
           template(
             name="RemoteHostSyslog"
             type="string"
-            string="{{rsyslog__system_log_dir}}/remote/hosts/%HOSTNAME%/syslog"
+            string="{{rsyslog_system_log_dir}}/remote/hosts/%HOSTNAME%/syslog"
           )
 
       - comment: 'Remote host auth logs'
@@ -595,7 +608,7 @@ rsyslog__conf_filename_templates:
           template(
             name="RemoteHostAuthLog"
             type="string"
-            string="{{rsyslog__system_log_dir}}/remote/hosts/%HOSTNAME%/auth.log"
+            string="{{rsyslog_system_log_dir}}/remote/hosts/%HOSTNAME%/auth.log"
           )
 
       - comment: 'Remote host cron logs'
@@ -603,7 +616,7 @@ rsyslog__conf_filename_templates:
           template(
             name="RemoteHostCronLog"
             type="string"
-            string="{{rsyslog__system_log_dir}}/remote/hosts/%HOSTNAME%/cron.log"
+            string="{{rsyslog_system_log_dir}}/remote/hosts/%HOSTNAME%/cron.log"
           )
 
       - comment: 'Remote service auth logs'
@@ -611,7 +624,7 @@ rsyslog__conf_filename_templates:
           template(
             name="RemoteServiceAuthLog"
             type="string"
-            string="{{rsyslog__system_log_dir}}/remote/services/auth/auth.log"
+            string="{{rsyslog_system_log_dir}}/remote/services/auth/auth.log"
           )
 
       - comment: 'Remote service cron logs'
@@ -619,7 +632,7 @@ rsyslog__conf_filename_templates:
           template(
             name="RemoteServiceCronLog"
             type="string"
-            string="{{rsyslog__system_log_dir}}/remote/services/cron/cron.log"
+            string="{{rsyslog_system_log_dir}}/remote/services/cron/cron.log"
           )
 
       - comment: 'Remote service mail logs'
@@ -627,44 +640,44 @@ rsyslog__conf_filename_templates:
           template(
             name="RemoteServiceMailLog"
             type="string"
-            string="{{rsyslog__system_log_dir}}/remote/services/mail/mail.log"
+            string="{{rsyslog_system_log_dir}}/remote/services/mail/mail.log"
           )
 
       - comment: 'Include custom templates'
         options: |-
-          $IncludeConfig {{rsyslog__config_dir}}/*.template
+          $IncludeConfig {{rsyslog_config_dir}}/*.template
 
       - comment: 'Use traditional timestamp format'
         options: |-
           $ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
 
-# .. envvar:: rsyslog__conf_remote_forward
+# .. envvar:: rsyslog_conf_remote_forward
 #
 # Enable log forwardin to another ``rsyslogd`` instance if it's enabled in
-# :envvar:`rsyslog__forward` variables. See :ref:`rsyslog__forward` for more details.
-rsyslog__conf_remote_forward:
+# :envvar:`rsyslog_forward` variables.
+rsyslog_conf_remote_forward:
 
   - filename: '20-remote-forward.system'
     state: '{{ "present"
-               if (rsyslog__forward|d() or rsyslog__group_forward|d() or rsyslog__host_forward|d())
+               if (rsyslog_forward|d() or rsyslog_group_forward|d() or rsyslog_host_forward|d())
                else "absent" }}'
 
     sections:
 
       - comment: 'Forward logs over TLS by default'
-        options: '{{ rsyslog__send_over_tls }}'
+        options: '{{ rsyslog_send_over_tls }}'
         state: '{{ "present"
-                   if (rsyslog__pki|bool and
-                       "tls" in rsyslog__capabilities)
+                   if (rsyslog_pki|bool and
+                       "tls" in rsyslog_capabilities)
                    else "absent" }}'
 
       - comment: 'Forward logs to specified hosts'
         options: |-
-          {% for element in (rsyslog__forward + rsyslog__group_forward + rsyslog__host_forward) %}
+          {% for element in (rsyslog_forward + rsyslog_group_forward + rsyslog_host_forward) %}
           {{ element }}
           {% endfor %}
 
-# .. envvar:: rsyslog__conf_default_rulesets [[[
+# .. envvar:: rsyslog_conf_default_rulesets [[[
 #
 # The ``rsyslogd`` configuration can contain multiple rulesets, each one
 # connected to an input channel (see
@@ -674,9 +687,9 @@ rsyslog__conf_remote_forward:
 # By default ``rsyslog`` use the default ruleset for local system logs, 
 # and defines a separate ``remote`` ruleset for logs incoming over the
 # network from remote hosts. The local log rules are stored in
-# :file:`{{rsyslog__config_dir}}/*.system` configuration files, and remote log
-# rules are stored in :file:`{{rsyslog__config_dir}}/*.remote` configuration files.
-rsyslog__conf_default_rulesets:
+# :file:`{{rsyslog_config_dir}}/*.system` configuration files, and remote log
+# rules are stored in :file:`{{rsyslog_config_dir}}/*.remote` configuration files.
+rsyslog_conf_default_rulesets:
 
   - name: 'default-rulesets'
     type: 'rules'
@@ -684,20 +697,20 @@ rsyslog__conf_default_rulesets:
 
       - comment: 'Rules for the local system logs'
         options: |-
-          $IncludeConfig {{rsyslog__config_dir}}/*.system
+          $IncludeConfig {{rsyslog_config_dir}}/*.system
 
       - comment: 'Rules for logs incoming from remote hosts'
         options: |-
           ruleset(name="remote") {
-            $IncludeConfig {{rsyslog__config_dir}}/*.remote
+            $IncludeConfig {{rsyslog_config_dir}}/*.remote
           }
 
-# .. envvar:: rsyslog__conf_system_rules
+# .. envvar:: rsyslog_conf_system_rules
 #
 # A set of default ``rsyslog`` options which store local system logs in files
-# located in :file:`{{rsyslog__system_log_dir}}/` directory. This is mostly the same as the default
+# located in :file:`{{rsyslog_system_log_dir}}/` directory. This is mostly the same as the default
 # ``rsyslogd`` configuration provided in Debian/Ubuntu installations.
-rsyslog__conf_system_rules:
+rsyslog_conf_system_rules:
 
   - filename: '50-default-rules.system'
     sections:
@@ -712,19 +725,19 @@ rsyslog__conf_system_rules:
           Log anything (except mail) of level info or higher.
           Don't log private authentication messages!
         options: |-
-          *.info;mail.none;authpriv.none;cron.none                {{rsyslog__system_log_dir}}/messages
+          *.info;mail.none;authpriv.none;cron.none                {{rsyslog_system_log_dir}}/messages
 
       - comment: 'The authpriv file has restricted access.'
         options: |-
-          authpriv.*                                              {{rsyslog__system_log_dir}}/secure
+          authpriv.*                                              {{rsyslog_system_log_dir}}/secure
 
       - comment: 'Log all the mail messages in one place.'
         options: |-
-          mail.*                                                  -{{rsyslog__system_log_dir}}/maillog
+          mail.*                                                  -{{rsyslog_system_log_dir}}/maillog
 
       - comment: 'Log cron stuff'
         options: |-
-          cron.*                                                  -{{rsyslog__system_log_dir}}/cron
+          cron.*                                                  -{{rsyslog_system_log_dir}}/cron
 
       - comment: 'Everybody gets emergency messages'
         options: |-
@@ -732,42 +745,42 @@ rsyslog__conf_system_rules:
 
       - comment: 'Save news errors of level crit and higher in a special file.'
         options: |-
-          uucp,news.crit                                          {{rsyslog__system_log_dir}}/spooler
+          uucp,news.crit                                          {{rsyslog_system_log_dir}}/spooler
 
       - comment: 'Save boot messages also to boot.log'
         options: |-
-          local7.*                                                {{rsyslog__system_log_dir}}/boot.log
+          local7.*                                                {{rsyslog_system_log_dir}}/boot.log
 
-# .. envvar:: rsyslog__conf_system_cron
+# .. envvar:: rsyslog_conf_system_cron
 #
 # Configuration for system :program:`cron` logs. This will ensure that :program:`cron` logs
-# will be stored in separate :file:`{{rsyslog__system_log_dir}}/cron.log` file and won't clutter auth
+# will be stored in separate :file:`{{rsyslog_system_log_dir}}/cron.log` file and won't clutter auth
 # or syslog logs.
-rsyslog__conf_system_cron:
+rsyslog_conf_system_cron:
   filename: '40-cron.system'
   options: |
     if ($msg contains "pam_unix(cron:session): session opened for user") then {
-      action(type="omfile" file="{{rsyslog__system_log_dir}}/cron.log")
-    {% if 'remote-files' in rsyslog__capabilities %}
+      action(type="omfile" file="{{rsyslog_system_log_dir}}/cron.log")
+    {% if 'remote-files' in rsyslog_capabilities %}
       action(type="omfile" DynaFile="RemoteHostCronLog")
       action(type="omfile" DynaFile="RemoteServiceCronLog")
     {% endif %}
       stop
     } else if ($msg contains "pam_unix(cron:session): session closed for user") then {
-      action(type="omfile" file="{{rsyslog__system_log_dir}}/cron.log")
-    {% if 'remote-files' in rsyslog__capabilities %}
+      action(type="omfile" file="{{rsyslog_system_log_dir}}/cron.log")
+    {% if 'remote-files' in rsyslog_capabilities %}
       action(type="omfile" DynaFile="RemoteHostCronLog")
       action(type="omfile" DynaFile="RemoteServiceCronLog")
     {% endif %}
       stop
     }
 
-# .. envvar:: rsyslog__conf_dynamic_logs
+# .. envvar:: rsyslog_conf_dynamic_logs
 #
 # List of ``rsyslogd`` rules which maintain dynamic log files in
-# :file:`{{rsyslog__system_log_dir}}/remote/` directory. These log files will store
+# :file:`{{rsyslog_system_log_dir}}/remote/` directory. These log files will store
 # logs incoming from other, remote hosts.
-rsyslog__conf_dynamic_logs:
+rsyslog_conf_dynamic_logs:
 
   - filename: '40-dynamic-cron.remote'
     options: |
@@ -781,7 +794,7 @@ rsyslog__conf_dynamic_logs:
         stop
       }
     state: '{{ "present"
-               if ("remote-files" in rsyslog__capabilities)
+               if ("remote-files" in rsyslog_capabilities)
                else "absent" }}'
 
   - filename: '50-dynamic-logs.remote'
@@ -794,16 +807,16 @@ rsyslog__conf_dynamic_logs:
       cron.*                              -?RemoteServiceCronLog
       mail.*                              -?RemoteServiceMailLog
     state: '{{ "present"
-               if ("remote-files" in rsyslog__capabilities)
+               if ("remote-files" in rsyslog_capabilities)
                else "absent" }}'
 
-# .. envvar:: rsyslog__conf_stop_remote
+# .. envvar:: rsyslog_conf_stop_remote
 #
 # The older ``rsyslogd`` versions do not support empty rulesets. This
 # configuration file is used to allow empty ``remote`` ruleset when remote log
 # support is disabled, and should be included in the configuration at the very
 # end.
-rsyslog__conf_stop_remote:
+rsyslog_conf_stop_remote:
 
   - filename: 'zz-stop.remote'
     comment: |-
@@ -816,12 +829,12 @@ rsyslog__conf_stop_remote:
 logging_mmk8s_ca_cert: ''
 logging_mmk8s_token: ''
 
-rsyslog__conf_viaq_main_modules:
+rsyslog_conf_viaq_main_modules:
 
   - name: 'viaq_main'
     type: 'modules'
     state: "{{ 'present'
-               if ('viaq' in rsyslog__capabilities)
+               if ('viaq' in rsyslog_capabilities)
                else 'absent' }}"
     sections:
 
@@ -831,7 +844,7 @@ rsyslog__conf_viaq_main_modules:
 
       - options: |-
           # Read from journal
-          module(load="imjournal" StateFile="{{ rsyslog__work_dir }}/imjournal.state" UsePid="both" RateLimit.Burst="{{ imjournal_ratelimit_burst|default(1000000) }}" RateLimit.Interval="{{ imjournal_ratelimit_interval|default(10) }}" PersistStateInterval="1000" WorkAroundJournalBug="on")
+          module(load="imjournal" StateFile="{{ rsyslog_work_dir }}/imjournal.state" UsePid="both" RateLimit.Burst="{{ imjournal_ratelimit_burst|default(1000000) }}" RateLimit.Interval="{{ imjournal_ratelimit_interval|default(10) }}" PersistStateInterval="1000" WorkAroundJournalBug="on")
 
       - options: |-
           # Normalize logs
@@ -847,15 +860,15 @@ rsyslog__conf_viaq_main_modules:
 
       - options: |-
           # Include viaq config files
-          $IncludeConfig {{ rsyslog__viaq_config_dir }}/*.conf
+          $IncludeConfig {{ rsyslog_viaq_config_dir }}/*.conf
 
-rsyslog__conf_viaq_mmk8s:
+rsyslog_conf_viaq_mmk8s:
 
   - name: 'mmk8s'
     type: 'modules'
-    path: '{{rsyslog__viaq_config_dir }}'
+    path: '{{rsyslog_viaq_config_dir }}'
     state: "{{ 'present'
-               if ('viaq-k8s' in rsyslog__capabilities)
+               if ('viaq-k8s' in rsyslog_capabilities)
                else 'absent' }}"
     sections:
 
@@ -863,31 +876,31 @@ rsyslog__conf_viaq_mmk8s:
           # mmkubernetes
           module(load="mmkubernetes")
           
-          input(type="imfile" file="{{ rsyslog__viaq_log_dir }}/*.log" tag="kubernetes" addmetadata="on" reopenOnTruncate="on")
+          input(type="imfile" file="{{ rsyslog_viaq_log_dir }}/*.log" tag="kubernetes" addmetadata="on" reopenOnTruncate="on")
           
           if ((strlen($!CONTAINER_NAME) > 0) and (strlen($!CONTAINER_ID_FULL) > 0)) or
-              ((strlen($!metadata) > 0) and (strlen($!metadata!filename) > 0) and ($!metadata!filename startswith "{{rsyslog__viaq_log_dir}}/")) then {
-              if ((strlen($!metadata) > 0) and (strlen($!metadata!filename) > 0) and ($!metadata!filename startswith "{{rsyslog__viaq_log_dir}}/")) then {
+              ((strlen($!metadata) > 0) and (strlen($!metadata!filename) > 0) and ($!metadata!filename startswith "{{rsyslog_viaq_log_dir}}/")) then {
+              if ((strlen($!metadata) > 0) and (strlen($!metadata!filename) > 0) and ($!metadata!filename startswith "{{rsyslog_viaq_log_dir}}/")) then {
                   if $msg startswith "{" then {
                       action(type="mmjsonparse" cookie="") # parse entire message as json
                   } else {
-                      action(type="mmnormalize" rulebase="{{ rsyslog__viaq_config_dir }}/crio.rulebase")
+                      action(type="mmnormalize" rulebase="{{ rsyslog_viaq_config_dir }}/crio.rulebase")
                   }
               }
               action(type="mmkubernetes"
-                 filenamerulebase="{{ rsyslog__viaq_config_dir }}/k8s_filename.rulebase"
-                 containerrulebase="{{ rsyslog__viaq_config_dir }}/k8s_container_name.rulebase"
+                 filenamerulebase="{{ rsyslog_viaq_config_dir }}/k8s_filename.rulebase"
+                 containerrulebase="{{ rsyslog_viaq_config_dir }}/k8s_container_name.rulebase"
                  tls.cacert="{{logging_mmk8s_ca_cert}}"
                  tokenfile="{{logging_mmk8s_token}}" annotation_match=["."])
           }
 
-rsyslog__conf_viaq_elasticsearch:
+rsyslog_conf_viaq_elasticsearch:
 
   - name: 'elasticsearch'
     type: 'output'
-    path: '{{rsyslog__viaq_config_dir }}'
+    path: '{{rsyslog_viaq_config_dir }}'
     state: "{{ 'present'
-               if ('viaq' in rsyslog__capabilities)
+               if ('viaq' in rsyslog_capabilities)
                else 'absent' }}"
     sections:
 
@@ -914,7 +927,7 @@ rsyslog__conf_viaq_elasticsearch:
           template(name="id_template" type="string" string="%$.viaq_msg_id%")
           
           ruleset(name="error_es") {
-              action(type="omfile" template="viaq_template_nl" file="{{rsyslog__work_dir}}/es-bulk-errors.log")
+              action(type="omfile" template="viaq_template_nl" file="{{rsyslog_work_dir}}/es-bulk-errors.log")
           }
           
           ruleset(name="try_es") {
@@ -948,73 +961,125 @@ rsyslog__conf_viaq_elasticsearch:
               } else {
                   set $.viaq_index_name = exec_template("prefix_index_template");
               }
-          {% if openshift_logging_use_ops | default(False) %}
-              if $.viaq_index_prefix startswith "project." then {
+          {% for res in rsyslog_elasticsearch_viaq %}
+          {% if loop.length == 1 %}
+              action(
+                  type="omelasticsearch"
+                  name="{{ res.name | default('viaq-elasticsearch') }}"
+                  server="{{ res.server_host | default('logging-es') }}"
+                  serverport="{{ res.server_port | default(9200) | int }}"
+                  template="viaq_template"
+                  searchIndex="index_template"
+                  dynSearchIndex="on"
+                  searchType="com.redhat.viaq.common"
+                  bulkmode="on"
+                  writeoperation="create"
+                  bulkid="id_template"
+                  dynbulkid="on"
+                  retryfailures="on"
+                  retryruleset="try_es"
+                  usehttps="on"
+          {% if use_omelasticsearch_cert | default(False) %}
+                  tls.cacert="{{ res.ca_cert }}"
+                  tls.mycert="{{ res.cert }}"
+                  tls.myprivkey="{{ res.key }}"
           {% endif %}
-              action(
-                  type="omelasticsearch"
-                  server="{{ elasticsearch_server_host | default('logging-es') }}"
-                  serverport="{{ elasticsearch_server_port | default(9200) }}"
-                  template="viaq_template"
-                  searchIndex="index_template"
-                  dynSearchIndex="on"
-                  searchType="com.redhat.viaq.common"
-                  bulkmode="on"
-                  writeoperation="create"
-                  bulkid="id_template"
-                  dynbulkid="on"
-                  retryfailures="on"
-                  retryruleset="try_es"
-                  usehttps="on"
-              {% if use_omelasticsearch_cert | default(False) %}
-                  tls.cacert="{{logging_elasticsearch_ca_cert}}"
-                  tls.mycert="{{logging_elasticsearch_cert}}"
-                  tls.myprivkey="{{logging_elasticsearch_key}}"
-              {% endif %}
               )
-          {% if openshift_logging_use_ops | default(False) %}
-              } else {
-              action(
-                  type="omelasticsearch"
-                  server="{{ elasticsearch_ops_server_host | default('logging-es-ops') }}"
-                  serverport="{{ elasticsearch_ops_server_port | default(9200) }}"
-                  template="viaq_template"
-                  searchIndex="index_template"
-                  dynSearchIndex="on"
-                  searchType="com.redhat.viaq.common"
-                  bulkmode="on"
-                  writeoperation="create"
-                  bulkid="id_template"
-                  dynbulkid="on"
-                  retryfailures="on"
-                  retryruleset="try_es"
-                  usehttps="on"
-              {% if use_omelasticsearch_cert | default(False) %}
-                  tls.cacert="{{logging_elasticsearch_ca_cert}}"
-                  tls.mycert="{{logging_elasticsearch_cert}}"
-                  tls.myprivkey="{{logging_elasticsearch_key}}"
-              {% endif %}
-              )
+          {% else %}
+          {% if loop.first %}
+              if $.viaq_index_prefix startswith "{{ res.index_prefix }}" then {
+                action(
+                    type="omelasticsearch"
+                    name="{{ res.name | default('viaq-elasticsearch') }}"
+                    server="{{ res.server_host | default('logging-es') }}"
+                    serverport="{{ res.server_port | default(9200) | int }}"
+                    template="viaq_template"
+                    searchIndex="index_template"
+                    dynSearchIndex="on"
+                    searchType="com.redhat.viaq.common"
+                    bulkmode="on"
+                    writeoperation="create"
+                    bulkid="id_template"
+                    dynbulkid="on"
+                    retryfailures="on"
+                    retryruleset="try_es"
+                    usehttps="on"
+            {% if use_omelasticsearch_cert | default(False) %}
+                    tls.cacert="{{ res.ca_cert }}"
+                    tls.mycert="{{ res.cert }}"
+                    tls.myprivkey="{{ res.key }}"
+            {% endif %}
+                )
+          {% elif loop.last %}
+              else {
+                action(
+                    type="omelasticsearch"
+                    name="{{ res.name | default('viaq-elasticsearch') }}"
+                    server="{{ res.server_host | default('logging-es') }}"
+                    serverport="{{ res.server_port | default(9200) | int }}"
+                    template="viaq_template"
+                    searchIndex="index_template"
+                    dynSearchIndex="on"
+                    searchType="com.redhat.viaq.common"
+                    bulkmode="on"
+                    writeoperation="create"
+                    bulkid="id_template"
+                    dynbulkid="on"
+                    retryfailures="on"
+                    retryruleset="try_es"
+                    usehttps="on"
+            {% if use_omelasticsearch_cert | default(False) %}
+                    tls.cacert="{{ res.ca_cert }}"
+                    tls.mycert="{{ res.cert }}"
+                    tls.myprivkey="{{ res.key }}"
+            {% endif %}
+                )
+          {% else %}
+              else if $.viaq_index_prefix startswith "{{ res.index_prefix }}" then {
+                action(
+                    type="omelasticsearch"
+                    name="{{ res.name | default('viaq-elasticsearch') }}"
+                    server="{{ res.server_host | default('logging-es') }}"
+                    serverport="{{ res.server_port | default(9200) | int }}"
+                    template="viaq_template"
+                    searchIndex="index_template"
+                    dynSearchIndex="on"
+                    searchType="com.redhat.viaq.common"
+                    bulkmode="on"
+                    writeoperation="create"
+                    bulkid="id_template"
+                    dynbulkid="on"
+                    retryfailures="on"
+                    retryruleset="try_es"
+                    usehttps="on"
+            {% if use_omelasticsearch_cert | default(False) %}
+                    tls.cacert="{{ res.ca_cert }}"
+                    tls.mycert="{{ res.cert }}"
+                    tls.myprivkey="{{ res.key }}"
+            {% endif %}
+                )
+          {% endif %}
               }
           {% endif %}
+          {% endfor %}
           }
           
           call try_es
 
-rsyslog__conf_viaq_viaq_formatting:
+rsyslog_conf_viaq_viaq_formatting:
 
   - name: 'viaq_formatting'
     type: 'template'
-    path: '{{rsyslog__viaq_config_dir }}'
+    path: '{{rsyslog_viaq_config_dir }}'
     state: "{{ 'present'
-               if ('viaq' in rsyslog__capabilities)
+               if ('viaq' in rsyslog_capabilities)
                else 'absent' }}"
     sections:
 
       - options: |-
           # formatting
-          lookup_table(name="prio_to_level" file="{{ rsyslog__viaq_config_dir }}/prio_to_level.json")
-          lookup_table(name="normalize_level" file="{{ rsyslog__viaq_config_dir }}/normalize_level.json")
+          lookup_table(name="prio_to_level" file="{{ rsyslog_viaq_config_dir }}/prio_to_level.json")
+          lookup_table(name="normalize_level" file="{{ rsyslog_viaq_config_dir }}/normalize_level.json")
           
           template(name="cnvt_to_viaq_timestamp" type="list") {
               property(name="TIMESTAMP" dateFormat="rfc3339")
@@ -1027,7 +1092,7 @@ rsyslog__conf_viaq_viaq_formatting:
           # "message" in the outgoing record
           if strlen($!MESSAGE) > 0 then {
               set $!pipeline_metadata!collector!original_raw_message = $!MESSAGE;
-              action(type="mmnormalize" ruleBase="{{ rsyslog__viaq_config_dir }}/parse_json.rulebase" variable="$!MESSAGE")
+              action(type="mmnormalize" ruleBase="{{ rsyslog_viaq_config_dir }}/parse_json.rulebase" variable="$!MESSAGE")
               # ensure that $!message is set and $!MESSAGE is unset
               # if rsyslog is case sensitive, then $!MESSAGE == $!message
               if $!MESSAGE == $!message then {
@@ -1046,7 +1111,7 @@ rsyslog__conf_viaq_viaq_formatting:
           } else {
               if strlen($!log) > 0 then {
                   set $!pipeline_metadata!collector!original_raw_message = $!log;
-                  action(type="mmnormalize" ruleBase="{{ rsyslog__viaq_config_dir }}/parse_json.rulebase" variable="$!log")
+                  action(type="mmnormalize" ruleBase="{{ rsyslog_viaq_config_dir }}/parse_json.rulebase" variable="$!log")
                   if strlen($!message) == 0 then {
                       set $!message = $!log;
                   }
@@ -1304,29 +1369,29 @@ rsyslog__conf_viaq_viaq_formatting:
           }
           unset $!metadata;
 
-rsyslog__rulebase_viaq_k8s_filename:
+rsyslog_rulebase_viaq_k8s_filename:
 
   - name: 'k8s_filename'
     filename: 'k8s_filename.rulebase'
     nocomment: 'true'
-    path: '{{rsyslog__viaq_config_dir }}'
+    path: '{{rsyslog_viaq_config_dir }}'
     state: "{{ 'present'
-               if ('viaq-k8s' in rsyslog__capabilities)
+               if ('viaq-k8s' in rsyslog_capabilities)
                else 'absent' }}"
     sections:
 
       - options: |-
           version=2
-          rule=:{{ rsyslog__viaq_log_dir }}/%pod_name:char-to:_%_%namespace_name:char-to:_%_%container_name_and_id:char-to:.%.log
+          rule=:{{ rsyslog_viaq_log_dir }}/%pod_name:char-to:_%_%namespace_name:char-to:_%_%container_name_and_id:char-to:.%.log
 
-rsyslog__rulebase_viaq_parse_json:
+rsyslog_rulebase_viaq_parse_json:
 
   - name: 'parse_json'
     filename: 'parse_json.rulebase'
     nocomment: 'true'
-    path: '{{rsyslog__viaq_config_dir }}'
+    path: '{{rsyslog_viaq_config_dir }}'
     state: "{{ 'present'
-               if ('viaq' in rsyslog__capabilities)
+               if ('viaq' in rsyslog_capabilities)
                else 'absent' }}"
     sections:
 
@@ -1334,14 +1399,14 @@ rsyslog__rulebase_viaq_parse_json:
           version=2
           rule=:%.:json%
 
-rsyslog__rulebase_viaq_k8s_container_name:
+rsyslog_rulebase_viaq_k8s_container_name:
 
   - name: 'k8s_container_name'
     filename: 'k8s_container_name.rulebase'
     nocomment: 'true'
-    path: '{{rsyslog__viaq_config_dir }}'
+    path: '{{rsyslog_viaq_config_dir }}'
     state: "{{ 'present'
-               if ('viaq-k8s' in rsyslog__capabilities)
+               if ('viaq-k8s' in rsyslog_capabilities)
                else 'absent' }}"
     sections:
 
@@ -1352,14 +1417,14 @@ rsyslog__rulebase_viaq_k8s_container_name:
           # not a kubernetes container
           rule=:%container_name:rest%
 
-rsyslog__json_viaq_normalize_level:
+rsyslog_json_viaq_normalize_level:
 
   - name: 'normalize_level'
     filename: 'normalize_level.json'
     nocomment: 'true'
-    path: '{{rsyslog__viaq_config_dir }}'
+    path: '{{rsyslog_viaq_config_dir }}'
     state: "{{ 'present'
-               if ('viaq' in rsyslog__capabilities)
+               if ('viaq' in rsyslog_capabilities)
                else 'absent' }}"
     sections:
 
@@ -1385,14 +1450,14 @@ rsyslog__json_viaq_normalize_level:
             ]
           }
 
-rsyslog__json_viaq_prio_to_level:
+rsyslog_json_viaq_prio_to_level:
 
   - name: 'prio_to_level'
     filename: 'prio_to_level.json'
     nocomment: 'true'
-    path: '{{rsyslog__viaq_config_dir }}'
+    path: '{{rsyslog_viaq_config_dir }}'
     state: "{{ 'present'
-               if ('viaq' in rsyslog__capabilities)
+               if ('viaq' in rsyslog_capabilities)
                else 'absent' }}"
     sections:
 
@@ -1414,13 +1479,13 @@ rsyslog__json_viaq_prio_to_level:
             ]
           }
 
-rsyslog__rulebase_viaq_crio:
+rsyslog_rulebase_viaq_crio:
   - name: 'crio'
     filename: 'crio.rulebase'
     nocomment: 'true'
-    path: '{{rsyslog__viaq_config_dir }}'
+    path: '{{rsyslog_viaq_config_dir }}'
     state: "{{ 'present'
-               if ('viaq-k8s' in rsyslog__capabilities)
+               if ('viaq-k8s' in rsyslog_capabilities)
                else 'absent' }}"
     sections:
       - options: |-
