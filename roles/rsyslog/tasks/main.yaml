@@ -1,7 +1,7 @@
 ---
 - name: Install/Update required packages
   yum:
-    name: "{{rsyslog_base_packages|flatten}}+{{rsyslog_viaq_prereq_packages|flatten if rsyslog_viaq else []}}+{{rsyslog_viaq_packages|flatten if rsyslog_viaq else []}}+{{rsyslog_tls_packages|flatten if rsyslog_pki else []}}+{{rsyslog_packages|flatten}}"
+    name: "{{rsyslog_base_packages|flatten}}+{{rsyslog_viaq_prereq_packages|flatten if rsyslog_viaq else []}}+{{rsyslog_viaq_packages|flatten if rsyslog_viaq else []}}+{{rsyslog_viaq_k8s_packages|flatten if rsyslog_viaq and 'viaq-k8s' in rsyslog_capabilities else []}}+{{rsyslog_tls_packages|flatten if rsyslog_pki else []}}+{{rsyslog_packages|flatten}}"
     state: 'latest'
   when: rsyslog_enabled|bool and not use_rsyslog_image|default(False)|bool
 
@@ -79,9 +79,15 @@
     dest: "{{ backupdir }}/backup.tgz"
     remove: '{{true if rsyslog_purge_original_conf|bool else false}}'
 
-- name: create rsyslog viaq subdir
+- name: Create rsyslog viaq subdir
   file: path="{{ rsyslog_viaq_config_dir }}" state=directory mode=0700
   when: rsyslog_viaq|bool
+
+- name: Remove rsyslog viaq subdir
+  file:
+    path: "{{ rsyslog_viaq_config_dir }}/"
+    state: 'absent'
+  when: not rsyslog_viaq|bool
 
 - name: Update directory and file permissions
   shell: |

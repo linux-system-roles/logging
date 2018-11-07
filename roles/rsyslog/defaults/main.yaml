@@ -72,7 +72,8 @@ rsyslog_base_packages: [ 'rsyslog', 'libselinux-python' ]
 #
 # List of rpm packages for Common Logging.
 rsyslog_viaq_prereq_packages: [ 'nmap-ncat', 'systemd-python', 'policycoreutils', 'checkpolicy', 'policycoreutils-python' ]
-rsyslog_viaq_packages: [ 'rsyslog-elasticsearch', 'rsyslog-mmjsonparse', 'rsyslog-mmkubernetes', 'rsyslog-mmnormalize' ]
+rsyslog_viaq_packages: [ 'rsyslog-elasticsearch', 'rsyslog-mmnormalize' ]
+rsyslog_viaq_k8s_packages: [ 'rsyslog-mmjsonparse', 'rsyslog-mmkubernetes' ]
 
 # .. envvar:: rsyslog_tls_packages
 #
@@ -445,7 +446,18 @@ rsyslog_conf_local_modules:
     sections:
 
       - comment: 'Log messages sent to local UNIX socket'
-        options: module(load="imuxsock" SysSock.use="off")
+        options: |-
+          module(load="imuxsock" SysSock.use="on")
+        state: '{{ "present"
+                  if not rsyslog_viaq|bool
+                  else "absent" }}'
+
+      - comment: 'Log messages sent to local UNIX socket with use=off'
+        options: |-
+          module(load="imuxsock" SysSock.use="off")
+        state: '{{ "present"
+                  if rsyslog_viaq|bool
+                  else "absent" }}'
 
       - comment: 'Log kernel messages'
         options: |-
@@ -851,10 +863,6 @@ rsyslog_conf_viaq_main_modules:
           module(load="mmnormalize")
 
       - options: |-
-          # Parse logs to JSON
-          module(load="mmjsonparse")
-
-      - options: |-
           # Send to ElasticSearch
           module(load="omelasticsearch")
 
@@ -876,6 +884,9 @@ rsyslog_conf_viaq_mmk8s:
           # mmkubernetes
           module(load="mmkubernetes")
           
+          # Parse logs to JSON
+          module(load="mmjsonparse")
+
           input(type="imfile" file="{{ rsyslog_viaq_log_dir }}/*.log" tag="kubernetes" addmetadata="on" reopenOnTruncate="on")
           
           if ((strlen($!CONTAINER_NAME) > 0) and (strlen($!CONTAINER_ID_FULL) > 0)) or
@@ -1004,11 +1015,11 @@ rsyslog_conf_viaq_elasticsearch:
                     retryfailures="on"
                     retryruleset="try_es"
                     usehttps="on"
-            {% if use_omelasticsearch_cert | default(False) %}
+          {% if use_omelasticsearch_cert | default(False) %}
                     tls.cacert="{{ res.ca_cert }}"
                     tls.mycert="{{ res.cert }}"
                     tls.myprivkey="{{ res.key }}"
-            {% endif %}
+          {% endif %}
                 )
           {% elif loop.last %}
               else {
@@ -1028,11 +1039,11 @@ rsyslog_conf_viaq_elasticsearch:
                     retryfailures="on"
                     retryruleset="try_es"
                     usehttps="on"
-            {% if use_omelasticsearch_cert | default(False) %}
+          {% if use_omelasticsearch_cert | default(False) %}
                     tls.cacert="{{ res.ca_cert }}"
                     tls.mycert="{{ res.cert }}"
                     tls.myprivkey="{{ res.key }}"
-            {% endif %}
+          {% endif %}
                 )
           {% else %}
               else if $.viaq_index_prefix startswith "{{ res.index_prefix }}" then {
@@ -1052,11 +1063,11 @@ rsyslog_conf_viaq_elasticsearch:
                     retryfailures="on"
                     retryruleset="try_es"
                     usehttps="on"
-            {% if use_omelasticsearch_cert | default(False) %}
+          {% if use_omelasticsearch_cert | default(False) %}
                     tls.cacert="{{ res.ca_cert }}"
                     tls.mycert="{{ res.cert }}"
                     tls.myprivkey="{{ res.key }}"
-            {% endif %}
+          {% endif %}
                 )
           {% endif %}
               }
