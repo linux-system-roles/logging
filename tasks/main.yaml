@@ -1,0 +1,84 @@
+---
+# Set Rsyslog facts
+
+- block:
+
+    - name: Set rsyslog_enabled
+      set_fact:
+        rsyslog_enabled: "{{ logging_enabled|d(true) }}"
+
+    - name: Set rsyslog_elasticsearch_viaq
+      set_fact:
+        rsyslog_elasticsearch_viaq: "{{ rsyslog_elasticsearch_viaq|d([]) }} + {{ [ { 'name': item.output_name, 'server_host': item.elasticsearch_server_host, 'server_port': item.elasticsearch_server_port, 'ca_cert': item.elasticsearch_ca_cert_path|d(logging_elasticsearch_default_ca_cert_path)|d(Error), 'cert': item.elasticsearch_client_cert_path|d(logging_elasticsearch_default_client_cert_path)|d(Error), 'key': item.elasticsearch_client_key_path|d(logging_elasticsearch_default_client_key_path)|d(Error) } ] }}"
+      with_items: "{{ logging_output_list }}"
+      when: item.output_type == 'elasticsearch'
+
+    - name: Set rsyslog_logs_collections
+      set_fact:
+        rsyslog_logs_collections: "{{ rsyslog_logs_collections|d([]) }} + [ '{{ item.1 }}' ]"
+      with_subelements:
+        - "{{ logging_output_list|selectattr('logs_collections', 'defined')|list }}"
+        - logs_collections
+
+    - set_fact:
+        rsyslog_logs_collections: "{{ rsyslog_logs_collections|d([]) | unique }}"
+
+    - name: Set rsyslog_outputs
+      set_fact:
+        rsyslog_outputs: "{{ rsyslog_outputs|d([]) }} + {{ [  item.output_type ] }}"
+      with_items: "{{ logging_output_list }}"
+
+    - set_fact:
+        rsyslog_outputs: "{{ rsyslog_outputs|d([]) | unique }}"
+
+    - name: Set rsyslog_viaq fact
+      set_fact:
+        # install viaq packages & config files
+        rsyslog_viaq: true
+      when: "'elasticsearch' in rsyslog_outputs"
+
+    - name: Set rsyslog facts if we should collect 'example' logs
+      set_fact:
+        # install example packages & config files
+        rsyslog_example: true
+        rsyslog_capabilities: "{{ rsyslog_capabilities |d([]) }} + [ 'network', 'remote-files', 'tls' ]"
+      when: '"example" in rsyslog_logs_collections'
+
+    - name: Set rsyslog facts if we should collect 'viaq' logs
+      set_fact:
+        rsyslog_capabilities: "{{ rsyslog_capabilities|d([]) }} + [ 'viaq' ]"
+        use_omelasticsearch_cert: True
+      when: "'viaq' in rsyslog_logs_collections"
+
+    - name: Set rsyslog facts if we should collect 'viaq-k8s' logs
+      set_fact:
+        rsyslog_capabilities: "{{ rsyslog_capabilities|d([]) }} + [ 'viaq', 'viaq-k8s' ]"
+        use_omelasticsearch_cert: True
+      when: "'viaq-k8s' in rsyslog_logs_collections"
+
+    - name: Set rsyslog facts if we should collect 'ovirt' logs
+      set_fact:
+        rsyslog_capabilities: "{{ rsyslog_capabilities|d([]) }} + [ 'ovirt' ]"
+        use_omelasticsearch_cert: True
+        rsyslog_viaq_rules: []
+      when: "'ovirt' in rsyslog_logs_collections"
+
+    - name: Remove duplicate records from rsyslog_capabilities
+      set_fact:
+        rsyslog_capabilities: "{{ rsyslog_capabilities|d([]) | unique }}"
+
+    - name: Set rsyslog_unprivileged fact
+      set_fact:
+        rsyslog_unprivileged: "{{ logging_unprivileged|d(true) }}"
+
+    - name: Set rsyslog_purge_original_conf fact to purge all configuration files before saving the new ones.
+      set_fact:
+        rsyslog_purge_original_conf: true
+      when:  logging_purge_confs|d(false) 
+
+    - name: Set custom_config_files fact
+        rsyslog_custom_config_files: "{{ item.custom_config_files }}"
+      with_items: "{{ logging_output_list }}"
+      when: item.output_type == 'custom'
+
+  when: logging_collector|default(rsyslog) == 'rsyslog'
