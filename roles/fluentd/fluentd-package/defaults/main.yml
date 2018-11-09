@@ -1,9 +1,0 @@
----
-# Fluentd package name.
-fluentd_package_name: fluentd
-
-fluentd_ovirt_plugin_packages:
-  - rubygem-fluent-plugin-rewrite-tag-filter
-  - rubygem-fluent-plugin-secure-forward
-  - rubygem-fluent-plugin-viaq_data_model
-  - rubygem-fluent-plugin-elasticsearch

@@ -1,4 +1,0 @@
----
-- name: set failed validation
-  set_fact:
-    failed_validation: true
