@@ -1,0 +1,110 @@
+---
+# Viaq configuration
+# ---------------------
+
+# .. envvar:: rsyslog_viaq_config_dir
+#
+# Viaq configuration directory
+rsyslog_viaq_config_dir: '{{rsyslog_config_dir}}/viaq'
+
+# .. envvar:: rsyslog_viaq_log_dir
+#
+# Viaq log directory
+rsyslog_viaq_log_dir: '{{rsyslog_system_log_dir}}/containers'
+
+# Viaq rpm packages
+# adding rsyslog_logging_packages
+# ------------------
+
+# .. envvar:: rsyslog_viaq_k8s_packages
+#
+# List of rpm packages for Common Logging.
+rsyslog_viaq_k8s_packages: [ 'rsyslog-mmjsonparse', 'rsyslog-mmkubernetes' ]
+
+# Available configuration set
+# ----------------------------
+
+# Viaq Rsyslog configuration rules
+# ---------------------------
+
+rsyslog_viaq_k8s_rules:
+
+  - '{{ rsyslog_conf_viaq_mmk8s }}'
+  - '{{ rsyslog_rulebase_viaq_k8s_filename }}'
+  - '{{ rsyslog_rulebase_viaq_k8s_container_name }}'
+  - '{{ rsyslog_rulebase_viaq_crio }}'
+
+# Default Viaq-k8s configuration options
+# ---------------------------------
+
+logging_mmk8s_ca_cert: ''
+logging_mmk8s_token: ''
+
+rsyslog_conf_viaq_mmk8s:
+
+  - name: 'mmk8s'
+    type: 'modules'
+    path: '{{rsyslog_viaq_config_dir }}'
+    sections:
+
+      - options: |-
+          # mmkubernetes
+          module(load="mmkubernetes")
+          
+          # Parse logs to JSON
+          module(load="mmjsonparse")
+
+          input(type="imfile" file="{{ rsyslog_viaq_log_dir }}/*.log" tag="kubernetes" addmetadata="on" reopenOnTruncate="on")
+          
+          if ((strlen($!CONTAINER_NAME) > 0) and (strlen($!CONTAINER_ID_FULL) > 0)) or
+              ((strlen($!metadata) > 0) and (strlen($!metadata!filename) > 0) and ($!metadata!filename startswith "{{rsyslog_viaq_log_dir}}/")) then {
+              if ((strlen($!metadata) > 0) and (strlen($!metadata!filename) > 0) and ($!metadata!filename startswith "{{rsyslog_viaq_log_dir}}/")) then {
+                  if $msg startswith "{" then {
+                      action(type="mmjsonparse" cookie="") # parse entire message as json
+                  } else {
+                      action(type="mmnormalize" rulebase="{{ rsyslog_viaq_config_dir }}/crio.rulebase")
+                  }
+              }
+              action(type="mmkubernetes"
+                 filenamerulebase="{{ rsyslog_viaq_config_dir }}/k8s_filename.rulebase"
+                 containerrulebase="{{ rsyslog_viaq_config_dir }}/k8s_container_name.rulebase"
+                 tls.cacert="{{logging_mmk8s_ca_cert}}"
+                 tokenfile="{{logging_mmk8s_token}}" annotation_match=["."])
+          }
+
+rsyslog_rulebase_viaq_k8s_filename:
+
+  - name: 'k8s_filename'
+    filename: 'k8s_filename.rulebase'
+    nocomment: 'true'
+    path: '{{rsyslog_viaq_config_dir }}'
+    sections:
+
+      - options: |-
+          version=2
+          rule=:{{ rsyslog_viaq_log_dir }}/%pod_name:char-to:_%_%namespace_name:char-to:_%_%container_name_and_id:char-to:.%.log
+
+rsyslog_rulebase_viaq_k8s_container_name:
+
+  - name: 'k8s_container_name'
+    filename: 'k8s_container_name.rulebase'
+    nocomment: 'true'
+    path: '{{rsyslog_viaq_config_dir }}'
+    sections:
+
+      - options: |-
+          version=2
+          rule=:%k8s_prefix:char-to:_%_%container_name:char-to:.%.%container_hash:char-to:_%_%pod_name:char-to:_%_%namespace_name:char-to:_%_%not_used_1:char-to:_%_%not_used_2:rest%
+          rule=:%k8s_prefix:char-to:_%_%container_name:char-to:_%_%pod_name:char-to:_%_%namespace_name:char-to:_%_%not_used_1:char-to:_%_%not_used_2:rest%
+          # not a kubernetes container
+          rule=:%container_name:rest%
+
+rsyslog_rulebase_viaq_crio:
+  - name: 'crio'
+    filename: 'crio.rulebase'
+    nocomment: 'true'
+    path: '{{rsyslog_viaq_config_dir }}'
+    sections:
+      - options: |-
+          version=2
+          rule=:%time:word% %stream:word% %logtag:word% %log:rest%

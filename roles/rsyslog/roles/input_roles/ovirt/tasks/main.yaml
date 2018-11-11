@@ -1,0 +1,26 @@
+---
+- name: Set ovirt_output_name
+  set_fact:
+    output_name: "{{ item.output_name }}"
+  with_items: "{{ rsyslog_logs_collections }}"
+  when: item.name == 'ovirt'
+
+- name: Set oVirt facts
+  set_fact:
+    rsyslog_role_packages: "{{rsyslog_ovirt_prereq_packages|flatten|d([])}}+{{rsyslog_ovirt_packages|flatten|d([])}}"
+    rsyslog_role_config_dir: "{{ rsyslog_ovirt_config_dir }}"
+    rsyslog_role_rules: "{{ rsyslog_ovirt_rules }}"
+
+- name: Install/Update role packages and generate role configuration files to role subdir
+  include_role:
+    name: logging/roles/rsyslog
+    tasks_from: deploy.yaml
+
+- name: Allow rsyslog to listen on collectd port
+  seport:
+    ports: "{{ rsyslog_read_collectd_port|d(44514) }}"
+    proto: tcp
+    setype: syslogd_port_t
+    state: present
+  when: 'ansible_selinux.mode in ["enforcing", "permissive"]'
+  notify: restart rsyslogd

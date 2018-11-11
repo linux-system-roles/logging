@@ -4,7 +4,7 @@ linux-system-roles Logging
 Guidelines for Using Logging Ansible Role
 -----------------------------------------
 
-The `logging` role allowa a RHEL admin/developer to deploy logging collectors on the local host, remote host or set of remote hosts,
+The `logging` role enables a RHEL admin/developer to deploy logging collectors on the local host, remote host or set of remote hosts,
 process these logs if needed to add additional metadata and ship it to a remote location to be saved and analyzed.
 
 The logging role currently supports `Rsyslog` as the log collector.
@@ -13,17 +13,18 @@ Definitions
 -----------
 
   - [`Rsyslog`](https://www.rsyslog.com/) - The logging role default log collector used for log processing.
-  - [`Viaq`](https://docs.okd.io/latest/install_config/aggregate_logging.html)- Common Logging based on OpenShift Aggregated Logging (OCP/Origin)
+  - [`Viaq`](https://docs.okd.io/latest/install_config/aggregate_logging.html)- Common Logging based on OpenShift Aggregated Logging (OCP/Origin).
   - [`Elasticsearch`](https://www.elastic.co/) - Non-OpenShift standalone Elasticsearch.
-  - `Local` - Output the collected logs to a local File/Journal. Supported only for default and example Rsyslog data at this point.
-  - `Remote Rsyslog` - Output logs to a remote Rsyslog server.
-  - `Message Queue` (kafka, amqp) - Not yet supported.
+  - `Local` - Output the collected logs to a local File/Journal. Supported only for default and debops Rsyslog data at this point.
+  - `Remote Rsyslog` - Output logs to a remote Rsyslog server. - Not yet implemented
+  - `Message Queue` (kafka, amqp) - Not yet supported. -Not yet implemented
 
 Deploy Default Logging Configuration Files
 ==========================================
 
 
 ``` ansible-playbook [-vvv]  --become --become-user root --connection local -i inventory_file playbook.yaml ```
+
 
 Deploy Configuration Files
 ===========================
@@ -61,45 +62,46 @@ vars.yaml
 
 vars.yaml stores variables which are passed to ansible to control the tasks.
 
-**Note:**   Currently, the role supports 3 types of logs collections: default, 'viaq' and 'example'. 'viaq' and 'example' can theoretically, both be added to the logs_collections and the specified configuration files are deployed, but rsyslog does not work properly with the configuration.
+**Note:**   Currently, the role supports 3 types of logs collections: default, 'viaq' and 'debops'. 'viaq' and 'debops' can theoretically, both be added to the logs_collections and the specified configuration files are deployed, but rsyslog does not work properly with the configuration.
 
 Initial conf will be supplied by default.
 User can supply another conf to be used.
 
-Configure the list of outputs you want to send your logs to by 
+Configure the list of outputs you want to send your logs to.
 
 
 vars.yaml example:
 
 ```
-logging_output_list:
+If 'viaq-k8s' is in logs_collections, logging_mmk8s_* need to be specified.
+logging_mmk8s_token:
+logging_mmk8s_ca_cert:
+
+logging_outputs:
   - name: viaq-elasticsearch
     type: elasticsearch
-    logs_collections: [ 'viaq', 'viaq-k8s' ]
+    logs_collections:
+      - name: 'viaq'
+    # 'state' is not a mandatory field. Defaults to 'present'.
+      - name: 'viaq-k8s'
+      - name: 'ovirt'
+        state: 'absent'
     server_host: logging-es
     server_port: 9200
     index_prefix: project.
-    ca_cert: 
+    ca_cert:
     cert:
     key:
-    # If 'viaq-k8s' is in logs_collections, logging_mmk8s_* need to be specified.
-    logging_mmk8s_token: 
-    logging_mmk8s_ca_cert:
   - name: ovirt-elasticsearch
     type: elasticsearch
-    logs_collections: [ 'ovirt' ]
+    logs_collections:
+      - name: 'ovirt'
     server_host: logging-es-ovirt
     server_port: 9200
     index_prefix: project.ovirt-logs
-    ca_cert: 
+    ca_cert:
     cert:
     key:
-  - name: rsyslog_remote-test **The rsyslog_remote type is not yet implemented**
-    type: rsyslog_remote
-    logs_collections: [ 'example' ]
-  - name: local-example
-    type: local
-    logs_collections: [ 'example' ]
   - name: custom_files-test
     type: custom_files
     custom_config_files: [ '/path/to/custom_A.conf', '/path/to/custom_B.conf' ]
@@ -112,7 +114,7 @@ logging_output_list:
 playbook.yaml
 -------------
 
-- name: install and configure rsyslog on the nodes
+- name: install and configure logging on the nodes
   hosts: nodes
   roles:
     - role: logging
@@ -124,36 +126,25 @@ Variables in vars.yaml
 - `logging_collector`: The logs collector to use for the logs collection. Currently Rsyslog is the only supported logs collector. Defaults to `rsyslog`.
 - `logging_enabled` : When 'True' logging role will deploy specified configuration file set. Default to 'True'.
 - `logging_purge_confs`: By default, the Rsyslog configuration files are applied on top of pre-existing configuration files. To purge local files prior to setting new ones, set logging_purge_confs variable to 'True', it will move all Rsyslog configuration files to a backup directory, `/tmp/rsyslog.d-XXXXXX/backup.tgz`, before deploying the new configuration files. Defaults to 'False'.
-- `openshift_logging_use_ops`: Set to 'True', if you have a second ES cluster for infrastructure logs. Default to 'False'.
 - `logging_mmk8s_token`: Path to token for kubernetes.  Default to "/etc/rsyslog.d/viaq/mmk8s.token".
 - `logging_mmk8s_ca_cert`: Path to CA cert for kubernetes.  Default to "/etc/rsyslog.d/viaq/mmk8s.ca.crt".
-- `logging_output_list`: A set of following variables to specify output configurations.  It could be an list if multiple outputs that should to be configured.
+
 - `logging_elasticsearch_default_ca_cert_path`: Default path to CA cert for ElasticSearch if Elasticsearch installation share the same CA cert. **Note:** If provided, no need to add the `ca_cert` variable in the Elasticsearch output record.
 - `logging_elasticsearch_default_client_cert_path`: Default path to client cert for ElasticSearch if Elasticsearch installation share the same client cert. **Note:** If provided, no need to add the `cert` variable in the Elasticsearch output record.
 - `logging_elasticsearch_default_client_key_path`: Default path to client key for ElasticSearch if Elasticsearch installation share the same client key. **Note:** If provided, no need to add the `key` variable in the Elasticsearch output record.
+- `logging_outputs`: A set of following variables to specify output configurations.  It could be an list if multiple outputs that should to be configured.
    -  **If `type: elasticsearch`** Send logs to one or more remote elasticsearch or Viaq installations.
       - `name`: Name of the elasticsearch element.
-      - `type`: Type of the output element. Optional values: `elasticsearch`, `rsyslog_remote`, `local`, `custom_files`.
-      - `logs_collections` : List of optional logs collections that can be configured. [ 'viaq', 'viaq-k8s','ovirt', 'example' ] are predefined. **Note:** Currently only ['viaq', 'viaq-k8s'] are supported for the elastocsearch output type.
+      - `type`: Type of the output element. Optional values: `elasticsearch`, `local`, `custom_files`.
+      - `logs_collections` : List of optional logs collections, dictionaries with `name` and `state` attributes, that were pre-configured.
+        - `name`: The name of the pre-configured logs to collect. **Note:** Currently only ['viaq', 'viaq-k8s', 'ovirt'] are supported for the elasticsearch output.
+          `state`: The state of the configuration files states if they should be `present` or `absent`. Default to `present`.
       - `server_host`: Hostname elasticsearch is running on.
       - `server_port`: Port number elasticsearch is listening to.
       - `index_prefix`: Elasticsearch index prefix the particular log will be indexed to.
-      - `ca_cert`: Path to CA cert for ElasticSearch.  Default to '/etc/rsyslog.d/viaq/es-ca.crt'
-      - `cert`: Path to cert for ElasticSearch.  Default to '/etc/rsyslog.d/viaq/es-cert.pem'
-      - `key`: Path to key for ElasticSearch.  Default to "/etc/rsyslog.d/viaq/es-key.pem"
-         If 'viaq-k8s' is in logs_collections, logging_mmk8s_* need to be specified.
-       -  `logging_mmk8s_token`: Path to mmk8s token for collecting container logs. Default to none.
-       - `logging_mmk8s_ca_cert`: Path to mmk8s CA cert for collecting container logs. Default to none.
-   -  **If `type: rsyslog_remote`** Send logs to one or more remote rsyslog instances. **Not Yet implemented**
-      - `name`: Name of the remote Rsyslog element.
-      - `type`: Type of the output element. Optional values: `elasticsearch`, `rsyslog_remote`, `local`, `custom_files`.
-      - `logs_collections` : List of optional logs collections that can be configured. [ 'viaq', 'viaq-k8s','ovirt', 'example' ] are predefined. **Note:** Currently only ['example'] is supported for the rsyslog_remote output type.
-      - `server_host`: Hostname elasticsearch is running on.
-      - `server_port`: Port number elasticsearch is listening to.
-   -  **If `type: local`** Store logs collections locally.
-      - `name`: Name of the local output element.
-      - `type`: Type of the output element.
-      - `logs_collections` : List of optional logs collections that can be configured. [ 'viaq', 'viaq-k8s','ovirt', 'example' ] are predefined. **Note:** Currently only ['example'] is supported for the local output type.
+      - `ca_cert`: Path to CA cert for ElasticSearch.  Default to '/etc/rsyslog.d/elasticsearch/es-ca.crt'
+      - `cert`: Path to cert for ElasticSearch.  Default to '/etc/rsyslog.d/elasticsearch/es-cert.pem'
+      - `key`: Path to key for ElasticSearch.  Default to "/etc/rsyslog.d/elasticsearch/es-key.pem"
    -  **If `type: custom`** To include existing config files in the new ansible deployment, add the paths to custom_config_files as follows.  The specified files are copied to /etc/rsyslog.d.
       - `name`: Name of the custom file output element.
       - `type`: Type of the output element.

@@ -7,65 +7,44 @@
       set_fact:
         rsyslog_enabled: "{{ logging_enabled|d(true) }}"
 
-    - name: Set rsyslog_elasticsearch_viaq
+    - name: Set rsyslog_elasticsearch
       set_fact:
-        rsyslog_elasticsearch_viaq: "{{ rsyslog_elasticsearch_viaq|d([]) }} + {{ [ { 'name': item.output_name, 'server_host': item.elasticsearch_server_host, 'server_port': item.elasticsearch_server_port, 'ca_cert': item.elasticsearch_ca_cert_path|d(logging_elasticsearch_default_ca_cert_path)|d(Error), 'cert': item.elasticsearch_client_cert_path|d(logging_elasticsearch_default_client_cert_path)|d(Error), 'key': item.elasticsearch_client_key_path|d(logging_elasticsearch_default_client_key_path)|d(Error) } ] }}"
-      with_items: "{{ logging_output_list }}"
-      when: item.output_type == 'elasticsearch'
+        rsyslog_elasticsearch: "{{ rsyslog_elasticsearch|d([]) }} + {{ [ { 'name': item.name, 'type': item.type, 'index_prefix': item.index_prefix|d('project.'), 'server_host': item.server_host|d('localhost'), 'server_port': item.server_port|d(9200|int), 'ca_cert': item.ca_cert|d(logging_elasticsearch_default_ca_cert_path)|d(Error), 'cert': item.cert|d(logging_elasticsearch_default_client_cert_path)|d(Error), 'key': item.key|d(logging_elasticsearch_default_client_key_path)|d(Error) } ] }}"
+      with_items: "{{ logging_outputs }}"
+      when: item.type|d('') == 'elasticsearch'
 
     - name: Set rsyslog_logs_collections
       set_fact:
-        rsyslog_logs_collections: "{{ rsyslog_logs_collections|d([]) }} + [ '{{ item.1 }}' ]"
+        rsyslog_logs_collections: "{{ rsyslog_logs_collections|d([]) }} + {{ [ { 'name': item.1.name, 'state': item.1.state|d('present'), 'output_name': item.0.name } ] }}"
       with_subelements:
-        - "{{ logging_output_list|selectattr('logs_collections', 'defined')|list }}"
+        - "{{ logging_outputs }}"
         - logs_collections
-
-    - set_fact:
-        rsyslog_logs_collections: "{{ rsyslog_logs_collections|d([]) | unique }}"
 
     - name: Set rsyslog_outputs
       set_fact:
-        rsyslog_outputs: "{{ rsyslog_outputs|d([]) }} + {{ [  item.output_type ] }}"
-      with_items: "{{ logging_output_list }}"
+        rsyslog_outputs: []
+
+    - name: Set rsyslog_outputs
+      set_fact:
+        rsyslog_outputs: "{{ rsyslog_outputs|d([]) }} + {{ [ item.type ] }}"
+      with_items: "{{ logging_outputs }}"
+      when: item.type is defined
 
     - set_fact:
         rsyslog_outputs: "{{ rsyslog_outputs|d([]) | unique }}"
 
-    - name: Set rsyslog_viaq fact
+    - name: Check if need to deploy default configuration
       set_fact:
-        # install viaq packages & config files
-        rsyslog_viaq: true
-      when: "'elasticsearch' in rsyslog_outputs"
+        rsyslog_default_check: "{{ rsyslog_default_check|d([]) }} + {{ [ { 'name': item.1.name } ] }}"
+      with_subelements:
+        - "{{ logging_outputs }}"
+        - logs_collections
+      when: item.1.state|d('present') == 'present'
 
-    - name: Set rsyslog facts if we should collect 'example' logs
+    - name: Set rsyslog_default
       set_fact:
-        # install example packages & config files
-        rsyslog_example: true
-        rsyslog_capabilities: "{{ rsyslog_capabilities |d([]) }} + [ 'network', 'remote-files', 'tls' ]"
-      when: '"example" in rsyslog_logs_collections'
-
-    - name: Set rsyslog facts if we should collect 'viaq' logs
-      set_fact:
-        rsyslog_capabilities: "{{ rsyslog_capabilities|d([]) }} + [ 'viaq' ]"
-        use_omelasticsearch_cert: True
-      when: "'viaq' in rsyslog_logs_collections"
-
-    - name: Set rsyslog facts if we should collect 'viaq-k8s' logs
-      set_fact:
-        rsyslog_capabilities: "{{ rsyslog_capabilities|d([]) }} + [ 'viaq', 'viaq-k8s' ]"
-        use_omelasticsearch_cert: True
-      when: "'viaq-k8s' in rsyslog_logs_collections"
-
-    - name: Set rsyslog facts if we should collect 'ovirt' logs
-      set_fact:
-        rsyslog_capabilities: "{{ rsyslog_capabilities|d([]) }} + [ 'ovirt' ]"
-        use_omelasticsearch_cert: True
-        rsyslog_viaq_rules: []
-      when: "'ovirt' in rsyslog_logs_collections"
-
-    - name: Remove duplicate records from rsyslog_capabilities
-      set_fact:
-        rsyslog_capabilities: "{{ rsyslog_capabilities|d([]) | unique }}"
+         rsyslog_default: false
+      when: (rsyslog_default_check|d([]) != []) or (rsyslog_outputs|d([]) != [])
 
     - name: Set rsyslog_unprivileged fact
       set_fact:
@@ -74,11 +53,54 @@
     - name: Set rsyslog_purge_original_conf fact to purge all configuration files before saving the new ones.
       set_fact:
         rsyslog_purge_original_conf: true
-      when:  logging_purge_confs|d(false) 
+      when: logging_purge_confs|d(false)
 
     - name: Set custom_config_files fact
+      set_fact:
         rsyslog_custom_config_files: "{{ item.custom_config_files }}"
-      with_items: "{{ logging_output_list }}"
-      when: item.output_type == 'custom'
+      with_items: "{{ logging_outputs }}"
+      when:
+        - item.type|d('') == 'custom'
+        - logging_enabled|d(true)
 
-  when: logging_collector|default(rsyslog) == 'rsyslog'
+
+    - name: Re-read facts after adding custom fact
+      setup:
+        filter: ansible_local
+      when: logging_debug|d(false)
+
+    - name: Create rsyslog debug dir
+      file:
+        path:  logging/debug
+        state: 'directory'
+        mode: '0700'
+      when: logging_debug|d(false)
+
+    - name: Delete debug file
+      file:
+        path: logging/debug/main.yaml
+        state: absent
+      ignore_errors: true
+      when: logging_debug|d(false)
+
+    - name: Create rsyslog debug file
+      lineinfile:
+        path: logging/debug/main.yaml
+        create: yes
+        line: "#ANSIBLE MANAGED VARIABLES FILE"
+      when: logging_debug|d(false)
+
+    - name: Populate rsyslog debug file
+      lineinfile:
+        path: logging/debug/main.yaml
+        create: yes
+        line: "{{ item.key }}: {{ item.value| to_nice_json(indent=2) }}"
+      with_dict: "{{ hostvars[inventory_hostname] }}"
+      when:
+        - item.key is match("rsyslog*")
+        - logging_debug|d(false)
+
+    - include_role:
+        name: logging/roles/rsyslog
+
+  when: logging_collector|d('rsyslog') == 'rsyslog'

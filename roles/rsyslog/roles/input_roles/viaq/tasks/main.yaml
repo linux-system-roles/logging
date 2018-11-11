@@ -1,0 +1,18 @@
+---
+- name: Set ovirt_output_name
+  set_fact:
+    output_name: "{{ item.output_name }}"
+  with_items: "{{ rsyslog_logs_collections }}"
+  when: item.name == 'viaq'
+
+- name: Set Viaq facts
+  set_fact:
+    rsyslog_role_packages: "{{rsyslog_viaq_prereq_packages|flatten|d([])}}+{{rsyslog_viaq_packages|flatten|d([])}}"
+    rsyslog_role_config_dir: "{{ rsyslog_viaq_config_dir }}"
+    rsyslog_role_rules: "{{ rsyslog_viaq_rules }}"
+
+- name: Install/Update role packages and generate role configuration files to role subdir
+  include_role:
+    name: logging/roles/rsyslog
+    tasks_from: deploy.yaml
+
