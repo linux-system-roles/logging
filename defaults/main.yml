@@ -4,11 +4,11 @@ logging_collector: rsyslog
 
 logging_enabled: true
 
-logging_output_list: []
+logging_outputs: []
 
 logging_custom_config_files: []
 
-logging_purge_confs: false
+logging_purge_confs: true
 
 logging_elasticsearch_default_ca_cert_path: /path/to/ca-cert.pem
 logging_elasticsearch_default_client_cert_path: /path/to/cert.pem

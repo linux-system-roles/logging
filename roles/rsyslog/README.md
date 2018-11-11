@@ -16,8 +16,8 @@ Table of Contents
       * [vars.yaml](#vars)
       * [playbook.yaml](#playbook)
    * [Deployed Results](#results)
-      * [rsyslog_viaq](#rsyslog_viaq)
-      * [rsyslog_example](#rsyslog_example)
+      * [rsyslog_viaq_role](#Viaq role)
+      * [rsyslog_debops_role](#Debops role)
    * [Variables in vars.yaml](#variables)
       * [Common sub-variables](#common-variables)
       * [Viaq sub-variables](#viaw)
@@ -37,64 +37,81 @@ Inventory File
 --------------
 inventory_file is used to specify the hosts to deploy the configuration files.
 
-   Sample inventory file for the es-ops enabled case
+   Sample inventory file
 ```
 [masters]
-localhost ansible_user=YOUR_ANSIBLE_USER openshift_logging_use_ops=True
+localhost ansible_user=YOUR_ANSIBLE_USER
 
 [nodes]
-localhost ansible_user=YOUR_ANSIBLE_USER openshift_logging_use_ops=True
+localhost ansible_user=YOUR_ANSIBLE_USER
 ```
 
 vars.yaml
 ---------
 1. vars.yaml stores variables which are passed to ansible to control the tasks.
 
-   Currently, this rsyslog roles support 2 deployment variables, rsyslog_viaq and rsyslog_example.  I.e., there are 3 sets of deployment - rsyslog_viaq: true, rsyslog_example: true, and both false.  Theoretically, both true could be set and the specified configuration files are deployed, but rsyslog does not work properly with the configuration.
+   Currently, this rsyslog roles support `viaq` and `debops` input configurations.  Theoretically, both true could be set and the specified configuration files are deployed, but rsyslog does not work properly with the configuration.
 
    See the variables section for each variable.
 
    Sample vars.yaml file for the viaq case.
 ```
-rsyslog_enabled: true
-# install viaq packages & config files
-rsyslog_viaq: true
-rsyslog_capabilities: [ 'viaq' ]
 rsyslog_unprivileged: False
-elasticsearch_server_host: es_hostname
-elasticsearch_server_port: 9200
+rsyslog_elasticsearch:
+  - name: viaq-elasticsearch
+    type: elasticsearch
+    logs_collections:
+      - name: 'viaq'
+        state: 'present'
+    server_host: es-hostname
+    server_port: 9200
 ```
 
 2. vars.yaml to configure to handle the inputs from openshift containers
 ```
-rsyslog_enabled: true
-# install viaq packages & config files
-rsyslog_viaq: true
-rsyslog_capabilities: [ 'viaq', 'viaq-k8s' ]
 rsyslog_unprivileged: False
-# If 'viaq-k8s' is in rsyslog_capabilities, logging_mmk8s_* need to be specified.
+# If 'viaq-k8s' is in logs collections, logging_mmk8s_* need to be specified.
 logging_mmk8s_token: "{{rsyslog_viaq_config_dir}}/mmk8s.token"
 logging_mmk8s_ca_cert: "{{rsyslog_viaq_config_dir}}/mmk8s.ca.crt"
-# If use_omelasticsearch_cert is True, ca_cert, cert and key in rsyslog_elasticsearch_viaq needs to be set.
+# If use_omelasticsearch_cert is True, ca_cert, cert and key in rsyslog_outputs needs to be set.
 use_omelasticsearch_cert: True
-openshift_logging_use_ops: True
-rsyslog_elasticsearch_viaq:
+# If use_local_omelasticsearch_cert is True, local files ca_cert_src, cert_src and key_src will be deployed to the remote host.
+use_local_omelasticsearch_cert: True
+rsyslog_outputs:
   - name: viaq-elasticsearch
+    type: elasticsearch
+    rsyslog_logs_collections:
+      - name: 'viaq'
+        state: 'present'
+      - name: 'viaq-k8s'
+        state: `present`
     server_host: logging-es
     server_port: 9200
     index_prefix: project.
     ca_cert: "{{rsyslog_viaq_config_dir}}/es-ca.crt"
     cert: "{{rsyslog_viaq_config_dir}}/es-cert.pem"
     key: "{{rsyslog_viaq_config_dir}}/es-key.pem"
+    ca_cert_src : "/path/to/es-ca.crt"
+    cert_src : "/path/to/es-cert.pem"
+    key_src : "/path/to/es-key.pem"
   - name: viaq-elasticsearch-ops
+    type: elasticsearch
+    rsyslog_logs_collections:
+      - name: 'viaq'
+        state: 'present'
+      - name: 'viaq-k8s'
+        state: `present`
     server_host: logging-es-ops
     server_port: 9200
     index_prefix: .operations.
     ca_cert: "{{rsyslog_viaq_config_dir}}/es-ca.crt"
     cert: "{{rsyslog_viaq_config_dir}}/es-cert.pem"
     key: "{{rsyslog_viaq_config_dir}}/es-key.pem"
+    ca_cert_src : "/path/to/es-ca.crt"
+    cert_src : "/path/to/es-cert.pem"
+    key_src : "/path/to/es-key.pem"
 ```
-The key-value pairs in rsylog_elasticsearch_viaq are used to configure rsyslog to send the logs to the Openshift Aggregated Logging ElasticSearch.  The elements are used in the output elasticsearch configuration 30-elasticsearch.conf as follows (note: not following the abstract syntax):
+The key-value pairs in rsyslog_elasticsearch are used to configure rsyslog to send the logs to the Openshift Aggregated Logging ElasticSearch.  The elements are used in the output elasticsearch configuration 30-elasticsearch.conf as follows (note: not following the abstract syntax):
 ```
 if index_prefix starts with "project." then {
   action( 
@@ -120,14 +137,15 @@ if index_prefix starts with "project." then {
   )
 }
 ```
-The order of the list in rsyslog_elasticsearch_viaq is important.  The first item is in the first if clause with the index_prefix value and the last item is in the else clause.  Elements in between will be placed with else if clause.
+The order of the list in rsyslog_elasticsearch is important.  The first item is in the first if clause with the index_prefix value and the last item is in the else clause.  Elements in between will be placed with else if clause.
+
+The variables ca_cert, cert and key in rsyslog_elasticsearch specify the paths where the CA certificate, certificate and key are located in the remote host.  The variables ca_cert_src, cert_src, and key_src are paths of them to be deployed to the remote host.
 
 
 3. vars.yaml to configure custom config files.
 
    To include existing config files in the new ansible deployment, add the paths to rsyslog_custom_config_files as follows.  The specified files are copied to /etc/rsyslog.d.
 ```
-rsyslog_enabled: true
 ....
 rsyslog_custom_config_files: [ '/path/to/custom_A.conf', '/path/to/custom_B.conf' ]
 ```
@@ -145,9 +163,9 @@ playbook.yaml
 
 Deployed Results
 ================
-rsyslog_viaq
-------------
-Once the command-line ansible-playbook is run with rsyslog_viaq: true, the following configuration files will be deployed.
+Viaq role
+-----------------
+Once the command-line ansible-playbook is run with `viaq` in `rsyslog_logs_collections`, the following configuration files will be deployed.
 
 ```
 /etc/rsyslog.conf
@@ -157,12 +175,12 @@ Once the command-line ansible-playbook is run with rsyslog_viaq: true, the follo
                10-viaq_main.conf
                viaq/10-mmk8s.conf
                     20-viaq_formatting.conf
-                    30-elasticsearch.conf
                     k8s_container_name.rulebase
                     k8s_filename.rulebase
                     parse_json.rulebase
                     normalize_level.json
                     prio_to_level.json
+                elasticsearch/30-elasticsearch.conf
                     es-ca.crt
                     es-cert.pem
                     es-key.pem
@@ -170,26 +188,19 @@ Once the command-line ansible-playbook is run with rsyslog_viaq: true, the follo
                     mmk8s.token
 ```
 
-Sample vars.yaml file for the viaq case
+Debops role
+-------------------
+The configuration generated by the `debops` configuration basically reads logs from the local unix socket and outputs to the local files, e.g., in /var/log.  This is the minimum variables to set it up.
+```
+rsyslog_unprivileged: False
+rsyslog_outputs:
+  - name: debops exampl config
+    rsyslog_logs_collections:
+      - name: 'debops'
+        state: 'present'
 
 ```
-rsyslog_enabled: true
-# install example packages & config files
-rsyslog_viaq: true
-rsyslog_capabilities: [ 'viaq', 'viaq-k8s' ]
-rsyslog_unprivileged: False
-```
-
-rsyslog_example
----------------
-The configuration generated by rsyslog_example basically reads logs from the local unix socket and outputs to the local files, e.g., in /var/log.  This is the minimum variables to set it up.
-```
-rsyslog_enabled: true
-# install example packages & config files
-rsyslog_example: true
-rsyslog_unprivileged: False
-```
-In addition, rsyslog_example allows to add remote input/output as well as the security over the network.
+In addition, debops role allows to add remote input/output as well as the security over the network.
 
 To redirect the logs to the remote rsyslog servers using the rsyslog rule, you could add rsyslog_forward to the above basic variables.  E.g.,
 ```
@@ -210,17 +221,19 @@ rsyslog_capabilities: [ 'network', 'remote-files' ]
 
 Finally, to make the network communication safe, enable rsyslog_pki and add 'tls' to rsyslog_capabilities.
 ```
-rsyslog_enabled: true
-# install example packages & config files
-rsyslog_example: true
+rsyslog_outputs:
 rsyslog_pki: true
-rsyslog_unprivileged: False
-rsyslog_capabilities: [ 'network', 'remote-files', 'tls' ]
-rsyslog_forward: [ '*.crit @@10.10.10.1:514', '*.info @@10.10.10.11:514' ]
+rsyslog_outputs:
+  - name: debops exampl config
+    rsyslog_logs_collections:
+      - name: 'debops'
+        state: 'present'
+        rsyslog_capabilities: [ 'network', 'remote-files', 'tls' ]
+        rsyslog_forward: [ '*.crit @@10.10.10.1:514', '*.info @@10.10.10.11:514' ]
 ```
 It will set the ca_cert, cert and key paths to the configuration and enable receiving and forwarding logs over TLS.
 
-Once ansible-playbook is run with both rsyslog_example and rsyslog_pki set to true and having full rsyslog_capabilities [ 'network', 'remote-files', 'tls' ], the following configuration files will be deployed.
+Once ansible-playbook is run with debops in rsyslog_logs_collection set to true and having full rsyslog_capabilities [ 'network', 'remote-files', 'tls' ], the following configuration files will be deployed.
 ```
 /etc/rsyslog.conf
      rsyslog.d/00-global.conf
@@ -238,20 +251,16 @@ Once ansible-playbook is run with both rsyslog_example and rsyslog_pki set to tr
                zz-stop.remote
 ```
 
-If both rsyslog_viaq and rsyslog_example are set to false, the default rsyslog.conf is placed in /etc.  The "default" contents are stored in ./roles/rsyslog/templates/etc/rsyslog.conf.j2.
+If rsyslog_outputs is not set, the default rsyslog.conf is placed in /etc.  The "default" contents are stored in ./roles/rsyslog/templates/etc/rsyslog.conf.j2.
 
-WARNING: If both variables are set to true, conflicting configurations are generated and rsyslog would not work as expected.
+WARNING: If both 'debops' and 'viaq' logs_collections are set , conflicting configurations are generated and rsyslog would not work as expected.
 
 Variables in vars.yaml
 ======================
 
 - `rsyslog_enabled` : When 'True' rsyslog role will deploy specified configuration file set. Default to 'True'.
-
-- `rsyslog_viaq` : When 'True' rsyslog role will deploy the viaq configuration set.  In this case, rsyslog works as a collector of OpenShift logs, normalizes them, then sends to the ElasticSearch.  Default to 'False'.
-- `rsyslog_example` : When 'True' rsyslog role will deploy the example configuration set.  Default to 'False'.
 - `rsyslog_pki` : When 'True' pki related variables are configured.  In addition, if 'tls' is included in 'rsyslog_capabilities', it enables to forward logs over TLS.  Default to 'False'.
-
-- `rsyslog_capabilities` : List of capabilities to configure.  [ 'network', 'remote-files', 'tls', 'viaq', 'viaq-k8s' ] are predefined.
+- `rsyslog_capabilities` : List of capabilities to configure.  [ 'network', 'remote-files', 'tls' ] are predefined.
 
 Common sub-variables
 --------------------
@@ -269,10 +278,13 @@ Viaq sub-variables
 ------------------
 - `rsyslog_viaq_config_dir`: Directory to store viaq configuration files.  Default to '/etc/rsyslog.d/viaq'.
 - `rsyslog_viaq_log_dir`: Viaq log directory.  Default to '/var/log/containers'.
-- `openshift_logging_use_ops`: Set to 'True', if you have a second ES cluster for infrastructure logs. Default to 'False'.
 - `logging_mmk8s_token`: Path to token for kubernetes.  Default to "/etc/rsyslog.d/viaq/mmk8s.token"
 - `logging_mmk8s_ca_cert`: Path to CA cert for kubernetes.  Default to "/etc/rsyslog.d/viaq/mmk8s.ca.crt"
-- `rsyslog_elasticsearch_viaq`: A set of following variables to specify output elasticsearch configurations.  It could be an array if multiple elasticsearch clusters to be configured. 
+- `use_omelasticsearch_cert` : If set to `True`, omelasticsearch is configured to use the certificates specified in rsyslog_elasticsearch.  Default to `False`.
+- `use_local_omelasticsearch_cert` : If set to `True`, local files ca_cert_src, cert_src and key_src in rsyslog_elasticsearch will be deployed to the remote host.
+
+- `rsyslog_elasticsearch`: A set of following variables to specify output elasticsearch configurations. It could be an array if multiple elasticsearch clusters to be configured.
+   If set to `True`, ca_cert_src, cert_src and key_src must be set in each `rsyslog_elasticsearch` element. Otherwise, the deployment fails. Default to `False`.
   - `name`: Name of the elasticsearch element.
   - `server_host`: Hostname elasticsearch is running on.
   - `server_port`: Port number elasticsearch is listening to.
@@ -280,6 +292,9 @@ Viaq sub-variables
   - `ca_cert`: Path to CA cert for ElasticSearch.  Default to '/etc/rsyslog.d/viaq/es-ca.crt'
   - `cert`: Path to cert for ElasticSearch.  Default to '/etc/rsyslog.d/viaq/es-cert.pem'
   - `key`: Path to key for ElasticSearch.  Default to "/etc/rsyslog.d/viaq/es-key.pem"
+  - `ca_cert_src`: Path to the local CA cert file to deploy for ElasticSearch.
+  - `cert_src`: Path to the local cert file to deploy for ElasticSearch.
+  - `key_src`: Path to the local key file to deploy for ElasticSearch.
 
 Contents of Roles
 =================
@@ -291,7 +306,7 @@ The basic framework borrowed from debops.rsyslog and adjusted to the RHEL/Fedora
 
 - tasks/main.yaml contains the sceries of tasks to deploy specified set of configuration files.
 
-If rsyslog_viaq is true, the following tasks are executed.
+If viaq is in rsyslog_logs_collections, the following tasks are executed.
 ```
 TASK [rsyslog : Install/Update required packages]
 TASK [rsyslog : Create required system group]
@@ -307,7 +322,7 @@ TASK [rsyslog : Generate main rsyslog configuration]
 TASK [rsyslog : Generate viaq configuration files in rsyslog.d]
 TASK [rsyslog : Generate rsyslog viaq configuration files in rsyslog.d/viaq]
 ```
-If rsyslog_example is true, the following tasks are executed.
+If debops is in rsyslog_logs_collections the following tasks are executed.
 ```
 TASK [rsyslog : Install/Update required packages]
 TASK [rsyslog : Create required system group]
@@ -328,7 +343,7 @@ WARNING: Pre-existing rsyslog.conf and configuration files in /etc/rsyslog.d are
 
 Describing how the configuration files are defined to be deployed using the viaq case.
 
-Viaq configuration files are defined in {{rsyslog_viaq_rules}} in defaults/main.yaml.  The set is made from the generic modules{rsyslog_conf_global_options, rsyslog_conf_local_modules, rsyslog_conf_network_modules, rsyslog_conf_common} and viaq specific configurations.
+Viaq configuration files are defined in {{rsyslog_viaq_rules}} in /roles/input_rols/viaq/defaults/main.yaml.  The set is made from the generic modules{rsyslog_conf_global_options, rsyslog_conf_local_modules, rsyslog_conf_network_modules, rsyslog_conf_common} and viaq specific configurations.
 
 To make a new configuration file installed in addition to the current {{rsyslog_viaq_rules}}, create an rsyslog config item based on the following skelton and add the title {{rsyslog_conf_yourname}} to {{rsyslog_viaq_rules}}.
 ```
