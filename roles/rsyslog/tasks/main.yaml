@@ -87,7 +87,7 @@
   file:
     path: "{{ rsyslog_viaq_config_dir }}/"
     state: 'absent'
-  when: not rsyslog_viaq|bool
+  when: not rsyslog_enabled or not rsyslog_viaq|bool
 
 - name: Update directory and file permissions
   shell: |
@@ -100,8 +100,8 @@
   template:
     src: 'etc/rsyslog.conf.j2'
     dest: '/etc/rsyslog.conf'
-    owner: 'root'
-    group: 'root'
+    owner: '{{rsyslog_user}}'
+    group: '{{rsyslog_group}}'
     mode: '0400'
   when: rsyslog_enabled|bool
 
@@ -114,6 +114,7 @@
     mode:  '{{ item.mode  | d("0400") }}'
   with_flattened:
     - '{{ rsyslog_pools | d([]) }}'
+    - '{{ rsyslog_common_rules }}'
     - '{{ rsyslog_default_rules }}'
     - '{{ rsyslog_rules }}'
     - '{{ rsyslog_group_rules }}'
@@ -132,10 +133,21 @@
     group: '{{ item.group | d("root") }}'
     mode:  '{{ item.mode  | d("0400") }}'
   with_flattened:
+    - '{{ rsyslog_common_rules }}'
     - '{{ rsyslog_viaq_rules }}'
   when: (rsyslog_enabled|bool and rsyslog_viaq|bool and
          (item.filename|d() or item.name|d()) and
          (item.state is undefined or item.state != 'absent') and
+         (item.options|d() or item.sections|d()))
+
+- name: Remove common config files in rsyslog.d
+  file:
+    path: '{{rsyslog_config_dir}}/{{ item.filename | d((item.weight if item.weight|d() else rsyslog_weight_map[item.type|d("rules")]) + "-" + (item.name|d("rules")) + "." + (item.suffix | d("conf"))) }}'
+    state: 'absent'
+  with_flattened:
+    - '{{ rsyslog_common_rules }}'
+  when: (not rsyslog_enabled|bool and
+         (item.filename|d() or item.name|d()) and
          (item.options|d() or item.sections|d()))
 
 - name: Remove example config files in rsyslog.d
@@ -149,9 +161,8 @@
     - '{{ rsyslog_group_rules }}'
     - '{{ rsyslog_host_rules }}'
     - '{{ rsyslog_dependent_rules }}'
-  when: (not rsyslog_enabled|bool or not rsyslog_example|bool and
+  when: ((not rsyslog_enabled|bool or not rsyslog_example|bool) and
          (item.filename|d() or item.name|d()) and
-         (item.state is defined and item.state == 'absent') and
          (item.options|d() or item.sections|d()))
 
 - name: Remove viaq config files in rsyslog.d and rsyslog.d/viaq
@@ -160,16 +171,15 @@
     state: 'absent'
   with_flattened:
     - '{{ rsyslog_viaq_rules }}'
-  when: (not rsyslog_enabled|bool or not rsyslog_viaq|bool and
+  when: ((not rsyslog_enabled|bool or not rsyslog_viaq|bool) and
          (item.filename|d() or item.name|d()) and
-         (item.state is defined and item.state == 'absent') and
          (item.options|d() or item.sections|d()))
 
 # How to set rsyslog_custom_config_files:
 # rsyslog_custom_config_files: [ '/path/to/custom0.conf', '/path/to/custom1.conf' ]
 # The specified custom config files are copied to /etc/rsyslog.d.
 # If the array containse non-existing file, the deployment stops there with an error.
-- name: copy custom config files if they are specified in rsyslog_custom_config_files variable array.
+- name: Copy custom config files if they are specified in rsyslog_custom_config_files variable array.
   copy:
     src: '{{ item }}'
     dest: '{{ rsyslog_config_dir }}'
@@ -179,3 +189,19 @@
   with_flattened:
     - '{{ rsyslog_custom_config_files }}'
   when: (rsyslog_enabled|bool)
+
+- name: Enable rsyslog
+  systemd:
+    name: rsyslog.service
+    daemon_reload: yes
+    enabled: yes
+    state: restarted
+  when: rsyslog_enabled|bool and not use_rsyslog_image|default(False)|bool
+
+- name: Disable rsyslog
+  systemd:
+    name: rsyslog.service
+    enabled: no
+    state: stopped
+  when: not rsyslog_enabled|bool and not use_rsyslog_image|default(False)|bool
+
