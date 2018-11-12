@@ -40,10 +40,10 @@ inventory_file is used to specify the hosts to deploy the configuration files.
    Sample inventory file for the es-ops enabled case
 ```
 [masters]
-localhost ansible_user=YOUR_ANSIBLE_USER openshift_logging_use_ops=True
+localhost ansible_user=YOUR_ANSIBLE_USER
 
 [nodes]
-localhost ansible_user=YOUR_ANSIBLE_USER openshift_logging_use_ops=True
+localhost ansible_user=YOUR_ANSIBLE_USER
 ```
 
 vars.yaml
@@ -77,7 +77,6 @@ logging_mmk8s_token: "{{rsyslog_viaq_config_dir}}/mmk8s.token"
 logging_mmk8s_ca_cert: "{{rsyslog_viaq_config_dir}}/mmk8s.ca.crt"
 # If use_omelasticsearch_cert is True, ca_cert, cert and key in rsyslog_elasticsearch_viaq needs to be set.
 use_omelasticsearch_cert: True
-openshift_logging_use_ops: True
 rsyslog_elasticsearch_viaq:
   - name: viaq-elasticsearch
     server_host: logging-es
@@ -269,7 +268,6 @@ Viaq sub-variables
 ------------------
 - `rsyslog_viaq_config_dir`: Directory to store viaq configuration files.  Default to '/etc/rsyslog.d/viaq'.
 - `rsyslog_viaq_log_dir`: Viaq log directory.  Default to '/var/log/containers'.
-- `openshift_logging_use_ops`: Set to 'True', if you have a second ES cluster for infrastructure logs. Default to 'False'.
 - `logging_mmk8s_token`: Path to token for kubernetes.  Default to "/etc/rsyslog.d/viaq/mmk8s.token"
 - `logging_mmk8s_ca_cert`: Path to CA cert for kubernetes.  Default to "/etc/rsyslog.d/viaq/mmk8s.ca.crt"
 - `rsyslog_elasticsearch_viaq`: A set of following variables to specify output elasticsearch configurations.  It could be an array if multiple elasticsearch clusters to be configured. 
