@@ -61,8 +61,10 @@ rsyslog_enabled: true
 rsyslog_viaq: true
 rsyslog_capabilities: [ 'viaq' ]
 rsyslog_unprivileged: False
-elasticsearch_server_host: es_hostname
-elasticsearch_server_port: 9200
+rsyslog_elasticsearch_viaq:
+  - name: viaq-elasticsearch
+    server_host: es-hostname
+    server_port: 9200
 ```
 
 2. vars.yaml to configure to handle the inputs from openshift containers
@@ -77,6 +79,8 @@ logging_mmk8s_token: "{{rsyslog_viaq_config_dir}}/mmk8s.token"
 logging_mmk8s_ca_cert: "{{rsyslog_viaq_config_dir}}/mmk8s.ca.crt"
 # If use_omelasticsearch_cert is True, ca_cert, cert and key in rsyslog_elasticsearch_viaq needs to be set.
 use_omelasticsearch_cert: True
+# If use_local_omelasticsearch_cert is True, local files ca_cert_src, cert_src and key_src in rsyslog_elasticsearch_viaq will be deployed to the remote host.
+use_local_omelasticsearch_cert: True
 openshift_logging_use_ops: True
 rsyslog_elasticsearch_viaq:
   - name: viaq-elasticsearch
@@ -86,6 +90,9 @@ rsyslog_elasticsearch_viaq:
     ca_cert: "{{rsyslog_viaq_config_dir}}/es-ca.crt"
     cert: "{{rsyslog_viaq_config_dir}}/es-cert.pem"
     key: "{{rsyslog_viaq_config_dir}}/es-key.pem"
+    ca_cert_src : "/path/to/es-ca.crt"
+    cert_src : "/path/to/es-cert.pem"
+    key_src : "/path/to/es-key.pem"
   - name: viaq-elasticsearch-ops
     server_host: logging-es-ops
     server_port: 9200
@@ -93,6 +100,9 @@ rsyslog_elasticsearch_viaq:
     ca_cert: "{{rsyslog_viaq_config_dir}}/es-ca.crt"
     cert: "{{rsyslog_viaq_config_dir}}/es-cert.pem"
     key: "{{rsyslog_viaq_config_dir}}/es-key.pem"
+    ca_cert_src : "/path/to/es-ca.crt"
+    cert_src : "/path/to/es-cert.pem"
+    key_src : "/path/to/es-key.pem"
 ```
 The key-value pairs in rsylog_elasticsearch_viaq are used to configure rsyslog to send the logs to the Openshift Aggregated Logging ElasticSearch.  The elements are used in the output elasticsearch configuration 30-elasticsearch.conf as follows (note: not following the abstract syntax):
 ```
@@ -122,6 +132,7 @@ if index_prefix starts with "project." then {
 ```
 The order of the list in rsyslog_elasticsearch_viaq is important.  The first item is in the first if clause with the index_prefix value and the last item is in the else clause.  Elements in between will be placed with else if clause.
 
+The variables ca_cert, cert and key in rsyslog_elasticsearch_viaq specify the paths where the CA certificate, certificate and key are located in the remote host.  The variables ca_cert_src, cert_src, and key_src are paths of them to be deployed to the remote host.
 
 3. vars.yaml to configure custom config files.
 
@@ -272,6 +283,8 @@ Viaq sub-variables
 - `openshift_logging_use_ops`: Set to 'True', if you have a second ES cluster for infrastructure logs. Default to 'False'.
 - `logging_mmk8s_token`: Path to token for kubernetes.  Default to "/etc/rsyslog.d/viaq/mmk8s.token"
 - `logging_mmk8s_ca_cert`: Path to CA cert for kubernetes.  Default to "/etc/rsyslog.d/viaq/mmk8s.ca.crt"
+- `use_omelasticsearch_cert` : If set to `True`, mmelasticsearch is configured to use the certificates specified in rsyslog_elasticsearch_viaq.  Default to `False`.
+- `use_local_omelasticsearch_cert` : If set to `True`, local files ca_cert_src, cert_src and key_src in rsyslog_elasticsearch_viaq will be deployed to the remote host.  Default to `False`
 - `rsyslog_elasticsearch_viaq`: A set of following variables to specify output elasticsearch configurations.  It could be an array if multiple elasticsearch clusters to be configured. 
   - `name`: Name of the elasticsearch element.
   - `server_host`: Hostname elasticsearch is running on.

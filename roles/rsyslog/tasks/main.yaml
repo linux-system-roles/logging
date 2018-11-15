@@ -83,11 +83,59 @@
   file: path="{{ rsyslog_viaq_config_dir }}" state=directory mode=0700
   when: rsyslog_viaq|bool
 
+- name: Collect local viaq cert files
+  set_fact:
+    viaq_local_cert_files0: "{{ rsyslog_elasticsearch_viaq | map(attribute='ca_cert_src') | list }} + {{ rsyslog_elasticsearch_viaq | map(attribute='cert_src') | list }} + {{ rsyslog_elasticsearch_viaq | map(attribute='key_src') | list }}"
+  when: use_omelasticsearch_cert|default(False)|bool and use_local_omelasticsearch_cert|default(Flase)|bool
+
+- name: Make local viaq cert files unique
+  set_fact:
+    viaq_local_cert_files: "{{ viaq_local_cert_files0 | unique }}"
+  when: use_omelasticsearch_cert|default(False)|bool and use_local_omelasticsearch_cert|default(Flase)|bool
+
+- name: Collect remote viaq cert files
+  set_fact:
+    viaq_remote_cert_files0: "{{ rsyslog_elasticsearch_viaq | map(attribute='ca_cert') | list }} + {{ rsyslog_elasticsearch_viaq | map(attribute='cert') | list }} + {{ rsyslog_elasticsearch_viaq | map(attribute='key') | list }}"
+  when: use_omelasticsearch_cert|default(False)|bool
+
+- name: Make remote viaq cert files unique
+  set_fact:
+    viaq_remote_cert_files: "{{ viaq_remote_cert_files0 | unique }}"
+  when: use_omelasticsearch_cert|default(False)|bool
+
+- debug:
+    msg: "viaq_local_cert_files is {{ viaq_local_cert_files }}"
+  when: use_omelasticsearch_cert|bool and use_local_omelasticsearch_cert|bool
+
+- debug:
+    msg: "viaq_remote_cert_files are {{ viaq_remote_cert_files }}"
+  when: use_omelasticsearch_cert|bool and use_local_omelasticsearch_cert|bool
+
+- name: Setup viaq keys and certs
+  copy:
+    src: '{{ item }}'
+    dest: '{{ rsyslog_viaq_config_dir }}'
+  with_items:
+    - '{{ viaq_local_cert_files | default([]) }}'
+  when: (rsyslog_enabled|bool and rsyslog_viaq|bool) and
+        use_omelasticsearch_cert|default(False)|bool and 
+        use_local_omelasticsearch_cert|default(Flase)|bool and
+        item is defined
+
+- name: Remove viaq keys and certs
+  file:
+    path: '{{ item }}'
+    state: 'absent'
+  with_flattened:
+    - '{{ viaq_remote_cert_files }}'
+  when: (not rsyslog_enabled|bool or not rsyslog_viaq|bool) and
+        item is defined
+
 - name: Remove rsyslog viaq subdir
   file:
     path: "{{ rsyslog_viaq_config_dir }}/"
     state: 'absent'
-  when: not rsyslog_viaq|bool
+  when: (not rsyslog_enabled|bool or not rsyslog_viaq|bool)
 
 - name: Update directory and file permissions
   shell: |
