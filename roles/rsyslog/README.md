@@ -284,7 +284,7 @@ Viaq sub-variables
 - `logging_mmk8s_token`: Path to token for kubernetes.  Default to "/etc/rsyslog.d/viaq/mmk8s.token"
 - `logging_mmk8s_ca_cert`: Path to CA cert for kubernetes.  Default to "/etc/rsyslog.d/viaq/mmk8s.ca.crt"
 - `use_omelasticsearch_cert` : If set to `True`, mmelasticsearch is configured to use the certificates specified in rsyslog_elasticsearch_viaq.  Default to `False`.
-- `use_local_omelasticsearch_cert` : If set to `True`, local files ca_cert_src, cert_src and key_src in rsyslog_elasticsearch_viaq will be deployed to the remote host.  Default to `False`
+- `use_local_omelasticsearch_cert` : If set to `True`, local files ca_cert_src, cert_src and key_src in rsyslog_elasticsearch_viaq will be deployed to the remote host.  If set to `True`, ca_cert_src, cert_src and key_src must be set in each `rsyslog_elastic_viaq` element.  Otherwise, the deployment fails.  Default to `False`  
 - `rsyslog_elasticsearch_viaq`: A set of following variables to specify output elasticsearch configurations.  It could be an array if multiple elasticsearch clusters to be configured. 
   - `name`: Name of the elasticsearch element.
   - `server_host`: Hostname elasticsearch is running on.
@@ -293,6 +293,9 @@ Viaq sub-variables
   - `ca_cert`: Path to CA cert for ElasticSearch.  Default to '/etc/rsyslog.d/viaq/es-ca.crt'
   - `cert`: Path to cert for ElasticSearch.  Default to '/etc/rsyslog.d/viaq/es-cert.pem'
   - `key`: Path to key for ElasticSearch.  Default to "/etc/rsyslog.d/viaq/es-key.pem"
+  - `ca_cert_src`: Path to the local CA cert file to deploy for ElasticSearch.
+  - `cert_src`: Path to the local cert file to deploy for ElasticSearch.
+  - `key_src`: Path to the local key file to deploy for ElasticSearch.
 
 Contents of Roles
 =================

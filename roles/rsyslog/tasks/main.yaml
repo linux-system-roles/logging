@@ -85,7 +85,7 @@
 
 - name: Collect local viaq cert files
   set_fact:
-    viaq_local_cert_files0: "{{ rsyslog_elasticsearch_viaq | map(attribute='ca_cert_src') | list }} + {{ rsyslog_elasticsearch_viaq | map(attribute='cert_src') | list }} + {{ rsyslog_elasticsearch_viaq | map(attribute='key_src') | list }}"
+    viaq_local_cert_files0: "{{ viaq_local_cert_files0 | default([]) }} + {{ rsyslog_elasticsearch_viaq | map(attribute='ca_cert_src') | list | default([]) }} + {{ rsyslog_elasticsearch_viaq | map(attribute='cert_src') | list | default([]) }} + {{ rsyslog_elasticsearch_viaq | map(attribute='key_src') | list | default([]) }}"
   when: use_omelasticsearch_cert|default(False)|bool and use_local_omelasticsearch_cert|default(Flase)|bool
 
 - name: Make local viaq cert files unique
