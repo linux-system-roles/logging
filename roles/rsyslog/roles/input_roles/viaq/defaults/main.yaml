@@ -372,6 +372,8 @@ rsyslog_conf_viaq_formatting:
               set $!offset = $!metadata!fileoffset;
           }
           unset $!metadata;
+          # add viaq logs identifier
+          set $.logs_collection = "viaq";
 
 rsyslog_rulebase_viaq_parse_json:
 

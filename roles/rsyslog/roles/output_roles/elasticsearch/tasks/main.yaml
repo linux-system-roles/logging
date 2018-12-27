@@ -1,38 +1,54 @@
 ---
-# Collect certificates from local location and copy them to /etc/rsyslog.d directory
-- name: Collect local Elasticsearch cert files
-  set_fact:
-    elasticsearch_local_cert_files: "{{ elasticsearch_local_cert_files |d([]) }} + {{ [item.ca_cert_src|d([])] }} + {{ [item.cert_src|d([])] }} + {{ [item.key_src|d([])] }}"
-  with_items: "{{ rsyslog_elasticsearch }}"
-  when: item.use_local_omelasticsearch_cert|default(False)|bool
+- block:
+  # This block collect certificates from local location and copies them to /etc/rsyslog.d directory
+    - name: Copy local Elasticsearch ca_certs to elasticsearch directory in Rsyslog
+      copy:
+        src: '{{ item.ca_cert_src }}'
+        dest: '{{ rsyslog_elasticsearch_config_dir }}'
+      with_items:
+        - '{{ rsyslog_elasticsearch }}'
+      when:
+        - item.ca_cert_src is defined
+        - item.ca_cert_src != ""
 
-- name: Make local Elasticsearch cert files unique
-  set_fact:
-    elasticsearch_local_cert_files: "{{ elasticsearch_local_cert_files| unique }}"
-  when:  elasticsearch_local_cert_files is defined
+    - name: Copy local Elasticsearch certs to elasticsearch directory in Rsyslog
+      copy:
+        src: '{{ item.cert_src }}'
+        dest: '{{ rsyslog_elasticsearch_config_dir }}'
+      with_items:
+        - '{{ rsyslog_elasticsearch }}'
+      when:
+        - item.cert_src is defined
+        - item.cert_src != ""
 
-- name: Copy local Elasticsearch keys and certs to elasticsearch directory in Rsyslog
-  copy:
-    src: '{{ item }}'
-    dest: '{{ rsyslog_elasticsearch_config_dir }}'
-  with_items:
-    - '{{ elasticsearch_local_cert_files | default([]) }}'
+    - name: Copy local Elasticsearch keys to elasticsearch directory in Rsyslog
+      copy:
+        src: '{{ item.key_src }}'
+        dest: '{{ rsyslog_elasticsearch_config_dir }}'
+      with_items:
+        - '{{ rsyslog_elasticsearch }}'
+      when:
+        - item.key_src is defined
+        - item.key_src != ""
+
+    - name: Update ca_cert path to elasticsearch directory in Rsyslog
+      set_fact:
+        rsyslog_elasticsearch_temp: "{{ rsyslog_elasticsearch_temp|d([]) }} + {{ [  item | combine( { 'ca_cert': item.ca_cert_src| basename , 'cert': item.cert_src| basename, 'key': item.key_src| basename } ) ] }}"
+      with_items:
+        - '{{ rsyslog_elasticsearch }}'
+      when:
+        - item.ca_cert_src is defined
+        - item.ca_cert_src != ""
+      register: result
+
+    - name: Set updated rsyslog_elasticsearch
+      set_fact:
+        rsyslog_elasticsearch: "{{ rsyslog_elasticsearch_temp }}"
+
   when:
-    - rsyslog_enabled|bool
-    - use_omelasticsearch_cert|default(False)|bool
+    - rsyslog_elasticsearch is defined
+    - rsyslog_elasticsearch != []
     - use_local_omelasticsearch_cert|default(Flase)|bool
-    - item is defined
-
-- name: Collect remote Elasticsearch cert files
-  set_fact:
-    elasticsearch_cert_files: "{{ elasticsearch_cert_files |d([]) }} + {{ [item.ca_cert|d([])] }} + {{ [item.cert|d([])] }} + {{ [item.key|d([])] }}"
-  with_items: "{{ rsyslog_elasticsearch }}"
-  when: item.use_omelasticsearch_cert|default(False)|bool
-
-- name: Make remote Elasticsearch cert files unique
-  set_fact:
-    elasticsearch_cert_files: "{{ elasticsearch_cert_files| unique }}"
-  when: elasticsearch_cert_files is defined
 
 # Deploy configuration files
 - name: Set Elasticsearch facts
@@ -43,6 +59,5 @@
 
 - name: Install/Update role packages and generate role configuration files to role subdir
   include_role:
-    name: logging/roles/rsyslog
+    name: "{{ logging_role_path|d('logging') }}/roles/rsyslog"
     tasks_from: deploy.yaml
-
