@@ -84,7 +84,7 @@ rsyslog_outputs:
       - name: 'viaq'
         state: 'present'
       - name: 'viaq-k8s'
-        state: `present`
+        state: 'present'
     server_host: logging-es
     server_port: 9200
     index_prefix: project.
@@ -289,9 +289,9 @@ Viaq sub-variables
   - `server_host`: Hostname elasticsearch is running on.
   - `server_port`: Port number elasticsearch is listening to.
   - `index_prefix`: Elasticsearch index prefix the particular log is to be indexed.
-  - `ca_cert`: Path to CA cert for ElasticSearch.  Default to '/etc/rsyslog.d/viaq/es-ca.crt'
-  - `cert`: Path to cert for ElasticSearch.  Default to '/etc/rsyslog.d/viaq/es-cert.pem'
-  - `key`: Path to key for ElasticSearch.  Default to "/etc/rsyslog.d/viaq/es-key.pem"
+  - `ca_cert`: Path to CA cert for ElasticSearch.  Default to '/etc/rsyslog.d/elasticsearch/es-ca.crt'
+  - `cert`: Path to cert for ElasticSearch.  Default to '/etc/rsyslog.d/elasticsearc/es-cert.pem'
+  - `key`: Path to key for ElasticSearch.  Default to "/etc/rsyslog.d/elasticsearch/es-key.pem"
   - `ca_cert_src`: Path to the local CA cert file to deploy for ElasticSearch.
   - `cert_src`: Path to the local cert file to deploy for ElasticSearch.
   - `key_src`: Path to the local key file to deploy for ElasticSearch.

@@ -1,10 +1,4 @@
 ---
-- name: Set ovirt_output_name
-  set_fact:
-    output_name: "{{ item.output_name }}"
-  with_items: "{{ rsyslog_logs_collections }}"
-  when: item.name == 'ovirt'
-
 - name: Set oVirt facts
   set_fact:
     rsyslog_role_config_dir: "{{ rsyslog_ovirt_config_dir }}"
@@ -13,5 +7,5 @@
 
 - name: Remove oVirt subdir
   include_role:
-    name: logging/roles/rsyslog
+    name: "{{ logging_role_path|d('logging') }}/roles/rsyslog"
     tasks_from: cleanup.yaml

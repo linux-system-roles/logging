@@ -6,6 +6,6 @@
 
 - name: Remove Viaq-k8s role config files from subdir
   include_role:
-    name: logging/roles/rsyslog
+    name: "{{ logging_role_path|d('logging') }}/roles/rsyslog"
     tasks_from: cleanup.yaml
 

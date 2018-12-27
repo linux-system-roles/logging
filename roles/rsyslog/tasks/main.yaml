@@ -74,14 +74,9 @@
       changed_when: False
 
     # Creating a backup dir for rsyslog.d
-    - name: Create a temp directory for rsyslog.d backup
-      command: mktemp -d /tmp/rsyslog.d-XXXXXX
-      register: mktemp
-      changed_when: False
-
     - name: Set backup dir name
       set_fact:
-        backupdir: '{{ rsyslog_backup_dir | default(mktemp.stdout) }}'
+        backupdir: '{{ rsyslog_backup_dir|default("/tmp") }}/rsyslog.d-{{ ansible_date_time.iso8601_basic_short }}'
 
     - name: Create a backup dir
       file:
@@ -98,7 +93,7 @@
       archive:
         path: ["{{rsyslog_config_dir}}",/etc/rsyslog.conf]
         dest: "{{ backupdir }}/backup.tgz"
-        remove: '{{true if rsyslog_purge_original_conf|bool else false}}'
+        remove: '{{ true if rsyslog_purge_original_conf|bool else false }}'
 
     - name: Update directory and file permissions
       shell: |
@@ -166,7 +161,7 @@
 
     - name: Run deploy input sub-roles configs
       include_role:
-        name: "logging/roles/rsyslog/roles/input_roles/{{ item.name }}"
+        name: "{{ logging_role_path|d('logging') }}/roles/rsyslog/roles/input_roles/{{ item.name }}"
       with_items: '{{ rsyslog_logs_collections }}'
       when:
         - rsyslog_enabled|bool
@@ -175,7 +170,7 @@
 
     - name: Run remove input sub-roles configs
       include_role:
-        name: "logging/roles/rsyslog/roles/input_roles/{{ item.name }}"
+        name: "{{ logging_role_path|d('logging') }}/roles/rsyslog/roles/input_roles/{{ item.name }}"
         tasks_from: cleanup.yaml
       with_items: '{{ rsyslog_logs_collections }}'
       when:
@@ -184,7 +179,7 @@
 
     - name: Run output sub-roles
       include_role:
-        name: "logging/roles/rsyslog/roles/output_roles/{{ item }}"
+        name: "{{ logging_role_path|d('logging') }}/roles/rsyslog/roles/output_roles/{{ item }}"
       with_items: " {{ rsyslog_outputs }}"
       when:
         - rsyslog_enabled|bool

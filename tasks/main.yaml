@@ -9,9 +9,13 @@
 
     - name: Set rsyslog_elasticsearch
       set_fact:
-        rsyslog_elasticsearch: "{{ rsyslog_elasticsearch|d([]) }} + {{ [ { 'name': item.name, 'type': item.type, 'index_prefix': item.index_prefix|d('project.'), 'server_host': item.server_host|d('localhost'), 'server_port': item.server_port|d(9200|int), 'ca_cert': item.ca_cert|d(logging_elasticsearch_default_ca_cert_path)|d(Error), 'cert': item.cert|d(logging_elasticsearch_default_client_cert_path)|d(Error), 'key': item.key|d(logging_elasticsearch_default_client_key_path)|d(Error) } ] }}"
-      with_items: "{{ logging_outputs }}"
-      when: item.type|d('') == 'elasticsearch'
+        rsyslog_elasticsearch: "{{ rsyslog_elasticsearch|d([]) }} + {{ [  item.0 |combine( {'logs_collections_name': item.1.name} )] }}"
+      with_subelements:
+        - "{{ logging_outputs }}"
+        - logs_collections
+      when:
+        - item.0.type|d('') == 'elasticsearch'
+        - item.1.state|d('present') == 'present'
 
     - name: Set rsyslog_logs_collections
       set_fact:
@@ -48,12 +52,12 @@
 
     - name: Set rsyslog_unprivileged fact
       set_fact:
-        rsyslog_unprivileged: "{{ logging_unprivileged|d(true) }}"
+        rsyslog_unprivileged: "{{ logging_unprivileged|d(false) }}"
 
     - name: Set rsyslog_purge_original_conf fact to purge all configuration files before saving the new ones.
       set_fact:
-        rsyslog_purge_original_conf: true
-      when: logging_purge_confs|d(false)
+        rsyslog_purge_original_conf: yes
+      when: logging_purge_confs|d(no)
 
     - name: Set custom_config_files fact
       set_fact:
@@ -63,7 +67,6 @@
         - item.type|d('') == 'custom'
         - logging_enabled|d(true)
 
-
     - name: Re-read facts after adding custom fact
       setup:
         filter: ansible_local
@@ -71,28 +74,28 @@
 
     - name: Create rsyslog debug dir
       file:
-        path:  logging/debug
+        path:  "{{ logging_role_path|d('logging') }}/debug"
         state: 'directory'
         mode: '0700'
       when: logging_debug|d(false)
 
     - name: Delete debug file
       file:
-        path: logging/debug/main.yaml
+        path: "{{ logging_role_path|d('logging') }}/debug/main.yaml"
         state: absent
       ignore_errors: true
       when: logging_debug|d(false)
 
     - name: Create rsyslog debug file
       lineinfile:
-        path: logging/debug/main.yaml
+        path: "{{ logging_role_path|d('logging') }}/debug/main.yaml"
         create: yes
         line: "#ANSIBLE MANAGED VARIABLES FILE"
       when: logging_debug|d(false)
 
     - name: Populate rsyslog debug file
       lineinfile:
-        path: logging/debug/main.yaml
+        path: "{{ logging_role_path|d('logging') }}/debug/main.yaml"
         create: yes
         line: "{{ item.key }}: {{ item.value| to_nice_json(indent=2) }}"
       with_dict: "{{ hostvars[inventory_hostname] }}"
@@ -100,7 +103,8 @@
         - item.key is match("rsyslog*")
         - logging_debug|d(false)
 
-    - include_role:
-        name: logging/roles/rsyslog
+    - name: include Rsyslog role
+      include_role:
+        name: "{{ logging_role_path|d('logging') }}/roles/rsyslog"
 
   when: logging_collector|d('rsyslog') == 'rsyslog'

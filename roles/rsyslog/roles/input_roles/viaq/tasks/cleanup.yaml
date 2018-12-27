@@ -13,5 +13,5 @@
 
 - name: Remove Viaq role subdir
   include_role:
-    name: logging/roles/rsyslog
+    name: "{{ logging_role_path|d('logging') }}/roles/rsyslog"
     tasks_from: cleanup.yaml

@@ -52,7 +52,7 @@ rsyslog_message_reduction: False
 #
 # The pre-existing config files are archived in the tempdir and purged if the
 # rsyslog_purge_original_conf is set to `True`.  Default to 'False`.
-rsyslog_purge_original_conf: False
+rsyslog_purge_original_conf: no
 
 # rpm packages
 # adding rsyslog_logging_packages
@@ -381,6 +381,9 @@ rsyslog_conf_global_options:
         defaultNetstreamDriverCertFile="{{ rsyslog_pki_path + '/' + rsyslog_pki_realm + '/' + rsyslog_pki_crt }}"
         defaultNetstreamDriverKeyFile="{{ rsyslog_pki_path + '/' + rsyslog_pki_realm + '/' + rsyslog_pki_key }}"
       {%   endif %}
+      {% endif %}
+      {% if rsyslog_max_message_size is defined %}
+        maxMessageSize="{{ rsyslog_max_message_size }}"
       {% endif %}
       )
 
