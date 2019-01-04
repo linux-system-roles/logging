@@ -100,6 +100,10 @@
         dest: "{{ backupdir }}/backup.tgz"
         remove: '{{true if rsyslog_purge_original_conf|bool else false}}'
 
+    - name: Cleaning up subdirs in {{rsyslog_config_dir}} if needed.
+      shell: /bin/rm -rf {{rsyslog_config_dir}}/*
+      when: rsyslog_purge_original_conf is defined and rsyslog_purge_original_conf == true
+
     - name: Update directory and file permissions
       shell: |
         [ ! -d {{ rsyslog_system_log_dir }} ] || ( [ "$(stat -c '%G' {{ rsyslog_system_log_dir }})" = "{{ rsyslog_group }}" ] || ( chown -v root:{{ rsyslog_group }} {{ rsyslog_system_log_dir }} ; chmod -v 775 {{ rsyslog_system_log_dir }} ) )
@@ -137,7 +141,7 @@
     - name: Remove common config files in rsyslog.d
       file:
         path: '{{rsyslog_config_dir}}/{{ item.filename | d((item.weight if item.weight|d() else rsyslog_weight_map[item.type|d("rules")]) + "-" + (item.name|d("rules")) + "." + (item.suffix | d("conf"))) }}'
-        state: 'absent'
+        state: absent
       with_flattened:
         - '{{ rsyslog_common_rules }}'
       when:
