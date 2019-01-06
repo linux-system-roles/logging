@@ -89,11 +89,15 @@ rsyslog_conf_ovirt_formatting:
       - options: |-
           # formatting
 
+          template(name="cnvt_to_viaq_timestamp" type="list") {
+              property(name="TIMESTAMP" dateFormat="rfc3339")
+          }
+
           input (type="imtcp" port="{{ rsyslog_read_collectd_port|d(44514) }}")
           if $syslogtag == 'collectd' then {
               set $!original_raw_message = $msg;
               action(type="mmjsonparse" cookie="") # parse entire message as json
-              set $!@timestamp = format_time($!time, "date-rfc3339");
+              set $!@timestamp = exec_template('cnvt_to_viaq_timestamp');
               unset $!time;
           }
 
