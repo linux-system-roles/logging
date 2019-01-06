@@ -135,6 +135,7 @@ Variables in vars.yaml
       - `type`: Type of the output element. Optional values: `elasticsearch`, `local`, `custom_files`.
       - `logs_collections` : List of optional logs collections, dictionaries with `name` and `state` attributes, that were pre-configured.
         - `name`: The name of the pre-configured logs to collect. **Note:** Currently only ['viaq', 'viaq-k8s', 'ovirt'] are supported for the elasticsearch output.
+          
           `state`: The state of the configuration files states if they should be `present` or `absent`. Default to `present`.
       - `server_host`: Hostname elasticsearch is running on.
       - `server_port`: Port number elasticsearch is listening to.
