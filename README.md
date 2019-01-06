@@ -17,7 +17,7 @@ Definitions
   - [`Elasticsearch`](https://www.elastic.co/) - Non-OpenShift standalone Elasticsearch.
   - `Local` - Output the collected logs to a local File/Journal. Supported only for default and debops Rsyslog data at this point.
   - `Remote Rsyslog` - Output logs to a remote Rsyslog server. - Not yet implemented
-  - `Message Queue` (kafka, amqp) - Not yet supported. -Not yet implemented
+  - `Message Queue` (kafka, amqp) - Not yet implemented
 
 Deploy Default Logging Configuration Files
 ==========================================
@@ -129,9 +129,6 @@ Variables in vars.yaml
 - `logging_mmk8s_token`: Path to token for kubernetes.  Default to "/etc/rsyslog.d/viaq/mmk8s.token".
 - `logging_mmk8s_ca_cert`: Path to CA cert for kubernetes.  Default to "/etc/rsyslog.d/viaq/mmk8s.ca.crt".
 
-- `logging_elasticsearch_default_ca_cert_path`: Default path to CA cert for ElasticSearch if Elasticsearch installation share the same CA cert. **Note:** If provided, no need to add the `ca_cert` variable in the Elasticsearch output record.
-- `logging_elasticsearch_default_client_cert_path`: Default path to client cert for ElasticSearch if Elasticsearch installation share the same client cert. **Note:** If provided, no need to add the `cert` variable in the Elasticsearch output record.
-- `logging_elasticsearch_default_client_key_path`: Default path to client key for ElasticSearch if Elasticsearch installation share the same client key. **Note:** If provided, no need to add the `key` variable in the Elasticsearch output record.
 - `logging_outputs`: A set of following variables to specify output configurations.  It could be an list if multiple outputs that should to be configured.
    -  **If `type: elasticsearch`** Send logs to one or more remote elasticsearch or Viaq installations.
       - `name`: Name of the elasticsearch element.
