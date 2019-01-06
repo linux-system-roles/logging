@@ -9,12 +9,3 @@
     - item.filename|d() or item.name|d()
     - item.options|d() or item.sections|d()
   notify: restart rsyslogd
-
-- name: Remove role subdir
-  file:
-    path: "{{ rsyslog_role_config_dir }}/"
-    state: 'absent'
-  when:
-    - rsyslog_role_config_dir|d(rsyslog_config_dir) != rsyslog_config_dir
-    - remove_role_config_dir|d(false)
-  notify: restart rsyslogd

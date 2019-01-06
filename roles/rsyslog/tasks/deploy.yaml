@@ -7,13 +7,6 @@
     - not use_rsyslog_image|default(False)|bool
   notify: restart rsyslogd
 
-- name: Create rsyslog role subdir
-  file:
-    path: "{{ rsyslog_role_config_dir }}"
-    state: directory
-    mode: 0700
-  notify: restart rsyslogd
-
 - name: Generate role configuration files in rsyslog.d and subdir
   template:
     src: 'etc/rsyslog.d/rules.conf.j2'

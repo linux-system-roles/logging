@@ -1,17 +1,9 @@
 ---
-- name: Set ovirt_output_name
-  set_fact:
-    output_name: "{{ item.output_name }}"
-  with_items: "{{ rsyslog_logs_collections }}"
-  when: item.name == 'viaq'
-
 - name: Set Viaq facts
   set_fact:
     rsyslog_role_rules: "{{ rsyslog_viaq_rules }}"
-    rsyslog_role_config_dir: "{{ rsyslog_viaq_config_dir }}"
-    remove_role_config_dir: true
 
-- name: Remove Viaq role subdir
+- name: Remove viaq configs
   include_role:
     name: "{{ logging_role_path|d('logging') }}/roles/rsyslog"
     tasks_from: cleanup.yaml
