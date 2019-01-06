@@ -10,7 +10,3 @@ logging_custom_config_files: []
 
 logging_purge_confs: true
 
-logging_elasticsearch_default_ca_cert_path: /path/to/ca-cert.pem
-logging_elasticsearch_default_client_cert_path: /path/to/cert.pem
-logging_elasticsearch_default_client_key_path: /path/to/cert-key.pem
-

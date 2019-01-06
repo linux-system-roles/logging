@@ -2,7 +2,6 @@
 - name: Set Viaq facts
   set_fact:
     rsyslog_role_packages: "{{rsyslog_viaq_prereq_packages|flatten|d([])}}+{{rsyslog_viaq_packages|flatten|d([])}}"
-    rsyslog_role_config_dir: "{{ rsyslog_viaq_config_dir }}"
     rsyslog_role_rules: "{{ rsyslog_viaq_rules }}"
 
 - name: Install/Update role packages and generate role configuration files to role subdir

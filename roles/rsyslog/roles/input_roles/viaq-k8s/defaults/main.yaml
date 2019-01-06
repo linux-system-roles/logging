@@ -2,11 +2,6 @@
 # Viaq configuration
 # ---------------------
 
-# .. envvar:: rsyslog_viaq_config_dir
-#
-# Viaq configuration directory
-rsyslog_viaq_config_dir: '{{rsyslog_config_dir}}/viaq'
-
 # .. envvar:: rsyslog_viaq_log_dir
 #
 # Viaq log directory
@@ -44,7 +39,7 @@ rsyslog_conf_viaq_mmk8s:
 
   - name: 'mmk8s'
     type: 'modules'
-    path: '{{rsyslog_viaq_config_dir }}'
+    path: '{{rsyslog_config_dir }}'
     sections:
 
       - options: |-
@@ -54,20 +49,20 @@ rsyslog_conf_viaq_mmk8s:
           # Parse logs to JSON
           module(load="mmjsonparse")
 
-          input(type="imfile" file="{{ rsyslog_viaq_log_dir }}/*.log" tag="kubernetes" addmetadata="on" reopenOnTruncate="on")
+          input(type="imfile" file="{{ rsyslog_log_dir }}/*.log" tag="kubernetes" addmetadata="on" reopenOnTruncate="on")
           
           if ((strlen($!CONTAINER_NAME) > 0) and (strlen($!CONTAINER_ID_FULL) > 0)) or
-              ((strlen($!metadata) > 0) and (strlen($!metadata!filename) > 0) and ($!metadata!filename startswith "{{rsyslog_viaq_log_dir}}/")) then {
-              if ((strlen($!metadata) > 0) and (strlen($!metadata!filename) > 0) and ($!metadata!filename startswith "{{rsyslog_viaq_log_dir}}/")) then {
+              ((strlen($!metadata) > 0) and (strlen($!metadata!filename) > 0) and ($!metadata!filename startswith "{{rsyslog_log_dir}}/")) then {
+              if ((strlen($!metadata) > 0) and (strlen($!metadata!filename) > 0) and ($!metadata!filename startswith "{{rsyslog_log_dir}}/")) then {
                   if $msg startswith "{" then {
                       action(type="mmjsonparse" cookie="") # parse entire message as json
                   } else {
-                      action(type="mmnormalize" rulebase="{{ rsyslog_viaq_config_dir }}/crio.rulebase")
+                      action(type="mmnormalize" rulebase="{{ rsyslog_config_dir }}/crio.rulebase")
                   }
               }
               action(type="mmkubernetes"
-                 filenamerulebase="{{ rsyslog_viaq_config_dir }}/k8s_filename.rulebase"
-                 containerrulebase="{{ rsyslog_viaq_config_dir }}/k8s_container_name.rulebase"
+                 filenamerulebase="{{ rsyslog_config_dir }}/k8s_filename.rulebase"
+                 containerrulebase="{{ rsyslog_config_dir }}/k8s_container_name.rulebase"
                  tls.cacert="{{logging_mmk8s_ca_cert}}"
                  tokenfile="{{logging_mmk8s_token}}" annotation_match=["."])
           }
@@ -77,19 +72,19 @@ rsyslog_rulebase_viaq_k8s_filename:
   - name: 'k8s_filename'
     filename: 'k8s_filename.rulebase'
     nocomment: 'true'
-    path: '{{rsyslog_viaq_config_dir }}'
+    path: '{{rsyslog_config_dir }}'
     sections:
 
       - options: |-
           version=2
-          rule=:{{ rsyslog_viaq_log_dir }}/%pod_name:char-to:_%_%namespace_name:char-to:_%_%container_name_and_id:char-to:.%.log
+          rule=:{{ rsyslog_log_dir }}/%pod_name:char-to:_%_%namespace_name:char-to:_%_%container_name_and_id:char-to:.%.log
 
 rsyslog_rulebase_viaq_k8s_container_name:
 
   - name: 'k8s_container_name'
     filename: 'k8s_container_name.rulebase'
     nocomment: 'true'
-    path: '{{rsyslog_viaq_config_dir }}'
+    path: '{{rsyslog_config_dir }}'
     sections:
 
       - options: |-
@@ -103,7 +98,7 @@ rsyslog_rulebase_viaq_crio:
   - name: 'crio'
     filename: 'crio.rulebase'
     nocomment: 'true'
-    path: '{{rsyslog_viaq_config_dir }}'
+    path: '{{rsyslog_config_dir }}'
     sections:
       - options: |-
           version=2

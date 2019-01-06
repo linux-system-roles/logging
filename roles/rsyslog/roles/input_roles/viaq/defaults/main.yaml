@@ -2,11 +2,6 @@
 # Viaq configuration
 # ---------------------
 
-# .. envvar:: rsyslog_viaq_config_dir
-#
-# Viaq configuration directory
-rsyslog_viaq_config_dir: '{{rsyslog_config_dir}}/viaq'
-
 # Viaq rpm packages
 # adding rsyslog_logging_packages
 # ------------------
@@ -69,21 +64,17 @@ rsyslog_conf_viaq_main_modules:
           # Normalize logs
           module(load="mmnormalize")
 
-      - options: |-
-          # Include viaq config files
-          $IncludeConfig {{ rsyslog_viaq_config_dir }}/*.conf
-
 rsyslog_conf_viaq_formatting:
 
   - name: 'viaq_formatting'
     type: 'template'
-    path: '{{rsyslog_viaq_config_dir }}'
+    path: '{{rsyslog_config_dir }}'
     sections:
 
       - options: |-
           # formatting
-          lookup_table(name="prio_to_level" file="{{ rsyslog_viaq_config_dir }}/prio_to_level.json")
-          lookup_table(name="normalize_level" file="{{ rsyslog_viaq_config_dir }}/normalize_level.json")
+          lookup_table(name="prio_to_level" file="{{ rsyslog_config_dir }}/prio_to_level.json")
+          lookup_table(name="normalize_level" file="{{ rsyslog_config_dir }}/normalize_level.json")
           
           template(name="cnvt_to_viaq_timestamp" type="list") {
               property(name="TIMESTAMP" dateFormat="rfc3339")
@@ -96,7 +87,7 @@ rsyslog_conf_viaq_formatting:
           # "message" in the outgoing record
           if strlen($!MESSAGE) > 0 then {
               set $!pipeline_metadata!collector!original_raw_message = $!MESSAGE;
-              action(type="mmnormalize" ruleBase="{{ rsyslog_viaq_config_dir }}/parse_json.rulebase" variable="$!MESSAGE")
+              action(type="mmnormalize" ruleBase="{{ rsyslog_config_dir }}/parse_json.rulebase" variable="$!MESSAGE")
               # ensure that $!message is set and $!MESSAGE is unset
               # if rsyslog is case sensitive, then $!MESSAGE == $!message
               if $!MESSAGE == $!message then {
@@ -115,7 +106,7 @@ rsyslog_conf_viaq_formatting:
           } else {
               if strlen($!log) > 0 then {
                   set $!pipeline_metadata!collector!original_raw_message = $!log;
-                  action(type="mmnormalize" ruleBase="{{ rsyslog_viaq_config_dir }}/parse_json.rulebase" variable="$!log")
+                  action(type="mmnormalize" ruleBase="{{ rsyslog_config_dir }}/parse_json.rulebase" variable="$!log")
                   if strlen($!message) == 0 then {
                       set $!message = $!log;
                   }
@@ -380,7 +371,7 @@ rsyslog_rulebase_viaq_parse_json:
   - name: 'parse_json'
     filename: 'parse_json.rulebase'
     nocomment: 'true'
-    path: '{{rsyslog_viaq_config_dir }}'
+    path: '{{rsyslog_config_dir }}'
     sections:
 
       - options: |-
@@ -392,7 +383,7 @@ rsyslog_json_viaq_normalize_level:
   - name: 'normalize_level'
     filename: 'normalize_level.json'
     nocomment: 'true'
-    path: '{{rsyslog_viaq_config_dir }}'
+    path: '{{rsyslog_config_dir }}'
     sections:
 
       - options: |-
@@ -422,7 +413,7 @@ rsyslog_json_viaq_prio_to_level:
   - name: 'prio_to_level'
     filename: 'prio_to_level.json'
     nocomment: 'true'
-    path: '{{rsyslog_viaq_config_dir }}'
+    path: '{{rsyslog_config_dir }}'
     sections:
 
       - options: |-

@@ -2,11 +2,6 @@
 # Elasticsearch configuration
 # ---------------------
 
-# .. envvar:: rsyslog_elasticsearch_config_dir
-#
-# Elsticsearch configuration directory
-rsyslog_elasticsearch_config_dir: '{{rsyslog_config_dir}}/elasticsearch'
-
 # .. envvar:: rsyslog_elasticsearch_package
 #
 # List of rpm packages for Elasticsearch output.
@@ -45,16 +40,11 @@ rsyslog_conf_es_main_modules:
           # Send to ElasticSearch
           module(load="omelasticsearch")
 
-      - options: |-
-          # Include elasticsearch config files
-          $IncludeConfig {{ rsyslog_elasticsearch_config_dir }}/*.conf
-
-
 rsyslog_conf_es_elasticsearch:
 
   - name: 'elasticsearch'
     type: 'output'
-    path: '{{ rsyslog_elasticsearch_config_dir }}'
+    path: '{{ rsyslog_config_dir }}'
     sections:
 
       - options: |-

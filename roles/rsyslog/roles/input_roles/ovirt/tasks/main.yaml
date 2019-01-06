@@ -2,7 +2,6 @@
 - name: Set oVirt facts
   set_fact:
     rsyslog_role_packages: "{{rsyslog_ovirt_prereq_packages|flatten|d([])}}+{{rsyslog_ovirt_packages|flatten|d([])}}"
-    rsyslog_role_config_dir: "{{ rsyslog_ovirt_config_dir }}"
     rsyslog_role_rules: "{{ rsyslog_ovirt_rules }}"
 
 - name: Install/Update role packages and generate role configuration files to role subdir

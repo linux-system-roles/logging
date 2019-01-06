@@ -2,11 +2,6 @@
 # oVirt configuration
 # ---------------------
 
-# .. envvar:: rsyslog_ovirt_config_dir
-#
-# oVirt configuration directory
-rsyslog_ovirt_config_dir: '{{rsyslog_config_dir}}/ovirt'
-
 # oVirt rpm packages
 # adding rsyslog_logging_packages
 # ------------------
@@ -75,15 +70,11 @@ rsyslog_conf_ovirt_main_modules:
           # Parse logs to JSON
           module(load="mmjsonparse")
 
-      - options: |-
-          # Include oVirt config files
-          $IncludeConfig {{ rsyslog_ovirt_config_dir }}/*.conf
-
 rsyslog_conf_ovirt_formatting:
 
   - name: 'ovirt_formatting'
     type: 'template'
-    path: '{{ rsyslog_ovirt_config_dir }}'
+    path: '{{ rsyslog_config_dir }}'
     sections:
 
       - options: |-
@@ -116,7 +107,7 @@ rsyslog_conf_ovirt_formatting:
                 startmsg.regex="^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}")
 
           if $syslogtag == 'ovirt.engine' then {
-            action(type="mmnormalize" rulebase="{{ rsyslog_ovirt_config_dir }}/ovirt_engine.rulebase" path="$!ovirt")
+            action(type="mmnormalize" rulebase="{{ rsyslog_config_dir }}/ovirt_engine.rulebase" path="$!ovirt")
           }
           {% endif %}
 
@@ -125,7 +116,7 @@ rsyslog_conf_ovirt_formatting:
                 startmsg.regex="^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}")
 
           if $syslogtag == 'ovirt.vdsm' then {
-            action(type="mmnormalize" rulebase="{{ rsyslog_ovirt_config_dir }}/ovirt_vdsm.rulebase" path="$!ovirt")
+            action(type="mmnormalize" rulebase="{{ rsyslog_config_dir }}/ovirt_vdsm.rulebase" path="$!ovirt")
           }
           {% endif %}
 
@@ -164,7 +155,7 @@ rsyslog_rulebase_ovirt_engine:
   - name: 'ovirt_engine'
     filename: 'ovirt_engine.rulebase'
     nocomment: 'true'
-    path: '{{ rsyslog_ovirt_config_dir }}'
+    path: '{{ rsyslog_config_dir }}'
     sections:
       - options: |-
           version=2
@@ -174,7 +165,7 @@ rsyslog_rulebase_ovirt_vdsm:
   - name: 'ovirt_vdsm'
     filename: 'ovirt_vdsm.rulebase'
     nocomment: 'true'
-    path: '{{ rsyslog_ovirt_config_dir }}'
+    path: '{{ rsyslog_config_dir }}'
     sections:
       - options: |-
           version=2
@@ -186,7 +177,7 @@ rsyslog_rulebase_ovirt_parse_json:
   - name: 'parse_json'
     filename: 'parse_json.rulebase'
     nocomment: 'true'
-    path: '{{rsyslog_ovirt_config_dir }}'
+    path: '{{rsyslog_config_dir }}'
     sections:
 
       - options: |-
