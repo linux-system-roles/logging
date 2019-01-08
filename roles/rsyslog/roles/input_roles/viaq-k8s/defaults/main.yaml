@@ -24,7 +24,8 @@ rsyslog_viaq_k8s_packages: [ 'rsyslog-mmjsonparse', 'rsyslog-mmkubernetes' ]
 
 rsyslog_viaq_k8s_rules:
 
-  - '{{ rsyslog_conf_viaq_mmk8s }}'
+  - '{{ rsyslog_conf_viaq_mmk8s_module }}'
+  - '{{ rsyslog_conf_viaq_mmk8s_input }}'
   - '{{ rsyslog_rulebase_viaq_k8s_filename }}'
   - '{{ rsyslog_rulebase_viaq_k8s_container_name }}'
   - '{{ rsyslog_rulebase_viaq_crio }}'
@@ -35,11 +36,11 @@ rsyslog_viaq_k8s_rules:
 logging_mmk8s_ca_cert: ''
 logging_mmk8s_token: ''
 
-rsyslog_conf_viaq_mmk8s:
+rsyslog_conf_viaq_mmk8s_module:
 
   - name: 'mmk8s'
     type: 'modules'
-    path: '{{rsyslog_config_dir }}'
+    path: '{{rsyslog_config_dir}}'
     sections:
 
       - options: |-
@@ -49,11 +50,19 @@ rsyslog_conf_viaq_mmk8s:
           # Parse logs to JSON
           module(load="mmjsonparse")
 
-          input(type="imfile" file="{{ rsyslog_log_dir }}/*.log" tag="kubernetes" addmetadata="on" reopenOnTruncate="on")
+rsyslog_conf_viaq_mmk8s_input:
+
+  - name: 'mmk8s'
+    type: 'templates'
+    path: '{{rsyslog_config_dir}}'
+    sections:
+
+      - options: |-
+          input(type="imfile" file="{{ rsyslog_viaq_log_dir }}/*.log" tag="kubernetes" addmetadata="on" reopenOnTruncate="on")
           
           if ((strlen($!CONTAINER_NAME) > 0) and (strlen($!CONTAINER_ID_FULL) > 0)) or
-              ((strlen($!metadata) > 0) and (strlen($!metadata!filename) > 0) and ($!metadata!filename startswith "{{rsyslog_log_dir}}/")) then {
-              if ((strlen($!metadata) > 0) and (strlen($!metadata!filename) > 0) and ($!metadata!filename startswith "{{rsyslog_log_dir}}/")) then {
+              ((strlen($!metadata) > 0) and (strlen($!metadata!filename) > 0) and ($!metadata!filename startswith "{{rsyslog_viaq_log_dir}}/")) then {
+              if ((strlen($!metadata) > 0) and (strlen($!metadata!filename) > 0) and ($!metadata!filename startswith "{{rsyslog_viaq_log_dir}}/")) then {
                   if $msg startswith "{" then {
                       action(type="mmjsonparse" cookie="") # parse entire message as json
                   } else {
@@ -77,7 +86,7 @@ rsyslog_rulebase_viaq_k8s_filename:
 
       - options: |-
           version=2
-          rule=:{{ rsyslog_log_dir }}/%pod_name:char-to:_%_%namespace_name:char-to:_%_%container_name_and_id:char-to:.%.log
+          rule=:{{ rsyslog_viaq_log_dir }}/%pod_name:char-to:_%_%namespace_name:char-to:_%_%container_name_and_id:char-to:.%.log
 
 rsyslog_rulebase_viaq_k8s_container_name:
 
@@ -95,6 +104,7 @@ rsyslog_rulebase_viaq_k8s_container_name:
           rule=:%container_name:rest%
 
 rsyslog_rulebase_viaq_crio:
+
   - name: 'crio'
     filename: 'crio.rulebase'
     nocomment: 'true'
