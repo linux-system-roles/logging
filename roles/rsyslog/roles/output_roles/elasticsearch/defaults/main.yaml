@@ -126,7 +126,7 @@ rsyslog_conf_es_elasticsearch:
                   allowUnsignedCerts = "{{ res.allowUnsignedCerts | default("off") }}"
                   retryruleset="{{ res.retryruleset | default("try_es") }}"
                   usehttps="{{ res.usehttps | default("on") }}"
-          {% if use_omelasticsearch_cert | default(False) %}
+          {% if use_omelasticsearch_cert | default(true) %}
                   tls.cacert="{{ res.ca_cert|default("/etc/rsyslog.d/elasticsearch/es-ca.crt") }}"
                   tls.mycert="{{ res.cert|default("/etc/rsyslog.d/elasticsearch/es-cert.pem") }}"
                   tls.myprivkey="{{ res.key|default("/etc/rsyslog.d/elasticsearch/es-key.pem") }}"
@@ -152,7 +152,7 @@ rsyslog_conf_es_elasticsearch:
                     allowUnsignedCerts = "{{ res.allowUnsignedCerts | default("off") }}"
                     retryruleset="{{ res.retryruleset | default("try_es") }}"
                     usehttps="{{ res.usehttps | default("on") }}"
-          {% if use_omelasticsearch_cert | default(False) %}
+          {% if use_omelasticsearch_cert | default(true) %}
                     tls.cacert="{{ res.ca_cert|default("/etc/rsyslog.d/elasticsearch/es-ca.crt") }}"
                     tls.mycert="{{ res.cert|default("/etc/rsyslog.d/elasticsearch/es-cert.pem") }}"
                     tls.myprivkey="{{ res.key|default("/etc/rsyslog.d/elasticsearch/es-key.pem") }}"
@@ -179,7 +179,7 @@ rsyslog_conf_es_elasticsearch:
                     retryruleset="{{ res.retryruleset | default("try_es") }}"
           {% endif %}
                     usehttps="{{ res.usehttps | default("on") }}"
-          {% if use_omelasticsearch_cert | default(False) %}
+          {% if use_omelasticsearch_cert | default(true) %}
                     tls.cacert="{{ res.ca_cert|default("/etc/rsyslog.d/elasticsearch/es-ca.crt") }}"
                     tls.mycert="{{ res.cert|default("/etc/rsyslog.d/elasticsearch/es-cert.pem") }}"
                     tls.myprivkey="{{ res.key|default("/etc/rsyslog.d/elasticsearch/es-key.pem") }}"
@@ -206,7 +206,7 @@ rsyslog_conf_es_elasticsearch:
                     retryruleset="{{ res.retryruleset | default("try_es") }}"
           {% endif %}
                     usehttps="{{ res.usehttps | default("on") }}"
-          {% if use_omelasticsearch_cert | default(False) %}
+          {% if use_omelasticsearch_cert | default(true) %}
                     tls.cacert="{{ res.ca_cert|default("/etc/rsyslog.d/elasticsearch/es-ca.crt") }}"
                     tls.mycert="{{ res.cert|default("/etc/rsyslog.d/elasticsearch/es-cert.pem") }}"
                     tls.myprivkey="{{ res.key|default("/etc/rsyslog.d/elasticsearch/es-key.pem") }}"
