@@ -29,6 +29,7 @@ rsyslog_viaq_k8s_rules:
   - '{{ rsyslog_rulebase_viaq_k8s_filename }}'
   - '{{ rsyslog_rulebase_viaq_k8s_container_name }}'
   - '{{ rsyslog_rulebase_viaq_crio }}'
+  - '{{ rsyslog_rulebase_viaq_k8s_multiline }}'
 
 # Default Viaq-k8s configuration options
 # ---------------------------------
@@ -40,7 +41,7 @@ rsyslog_conf_viaq_mmk8s_module:
 
   - name: 'mmk8s'
     type: 'modules'
-    path: '{{rsyslog_config_dir}}'
+    path: '{{rsyslog_file_config_dir}}'
     sections:
 
       - options: |-
@@ -52,21 +53,64 @@ rsyslog_conf_viaq_mmk8s_module:
 
 rsyslog_conf_viaq_mmk8s_input:
 
-  - name: 'mmk8s'
-    type: 'templates'
-    path: '{{rsyslog_config_dir}}'
+  - name: '10-mmk8s'
+    type: 'format'
+    path: '{{rsyslog_file_config_dir}}'
     sections:
 
       - options: |-
+          {% if use_rsyslog_image|bool %}
+          # NOTE: endmsg.regex is available in 3.38.0 and newer
+          # for crio, the end of message is when the value "F" is in the logtag field
+          # for docker json-file, it is when the "log" field value ends with "\n"
+          # however, since imfile processing happens _before_ the field parsing, we have to
+          # rely on two regular expressions - basically look for the pattern \n"}$ for the
+          # string at the end of the message, or \n"," for the string in the middle of
+          # a message
+          input(type="imfile"
+                file="{{ rsyslog_viaq_log_dir }}/*.log"
+                tag="kubernetes" addmetadata="on" reopenOnTruncate="on"
+                discardTruncatedMsg="on" msgDiscardingError="off"
+                endmsg.regex="(^[^ ]+ (stdout|stderr) F )|(\\n\"}$)|(\\n\",\")") # "
+          {% else %}
           input(type="imfile" file="{{ rsyslog_viaq_log_dir }}/*.log" tag="kubernetes" addmetadata="on" reopenOnTruncate="on")
+          {% endif %}
 
           if ((strlen($!CONTAINER_NAME) > 0) and (strlen($!CONTAINER_ID_FULL) > 0)) or
               ((strlen($!metadata) > 0) and (strlen($!metadata!filename) > 0) and ($!metadata!filename startswith "{{rsyslog_viaq_log_dir}}/")) then {
               if ((strlen($!metadata) > 0) and (strlen($!metadata!filename) > 0) and ($!metadata!filename startswith "{{rsyslog_viaq_log_dir}}/")) then {
                   if $msg startswith "{" then {
-                      action(type="mmjsonparse" cookie="") # parse entire message as json
+                      action(type="mmnormalize" rulebase="{{ rsyslog_config_dir }}/multiline-json.rulebase")
+                      foreach ($.ii in $!multilinejson) do {
+                          if strlen($!@timestamp) == 0 then {
+                              set $!@timestamp = $.ii!time;
+                          }
+                          if strlen($!stream) == 0 then {
+                              set $!stream = $.ii!stream;
+                          }
+                          if strlen($!log) == 0 then {
+                              set $!log = $.ii!log;
+                          } else {
+                              reset $!log = $!log & $.ii!log;
+                          }
+                      }
+                      unset $!multilinejson;
                   } else {
                       action(type="mmnormalize" rulebase="{{ rsyslog_config_dir }}/crio.rulebase")
+                      foreach ($.ii in $!multilinecrio) do {
+                          if strlen($!@timestamp) == 0 then {
+                              set $!@timestamp = $.ii!time;
+                          }
+                          if strlen($!stream) == 0 then {
+                              set $!stream = $.ii!stream;
+                          }
+                          if strlen($!log) == 0 then {
+                              set $!log = $.ii!log;
+                          } else {
+                              reset $!log = $!log & $.ii!log;
+                          }
+                      }
+                      unset $!multilinecrio;
                   }
               }
               action(type="mmkubernetes"
@@ -81,7 +125,7 @@ rsyslog_rulebase_viaq_k8s_filename:
   - name: 'k8s_filename'
     filename: 'k8s_filename.rulebase'
     nocomment: 'true'
-    path: '{{rsyslog_config_dir }}'
+    path: '{{rsyslog_file_config_dir}}'
     sections:
 
       - options: |-
@@ -93,12 +137,11 @@ rsyslog_rulebase_viaq_k8s_container_name:
   - name: 'k8s_container_name'
     filename: 'k8s_container_name.rulebase'
     nocomment: 'true'
-    path: '{{rsyslog_config_dir }}'
+    path: '{{rsyslog_file_config_dir}}'
     sections:
 
       - options: |-
           version=2
-          rule=:%k8s_prefix:char-to:_%_%container_name:char-to:.%.%container_hash:char-to:_%_%pod_name:char-to:_%_%namespace_name:char-to:_%_%not_used_1:char-to:_%_%not_used_2:rest%
           rule=:%k8s_prefix:char-to:_%_%container_name:char-to:_%_%pod_name:char-to:_%_%namespace_name:char-to:_%_%not_used_1:char-to:_%_%not_used_2:rest%
           # not a kubernetes container
           rule=:%container_name:rest%
@@ -108,8 +151,39 @@ rsyslog_rulebase_viaq_crio:
   - name: 'crio'
     filename: 'crio.rulebase'
     nocomment: 'true'
-    path: '{{rsyslog_config_dir }}'
+    path: '{{rsyslog_file_config_dir}}'
     sections:
       - options: |-
           version=2
-          rule=:%time:word% %stream:word% %logtag:word% %log:rest%
+          rule=:%{"name":"multilinecrio", "type":"repeat",
+                      "parser":[
+                                 {"type":"word", "name":"time"},
+                                 {"type":"literal", "text":" "},
+                                 {"type":"word", "name":"stream"},
+                                 {"type":"literal", "text":" "},
+                                 {"type":"word", "name":"partial"},
+                                 {"type":"literal", "text":" "},
+                                 {"type":"char-sep", "name":"log", "extradata":"\n"}
+                               ],
+                      "while":[
+                                 {"type":"literal", "text":"\n"},
+                              ]
+                   }%
+
+rsyslog_rulebase_viaq_k8s_multiline:
+
+  - name: 'multiline'
+    filename: 'multiline-json.rulebase'
+    nocomment: 'true'
+    path: '{{rsyslog_file_config_dir}}'
+    sections:
+      - options: |-
+          version=2
+          rule=:%{"name":"multilinejson", "type":"repeat", "option.permitMismatchInParser": true,
+                      "parser":[
+                                 {"type":"json", "name":"."}
+                               ],
+                      "while":[
+                                 {"type":"char-sep", "extradata":"{"}
+                              ]
+                   }%

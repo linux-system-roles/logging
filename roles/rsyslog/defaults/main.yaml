@@ -17,15 +17,36 @@ rsyslog_default: True
 # Top directory to place logs
 rsyslog_system_log_dir: '/var/log'
 
-# .. envvar:: rsyslog_config_dir
+# .. envvar:: rsyslog_parent_config_dir
 #
-# Configuration directory
-rsyslog_config_dir: '/etc/rsyslog.d'
+# Parent configuration directory
+rsyslog_parent_config_dir: '/etc'
+
+# .. envvar:: rsyslog_file_config_dir
+#
+# Path the generated files are placed.  This is useful when generating config files
+# to be placed in an arbitrary directory for the later use.
+rsyslog_file_config_dir: '{{rsyslog_config_dir}}'
+
+# .. envvar:: rsyslog_mode
+#
+# Default mode for the config files
+rsyslog_mode: '0400'
 
 # .. envvar:: rsyslog_work_dir
 #
 # Rsyslog work directory
 rsyslog_work_dir: '/var/lib/rsyslog'
+
+# .. envvar:: rsyslog_max_message_size
+#
+# Rsyslog maximum supported message size
+rsyslog_max_message_size: '8192'
+
+# .. envvar:: use_rsyslog_image
+#
+# rsyslog is installed in a container
+use_rsyslog_image: false
 
 # .. envvar:: rsyslog_capabilities
 #
@@ -288,12 +309,12 @@ rsyslog_host_forward: []
 # .. envvar:: rsyslog_weight_map
 #
 # This is a dictionary map of different configuration "types" corresponding to
-# numbers used to sort configuration files in :file:`{{rsyslog_config_dir}}` directory
+# numbers used to sort configuration files in :file:`{{rsyslog_file_config_dir}}` directory
 # (configuration order is important). You can specify a type in the
 # configuration by using the ``item.type`` parameter.
 #
 # If you change the default weight map values, you will most likely need to
-# remove all files from :file:`{{rsyslog_config_dir}}` to reset the configuration.
+# remove all files from :file:`{{rsyslog_file_config_dir}}` to reset the configuration.
 #
 # See :ref:`rsyslog_rules` for more details.
 rsyslog_weight_map:
@@ -311,6 +332,7 @@ rsyslog_weight_map:
   'rules': '50'
   'ruleset': '50'
   'rulesets': '50'
+  'format': '60'
   'input': '90'
   'inputs': '90'
 
@@ -374,7 +396,13 @@ rsyslog_conf_global_options:
     options: |-
       global(
         defaultNetstreamDriver="{{ rsyslog_default_netstream_driver }}"
+      {% if use_rsyslog_image|bool %}
+        workDirectory=`echo $RSYSLOG_WORKDIRECTORY`
+      {% else %}
         workDirectory="{{ rsyslog_work_dir }}"
+      {% endif %}
+        oversizemsg.report="off"
+        oversizemsg.input.mode="accept"
       {% if rsyslog_pki|bool and "tls" in rsyslog_capabilities %}
         defaultNetstreamDriverCAFile="{{ rsyslog_pki_path + '/' + rsyslog_pki_realm + '/' + rsyslog_pki_ca }}"
       {%   if rsyslog_default_driver_authmode != "anon" or "network" in rsyslog_capabilities %}
@@ -471,8 +499,8 @@ rsyslog_conf_common_defaults:
 
       - comment: 'Set default permissions for all log files'
         options: |-
-          $FileOwner {{ rsyslog_file_owner }}
-          $FileGroup {{ rsyslog_file_group }}
+          $FileOwner {{ rsyslog_user }}
+          $FileGroup {{ rsyslog_group }}
           $FileCreateMode 0640
           $DirCreateMode 0755
           $Umask 0022

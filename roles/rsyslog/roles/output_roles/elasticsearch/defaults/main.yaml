@@ -24,7 +24,9 @@ rsyslog_elasticsearch:
 rsyslog_elasticsearch_rules:
 
   - '{{ rsyslog_conf_es_main_modules }}'
+  - '{{ rsyslog_conf_es_elasticsearch_templates }}'
   - '{{ rsyslog_conf_es_elasticsearch }}'
+  - '{{ rsyslog_conf_es_elasticsearch_call_ruleset }}'
 
 # Default elasticsearch configuration options [[[
 # ---------------------------------
@@ -40,11 +42,11 @@ rsyslog_conf_es_main_modules:
           # Send to ElasticSearch
           module(load="omelasticsearch")
 
-rsyslog_conf_es_elasticsearch:
+rsyslog_conf_es_elasticsearch_templates:
 
-  - name: 'elasticsearch'
-    type: 'output'
-    path: '{{ rsyslog_config_dir }}'
+  - name: 'elasticsearch-templates'
+    type: 'template'
+    path: '{{ rsyslog_file_config_dir }}'
     sections:
 
       - options: |-
@@ -71,9 +73,22 @@ rsyslog_conf_es_elasticsearch:
 
           template(name="index_template" type="string" string="%$.index_name%")
           template(name="id_template" type="string" string="%$.es_msg_id%")
+          
+rsyslog_conf_es_elasticsearch:
 
+  - name: '00-elasticsearch.conf'
+    type: 'format'
+    path: '{{ rsyslog_file_config_dir }}'
+    sections:
+
+      - options: |-
+          # omelasticsearch
           ruleset(name="error_es") {
-              action(type="omfile" template="es_template_nl" file="{{rsyslog_work_dir}}/es-bulk-errors.log")
+          {% if use_rsyslog_image|bool %}
+            action(type="omfile" template="es_template_nl" file=`echo $RSYSLOG_BULK_ERRORS`)
+          {% else %}
+            action(type="omfile" template="es_template_nl" file="{{rsyslog_work_dir}}/es-bulk-errors.log")
+          {% endif %}
           }
 
           ruleset(name="try_es") {
@@ -111,9 +126,15 @@ rsyslog_conf_es_elasticsearch:
           {% if loop.length == 1 %}
               action(
                   type="omelasticsearch"
+          {% if use_rsyslog_image|bool %}
+                  name=`echo $ES_OUTPUT_NAME`
+                  server=`echo $ES_HOST`
+                  serverport=`echo $ES_PORT`
+          {% else %}
                   name="{{ res.name | default('viaq-elasticsearch') }}"
                   server="{{ res.server_host | default('logging-es') }}"
                   serverport="{{ res.server_port | default(9200) | int }}"
+          {% endif %}
                   template="{{ res.template | default("es_template") }}"
                   searchIndex="{{ res.searchIndex | default("index_template") }}"
                   dynSearchIndex="{{ res.dynSearchIndex | default("on") }}"
@@ -123,23 +144,49 @@ rsyslog_conf_es_elasticsearch:
                   bulkid="{{ res.bulkid | default("id_template") }}"
                   dynbulkid="{{ res.dynbulkid | default("on") }}"
                   retryfailures="{{ res.retryfailures | default("on") }}"
-                  allowUnsignedCerts = "{{ res.allowUnsignedCerts | default("off") }}"
+                  allowUnsignedCerts="{{ res.allowUnsignedCerts | default("off") }}"
                   retryruleset="{{ res.retryruleset | default("try_es") }}"
                   usehttps="{{ res.usehttps | default("on") }}"
           {% if use_omelasticsearch_cert | default(true) %}
-                  tls.cacert="{{ res.ca_cert|default("/etc/rsyslog.d/elasticsearch/es-ca.crt") }}"
-                  tls.mycert="{{ res.cert|default("/etc/rsyslog.d/elasticsearch/es-cert.pem") }}"
-                  tls.myprivkey="{{ res.key|default("/etc/rsyslog.d/elasticsearch/es-key.pem") }}"
+          {% if use_rsyslog_image|bool %}
+                  tls.cacert=`echo $ES_CA`
+                  tls.mycert=`echo $ES_CLIENT_CERT`
+                  tls.myprivkey=`echo $ES_CLIENT_KEY`
+          {% else %}
+                  tls.cacert="{{ res.ca_cert|default('/etc/rsyslog.d/elasticsearch/es-ca.crt') }}"
+                  tls.mycert="{{ res.cert|default('/etc/rsyslog.d/elasticsearch/es-cert.pem') }}"
+                  tls.myprivkey="{{ res.key|default('/etc/rsyslog.d/elasticsearch/es-key.pem') }}"
+          {% endif %}
+          {% endif %}
+          {% if use_rsyslog_image | default(true) %}
+                  queue.filename="es-app"
+                  queue.spoolDirectory=`echo $RSYSLOG_SPOOLDIRECTORY`
+                  queue.type=`echo $ES_QUEUE_TYPE`
+                  queue.maxDiskSpace=`echo $ES_QUEUE_MAXDISKSPACE`
+                  queue.maxFileSize=`echo $ES_QUEUE_MAXFILESIZE`
+                  queue.checkpointInterval=`echo $ES_QUEUE_CHECKPOINTINTERVAL`
+                  queue.syncqueuefiles="on"
           {% endif %}
               )
           {% else %}
           {% if loop.first %}
+          {% if use_rsyslog_image|bool %}
+              if ( $.logs_collection == "{{ res.logs_collections_name }}" ) and ($.index_prefix startswith "{{ res.index_prefix }}")
+                 or ((`echo $ES_HOST` == `echo $OPS_HOST`) and (`echo $ES_PORT` == `echo $OPS_PORT`)) then {
+          {% else %}
               if ( $.logs_collection == "{{ res.logs_collections_name }}" ) and ($.index_prefix startswith "{{ res.index_prefix }}") then {
+          {% endif %}
                 action(
                     type="omelasticsearch"
+          {% if use_rsyslog_image|bool %}
+                    name=`echo $ES_OUTPUT_NAME`
+                    server=`echo $ES_HOST`
+                    serverport=`echo $ES_PORT`
+          {% else %}
                     name="{{ res.name | default('viaq-elasticsearch') }}"
                     server="{{ res.server_host | default('logging-es') }}"
                     serverport="{{ res.server_port | default(9200) | int }}"
+          {% endif %}
                     template="{{ res.template | default("es_template") }}"
                     searchIndex="{{ res.searchIndex | default("index_template") }}"
                     dynSearchIndex="{{ res.dynSearchIndex | default("on") }}"
@@ -149,22 +196,43 @@ rsyslog_conf_es_elasticsearch:
                     bulkid="{{ res.bulkid | default("id_template") }}"
                     dynbulkid="{{ res.dynbulkid | default("on") }}"
                     retryfailures="{{ res.retryfailures | default("on") }}"
-                    allowUnsignedCerts = "{{ res.allowUnsignedCerts | default("off") }}"
+                    allowUnsignedCerts="{{ res.allowUnsignedCerts | default("off") }}"
                     retryruleset="{{ res.retryruleset | default("try_es") }}"
                     usehttps="{{ res.usehttps | default("on") }}"
           {% if use_omelasticsearch_cert | default(true) %}
-                    tls.cacert="{{ res.ca_cert|default("/etc/rsyslog.d/elasticsearch/es-ca.crt") }}"
-                    tls.mycert="{{ res.cert|default("/etc/rsyslog.d/elasticsearch/es-cert.pem") }}"
-                    tls.myprivkey="{{ res.key|default("/etc/rsyslog.d/elasticsearch/es-key.pem") }}"
+          {% if use_rsyslog_image|bool %}
+                    tls.cacert=`echo $ES_CA`
+                    tls.mycert=`echo $ES_CLIENT_CERT`
+                    tls.myprivkey=`echo $ES_CLIENT_KEY`
+          {% else %}
+                    tls.cacert="{{ res.ca_cert|default('/etc/rsyslog.d/elasticsearch/es-ca.crt') }}"
+                    tls.mycert="{{ res.cert|default('/etc/rsyslog.d/elasticsearch/es-cert.pem') }}"
+                    tls.myprivkey="{{ res.key|default('/etc/rsyslog.d/elasticsearch/es-key.pem') }}"
+          {% endif %}
+          {% endif %}
+          {% if use_rsyslog_image | default(true) %}
+                    queue.filename="es-app"
+                    queue.spoolDirectory=`echo $RSYSLOG_SPOOLDIRECTORY`
+                    queue.type=`echo $ES_QUEUE_TYPE`
+                    queue.maxDiskSpace=`echo $ES_QUEUE_MAXDISKSPACE`
+                    queue.maxFileSize=`echo $ES_QUEUE_MAXFILESIZE`
+                    queue.checkpointInterval=`echo $ES_QUEUE_CHECKPOINTINTERVAL`
+                    queue.syncqueuefiles="on"
           {% endif %}
                 )
           {% elif loop.last %}
               else {
                 action(
                     type="omelasticsearch"
+          {% if use_rsyslog_image|bool %}
+                    name=`echo $ES_OPS_OUTPUT_NAME`
+                    server=`echo $OPS_HOST`
+                    serverport=`echo $OPS_PORT`
+          {% else %}
                     name="{{ res.name | default('viaq-elasticsearch') }}"
                     server="{{ res.server_host | default('logging-es') }}"
                     serverport="{{ res.server_port | default(9200) | int }}"
+          {% endif %}
                     template="{{ res.template | default("es_template") }}"
                     searchIndex="{{ res.searchIndex | default("index_template") }}"
                     dynSearchIndex="{{ res.dynSearchIndex | default("on") }}"
@@ -174,24 +242,50 @@ rsyslog_conf_es_elasticsearch:
                     bulkid="{{ res.bulkid | default("id_template") }}"
                     dynbulkid="{{ res.dynbulkid | default("on") }}"
                     retryfailures="{{ res.retryfailures | default("on") }}"
-                    allowUnsignedCerts = "{{ res.allowUnsignedCerts | default("off") }}"
+                    allowUnsignedCerts="{{ res.allowUnsignedCerts | default("off") }}"
           {% if res.retryfailures|default("on") == "on" %}
                     retryruleset="{{ res.retryruleset | default("try_es") }}"
           {% endif %}
                     usehttps="{{ res.usehttps | default("on") }}"
           {% if use_omelasticsearch_cert | default(true) %}
-                    tls.cacert="{{ res.ca_cert|default("/etc/rsyslog.d/elasticsearch/es-ca.crt") }}"
-                    tls.mycert="{{ res.cert|default("/etc/rsyslog.d/elasticsearch/es-cert.pem") }}"
-                    tls.myprivkey="{{ res.key|default("/etc/rsyslog.d/elasticsearch/es-key.pem") }}"
+          {% if use_rsyslog_image|bool %}
+                    tls.cacert=`echo $OPS_CA`
+                    tls.mycert=`echo $OPS_CLIENT_CERT`
+                    tls.myprivkey=`echo $OPS_CLIENT_KEY`
+          {% else %}
+                    tls.cacert="{{ res.ca_cert|default('/etc/rsyslog.d/elasticsearch/es-ca.crt') }}"
+                    tls.mycert="{{ res.cert|default('/etc/rsyslog.d/elasticsearch/es-cert.pem') }}"
+                    tls.myprivkey="{{ res.key|default('/etc/rsyslog.d/elasticsearch/es-key.pem') }}"
+          {% endif %}
+          {% endif %}
+          {% if use_rsyslog_image|bool %}
+                    queue.filename="es-app"
+                    queue.spoolDirectory=`echo $RSYSLOG_SPOOLDIRECTORY`
+                    queue.type=`echo $ES_QUEUE_TYPE`
+                    queue.maxDiskSpace=`echo $ES_QUEUE_MAXDISKSPACE`
+                    queue.maxFileSize=`echo $ES_QUEUE_MAXFILESIZE`
+                    queue.checkpointInterval=`echo $ES_QUEUE_CHECKPOINTINTERVAL`
+                    queue.syncqueuefiles="on"
           {% endif %}
                 )
           {% else %}
+          {% if use_rsyslog_image|bool %}
+              else if ( $.logs_collection == "{{ res.logs_collections_name }}" ) and ($.index_prefix startswith "{{ res.index_prefix }}")
+                 or ((`echo $ES_HOST` == `echo $OPS_HOST`) and (`echo $ES_PORT` == `echo $OPS_PORT`)) then {
+          {% else %}
               else if ( $.logs_collection == "{{ res.logs_collections_name }}" ) and ($.index_prefix startswith "{{ res.index_prefix }}") then {
+          {% endif %}
                 action(
                     type="omelasticsearch"
+          {% if use_rsyslog_image|bool %}
+                    name=`echo $ES_OUTPUT_NAME`
+                    server=`echo $ES_HOST`
+                    serverport=`echo $ES_PORT`
+          {% else %}
                     name="{{ res.name | default('viaq-elasticsearch') }}"
                     server="{{ res.server_host | default('logging-es') }}"
                     serverport="{{ res.server_port | default(9200) | int }}"
+          {% endif %}
                     template="{{ res.template | default("es_template") }}"
                     searchIndex="{{ res.searchIndex | default("index_template") }}"
                     dynSearchIndex="{{ res.dynSearchIndex | default("on") }}"
@@ -201,15 +295,30 @@ rsyslog_conf_es_elasticsearch:
                     bulkid="{{ res.bulkid | default("id_template") }}"
                     dynbulkid="{{ res.dynbulkid | default("on") }}"
                     retryfailures="{{ res.retryfailures | default("on") }}"
-                    allowUnsignedCerts = "{{ res.allowUnsignedCerts | default("off") }}"
+                    allowUnsignedCerts="{{ res.allowUnsignedCerts | default("off") }}"
           {% if res.retryfailures|default("on") == "on" %}
                     retryruleset="{{ res.retryruleset | default("try_es") }}"
           {% endif %}
                     usehttps="{{ res.usehttps | default("on") }}"
           {% if use_omelasticsearch_cert | default(true) %}
-                    tls.cacert="{{ res.ca_cert|default("/etc/rsyslog.d/elasticsearch/es-ca.crt") }}"
-                    tls.mycert="{{ res.cert|default("/etc/rsyslog.d/elasticsearch/es-cert.pem") }}"
-                    tls.myprivkey="{{ res.key|default("/etc/rsyslog.d/elasticsearch/es-key.pem") }}"
+          {% if use_rsyslog_image|bool %}
+                    tls.cacert=`echo $ES_CA`
+                    tls.mycert=`echo $ES_CLIENT_CERT`
+                    tls.myprivkey=`echo $ES_CLIENT_KEY`
+          {% else %}
+                    tls.cacert="{{ res.ca_cert|default('/etc/rsyslog.d/elasticsearch/es-ca.crt') }}"
+                    tls.mycert="{{ res.cert|default('/etc/rsyslog.d/elasticsearch/es-cert.pem') }}"
+                    tls.myprivkey="{{ res.key|default('/etc/rsyslog.d/elasticsearch/es-key.pem') }}"
+          {% endif %}
+          {% endif %}
+          {% if use_rsyslog_image|bool %}
+                    queue.filename="es-app"
+                    queue.spoolDirectory=`echo $RSYSLOG_SPOOLDIRECTORY`
+                    queue.type=`echo $ES_QUEUE_TYPE`
+                    queue.maxDiskSpace=`echo $ES_QUEUE_MAXDISKSPACE`
+                    queue.maxFileSize=`echo $ES_QUEUE_MAXFILESIZE`
+                    queue.checkpointInterval=`echo $ES_QUEUE_CHECKPOINTINTERVAL`
+                    queue.syncqueuefiles="on"
           {% endif %}
                 )
           {% endif %}
@@ -218,4 +327,14 @@ rsyslog_conf_es_elasticsearch:
           {% endfor %}
           }
 
+rsyslog_conf_es_elasticsearch_call_ruleset:
+
+  - name: '30-elasticsearch.conf'
+    type: 'format'
+    path: '{{ rsyslog_file_config_dir }}'
+    sections:
+
+      - options: |-
+          # call the elasticsearch output ruleset
           call try_es
+

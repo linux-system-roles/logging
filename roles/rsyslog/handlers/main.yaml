@@ -3,3 +3,4 @@
   service:
     name: 'rsyslog'
     state: 'restarted'
+  when: rsyslog_file_owner == 'root'

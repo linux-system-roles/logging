@@ -165,27 +165,35 @@ Deployed Results
 ================
 Viaq role
 -----------------
-Once the command-line ansible-playbook is run with `viaq` in `rsyslog_logs_collections`, the following configuration files will be deployed.
+Once the command-line ansible-playbook is run with `viaq` and `viaq-k8s` in `rsyslog_logs_collections`, the following configuration files will be deployed.
 
 ```
 /etc/rsyslog.conf
      rsyslog.d/00-global.conf
                05-common-defaults.conf
+               10-elasticsearch_main.conf
                10-local-modules.conf
-               10-viaq_main.conf
-               viaq/10-mmk8s.conf
-                    20-viaq_formatting.conf
-                    k8s_container_name.rulebase
-                    k8s_filename.rulebase
-                    parse_json.rulebase
-                    normalize_level.json
-                    prio_to_level.json
-                elasticsearch/30-elasticsearch.conf
-                    es-ca.crt
-                    es-cert.pem
-                    es-key.pem
-                    mmk8s.ca.crt
-                    mmk8s.token
+               10-local-viaq-modules.conf
+               10-mmk8s.conf
+               10-viaq-modules.conf
+               20-elasticsearch-templates.conf
+               20-viaq-templates.conf
+               60-00-elasticsearch.conf.conf
+               60-10-mmk8s.conf
+               60-20-viaq-formatting.conf
+               60-30-elasticsearch.conf.conf
+               crio.rulebase
+               k8s_container_name.rulebase
+               k8s_filename.rulebase
+               multiline-json.rulebase
+               parse_json.rulebase
+               normalize_level.json
+               prio_to_level.json
+               es-ca.crt
+               es-cert.pem
+               es-key.pem
+               mmk8s.ca.crt
+               mmk8s.token
 ```
 
 Debops role
@@ -265,7 +273,11 @@ Variables in vars.yaml
 Common sub-variables
 --------------------
 - `rsyslog_system_log_dir`: System log directory.  Default to '/var/log'.
-- `rsyslog_config_dir`: Directory to store configuration files.  Default to '/etc/rsyslog.d'.
+- `rsyslog_config_dir`: Parent directory of the configuration files. Used inside of the config files.  Default to '/etc/rsyslog.d'.
+- `rsyslog_parent_config_dir`: Directory to store rsyslog.conf.  Default to '/etc'.
+- `rsyslog_files_config_dir`: Directory to locate rsyslog.conf. Used in deploying the config files.  Default to '/etc/rsyslog.d'.
+- `rsyslog_mode`:  Mode for the config files.  Default to '0400'
+- `rsyslog_max_message_size`: Maximum supported message size.  Default to 8k.
 - `rsyslog_work_dir`: Working directory.  Default to '/var/lib/rsyslog'.
 - `rsyslog_purge_original_conf`: By default, the Rsyslog configuration files are applied on top of pre-existing configuration files. To purge local files prior to setting new ones, set rsyslog_purge_original_conf variable to 'True', it will move all Rsyslog configuration files to a backup directory before deploying the new configuration files. Defaults to 'False'.
 - `rsyslog_backup_dir`: By default, the Rsyslog backs up the pre-existing configuration files in a temp dir as tar-gz format - /tmp/rsyslog.d-XXXXXX/backup.tgz.  By setting a path to rsyslog_backup_dir, the path is used as the backup directory.  Note that the directory should exist and have the permission to create the backup file both in the file mode and the selinux.
@@ -273,6 +285,8 @@ Common sub-variables
 - `rsyslog_unprivileged`: If set to True, you could specify non-root rsyslog_user and rsyslog_group.  If ansible_distribution is one of "CentOS", "RedHat", and "Fedora", default to True.  Otherwise, False.
 - `rsyslog_user`: Owner user of rsyslogd.  Default to 'syslog' if rsyslog_unprivileged is True.  Otherwise, 'root'.
 - `rsyslog_group`: Owner group of rsyslogd.  Default to 'syslog' if rsyslog_unprivileged is True.  Otherwise, 'root'.
+- `rsyslog_purge_confs`: If set to 'True', existing files in `rsyslog_config_dir` are purged.  Default to 'False'.
+- `use_rsyslog_image`: If set to 'True', the rsyslog is run in the OpenShift container.
 
 Viaq sub-variables
 ------------------

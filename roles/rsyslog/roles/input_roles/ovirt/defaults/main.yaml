@@ -74,7 +74,7 @@ rsyslog_conf_ovirt_formatting:
 
   - name: 'ovirt_formatting'
     type: 'template'
-    path: '{{ rsyslog_config_dir }}'
+    path: '{{ rsyslog_file_config_dir }}'
     sections:
 
       - options: |-
@@ -155,7 +155,7 @@ rsyslog_rulebase_ovirt_engine:
   - name: 'ovirt_engine'
     filename: 'ovirt_engine.rulebase'
     nocomment: 'true'
-    path: '{{ rsyslog_config_dir }}'
+    path: '{{ rsyslog_file_config_dir }}'
     sections:
       - options: |-
           version=2
@@ -165,7 +165,7 @@ rsyslog_rulebase_ovirt_vdsm:
   - name: 'ovirt_vdsm'
     filename: 'ovirt_vdsm.rulebase'
     nocomment: 'true'
-    path: '{{ rsyslog_config_dir }}'
+    path: '{{ rsyslog_file_config_dir }}'
     sections:
       - options: |-
           version=2
@@ -177,7 +177,7 @@ rsyslog_rulebase_ovirt_parse_json:
   - name: 'parse_json'
     filename: 'parse_json.rulebase'
     nocomment: 'true'
-    path: '{{rsyslog_config_dir }}'
+    path: '{{rsyslog_file_config_dir }}'
     sections:
 
       - options: |-

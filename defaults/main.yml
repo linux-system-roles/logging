@@ -9,3 +9,8 @@ logging_outputs: []
 logging_custom_config_files: []
 
 logging_purge_confs: false
+
+# Configuration directory
+# Unless this is set, "Set rsyslog_elasticsearch" fails.
+rsyslog_config_dir: '/etc/rsyslog.d'
+

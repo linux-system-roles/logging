@@ -24,6 +24,7 @@ rsyslog_viaq_rules:
 
   - '{{ rsyslog_conf_local_viaq_modules }}'
   - '{{ rsyslog_conf_viaq_main_modules }}'
+  - '{{ rsyslog_conf_viaq_templates }}'
   - '{{ rsyslog_conf_viaq_formatting }}'
   - '{{ rsyslog_rulebase_viaq_parse_json }}'
   - '{{ rsyslog_json_viaq_normalize_level }}'
@@ -48,7 +49,7 @@ rsyslog_conf_local_viaq_modules:
 
 rsyslog_conf_viaq_main_modules:
 
-  - name: 'viaq_main'
+  - name: 'viaq-modules'
     type: 'modules'
     sections:
 
@@ -58,27 +59,54 @@ rsyslog_conf_viaq_main_modules:
 
       - options: |-
           # Read from journal
+          {% if use_rsyslog_image|bool %}
+          module(load="imjournal" StateFile=`echo $RSYSLOG_IMJOURNAL_STATE` UsePid="both" RateLimit.Burst="{{ imjournal_ratelimit_burst|default(1000000) }}" RateLimit.Interval="{{ imjournal_ratelimit_interval|default(10) }}" PersistStateInterval="1000" WorkAroundJournalBug="on")
+          {% else %}
           module(load="imjournal" StateFile="{{ rsyslog_work_dir }}/imjournal.state" UsePid="both" RateLimit.Burst="{{ imjournal_ratelimit_burst|default(1000000) }}" RateLimit.Interval="{{ imjournal_ratelimit_interval|default(10) }}" PersistStateInterval="1000" WorkAroundJournalBug="on")
+          {% endif %}
 
       - options: |-
           # Normalize logs
           module(load="mmnormalize")
 
-rsyslog_conf_viaq_formatting:
+      - options: |-
+          # Stats for monitoring
+          {% if use_rsyslog_image|bool %}
+          module(load="impstats" interval="1" format="cee" log.syslog="off" log.file=`echo $RSYSLOG_IMPSTATS_FILE`)
+          {% else %}
+          module(load="impstats" interval="1" format="cee" log.syslog="off" log.file="{{ rsyslog_work_dir }}/impstats.json")
+          {% endif %}
 
-  - name: 'viaq_formatting'
-    type: 'template'
-    path: '{{rsyslog_config_dir }}'
+rsyslog_conf_viaq_templates:
+
+  - name: 'viaq-templates'
+    type: 'templates'
+    path: '{{ rsyslog_file_config_dir }}'
+    sections:
+
+      - options: |-
+          template(name="cnvt_to_viaq_timestamp" type="list") {
+              property(name="TIMESTAMP" dateFormat="rfc3339")
+          }
+
+          template(name="timegeneratedrfc3339" type="string" string="%timegenerated:::date-rfc3339%")
+
+rsyslog_conf_viaq_formatting:
+  - name: 'parse_json'
+    filename: 'parse_json.rulebase'
+    nocomment: 'true'
+    path: '{{ rsyslog_file_config_dir }}'
+    sections:
+
+  - name: '20-viaq-formatting'
+    type: 'format'
+    path: '{{ rsyslog_file_config_dir }}'
     sections:
 
       - options: |-
           # formatting
           lookup_table(name="prio_to_level" file="{{ rsyslog_config_dir }}/prio_to_level.json")
           lookup_table(name="normalize_level" file="{{ rsyslog_config_dir }}/normalize_level.json")
-
-          template(name="cnvt_to_viaq_timestamp" type="list") {
-              property(name="TIMESTAMP" dateFormat="rfc3339")
-          }
 
           # rsyslog 8.30.0 and later does case insensitive variable name comparison
           # which means $!MESSAGE is the same as $!message - HOWEVER - the case
@@ -271,13 +299,17 @@ rsyslog_conf_viaq_formatting:
               }
               unset $!PRIORITY;
               if strlen($!hostname) == 0 then {
-                  if (strlen($!kubernetes) > 0) and (strlen($!kubernetes!host)) > 0 then {
+                  if (strlen($!kubernetes) > 0) and (strlen($!kubernetes!host) > 0) then {
                       set $!hostname = $!kubernetes!host;
                   } else {
                       if strlen($!_HOSTNAME) > 0 then {
                           set $!hostname = $!_HOSTNAME;
                       } else {
-                          set $!hostname = $hostname;
+          {% if use_rsyslog_image|bool %}
+                          set $!hostname = `echo $HOSTNAME`;
+          {% else %}
+                          set $!hostname = $myhostname;
+          {% endif %}
                       }
                   }
               }
@@ -295,7 +327,11 @@ rsyslog_conf_viaq_formatting:
                   if strlen($!kubernetes!host) > 0 then {
                       set $!hostname = $!kubernetes!host;
                   } else {
-                      set $!hostname = $hostname;
+          {% if use_rsyslog_image|bool %}
+                      set $!hostname = `echo $HOSTNAME`;
+          {% else %}
+                      set $!hostname = $myhostname;
+          {% endif %}
                   }
               }
               if strlen($!@timestamp) == 0 then {
@@ -353,9 +389,12 @@ rsyslog_conf_viaq_formatting:
           # add pipeline_metadata
           set $!pipeline_metadata!collector!name = "rsyslog";
           set $!pipeline_metadata!collector!inputname = $inputname;
-          template(name="timegeneratedrfc3339" type="string" string="%timegenerated:::date-rfc3339%")
           set $!pipeline_metadata!collector!received_at = exec_template("timegeneratedrfc3339");
-          # not sure how to get hostname, ipaddr4, ipaddr6, version
+          {% if use_rsyslog_image|bool %}
+          set $!pipeline_metadata!collector!ipaddr4 = `echo $IPADDR4`;
+          set $!pipeline_metadata!collector!ipaddr6 = `echo $IPADDR6`;
+          set $!pipeline_metadata!collector!version = `echo $PIPELINE_VERSION`;
+          {% endif %}
           if (strlen($!file) == 0) and (strlen($!metadata) > 0) and (strlen($!metadata!filename) > 0) then {
               set $!file = $!metadata!filename;
           }
@@ -371,7 +410,7 @@ rsyslog_rulebase_viaq_parse_json:
   - name: 'parse_json'
     filename: 'parse_json.rulebase'
     nocomment: 'true'
-    path: '{{rsyslog_config_dir }}'
+    path: '{{ rsyslog_file_config_dir }}'
     sections:
 
       - options: |-
@@ -383,7 +422,7 @@ rsyslog_json_viaq_normalize_level:
   - name: 'normalize_level'
     filename: 'normalize_level.json'
     nocomment: 'true'
-    path: '{{rsyslog_config_dir }}'
+    path: '{{ rsyslog_file_config_dir }}'
     sections:
 
       - options: |-
@@ -413,7 +452,7 @@ rsyslog_json_viaq_prio_to_level:
   - name: 'prio_to_level'
     filename: 'prio_to_level.json'
     nocomment: 'true'
-    path: '{{rsyslog_config_dir }}'
+    path: '{{ rsyslog_file_config_dir }}'
     sections:
 
       - options: |-

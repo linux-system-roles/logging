@@ -4,7 +4,7 @@
     - name: Copy local Elasticsearch ca_certs to /etc/rsyslog.d directory in Rsyslog
       copy:
         src: '{{ item.ca_cert_src }}'
-        dest: '{{ rsyslog_config_dir }}'
+        dest: '{{ rsyslog_file_config_dir }}'
       with_items:
         - '{{ rsyslog_elasticsearch }}'
       when:
@@ -14,7 +14,7 @@
     - name: Copy local Elasticsearch certs to /etc/rsyslog.d directory in Rsyslog
       copy:
         src: '{{ item.cert_src }}'
-        dest: '{{ rsyslog_config_dir }}'
+        dest: '{{ rsyslog_file_config_dir }}'
       with_items:
         - '{{ rsyslog_elasticsearch }}'
       when:
@@ -24,7 +24,7 @@
     - name: Copy local Elasticsearch keys to /etc/rsyslog.d directory in Rsyslog
       copy:
         src: '{{ item.key_src }}'
-        dest: '{{ rsyslog_config_dir }}'
+        dest: '{{ rsyslog_file_config_dir }}'
       with_items:
         - '{{ rsyslog_elasticsearch }}'
       when:
