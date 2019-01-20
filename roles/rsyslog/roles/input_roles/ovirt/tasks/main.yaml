@@ -3,26 +3,6 @@
   set_fact:
     rsyslog_role_packages: "{{rsyslog_ovirt_prereq_packages|flatten|d([])}}+{{rsyslog_ovirt_packages|flatten|d([])}}"
     rsyslog_role_rules: "{{ rsyslog_ovirt_rules }}"
-    
-- name: Check if vdsm log file exist
-  stat:
-    path: /var/log/vdsm/vdsm.log
-  register: vdsm_log_exists
-
-- name: Check if engine log file exist
-  stat:
-    path: /var/log/ovirt-engine/engine.log
-  register: engine_log_exists
-
-- name: Set collect_ovirt_vdsm_log fact
-  set_fact:
-    collect_ovirt_vdsm_log: '{{ true if vdsm_log_exists.stat.exists else false }}'
-  when: collect_ovirt_vdsm_log|d(true)
-
-- name: Set collect_ovirt_engine_log fact
-  set_fact:
-    collect_ovirt_engine_log: '{{ true if engine_log_exists.stat.exists else false }}'
-  when: collect_ovirt_engine_log|d(true)
 
 - name: Install/Update role packages and generate role configuration files to role subdir
   include_role:
