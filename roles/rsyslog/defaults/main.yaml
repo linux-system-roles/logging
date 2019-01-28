@@ -52,7 +52,7 @@ rsyslog_message_reduction: False
 #
 # The pre-existing config files are archived in the tempdir and purged if the
 # rsyslog_purge_original_conf is set to `True`.  Default to 'False`.
-rsyslog_purge_original_conf: no
+rsyslog_purge_original_conf: False
 
 # rpm packages
 # adding rsyslog_logging_packages
