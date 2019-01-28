@@ -195,7 +195,7 @@
         name: rsyslog.service
         daemon_reload: yes
         enabled: yes
-        state: restarted
+        state: started
       when:
         - rsyslog_enabled|bool
         - not use_rsyslog_image|default(False)|bool
