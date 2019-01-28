@@ -22,7 +22,6 @@ rsyslog_elasticsearch:
 # ---------------------------
 
 rsyslog_elasticsearch_rules:
-
   - '{{ rsyslog_conf_es_main_modules }}'
   - '{{ rsyslog_conf_es_elasticsearch_templates }}'
   - '{{ rsyslog_conf_es_elasticsearch }}'
@@ -73,10 +72,10 @@ rsyslog_conf_es_elasticsearch_templates:
 
           template(name="index_template" type="string" string="%$.index_name%")
           template(name="id_template" type="string" string="%$.es_msg_id%")
-          
+
 rsyslog_conf_es_elasticsearch:
 
-  - name: '00-elasticsearch.conf'
+  - name: '00-elasticsearch'
     type: 'format'
     path: '{{ rsyslog_file_config_dir }}'
     sections:
@@ -158,7 +157,7 @@ rsyslog_conf_es_elasticsearch:
                   tls.myprivkey="{{ res.key|default('/etc/rsyslog.d/elasticsearch/es-key.pem') }}"
           {% endif %}
           {% endif %}
-          {% if use_rsyslog_image | default(true) %}
+          {% if use_rsyslog_image|bool %}
                   queue.filename="es-app"
                   queue.spoolDirectory=`echo $RSYSLOG_SPOOLDIRECTORY`
                   queue.type=`echo $ES_QUEUE_TYPE`
@@ -166,6 +165,14 @@ rsyslog_conf_es_elasticsearch:
                   queue.maxFileSize=`echo $ES_QUEUE_MAXFILESIZE`
                   queue.checkpointInterval=`echo $ES_QUEUE_CHECKPOINTINTERVAL`
                   queue.syncqueuefiles="on"
+          {% else %}
+                  queue.filename="{{ res.queue_filename|default('es-app') }}"
+                  queue.spoolDirectory="{{ res.queue_spooldir|default(rsyslog_es_q_spooldirectory) }}"
+                  queue.type="{{ res.queue_type|default(rsyslog_es_q_type) }}"
+                  queue.maxDiskSpace="{{ res.queue_max_disk_space|default(rsyslog_es_q_maxdiskspace) }}"
+                  queue.maxFileSize="{{ res.queue_max_file_size|default(rsyslog_es_q_maxfilesize) }}"
+                  queue.checkpointInterval="{{ res.queue_checkpoint_interval|default(rsyslog_es_q_checkpointinterval) }}"
+                  queue.syncqueuefiles="{{ res.queue_sync_files|default("on") }}"
           {% endif %}
               )
           {% else %}
@@ -210,7 +217,7 @@ rsyslog_conf_es_elasticsearch:
                     tls.myprivkey="{{ res.key|default('/etc/rsyslog.d/elasticsearch/es-key.pem') }}"
           {% endif %}
           {% endif %}
-          {% if use_rsyslog_image | default(true) %}
+          {% if use_rsyslog_image|bool %}
                     queue.filename="es-app"
                     queue.spoolDirectory=`echo $RSYSLOG_SPOOLDIRECTORY`
                     queue.type=`echo $ES_QUEUE_TYPE`
@@ -218,6 +225,14 @@ rsyslog_conf_es_elasticsearch:
                     queue.maxFileSize=`echo $ES_QUEUE_MAXFILESIZE`
                     queue.checkpointInterval=`echo $ES_QUEUE_CHECKPOINTINTERVAL`
                     queue.syncqueuefiles="on"
+          {% else %}
+                    queue.filename="{{ res.queue_filename|default('es-app') }}"
+                    queue.spoolDirectory="{{ res.queue_spooldir|default(rsyslog_es_q_spooldirectory) }}"
+                    queue.type="{{ res.queue_type|default(rsyslog_es_q_type) }}"
+                    queue.maxDiskSpace="{{ res.queue_max_disk_space|default(rsyslog_es_q_maxdiskspace) }}"
+                    queue.maxFileSize="{{ res.queue_max_file_size|default(rsyslog_es_q_maxfilesize) }}"
+                    queue.checkpointInterval="{{ res.queue_checkpoint_interval|default(rsyslog_es_q_checkpointinterval) }}"
+                    queue.syncqueuefiles="{{ res.queue_sync_files|default("on") }}"
           {% endif %}
                 )
           {% elif loop.last %}
@@ -266,6 +281,14 @@ rsyslog_conf_es_elasticsearch:
                     queue.maxFileSize=`echo $ES_QUEUE_MAXFILESIZE`
                     queue.checkpointInterval=`echo $ES_QUEUE_CHECKPOINTINTERVAL`
                     queue.syncqueuefiles="on"
+          {% else %}
+                    queue.filename="{{ res.queue_filename|default('es-app') }}"
+                    queue.spoolDirectory="{{ res.queue_spooldir|default(rsyslog_es_q_spooldirectory) }}"
+                    queue.type="{{ res.queue_type|default(rsyslog_es_q_type) }}"
+                    queue.maxDiskSpace="{{ res.queue_max_disk_space|default(rsyslog_es_q_maxdiskspace) }}"
+                    queue.maxFileSize="{{ res.queue_max_file_size|default(rsyslog_es_q_maxfilesize) }}"
+                    queue.checkpointInterval="{{ res.queue_checkpoint_interval|default(rsyslog_es_q_checkpointinterval) }}"
+                    queue.syncqueuefiles="{{ res.queue_sync_files|default("on") }}"
           {% endif %}
                 )
           {% else %}
@@ -319,6 +342,14 @@ rsyslog_conf_es_elasticsearch:
                     queue.maxFileSize=`echo $ES_QUEUE_MAXFILESIZE`
                     queue.checkpointInterval=`echo $ES_QUEUE_CHECKPOINTINTERVAL`
                     queue.syncqueuefiles="on"
+          {% else %}
+                    queue.filename="{{ res.queue_filename|default('es-app') }}"
+                    queue.spoolDirectory="{{ res.queue_spooldir|default(rsyslog_es_q_spooldirectory) }}"
+                    queue.type="{{ res.queue_type|default(rsyslog_es_q_type) }}"
+                    queue.maxDiskSpace="{{ res.queue_max_disk_space|default(rsyslog_es_q_maxdiskspace) }}"
+                    queue.maxFileSize="{{ res.queue_max_file_size|default(rsyslog_es_q_maxfilesize) }}"
+                    queue.checkpointInterval="{{ res.queue_checkpoint_interval|default(rsyslog_es_q_checkpointinterval) }}"
+                    queue.syncqueuefiles="{{ res.queue_sync_files|default("on") }}"
           {% endif %}
                 )
           {% endif %}
@@ -329,7 +360,7 @@ rsyslog_conf_es_elasticsearch:
 
 rsyslog_conf_es_elasticsearch_call_ruleset:
 
-  - name: '30-elasticsearch.conf'
+  - name: '30-elasticsearch'
     type: 'format'
     path: '{{ rsyslog_file_config_dir }}'
     sections:
@@ -337,4 +368,3 @@ rsyslog_conf_es_elasticsearch_call_ruleset:
       - options: |-
           # call the elasticsearch output ruleset
           call try_es
-

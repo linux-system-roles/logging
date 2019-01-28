@@ -6,7 +6,7 @@
   when:
     - rsyslog_enabled|bool
     - not use_rsyslog_image|default(False)|bool
-    - ansible_user == 'root' or (remote_user is defined and remote_user == 'root')
+    - can_mod_system|bool or (remote_user is defined and remote_user == 'root')
   tags:
     - skip_ansible_lint
 
@@ -19,13 +19,13 @@
     msg: "Rsyslog_version is {{ rsyslog_version }}"
 
 - block:
-    - name: Set rsyslog version
+    - name: Set rsyslog version (installed)
       set_fact:
         rsyslog_version: "{{ rsyslog_version.results|selectattr('yumstate','match','installed')|map(attribute='version')|list|first }}-{{ rsyslog_version.results|selectattr('yumstate','match','installed')|map(attribute='release')|list|first }}"
       when: rsyslog_version.results|selectattr('yumstate','match','installed')|list|first is defined
       ignore_errors: true
 
-    - name: Set rsyslog version
+    - name: Set rsyslog version (available)
       set_fact:
         rsyslog_version: "{{ rsyslog_version.results|selectattr('yumstate','match','available')|map(attribute='version')|list|first }}-{{ rsyslog_version.results|selectattr('yumstate','match','available')|map(attribute='release')|list|first }}"
       when: rsyslog_version.results|selectattr('yumstate','match','available')|list|first is defined
@@ -54,7 +54,7 @@
         system: True
       when:
         - rsyslog_unprivileged|bool
-        - ansible_user == 'root'
+        - can_mod_system|bool
         - getent_group == []
 
     - name: Get information about the group
@@ -74,56 +74,54 @@
         system: True
       when:
         - rsyslog_unprivileged|bool
-        - ansible_user == 'root'
+        - can_mod_system|bool
         - getent_passwd == []
+
+    - debug:
+        msg: "WORKDIR {{ rsyslog_work_dir }} - {{ can_mod_system }}"
 
     # Creating a work directory
     - name: Create a work directory
       file:
         state: directory
         path: '{{ rsyslog_work_dir }}'
-        owner: '{{ rsyslog_user }}'
+        owner: '{{ rsyslog_file_owner }}'
         group: '{{ rsyslog_file_group }}'
         mode: 0700
-      when:
-        - ansible_user == 'root'
+      when: can_mod_system|bool
       changed_when: False
 
     # Creating a backup dir for rsyslog.d
     - name: Set backup dir name
       set_fact:
         backupdir: '{{ rsyslog_backup_dir|default("/tmp") }}/rsyslog.d-{{ ansible_date_time.iso8601_basic_short }}'
-      when:
-        - ansible_user == 'root'
+      when: can_mod_system|bool
 
     - name: Create a backup dir
       file:
         state: directory
         path: '{{ backupdir }}'
-        owner: '{{ rsyslog_user }}'
+        owner: '{{ rsyslog_file_owner }}'
         group: '{{ rsyslog_file_group }}'
         mode: 0755
-      when:
-        - ansible_user == 'root'
+      when: can_mod_system|bool
       changed_when: False
 
     # Back up the pre-existing rsyslog config files in the backup dir,
     # then removing the files/dirs in rsyslog.d.
     - name: Archive the contents of {{rsyslog_file_config_dir}} to the backup dir
       archive:
-        path: ["{{rsyslog_file_config_dir}}",/etc/rsyslog.conf]
+        path: ["{{rsyslog_file_config_dir}}", /etc/rsyslog.conf]
         dest: "{{ backupdir }}/backup.tgz"
         remove: '{{ true if rsyslog_purge_original_conf|bool else false }}'
-      when:
-        - ansible_user == 'root'
+      when: can_mod_system|bool
       changed_when: False
 
     - name: Update directory and file permissions
       shell: |
         [ ! -d {{ rsyslog_system_log_dir }} ] || ( [ "$(stat -c '%G' {{ rsyslog_system_log_dir }})" = "{{ rsyslog_group }}" ] || ( chown -v root:{{ rsyslog_group }} {{ rsyslog_system_log_dir }} ; chmod -v 775 {{ rsyslog_system_log_dir }} ) )
       register: rsyslog_register_file_permissions
-      when: 
-        - ansible_user == 'root'
+      when: can_mod_system|bool
       changed_when: rsyslog_register_file_permissions.stdout != ''
 
     - name: Generate main rsyslog configuration
@@ -133,7 +131,7 @@
         owner: '{{rsyslog_file_owner}}'
         group: '{{rsyslog_file_group}}'
         mode: '{{rsyslog_mode}}'
-      when: 
+      when:
         - rsyslog_enabled|bool
         - not rsyslog_unprivileged|default(False)|bool
 
@@ -219,7 +217,7 @@
       when:
         - rsyslog_enabled|bool
         - not use_rsyslog_image|default(False)|bool
-        - ansible_user == 'root'
+        - can_mod_system|bool
 
     - name: Disable rsyslog service
       systemd:

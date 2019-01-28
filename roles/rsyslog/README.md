@@ -94,6 +94,13 @@ rsyslog_outputs:
     ca_cert_src : "/path/to/es-ca.crt"
     cert_src : "/path/to/es-cert.pem"
     key_src : "/path/to/es-key.pem"
+    queue_filename: "my-es-app"
+    queue_spooldir: "/var/lib/rsyslog"
+    queue_type: "Disk"
+    queue_max_disk_space: "536870912"
+    queue_max_file_size: "10000000"
+    queue_checkpoint_interval: "1000"
+    queue_sync_files: "on"
   - name: viaq-elasticsearch-ops
     type: elasticsearch
     rsyslog_logs_collections:
@@ -110,6 +117,13 @@ rsyslog_outputs:
     ca_cert_src : "/path/to/es-ca.crt"
     cert_src : "/path/to/es-cert.pem"
     key_src : "/path/to/es-key.pem"
+    queue_filename: "my-es-ops"
+    queue_spooldir: "/var/lib/rsyslogops"
+    queue_type: "Disk"
+    queue_max_disk_space: "536870912"
+    queue_max_file_size: "10000000"
+    queue_checkpoint_interval: "1000"
+    queue_sync_files: "on"
 ```
 The key-value pairs in rsyslog_elasticsearch are used to configure rsyslog to send the logs to the Openshift Aggregated Logging ElasticSearch.  The elements are used in the output elasticsearch configuration 30-elasticsearch.conf as follows (note: not following the abstract syntax):
 ```
@@ -137,6 +151,33 @@ if index_prefix starts with "project." then {
   )
 }
 ```
+The omelasticsearch action takes queue configuration values as follows.
+If use_rsyslog_image is true, the corresponding environment variables are assigned to each queue variable.  The use case: launch rsyslogd via a script in which the environment variables are dynamically set and passed to rsyslogd.
+If use_rsyslog_image is false, the queue variables are set in the layered manner.
+1. If there are the corresponding ansible variables set in vars.yaml or the ansible command line, they are assigned and used.
+2. If there are no ansible variables given, the corresponding environment variables set where the ansible is executed are used.  Note that the ansible executed host may not be the same as the target host.
+3. If the envionment variables are not set locally, they fall back to the hardcoded values in ./rsyslog/roles/output_roles/elasticsearch/tasks/main.yaml.
+Note: use_rsyslog_image is default to false.
+```
+{% if use_rsyslog_image | default(true) %}
+   queue.filename="es-app"
+   queue.spoolDirectory=`echo $RSYSLOG_SPOOLDIRECTORY`
+   queue.type=`echo $ES_QUEUE_TYPE`
+   queue.maxDiskSpace=`echo $ES_QUEUE_MAXDISKSPACE`
+   queue.maxFileSize=`echo $ES_QUEUE_MAXFILESIZE`
+   queue.checkpointInterval=`echo $ES_QUEUE_CHECKPOINTINTERVAL`
+   queue.syncqueuefiles="on"
+{% else %}
+   queue.filename="{{ res.queue_filename|default('es-app') }}"
+   queue.spoolDirectory="{{ res.queue_spooldir|default(rsyslog_es_q_spooldirectory) }}"
+   queue.type="{{ res.queue_type|default(rsyslog_es_q_type) }}"
+   queue.maxDiskSpace="{{ res.queue_max_disk_space|default(rsyslog_es_q_maxdiskspace) }}"
+   queue.maxFileSize="{{ res.queue_max_file_size|default(rsyslog_es_q_maxfilesize) }}"
+   queue.checkpointInterval="{{ res.queue_checkpoint_interval|default(rsyslog_es_q_checkpointinterval) }}"
+   queue.syncqueuefiles="{{ res.queue_sync_files|default("on") }}"
+{% endif %}
+```
+
 The order of the list in rsyslog_elasticsearch is important.  The first item is in the first if clause with the index_prefix value and the last item is in the else clause.  Elements in between will be placed with else if clause.
 
 The variables ca_cert, cert and key in rsyslog_elasticsearch specify the paths where the CA certificate, certificate and key are located in the remote host.  The variables ca_cert_src, cert_src, and key_src are paths of them to be deployed to the remote host.

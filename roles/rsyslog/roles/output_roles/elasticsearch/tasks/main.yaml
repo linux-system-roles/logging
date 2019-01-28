@@ -50,6 +50,21 @@
     - rsyslog_elasticsearch != []
     - use_local_omelasticsearch_cert|default(False)|bool
 
+- set_fact:
+    rsyslog_es_q_spooldirectory: "{{ lookup('env', 'RSYSLOG_SPOOLDIRECTORY' ) | ternary (lookup('env', 'RSYSLOG_SPOOLDIRECTORY' ), '/var/lib/rsyslog') }}"
+
+- set_fact:
+    rsyslog_es_q_type: "{{ lookup('env', 'RSYSLOG_QUEUE' ) | ternary (lookup('env', 'RSYSLOG_QUEUE' ), 'Disk') }}"
+
+- set_fact:
+    rsyslog_es_q_maxdiskspace: "{{ lookup('env', 'RSYSLOG_MAXDISKSPACE' ) | ternary (lookup('env', 'RSYSLOG_MAXDISKSPACE' ), '1073741824') }}"
+
+- set_fact:
+    rsyslog_es_q_maxfilesize: "{{ lookup('env', 'RSYSLOG_MAXFILESIZE' ) | ternary (lookup('env', 'RSYSLOG_MAXFILESIZE' ), '16777216') }}"
+
+- set_fact:
+    rsyslog_es_q_checkpointinterval: "{{ lookup('env', 'RSYSLOG_CHECKPOINTINTERVAL' ) | ternary (lookup('env', 'RSYSLOG_CHECKPOINTINTERVAL' ), '1000') }}"
+
 # Deploy configuration files
 - name: Set Elasticsearch facts
   set_fact:

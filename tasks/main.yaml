@@ -7,6 +7,11 @@
       set_fact:
         rsyslog_enabled: "{{ logging_enabled|d(true) }}"
 
+    - name: Check if we can change the user, group and filesystem
+      set_fact:
+        can_mod_system=True
+      when: ansible_user is defined and ansible_user == 'root'
+
     - name: Set rsyslog_elasticsearch
       set_fact:
         rsyslog_elasticsearch: "{{ rsyslog_elasticsearch|d([]) }} + {{ [  item.0 |combine( {'logs_collections_name': item.1.name} )] }}"
@@ -58,8 +63,8 @@
 
     - name: Set rsyslog_purge_original_conf fact to purge all configuration files before saving the new ones.
       set_fact:
-        rsyslog_purge_original_conf: yes
-      when: logging_purge_confs|d(no)
+        rsyslog_purge_original_conf: true
+      when: logging_purge_confs|d(false)
 
     - name: Set custom_config_files fact
       set_fact:

@@ -22,6 +22,11 @@ rsyslog_system_log_dir: '/var/log'
 # Parent configuration directory
 rsyslog_parent_config_dir: '/etc'
 
+# .. envvar:: rsyslog_config_dir
+#
+# Config path used in the config files.
+rsyslog_config_dir: '/etc/rsyslog.d'
+
 # .. envvar:: rsyslog_file_config_dir
 #
 # Path the generated files are placed.  This is useful when generating config files

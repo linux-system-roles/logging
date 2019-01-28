@@ -10,7 +10,8 @@ logging_custom_config_files: []
 
 logging_purge_confs: false
 
-# Configuration directory
-# Unless this is set, "Set rsyslog_elasticsearch" fails.
-rsyslog_config_dir: '/etc/rsyslog.d'
-
+# .. envvar:: can_mod_system
+#
+# Indicates if the ansible executer can do chmod, add user & group, etc.
+# It's checked by {{ lookup('env', 'USER') }} and set to True if the executer is root.
+can_mod_system: False
