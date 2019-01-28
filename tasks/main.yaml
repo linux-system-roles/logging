@@ -36,6 +36,8 @@
 
     - set_fact:
         rsyslog_outputs: "{{ rsyslog_outputs|d([]) | unique }}"
+      tags:
+        - skip_ansible_lint
 
     - name: Check if need to deploy default configuration
       set_fact:
