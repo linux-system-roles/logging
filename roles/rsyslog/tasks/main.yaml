@@ -6,6 +6,8 @@
   when:
     - rsyslog_enabled|bool
     - not use_rsyslog_image|default(False)|bool
+  tags:
+    - skip_ansible_lint
 
 - name: Get rsyslog version
   yum:
@@ -185,6 +187,8 @@
       when:
         - rsyslog_enabled|bool
         - item is defined and item != []
+      tags:
+        - skip_ansible_lint
 
     - name: Enable rsyslog service
       systemd:
