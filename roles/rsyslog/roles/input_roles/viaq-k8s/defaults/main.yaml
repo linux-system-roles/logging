@@ -14,7 +14,7 @@ rsyslog_viaq_log_dir: '{{rsyslog_system_log_dir}}/containers'
 # .. envvar:: rsyslog_viaq_k8s_packages
 #
 # List of rpm packages for Common Logging.
-rsyslog_viaq_k8s_packages: [ 'rsyslog-mmjsonparse', 'rsyslog-mmkubernetes' ]
+rsyslog_viaq_k8s_packages: ['rsyslog-mmjsonparse', 'rsyslog-mmkubernetes']
 
 # Available configuration set
 # ----------------------------
@@ -46,7 +46,7 @@ rsyslog_conf_viaq_mmk8s_module:
       - options: |-
           # mmkubernetes
           module(load="mmkubernetes")
-          
+
           # Parse logs to JSON
           module(load="mmjsonparse")
 
@@ -59,7 +59,7 @@ rsyslog_conf_viaq_mmk8s_input:
 
       - options: |-
           input(type="imfile" file="{{ rsyslog_viaq_log_dir }}/*.log" tag="kubernetes" addmetadata="on" reopenOnTruncate="on")
-          
+
           if ((strlen($!CONTAINER_NAME) > 0) and (strlen($!CONTAINER_ID_FULL) > 0)) or
               ((strlen($!metadata) > 0) and (strlen($!metadata!filename) > 0) and ($!metadata!filename startswith "{{rsyslog_viaq_log_dir}}/")) then {
               if ((strlen($!metadata) > 0) and (strlen($!metadata!filename) > 0) and ($!metadata!filename startswith "{{rsyslog_viaq_log_dir}}/")) then {

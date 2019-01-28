@@ -93,7 +93,7 @@
     # then removing the files/dirs in rsyslog.d.
     - name: Archive the contents of {{rsyslog_config_dir}} to the backup dir
       archive:
-        path: ["{{rsyslog_config_dir}}",/etc/rsyslog.conf]
+        path: ["{{rsyslog_config_dir}}", /etc/rsyslog.conf]
         dest: "{{ backupdir }}/backup.tgz"
         remove: '{{ true if rsyslog_purge_original_conf|bool else false }}'
       changed_when: False
@@ -121,7 +121,7 @@
         dest: '{{rsyslog_config_dir}}/{{ item.filename | d((item.weight if item.weight|d() else rsyslog_weight_map[item.type|d("rules")]) + "-" + (item.name|d("rules")) + "." + (item.suffix |d ("conf"))) }}'
         owner: '{{ item.owner | d("root") }}'
         group: '{{ item.group | d("root") }}'
-        mode:  '{{ item.mode  | d("0400") }}'
+        mode: '{{ item.mode  | d("0400") }}'
       with_flattened:
         - '{{ rsyslog_common_rules }}'
       when:
@@ -156,7 +156,7 @@
         dest: '{{ rsyslog_config_dir }}'
         owner: '{{ item.owner | d("root") }}'
         group: '{{ item.group | d("root") }}'
-        mode:  '{{ item.mode  | d("0400") }}'
+        mode: '{{ item.mode  | d("0400") }}'
       with_flattened:
         - '{{ rsyslog_custom_config_files }}'
       when: (rsyslog_enabled|bool)

@@ -49,7 +49,7 @@
 
     - name: Set rsyslog_default
       set_fact:
-         rsyslog_default: false
+        rsyslog_default: false
       when: (rsyslog_default_check|d([]) != []) or (rsyslog_outputs|d([]) != [])
 
     - name: Set rsyslog_unprivileged fact
@@ -76,7 +76,7 @@
 
     - name: Create rsyslog debug dir
       file:
-        path:  "{{ logging_role_path|d('logging') }}/debug"
+        path: "{{ logging_role_path|d('logging') }}/debug"
         state: 'directory'
         mode: '0700'
       when: logging_debug|d(false)
