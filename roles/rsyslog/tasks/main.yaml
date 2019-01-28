@@ -94,6 +94,7 @@
         path: ["{{rsyslog_config_dir}}",/etc/rsyslog.conf]
         dest: "{{ backupdir }}/backup.tgz"
         remove: '{{ true if rsyslog_purge_original_conf|bool else false }}'
+      changed_when: False
 
     - name: Update directory and file permissions
       shell: |
