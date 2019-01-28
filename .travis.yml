@@ -1,0 +1,17 @@
+---
+sudo: required
+language: python
+services:
+  - docker
+env:
+  matrix:
+    - MOLECULE_DISTRO="centos:7"
+    - MOLECULE_DISTRO="fedora:28"
+    - MOLECULE_DISTRO="fedora:29"
+install:
+  - pip install molecule docker
+script:
+  - molecule test
+branches:
+  only:
+  - master
