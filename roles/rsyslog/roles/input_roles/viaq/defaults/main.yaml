@@ -9,8 +9,8 @@
 # .. envvar:: rsyslog_viaq_packages
 #
 # List of rpm packages for Common Logging.
-rsyslog_viaq_prereq_packages: [ 'nmap-ncat', 'systemd-python', 'policycoreutils', 'checkpolicy', 'policycoreutils-python' ]
-rsyslog_viaq_packages: [ 'rsyslog-mmnormalize' ]
+rsyslog_viaq_prereq_packages: ['nmap-ncat', 'systemd-python', 'policycoreutils', 'checkpolicy', 'policycoreutils-python']
+rsyslog_viaq_packages: ['rsyslog-mmnormalize']
 
 # Available configuration set
 # ----------------------------
@@ -75,11 +75,11 @@ rsyslog_conf_viaq_formatting:
           # formatting
           lookup_table(name="prio_to_level" file="{{ rsyslog_config_dir }}/prio_to_level.json")
           lookup_table(name="normalize_level" file="{{ rsyslog_config_dir }}/normalize_level.json")
-          
+
           template(name="cnvt_to_viaq_timestamp" type="list") {
               property(name="TIMESTAMP" dateFormat="rfc3339")
           }
-          
+
           # rsyslog 8.30.0 and later does case insensitive variable name comparison
           # which means $!MESSAGE is the same as $!message - HOWEVER - the case
           # of the variable name is preserved when outputting, so we need to "normalize"
@@ -115,11 +115,11 @@ rsyslog_conf_viaq_formatting:
               unset $!originalmsg;
               unset $!unparsed-data;
           }
-          
+
           if strlen($!_MACHINE_ID) > 0 then {
               # convert from imjournal to viaq systemd format
               # https://github.com/ViaQ/elasticsearch-templates/blob/master/namespaces/systemd.yml
-          
+
               set $!systemd!t!MACHINE_ID = $!_MACHINE_ID;
               unset $!_MACHINE_ID;
               if strlen($!CODE_FILE) > 0 then {
@@ -262,7 +262,7 @@ rsyslog_conf_viaq_formatting:
                   set $!systemd!k!UDEV_DEVLINK = $!_UDEV_DEVLINK;
               }
               unset $!_UDEV_DEVLINK;
-          
+
               # these fields require special handling
               if strlen($!level) == 0 then {
                   if strlen($!PRIORITY) > 0 then {
@@ -307,7 +307,7 @@ rsyslog_conf_viaq_formatting:
                   }
               }
           }
-          
+
           # normalize level
           if strlen($!level) > 0 then {
               set $.lclevel = tolower($!level);
@@ -330,9 +330,9 @@ rsyslog_conf_viaq_formatting:
                   }
               }
           }
-          
+
           # add eventrouter
-          
+
           if (strlen($!kubernetes) > 0) and (strlen($!kubernetes!namespace_name) > 0) then {
               # see if this is an operations namespace
               if ($!kubernetes!namespace_name == "default") or ($!kubernetes!namespace_name == "openshift") or
@@ -345,11 +345,11 @@ rsyslog_conf_viaq_formatting:
                   } else {
                       set $.index_prefix = ".orphaned.";
                   }
-              } 
+              }
           } else {
               set $.index_prefix = ".operations.";
           }
-          
+
           # add pipeline_metadata
           set $!pipeline_metadata!collector!name = "rsyslog";
           set $!pipeline_metadata!collector!inputname = $inputname;

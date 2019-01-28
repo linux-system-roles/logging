@@ -1,13 +1,5 @@
 ---
 extends: default
 rules:
-  brackets: disable
-  colons: disable
-  commas: disable
-  comments: disable
-  comments-indentation: disable
-  empty-lines: disable
-  indentation: disable
   line-length: disable
   truthy: disable
-  trailing-spaces: disable

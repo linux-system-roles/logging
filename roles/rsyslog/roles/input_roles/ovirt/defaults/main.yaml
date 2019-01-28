@@ -9,7 +9,7 @@
 # .. envvar:: rsyslog_logging_packages
 #
 # List of rpm packages for Common Logging.
-rsyslog_ovirt_packages: [ 'rsyslog-mmnormalize', 'rsyslog-mmjsonparse', 'libfastjson', 'liblognorm', 'libestr' ]
+rsyslog_ovirt_packages: ['rsyslog-mmnormalize', 'rsyslog-mmjsonparse', 'libfastjson', 'liblognorm', 'libestr']
 rsyslog_ovirt_prereq_packages: []
 
 # Available configuration set

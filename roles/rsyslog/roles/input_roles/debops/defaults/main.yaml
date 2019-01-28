@@ -5,7 +5,7 @@ rsyslog_pki: 'True'
 
 rsyslog_unprivileged: 'False'
 
-rsyslog_capabilities: [ 'network', 'remote-files', 'tls' ]
+rsyslog_capabilities: ['network', 'remote-files', 'tls']
 
 # .. envvar:: rsyslog_debops_rules
 #

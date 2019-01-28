@@ -5,7 +5,7 @@
 # .. envvar:: rsyslog_elasticsearch_package
 #
 # List of rpm packages for Elasticsearch output.
-rsyslog_elasticsearch_packages: [ 'rsyslog-elasticsearch' ]
+rsyslog_elasticsearch_packages: ['rsyslog-elasticsearch']
 
 
 # Available configuration set
@@ -56,7 +56,7 @@ rsyslog_conf_es_elasticsearch:
               property(name="$!all-json-plain")
               constant(value="\n")
           }
-          
+
           # Add date to the end of the index name - index_prefix.yyyy-mm-dd,
           # based on the log timestamp.
           # This template sets "index_name"
@@ -71,11 +71,11 @@ rsyslog_conf_es_elasticsearch:
 
           template(name="index_template" type="string" string="%$.index_name%")
           template(name="id_template" type="string" string="%$.es_msg_id%")
-          
+
           ruleset(name="error_es") {
               action(type="omfile" template="es_template_nl" file="{{rsyslog_work_dir}}/es-bulk-errors.log")
           }
-          
+
           ruleset(name="try_es") {
               if strlen($.omes!status) > 0 then {
                   # retry case
@@ -217,5 +217,5 @@ rsyslog_conf_es_elasticsearch:
           {% endif %}
           {% endfor %}
           }
-          
+
           call try_es

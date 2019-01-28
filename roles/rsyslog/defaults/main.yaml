@@ -37,7 +37,7 @@ rsyslog_capabilities: []
 #
 # Enable or disable unprivileged ``rsyslogd`` operation. Warning, enabling this
 # option requires additional configuration outside of the ``rsyslog``
-# role. 
+# role.
 rsyslog_unprivileged: '{{ "True"
                            if (ansible_distribution in [ "CentOS", "RedHat", "Fedora" ])
                            else "False" }}'
@@ -61,12 +61,12 @@ rsyslog_purge_original_conf: False
 # .. envvar:: rsyslog_base_packages
 #
 # List of default rpm packages to install.
-rsyslog_base_packages: [ 'rsyslog', 'libselinux-python' ]
+rsyslog_base_packages: ['rsyslog', 'libselinux-python']
 
 # .. envvar:: rsyslog_tls_packages
 #
 # List of rpm packages required for TLS support.
-rsyslog_tls_packages: [ 'rsyslog-gnutls', 'ca-certificates' ]
+rsyslog_tls_packages: ['rsyslog-gnutls', 'ca-certificates']
 
 # .. envvar:: rsyslog_packages
 #
@@ -209,7 +209,7 @@ rsyslog_domain: '{{ ansible_domain if ansible_domain else ansible_hostname }}'
 #
 # List of hostnames, IP addresses or wildcard DNS domains which will be allowed
 # by the ``rsyslogd`` server to connect and send logs over TLS.
-rsyslog_permitted_peers: [ '*.{{ rsyslog_domain }}' ]
+rsyslog_permitted_peers: ['*.{{ rsyslog_domain }}']
 
 # .. envvar:: rsyslog_send_permitted_peers
 #
@@ -256,7 +256,7 @@ rsyslog_group_allow: []
 # List of IP addresses or CIDR subnets which should be allowed to connect to
 # ``rsyslogd`` ports by the firewall. This variable should be used for specific
 # hosts in the inventory.
-rsyslog_host_allow: [ '192.168.122.100/24' ]
+rsyslog_host_allow: ['192.168.122.100/24']
 
 
 # Log forwarding
@@ -297,22 +297,22 @@ rsyslog_host_forward: []
 #
 # See :ref:`rsyslog_rules` for more details.
 rsyslog_weight_map:
-  'global':    '05'
-  'globals':   '05'
-  'module':    '10'
-  'modules':   '10'
-  'template':  '20'
+  'global': '05'
+  'globals': '05'
+  'module': '10'
+  'modules': '10'
+  'template': '20'
   'templates': '20'
-  'output':    '30'
-  'outputs':   '30'
-  'service':   '30'
-  'services':  '30'
-  'rule':      '50'
-  'rules':     '50'
-  'ruleset':   '50'
-  'rulesets':  '50'
-  'input':     '90'
-  'inputs':    '90'
+  'output': '30'
+  'outputs': '30'
+  'service': '30'
+  'services': '30'
+  'rule': '50'
+  'rules': '50'
+  'ruleset': '50'
+  'rulesets': '50'
+  'input': '90'
+  'inputs': '90'
 
 # .. envvar:: rsyslog_rules
 #
@@ -353,10 +353,10 @@ rsyslog_dependent_rules: []
 # role.
 rsyslog_common_rules:
 
-   - '{{ rsyslog_conf_global_options }}'
-   - '{{ rsyslog_conf_local_modules }}'
-   - '{{ rsyslog_conf_network_modules }}'
-   - '{{ rsyslog_conf_common_defaults }}'
+  - '{{ rsyslog_conf_global_options }}'
+  - '{{ rsyslog_conf_local_modules }}'
+  - '{{ rsyslog_conf_network_modules }}'
+  - '{{ rsyslog_conf_common_defaults }}'
 
 
 # Default configuration options

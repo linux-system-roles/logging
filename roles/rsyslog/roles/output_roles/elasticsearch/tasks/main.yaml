@@ -1,6 +1,6 @@
 ---
 - block:
-  # This block collect certificates from local location and copies them to /etc/rsyslog.d directory
+    # This block collect certificates from local location and copies them to /etc/rsyslog.d directory
     - name: Copy local Elasticsearch ca_certs to /etc/rsyslog.d directory in Rsyslog
       copy:
         src: '{{ item.ca_cert_src }}'

@@ -7,4 +7,3 @@
   include_role:
     name: "{{ logging_role_path|d('logging') }}/roles/rsyslog"
     tasks_from: cleanup.yaml
-
