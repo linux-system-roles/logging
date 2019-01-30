@@ -37,11 +37,6 @@
       set_fact:
         rsyslog_failed_validation: true
       when: rsyslog_version is version('8.37.0-7.2.el7', '<')
-
-    - name: Check rsyslog version
-      debug:
-        msg: "Supported rsyslog version >= 8.37.0-7.2.el7"
-      when: rsyslog_failed_validation|d(false) == true
   when: use_rsyslog_image|default(False)|bool
 
 - block:
@@ -212,3 +207,10 @@
         - not use_rsyslog_image|default(False)|bool
 
   when: rsyslog_failed_validation|d(false) == false
+
+- name: Check rsyslog version
+  debug:
+    msg: "Rsyslog version must be >= 8.37.0-7.2.el7"
+  when:
+    - rsyslog_failed_validation|d(false) == true
+    - use_rsyslog_image|default(False)|bool
