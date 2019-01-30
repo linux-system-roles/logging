@@ -17,30 +17,32 @@
 - debug:
     msg: "Rsyslog_version is {{ rsyslog_version }}"
 
-- name: Set rsyslog version
-  set_fact:
-    rsyslog_version: "{{ rsyslog_version.results|selectattr('yumstate','match','installed')|map(attribute='version')|list|first }}-{{ rsyslog_version.results|selectattr('yumstate','match','installed')|map(attribute='release')|list|first }}"
-  when: rsyslog_version.results|selectattr('yumstate','match','installed')|list|first is defined
-  ignore_errors: true
+- block:
+    - name: Set rsyslog version
+      set_fact:
+        rsyslog_version: "{{ rsyslog_version.results|selectattr('yumstate','match','installed')|map(attribute='version')|list|first }}-{{ rsyslog_version.results|selectattr('yumstate','match','installed')|map(attribute='release')|list|first }}"
+      when: rsyslog_version.results|selectattr('yumstate','match','installed')|list|first is defined
+      ignore_errors: true
 
-- name: Set rsyslog version
-  set_fact:
-    rsyslog_version: "{{ rsyslog_version.results|selectattr('yumstate','match','available')|map(attribute='version')|list|first }}-{{ rsyslog_version.results|selectattr('yumstate','match','available')|map(attribute='release')|list|first }}"
-  when: rsyslog_version.results|selectattr('yumstate','match','available')|list|first is defined
-  ignore_errors: true
+    - name: Set rsyslog version
+      set_fact:
+        rsyslog_version: "{{ rsyslog_version.results|selectattr('yumstate','match','available')|map(attribute='version')|list|first }}-{{ rsyslog_version.results|selectattr('yumstate','match','available')|map(attribute='release')|list|first }}"
+      when: rsyslog_version.results|selectattr('yumstate','match','available')|list|first is defined
+      ignore_errors: true
 
-- debug:
-    msg: "Rsyslog_version is {{ rsyslog_version }}"
+    - debug:
+        msg: "Rsyslog_version is {{ rsyslog_version }}"
 
-- name: Set rsyslog_failed_validation
-  set_fact:
-    rsyslog_failed_validation: true
-  when: rsyslog_version is version('8.37.0-7.2.el7', '<')
+    - name: Set rsyslog_failed_validation
+      set_fact:
+        rsyslog_failed_validation: true
+      when: rsyslog_version is version('8.37.0-7.2.el7', '<')
 
-- name: Check rsyslog version
-  debug:
-    msg: "Supported rsyslog version >= 8.37.0-7.2.el7"
-  when: rsyslog_failed_validation|d(false) == true
+    - name: Check rsyslog version
+      debug:
+        msg: "Supported rsyslog version >= 8.37.0-7.2.el7"
+      when: rsyslog_failed_validation|d(false) == true
+  when: use_rsyslog_image|default(False)|bool
 
 - block:
     - name: Create required system group
