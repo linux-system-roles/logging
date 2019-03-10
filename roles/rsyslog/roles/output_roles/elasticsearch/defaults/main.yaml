@@ -123,7 +123,7 @@ rsyslog_conf_es_elasticsearch:
                   bulkid="{{ res.bulkid | default("id_template") }}"
                   dynbulkid="{{ res.dynbulkid | default("on") }}"
                   retryfailures="{{ res.retryfailures | default("on") }}"
-                  allowUnsignedCerts = "{{ res.allowUnsignedCerts | default("off") }}"
+                  allowUnsignedCerts="{{ res.allowUnsignedCerts | default("off") }}"
                   retryruleset="{{ res.retryruleset | default("try_es") }}"
                   usehttps="{{ res.usehttps | default("on") }}"
           {% if use_omelasticsearch_cert | default(true) %}
@@ -149,7 +149,7 @@ rsyslog_conf_es_elasticsearch:
                     bulkid="{{ res.bulkid | default("id_template") }}"
                     dynbulkid="{{ res.dynbulkid | default("on") }}"
                     retryfailures="{{ res.retryfailures | default("on") }}"
-                    allowUnsignedCerts = "{{ res.allowUnsignedCerts | default("off") }}"
+                    allowUnsignedCerts="{{ res.allowUnsignedCerts | default("off") }}"
                     retryruleset="{{ res.retryruleset | default("try_es") }}"
                     usehttps="{{ res.usehttps | default("on") }}"
           {% if use_omelasticsearch_cert | default(true) %}
@@ -174,7 +174,7 @@ rsyslog_conf_es_elasticsearch:
                     bulkid="{{ res.bulkid | default("id_template") }}"
                     dynbulkid="{{ res.dynbulkid | default("on") }}"
                     retryfailures="{{ res.retryfailures | default("on") }}"
-                    allowUnsignedCerts = "{{ res.allowUnsignedCerts | default("off") }}"
+                    allowUnsignedCerts="{{ res.allowUnsignedCerts | default("off") }}"
           {% if res.retryfailures|default("on") == "on" %}
                     retryruleset="{{ res.retryruleset | default("try_es") }}"
           {% endif %}
@@ -201,7 +201,7 @@ rsyslog_conf_es_elasticsearch:
                     bulkid="{{ res.bulkid | default("id_template") }}"
                     dynbulkid="{{ res.dynbulkid | default("on") }}"
                     retryfailures="{{ res.retryfailures | default("on") }}"
-                    allowUnsignedCerts = "{{ res.allowUnsignedCerts | default("off") }}"
+                    allowUnsignedCerts="{{ res.allowUnsignedCerts | default("off") }}"
           {% if res.retryfailures|default("on") == "on" %}
                     retryruleset="{{ res.retryruleset | default("try_es") }}"
           {% endif %}
