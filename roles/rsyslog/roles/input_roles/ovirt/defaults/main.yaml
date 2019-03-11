@@ -152,6 +152,7 @@ rsyslog_conf_ovirt_formatting:
           {% endif %}
 
 rsyslog_rulebase_ovirt_engine:
+
   - name: 'ovirt_engine'
     filename: 'ovirt_engine.rulebase'
     nocomment: 'true'
@@ -159,9 +160,10 @@ rsyslog_rulebase_ovirt_engine:
     sections:
       - options: |-
           version=2
-          rule=:%date:date-iso% %time:time-24hr%,%msec:number%%tz:word% %level:word% %class:string{"quoting.char.begin":"[","quoting.char.end":"]"}% %thread:string{"quoting.char.begin":"(","quoting.char.end":")"}% %correlationid:string{"quoting.char.begin":"[","quoting.char.end":"]"}% %message:rest%
+          rule=:%date:date-iso% %time:time-24hr%,%msec:number%%tz:word% %level:word%%-:whitespace%%class:string{"quoting.char.begin":"[","quoting.char.end":"]"}% %thread:string{"quoting.char.begin":"(","quoting.char.end":")"}% %correlationid:string{"quoting.char.begin":"[","quoting.char.end":"]"}% %message:rest%
 
 rsyslog_rulebase_ovirt_vdsm:
+
   - name: 'ovirt_vdsm'
     filename: 'ovirt_vdsm.rulebase'
     nocomment: 'true'
@@ -169,8 +171,7 @@ rsyslog_rulebase_ovirt_vdsm:
     sections:
       - options: |-
           version=2
-          rule=:%date:date-iso% %time:time-24hr%,%msec:number%%tz:word% %level:word% %class:string{"quoting.char.begin":"(","quoting.char.end":")"}% %thread:string{"quoting.char.begin":"[","quoting.char.end":"]"}% %message:rest%
-
+          rule=:%date:date-iso% %time:time-24hr%,%msec:number%%tz:word% %level:word%%-:whitespace%%class:string{"quoting.char.begin":"(","quoting.char.end":")"}% %thread:string{"quoting.char.begin":"[","quoting.char.end":"]"}% %message:rest%
 
 rsyslog_rulebase_ovirt_parse_json:
 
