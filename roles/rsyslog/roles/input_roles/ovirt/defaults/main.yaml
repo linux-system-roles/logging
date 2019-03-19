@@ -107,7 +107,7 @@ rsyslog_conf_ovirt_formatting:
                 startmsg.regex="^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}")
 
           if $syslogtag == 'ovirt.engine' then {
-            action(type="mmnormalize" rulebase="{{ rsyslog_config_dir }}/ovirt_engine.rulebase" path="$!ovirt")
+            action(type="mmnormalize" rulebase="{{ rsyslog_config_dir }}/ovirt_engine.rulebase" path="$.ovirt")
           }
           {% endif %}
 
@@ -116,7 +116,7 @@ rsyslog_conf_ovirt_formatting:
                 startmsg.regex="^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}")
 
           if $syslogtag == 'ovirt.vdsm' then {
-            action(type="mmnormalize" rulebase="{{ rsyslog_config_dir }}/ovirt_vdsm.rulebase" path="$!ovirt")
+            action(type="mmnormalize" rulebase="{{ rsyslog_config_dir }}/ovirt_vdsm.rulebase" path="$.ovirt")
           }
           {% endif %}
 
@@ -128,25 +128,22 @@ rsyslog_conf_ovirt_formatting:
               set $.index_prefix = "project.ovirt-logs-" & "{{ ovirt_env_name|d("engine") }}" & ".";
           {% endif %}
             # Add ovirt logs specific metadata
-              set $!@timestamp = $!ovirt!date & "T" & $!ovirt!time & "." & $!ovirt!msec & $!ovirt!tz;
+              set $!@timestamp = $.ovirt!date & "T" & $.ovirt!time & "." & $.ovirt!msec & $.ovirt!tz;
               set $!service = $syslogtag;
-              set $!message = $!ovirt!message;
-              set $!level = $!ovirt!level;
+              set $!message = $.ovirt!message;
+              set $!level = $.ovirt!level;
               set $!hostname = '{{ ansible_fqdn }}';
               set $!ovirt!cluster_name = '{{ ovirt_vds_cluster_name|d("") }}';
               set $!ipaddr4 = '{{ ansible_default_ipv4.address }}';
               set $!ovirt!engine_fqdn = '{{ ovirt_engine_fqdn|d("") }}';
               set $.logs_collection = "ovirt";
-              unset $!ovirt!date;
-              unset $!ovirt!time;
-              unset $!ovirt!msec;
-              unset $!ovirt!tz;
-              unset $!ovirt!message;
-              unset $!ovirt!level;
+              set $!ovirt!class = $.ovirt!class;
+              set $!ovirt!thread = $.ovirt!thread;
+
               unset $!metadata;
 
-              if ($syslogtag == 'ovirt.engine') and ($!ovirt!correlationid == "") then {
-                unset $!ovirt!correlationid;
+              if ($syslogtag == 'ovirt.engine') and ($.ovirt!correlationid != "") then {
+                set $!ovirt!correlationid = $.ovirt!correlationid;
               }
           }
           {% endif %}
