@@ -95,9 +95,9 @@ rsyslog_conf_ovirt_formatting:
           # add eventrouter
           if $syslogtag startswith 'collectd' then {
           {% if  ovirt_env_uuid_logs is defined %}
-              set $.index_prefix = "project.ovirt-metrics-" & "{{ ovirt_env_name|d("engine") }}" & "." & "{{ ovirt_env_uuid_metrics }}" & ".";
+              set $.index_prefix = "{{ rsyslog_elasticsearch_index_prefix_metrics|d("project.ovirt-metrics") }}" & "-" & "{{ ovirt_env_name|d("engine") }}" & "." & "{{ ovirt_env_uuid_metrics }}" & ".";
           {% else %}
-              set $.index_prefix = "project.ovirt-metrics-" & "{{ ovirt_env_name|d("engine") }}" & ".";
+              set $.index_prefix = "{{ rsyslog_elasticsearch_index_prefix_metrics|d("project.ovirt-metrics") }}" & "-" & "{{ ovirt_env_name|d("engine") }}" & ".";
           {% endif %}
               set $.logs_collection = "ovirt";
           }
@@ -123,9 +123,9 @@ rsyslog_conf_ovirt_formatting:
           {% if collect_ovirt_vdsm_log or collect_ovirt_engine_log%}
           if $syslogtag startswith "ovirt" then {
           {% if ovirt_env_uuid_logs is defined %}
-              set $.index_prefix = "project.ovirt-logs-" & "{{ ovirt_env_name|d("engine") }}" & "." & "{{ ovirt_env_uuid_logs }}" & ".";
+              set $.index_prefix = "{{ rsyslog_elasticsearch_index_prefix_logs|d("project.ovirt-logs") }}" & "-" & "{{ ovirt_env_name|d("engine") }}" & "." & "{{ ovirt_env_uuid_logs }}" & ".";
           {% else %}
-              set $.index_prefix = "project.ovirt-logs-" & "{{ ovirt_env_name|d("engine") }}" & ".";
+              set $.index_prefix = "{{ rsyslog_elasticsearch_index_prefix_logs|d("project.ovirt-logs") }}" & "-" & "{{ ovirt_env_name|d("engine") }}" & ".";
           {% endif %}
             # Add ovirt logs specific metadata
               set $!@timestamp = $.ovirt!date & "T" & $.ovirt!time & "." & $.ovirt!msec & $.ovirt!tz;
