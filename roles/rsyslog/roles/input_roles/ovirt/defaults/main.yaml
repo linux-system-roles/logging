@@ -90,6 +90,11 @@ rsyslog_conf_ovirt_formatting:
               action(type="mmjsonparse" cookie="") # parse entire message as json
               set $!@timestamp = exec_template('cnvt_to_viaq_timestamp');
               unset $!time;
+              if $!collectd!plugin == 'virt' then {
+                  set $!ovirt!entity == 'vms';
+              } else {
+                  set $!ovirt!entity == 'hosts';
+              }
           }
 
           # add eventrouter
