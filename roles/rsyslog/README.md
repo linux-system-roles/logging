@@ -273,6 +273,7 @@ Common sub-variables
 - `rsyslog_unprivileged`: If set to True, you could specify non-root rsyslog_user and rsyslog_group.  If ansible_distribution is one of "CentOS", "RedHat", and "Fedora", default to True.  Otherwise, False.
 - `rsyslog_user`: Owner user of rsyslogd.  Default to 'syslog' if rsyslog_unprivileged is True.  Otherwise, 'root'.
 - `rsyslog_group`: Owner group of rsyslogd.  Default to 'syslog' if rsyslog_unprivileged is True.  Otherwise, 'root'.
+- `rsyslog_default`: Determines if the rsyslog.conf file will include the defaulte config or only the line that includes the /etc/rsyslog.d/ directory. Default is `True`, which means the file will include the default configurations.
 
 Viaq sub-variables
 ------------------
