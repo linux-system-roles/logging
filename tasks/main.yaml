@@ -39,19 +39,6 @@
       tags:
         - skip_ansible_lint
 
-    - name: Check if need to deploy default configuration
-      set_fact:
-        rsyslog_default_check: "{{ rsyslog_default_check|d([]) }} + {{ [ { 'name': item.1.name } ] }}"
-      with_subelements:
-        - "{{ logging_outputs }}"
-        - logs_collections
-      when: item.1.state|d('present') == 'present'
-
-    - name: Set rsyslog_default
-      set_fact:
-        rsyslog_default: false
-      when: (rsyslog_default_check|d([]) != []) or (rsyslog_outputs|d([]) != [])
-
     - name: Set rsyslog_unprivileged fact
       set_fact:
         rsyslog_unprivileged: "{{ logging_unprivileged|d(false) }}"
