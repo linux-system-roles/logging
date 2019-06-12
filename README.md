@@ -8,9 +8,30 @@ The `logging` role enables a RHEL admin/developer to deploy logging collectors o
 process these logs if needed to add additional metadata and ship it to a remote location to be saved and analyzed.
 
 The logging role currently supports `Rsyslog` as the log collector.
+The `Rsyslog` is based on the role created by DebOps, https://github.com/debops/ansible-rsyslog.
+
+Table of Contents
+=================
+
+<!--ts-->
+   * [linux-system-roles Logging](#linux-system-roles-logging)
+   * [Table of contents](#table-of-contents)
+   * [Definitions](#definitions)
+   * [Deploy Default Logging Configuration Files](#deploy-default-logging-configuration-files)
+   * [Deploy Configuration Files](#deploy-configuration-files)
+      * [Inventory File](#inventory-file)
+      * [vars.yaml](#varsyaml)
+      * [Variables in vars.yaml](#variables-in-varsyaml)
+      * [playbook.yaml](#playbookyaml)
+   * [New Projects Integration](#new-projects-integration)
+      * [Planned Flows](#planned-flows)
+   * [Testing](#testing)
+   * [Additional Resources](#additional-resources)
+   * [License](#license)
+<!--te-->
 
 Definitions
------------
+===========
 
   - [`Rsyslog`](https://www.rsyslog.com/) - The logging role default log collector used for log processing.
   - [`Viaq`](https://docs.okd.io/latest/install_config/aggregate_logging.html)- Common Logging based on OpenShift Aggregated Logging (OCP/Origin).
@@ -22,24 +43,23 @@ Definitions
 Deploy Default Logging Configuration Files
 ==========================================
 
-
 ``` ansible-playbook [-vvv]  --become --become-user root --connection local -i inventory_file playbook.yaml ```
 
 
 Deploy Configuration Files
 ===========================
 
-Typical ansible-playbook command line.
+Typical ansible-playbook command line includes:
+
+ - vars.yaml - to be updated by the user
+ - inventory_file - used to specify the hosts to deploy the configuration files
 
 ``` ansible-playbook [-vvv] -e@vars.yaml --become --become-user root --connection local -i inventory_file playbook.yaml ```
 
-Two files - inventory_file and vars.yaml - in the command line is to be updated by the user.
-
 Inventory File
 --------------
-inventory_file is used to specify the hosts to deploy the configuration files.
 
-   Sample inventory file for the es-ops enabled case
+   Sample inventory file
 ```
 [masters]
 localhost ansible_user=YOUR_ANSIBLE_USER
@@ -48,27 +68,19 @@ localhost ansible_user=YOUR_ANSIBLE_USER
 localhost ansible_user=YOUR_ANSIBLE_USER
 ```
 
-Deploy Default Logging Configuration Files
-------------------------------------------
-
-For default logging configuration files, add the inventory_file and run the ansible playbook without the vars.yaml file.
-
-``` ansible-playbook [-vvv]  --become --become-user root --connection local -i inventory_file playbook.yaml ```
-
-No additional steps required.
-
 vars.yaml
 ---------
 
 vars.yaml stores variables which are passed to ansible to control the tasks.
 
-**Note:**   Currently, the role supports 3 types of logs collections: default, 'viaq' and 'debops'. 'viaq' and 'debops' can theoretically, both be added to the logs_collections and the specified configuration files are deployed, but rsyslog does not work properly with the configuration.
-
 Initial conf will be supplied by default.
 User can supply another conf to be used.
 
-Configure the list of outputs you want to send your logs to.
+**Note:**   Currently, the role supports 3 types of logs collections: default, 'viaq' and 'debops'.
+'viaq' and 'debops' can theoretically, both be added to the logs_collections and the specified configuration files are deployed, but rsyslog does not work properly with the configuration.
 
+
+Configure the list of outputs you want to send your logs to.
 
 vars.yaml example:
 
@@ -111,17 +123,9 @@ logging_outputs:
 
 **Note:** The order of the record with type  `elasticsearch` is important. The last Elasticsearch output will get all the logs that were not cached by previous Elasticsearches instances.
 
-playbook.yaml
--------------
-
-- name: install and configure logging on the nodes
-  hosts: nodes
-  roles:
-    - role: logging
-
 
 Variables in vars.yaml
-======================
+----------------------
 
 - `logging_collector`: The logs collector to use for the logs collection. Currently Rsyslog is the only supported logs collector. Defaults to `rsyslog`.
 - `logging_enabled` : When 'True' logging role will deploy specified configuration file set. Default to 'True'.
@@ -148,8 +152,52 @@ Variables in vars.yaml
       - `type`: Type of the output element.
       - `custom_config_files`: List of custom configuration files are deployed to /etc/rsyslog.d. [ '/path/to/custom_A.conf', '/path/to/custom_B.conf' ]. Default to none.
 
+playbook.yaml
+-------------
+
+- name: install and configure logging on the nodes
+  hosts: nodes
+  roles:
+    - role: logging
+
+New Projects Integration
+========================
+
+This role is a generic wrapper for deploying and configuring the log collectors to collect the logs,
+format them and ship them to the required destination.
+It currently supports Rsyslog as the default logs collector.
+
+The projects are called `logs_collections` and the user can choose to deploy several projects at the same time.
+Each project adds a sub-role to ./logging/roles/rsyslog/roles/input_roles/.
+
+The sub-role usually includes `tasks` and `defaults` directories.
+The `defaults` directory includes:
+  - List of required packages that are **not** the base rsyslog_base_packages: ['rsyslog', 'libselinux-python']
+  - List of modules to load  like `imfile`, `imtcp`, etc.
+  - Defines the formatting and the rulebases for parsing the logs.
+  - It is required to set for all logs the project identfier for pipelining:
+    set $.logs_collection = "project name";
+
+The `tasks` directory includes 2 tasks file:
+  - `main.yaml` - tasks for deploying the config files
+    This file is sets `rsyslog_role_packages` and `rsyslog_role_rules` and includes the task that deploys the files.
+  - `cleanup.yml` - tasks that cleanup the files deployed for this project.
+
+Examples can be found in the existing projects.
+
+The available outputs are defined in /logging/roles/rsyslog/roles/output_roles/.
+Currently, It supports Elasticsearch output.
+Additional output will be added.
+
+Planned Flows:
+--------------
+  - `Rsyslog` -> `Local` (RHEL Default) / `Viaq` [1] / `Elasticsearch` / `Remote Rsyslog` / `message Queue (kafka, amqp)`
+
+[1] Rsyslog to Viaq currently means doing output to the OCP Elasticsearch using client cert auth.
+    In the future we want to support Rsyslog to OCP rsyslog using RELP, or Rsyslog to mux using fluent relp input plugin, or message queue.
+
 Testing
--------
+=======
 In-tree tests are provided that use molecule to test the role against docker containers.
 These tests are designed to be used by CI, but they can also be run locally to test it
 out while developing.  This is best done by installing molecule in a virtualenv:
@@ -180,23 +228,14 @@ can test against a different image/tag like so:
 
   `$ MOLECULE_DISTRO="fedora:28" molecule test`
 
-Planned Flows:
---------------
-  - `Rsyslog` -> `Local` (RHEL Default) / `Viaq` [1] / `Elasticsearch` / `Remote Rsyslog` / `message Queue (kafka, amqp)`
-
-[1] Rsyslog to Viaq currently means doing output to the OCP Elasticsearch using client cert auth.
-    In the future we want to support Rsyslog to OCP rsyslog using RELP, or Rsyslog to mux using fluent relp input plugin, or message queue.
-
 Additional Resources
---------------------
+====================
 
 Additional Rsyslog custom parameters can be added to the logging role vars.yaml file,
 based on the parameters in the Rsyslog role README file under the /roles directory.
 
-
-
 License
--------
+=======
 
 Apache License 2.0
 
