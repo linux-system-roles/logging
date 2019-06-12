@@ -43,7 +43,7 @@ global(workDirectory="{{rsyslog_work_dir}}")
 module(load="builtin:omfile" Template="RSYSLOG_TraditionalFileFormat")
 
 # Include all config files in {{rsyslog_config_dir}}
-include(file="{{rsyslog_config_dir}}/*.conf" mode="optional")
+$IncludeConfig {{rsyslog_config_dir}}/*.conf
 
 #### RULES ####
 
