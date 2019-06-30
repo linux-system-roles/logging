@@ -91,9 +91,9 @@ rsyslog_conf_ovirt_formatting:
               set $!@timestamp = exec_template('cnvt_to_viaq_timestamp');
               unset $!time;
               if $!collectd!plugin == 'virt' then {
-                  set $!ovirt!entity == 'vms';
+                  set $!ovirt!entity = 'vms';
               } else {
-                  set $!ovirt!entity == 'hosts';
+                  set $!ovirt!entity = 'hosts';
               }
           }
 
