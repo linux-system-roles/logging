@@ -77,7 +77,7 @@ rsyslog_conf_es_elasticsearch:
           }
 
           ruleset(name="try_es") {
-              if strlen($.omes!status) > 0 then {
+              if (strlen($.omes) > 0) and (strlen($.omes!status) > 0) then {
                   # retry case
                   if ($.omes!status == 200) or ($.omes!status == 201) or (($.omes!status == 409) and ($.omes!writeoperation == "create")) then {
                       stop # successful
@@ -94,14 +94,14 @@ rsyslog_conf_es_elasticsearch:
               }
               if strlen($!es_msg_id) > 0 then {
                   set $.es_msg_id = $!es_msg_id;
-              } else if strlen($.omes!_id) > 0 then {
+              } else if (strlen($.omes) > 0) and (strlen($.omes!_id) > 0) then {
                   # retry
                   set $.es_msg_id = $.omes!_id;
               } else {
                   # NOTE: depends on rsyslog being compiled with --enable-uuid
                   set $.es_msg_id = $uuid;
               }
-              if strlen($.omes!_index) > 0 then {
+              if (strlen($.omes) > 0) and ( strlen($.omes!_index) > 0) then {
                   # retry
                   set $.index_name = $.omes!_index;
               } else {
