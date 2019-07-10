@@ -17,3 +17,9 @@
     state: present
   when: 'ansible_selinux.mode in ["enforcing", "permissive"]'
   notify: restart rsyslogd
+
+- name: Remove libvirt.conf
+  file:
+    state: absent
+    path: '{{ rsyslog_config_dir }}/libvirt.conf'
+  notify: restart rsyslogd
