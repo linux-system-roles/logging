@@ -22,7 +22,7 @@ module(load="imuxsock"    # provides support for local system logging (e.g. via 
 module(load="imjournal"   # provides access to the systemd journal
        StateFile="imjournal.state") # File to store the position in the journal
 #module(load="imklog") # reads kernel messages (the same are read from journald)
-#module(load"immark") # provides --MARK-- message capability
+#module(load="immark") # provides --MARK-- message capability
 
 # Provides UDP syslog reception
 # for parameters see http://www.rsyslog.com/doc/imudp.html
