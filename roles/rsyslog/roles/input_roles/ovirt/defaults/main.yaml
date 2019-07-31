@@ -42,6 +42,9 @@ rsyslog_conf_local_ovirt_modules:
 
   - name: 'local-ovirt-modules'
     type: 'modules'
+    state: '{{ "present"
+              if not (rsyslog_default|default(true)|bool)
+              else "absent" }}'
     sections:
 
       - comment: 'Log messages sent to local UNIX socket with use=off'
@@ -105,6 +108,7 @@ rsyslog_conf_ovirt_formatting:
               set $.index_prefix = "{{ rsyslog_elasticsearch_index_prefix_metrics|d("project.ovirt-metrics") }}" & "-" & "{{ ovirt_env_name|d("engine") }}" & ".";
           {% endif %}
               set $.logs_collection = "ovirt";
+              set $.send_targets_only = "true";
           }
 
           {% if collect_ovirt_engine_log %}
@@ -144,6 +148,7 @@ rsyslog_conf_ovirt_formatting:
               set $.logs_collection = "ovirt";
               set $!ovirt!class = $.ovirt!class;
               set $!ovirt!thread = $.ovirt!thread;
+              set $.send_targets_only = "true";
 
               unset $!metadata;
 
