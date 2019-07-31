@@ -357,6 +357,7 @@ rsyslog_common_rules:
   - '{{ rsyslog_conf_local_modules }}'
   - '{{ rsyslog_conf_network_modules }}'
   - '{{ rsyslog_conf_common_defaults }}'
+  - '{{ rsyslog_conf_send_targets_only }}'
 
 
 # Default configuration options
@@ -374,7 +375,9 @@ rsyslog_conf_global_options:
     options: |-
       global(
         defaultNetstreamDriver="{{ rsyslog_default_netstream_driver }}"
+      {% if not rsyslog_default|default(true)|bool %}
         workDirectory="{{ rsyslog_work_dir }}"
+      {% endif %}
       {% if rsyslog_pki|bool and "tls" in rsyslog_capabilities %}
         defaultNetstreamDriverCAFile="{{ rsyslog_pki_path + '/' + rsyslog_pki_realm + '/' + rsyslog_pki_ca }}"
       {%   if rsyslog_default_driver_authmode != "anon" or "network" in rsyslog_capabilities %}
@@ -484,3 +487,14 @@ rsyslog_conf_common_defaults:
       - comment: 'Log every message'
         options: |-
           $RepeatedMsgReduction {{ "on" if rsyslog_message_reduction|bool else "off" }}
+
+rsyslog_conf_send_targets_only:
+
+  - filename: '40-send-targets-only.conf'
+    comment: 'Stops logs that should only be sent to defined targets'
+    options: |-
+      if ( strlen($.send_targets_only) > 0 ) then {
+          if ( $.send_targets_only == 'true' ) then {
+              stop
+          }
+      }

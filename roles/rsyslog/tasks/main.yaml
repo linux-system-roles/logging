@@ -177,10 +177,10 @@
         - item is defined and item != []
         - item.state|d('present') == 'absent'
 
-    - name: Run output sub-roles
+    - name: Run output sub-roles configs
       include_role:
         name: "{{ logging_role_path|d('logging') }}/roles/rsyslog/roles/output_roles/{{ item }}"
-      with_items: " {{ rsyslog_outputs }}"
+      with_items: "{{ rsyslog_outputs }}"
       when:
         - rsyslog_enabled|bool
         - item is defined and item != []

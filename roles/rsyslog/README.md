@@ -261,6 +261,8 @@ Variables in vars.yaml
 - `rsyslog_enabled` : When 'True' rsyslog role will deploy specified configuration file set. Default to 'True'.
 - `rsyslog_pki` : When 'True' pki related variables are configured.  In addition, if 'tls' is included in 'rsyslog_capabilities', it enables to forward logs over TLS.  Default to 'False'.
 - `rsyslog_capabilities` : List of capabilities to configure.  [ 'network', 'remote-files', 'tls' ] are predefined.
+- `rsyslog_default`: If set as `True`, rsyslog.conf will be configured with default configurations and rules.
+  If set to `False`, rsyslog.conf will be updated and only include the includes /etc/rsyslod.d/ statement. Default to `True`.
 
 Common sub-variables
 --------------------
