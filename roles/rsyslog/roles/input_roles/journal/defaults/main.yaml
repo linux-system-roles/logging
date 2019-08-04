@@ -1,0 +1,116 @@
+---
+# journal configuration
+# ---------------------
+
+# journal rpm packages
+# adding rsyslog_logging_packages
+# ------------------
+
+# .. envvar:: rsyslog_logging_packages
+#
+# List of rpm packages for Common Logging.
+rsyslog_journal_packages: ['rsyslog-mmnormalize', 'rsyslog-mmjsonparse', 'libfastjson', 'liblognorm', 'libestr']
+rsyslog_journal_prereq_packages: []
+
+# Available configuration set
+# ----------------------------
+
+rsyslog_unprivileged: 'False'
+
+# journal Rsyslog configuration rules
+# ---------------------------
+
+rsyslog_journal_rules:
+  - '{{ rsyslog_conf_journal_main_modules }}'
+  - '{{ rsyslog_conf_journal_formatting }}'
+  - '{{ rsyslog_rulebase_viaq_parse_json }}'
+
+# Default journal configuration options
+# -----------------------------------
+
+rsyslog_conf_journal_main_modules:
+
+  - name: 'journal_main'
+    type: 'modules'
+    sections:
+
+      - options: |-
+          # Read from journal
+          module(load="imjournal" StateFile="{{ rsyslog_work_dir }}/imjournal.state" RateLimit.Burst="{{ imjournal_ratelimit_burst|default(1000000) }}" RateLimit.Interval="{{ imjournal_ratelimit_interval|default(10) }}" PersistStateInterval="{{ imjournal_persist_state_interval|default(1000) }}" )
+
+      - options: |-
+          # Normalize logs
+          module(load="mmnormalize")
+
+rsyslog_conf_journal_formatting:
+
+  - name: 'journal_formatting'
+    type: 'template'
+    path: '{{rsyslog_config_dir }}'
+    sections:
+
+      - options: |-
+          # formatting
+          template(name="cnvt_to_viaq_timestamp" type="list") {
+              property(name="TIMESTAMP" dateFormat="rfc3339")
+          }
+
+          # rsyslog 8.30.0 and later does case insensitive variable name comparison
+          # which means $!MESSAGE is the same as $!message - HOWEVER - the case
+          # of the variable name is preserved when outputting, so we need to "normalize"
+          # to all lower case so that the internal JSON to string conversion will output
+          # "message" in the outgoing record
+          if $inputname == 'imjournal' then {
+              if strlen($!MESSAGE) > 0 then {
+                  action(type="mmnormalize" ruleBase="{{ rsyslog_config_dir }}/parse_json.rulebase" variable="$!MESSAGE")
+                  # ensure that $!message is set and $!MESSAGE is unset
+                  # if rsyslog is case sensitive, then $!MESSAGE == $!message
+                  if $!MESSAGE == $!message then {
+                      set $.save_message = $!message;
+                      unset $!MESSAGE; # which also unsets $!message
+                      set $!message = $.save_message;
+                      unset $.save_message;
+                  } else {
+                      if strlen($!message) == 0 then {
+                          set $!message = $!MESSAGE;
+                      }
+                      unset $!MESSAGE;
+                  }
+              } else {
+                  if strlen($!log) > 0 then {
+                      action(type="mmnormalize" ruleBase="{{ rsyslog_config_dir }}/parse_json.rulebase" variable="$!log")
+                      if strlen($!message) == 0 then {
+                          set $!message = $!log;
+                      }
+                      unset $!log;
+                  }
+              }
+
+              if strlen($!@timestamp) == 0 then {
+                  if strlen($!time) > 0 then {
+                      set $!@timestamp = $!time; # assumes json-file log timestamp in rfc3339 format already
+                      unset $!time;
+                  } else {
+                      set $!@timestamp = exec_template('cnvt_to_viaq_timestamp');
+                  }
+              }
+
+              {% if index_prefix is defined %}
+              set $.index_prefix = '{{ index_prefix }}" & ".";
+              {% endif %}
+
+              # add journal logs identifier
+              set $.logs_collection = "journal";
+          }
+
+rsyslog_rulebase_viaq_parse_json:
+
+  - name: 'parse_json'
+    filename: 'parse_json.rulebase'
+    nocomment: 'true'
+    path: '{{rsyslog_config_dir }}'
+    sections:
+
+      - options: |-
+          version=2
+          rule=:%.:json%

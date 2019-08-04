@@ -1,0 +1,10 @@
+---
+- name: Set journal facts
+  set_fact:
+    rsyslog_role_packages: "{{rsyslog_journal_prereq_packages|flatten|d([])}}+{{rsyslog_journal_packages|flatten|d([])}}"
+    rsyslog_role_rules: "{{ rsyslog_journal_rules }}"
+
+- name: Install/Update role packages and generate role configuration files to role subdir
+  include_role:
+    name: "{{ logging_role_path|d('logging') }}/roles/rsyslog"
+    tasks_from: deploy.yaml

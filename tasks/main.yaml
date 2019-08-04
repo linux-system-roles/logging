@@ -24,6 +24,18 @@
         - "{{ logging_outputs }}"
         - logs_collections
 
+    - name: Set rsyslog_inputs
+      set_fact:
+        rsyslog_inputs: []
+
+    - name: Set rsyslog_inputs
+      set_fact:
+        rsyslog_inputs: "{{ rsyslog_inputs|d([]) }} + {{ [ item.name ] }}"
+      with_items: "{{ rsyslog_logs_collections }}"
+      when:
+        - item.name is defined
+        - item.state == 'present'
+
     - name: Set rsyslog_outputs
       set_fact:
         rsyslog_outputs: []
