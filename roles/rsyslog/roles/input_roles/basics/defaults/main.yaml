@@ -1,0 +1,157 @@
+---
+# Basic logs configuration set
+# ----------------------------
+rsyslog_pki: True
+
+rsyslog_unprivileged: False
+
+# rsyslog_capabilities is an array which takes 'network', 'remote-files', 'tls'
+# 'network' enables input and output over network.
+# 'remote-files' allows input from remote hosts are separately stored from the local logs.
+# 'tls' specifies the input and output could be processed over tls.
+#       Note: unles rsyslog_send_over_tls_only is set to true, insecure network connection
+#       is also allowed.
+rsyslog_capabilities: []
+
+rsyslog_use_imuxsock: False
+
+# rsyslog_basics_rules
+#
+# List of YAML dictionaries, each dictionary should contain ``rsyslogd``
+# configuration in a special format. See :ref:`rsyslog_rules` for more
+# details. This list specifies basics ``rsyslogd`` example configuration.
+rsyslog_basics_rules:
+  - '{{ rsyslog_conf_local_basics_modules }}'
+  - '{{ rsyslog_conf_default_rulesets }}'
+  - '{{ rsyslog_conf_system_input }}'
+  - '{{ rsyslog_conf_network_input }}'
+
+# Debops example configuration options
+# --------------------------------------------
+
+# rsyslog_conf_local_modules
+#
+# List of ``rsyslogd`` modules that enable logs from the local system to be
+# received and parsed by the ``rsyslogd`` daemon.
+rsyslog_conf_local_basics_modules:
+
+  - name: 'local-basics-modules'
+    type: 'modules'
+    sections:
+
+      - comment: 'Log messages sent to local UNIX socket'
+        options: |-
+          module(load="imuxsock"    # provides support for local system logging (e.g. via logger command)
+          {% if rsyslog_use_imuxsock %}
+                 SysSock.Use="on")  # Turn on message reception via local log socket.
+          {% else %}
+                 SysSock.Use="off") # Turn off message reception via local log socket.
+          {% endif %}
+          # local messages are retrieved through imjournal now.
+          module(load="imjournal"             # provides access to the systemd journal
+                 StateFile="{{rsyslog_work_dir}}/imjournal.state") # File to store the position in the journal
+
+      - comment: 'Reads kernel messages (the same are read from journald)'
+        options: |-
+          module(load="imklog" permitnonkernelfacility="on")
+        state: '{{ "present"
+                  if ("kernel-message" in rsyslog_capabilities)
+                  else "absent" }}'
+
+      - comment: 'Read messages sent over UDP or plain TCP without TLS'
+        options: |-
+          module(load="imudp")
+          module(load="imptcp")
+        state: '{{ "present"
+                  if ("network" in rsyslog_capabilities) and (not rsyslog_send_over_tls_only)
+                  else "absent" }}'
+
+# rsyslog_conf_default_rulesets
+#
+# The ``rsyslogd`` configuration can contain multiple rulesets, each one
+# connected to an input channel (see
+# http://www.rsyslog.com/doc/v8-stable/concepts/multi_ruleset.html for more
+# details).
+#
+# By default ``rsyslog`` use the default ruleset for local system logs,
+# and defines a separate ``remote`` ruleset for logs incoming over the
+# network from remote hosts. The local log rules are stored in
+# `{{rsyslog_config_dir}}/*.system` configuration files, and remote log
+# rules are stored in `{{rsyslog_config_dir}}/*.remote` configuration files.
+rsyslog_conf_default_rulesets:
+
+  - name: 'default-rulesets'
+    type: 'rules'
+    sections:
+
+      - comment: 'Rules for the local system logs'
+        options: |-
+          $IncludeConfig {{rsyslog_config_dir}}/*.system
+
+      - comment: 'Rules for logs incoming from remote hosts'
+        options: |-
+          ruleset(name="remote") {
+            $IncludeConfig {{rsyslog_config_dir}}/*.remote
+          }
+        state: '{{ "present"
+                  if ("network" in rsyslog_capabilities)
+                  else "absent" }}'
+
+# rsyslog_conf_system_input
+#
+rsyslog_conf_system_input:
+
+  - name: 'system-input'
+    type: 'input'
+    sections:
+
+      - comment: 'Log messages from imuxsock'
+        options: |-
+          input(name="basics_imuxsock" type="imuxsock" socket="/dev/log")
+        state: '{{ "present"
+                  if rsyslog_use_imuxsock|d(False)|bool
+                  else "absent" }}'
+
+# rsyslog_conf_network_input
+#
+# Configuration of UDP, TCP and TCP over TLS inputs to receive logs from remote
+# hosts, enabled by the ``network`` capability.
+rsyslog_conf_network_input:
+
+  - name: 'network-input'
+    type: 'input'
+    state: '{{ "present"
+              if ("network" in rsyslog_capabilities)
+              else "absent" }}'
+    sections:
+
+      - options: |-
+          # Log messages from remote hosts over UDP
+          input(
+            name="basics_imudp"
+            type="imudp"
+            port="{{ rsyslog_udp_port }}"
+            ruleset="remote"
+          )
+          # Log messages from remote hosts over plain TCP
+          input(
+            name="basics_imptcp"
+            type="imptcp"
+            port="{{ rsyslog_tcp_port }}"
+            ruleset="remote"
+          )
+        state: '{{ "present"
+                  if (not rsyslog_send_over_tls_only)
+                  else "absent" }}'
+
+      - comment: 'Log messages from remote hosts over TLS'
+        options: |-
+          input(
+            name="basics_imtcp"
+            type="imtcp"
+            port="{{ rsyslog_tcp_tls_port }}"
+            ruleset="remote"
+          )
+        state: '{{ "present"
+                  if ("tls" in rsyslog_capabilities)
+                  else "absent" }}'

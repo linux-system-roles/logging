@@ -1,0 +1,10 @@
+---
+# Deploy configuration files
+- name: Set forwards facts
+  set_fact:
+    rsyslog_role_rules: "{{ rsyslog_forwards_output_rules }}"
+
+- name: Install/Update role packages and generate role configuration files for forwarding outputs
+  include_role:
+    name: "{{ logging_role_path|d('logging') }}/roles/rsyslog"
+    tasks_from: deploy.yaml

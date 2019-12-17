@@ -87,7 +87,7 @@ rsyslog_conf_viaq_formatting:
           # "message" in the outgoing record
           if strlen($!MESSAGE) > 0 then {
               set $!pipeline_metadata!collector!original_raw_message = $!MESSAGE;
-              action(type="mmnormalize" ruleBase="{{ rsyslog_config_dir }}/parse_json.rulebase" variable="$!MESSAGE")
+              action(name="viaq_MESSAGE_mmnormalize" type="mmnormalize" ruleBase="{{ rsyslog_config_dir }}/parse_json.rulebase" variable="$!MESSAGE")
               # ensure that $!message is set and $!MESSAGE is unset
               # if rsyslog is case sensitive, then $!MESSAGE == $!message
               if $!MESSAGE == $!message then {
@@ -106,7 +106,7 @@ rsyslog_conf_viaq_formatting:
           } else {
               if strlen($!log) > 0 then {
                   set $!pipeline_metadata!collector!original_raw_message = $!log;
-                  action(type="mmnormalize" ruleBase="{{ rsyslog_config_dir }}/parse_json.rulebase" variable="$!log")
+                  action(name="viaq_log_mmnormalize" type="mmnormalize" ruleBase="{{ rsyslog_config_dir }}/parse_json.rulebase" variable="$!log")
                   if strlen($!message) == 0 then {
                       set $!message = $!log;
                   }

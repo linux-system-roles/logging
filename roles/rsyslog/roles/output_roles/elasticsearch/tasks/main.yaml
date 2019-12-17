@@ -56,7 +56,7 @@
     rsyslog_role_packages: "{{rsyslog_elasticsearch_packages|flatten([])}}"
     rsyslog_role_rules: "{{ rsyslog_elasticsearch_rules }}"
 
-- name: Install/Update role packages and generate role configuration files to role subdir
+- name: Install/Update role packages and generate role configuration files (elasticsearch)
   include_role:
     name: "{{ logging_role_path|d('logging') }}/roles/rsyslog"
     tasks_from: deploy.yaml

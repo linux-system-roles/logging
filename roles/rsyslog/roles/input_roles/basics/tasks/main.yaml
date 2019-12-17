@@ -1,0 +1,10 @@
+---
+- name: Set basics facts
+  set_fact:
+    rsyslog_role_packages: "rsyslog-gnutls"
+    rsyslog_role_rules: "{{ rsyslog_basics_rules }}"
+
+- name: Install/Update basics role packages and generate example configuration files to role subdir
+  include_role:
+    name: "{{ logging_role_path|d('logging') }}/roles/rsyslog"
+    tasks_from: deploy.yaml

@@ -1,0 +1,164 @@
+---
+# Files output configuration
+# ---------------------------------
+
+# Files Rsyslog output configuration rules
+# ---------------------------------
+rsyslog_files_output_rules:
+  - '{{ rsyslog_conf_files_output_modules }}'
+  - '{{ rsyslog_conf_files_output_rules }}'
+  - '{{ rsyslog_conf_remote_templates }}'
+  - '{{ rsyslog_conf_remote_output }}'
+
+# rsyslog_conf_files_output_modules:
+rsyslog_conf_files_output_modules:
+
+  - name: 'output-modules'
+    type: 'modules'
+    sections:
+
+      - comment: 'Log messages into files with timestamp format either traditional or default'
+        options: |-
+          {% if rsyslog_basics_use_traditional_timestamp_format|default(true) %}
+          module(load="builtin:omfile" Template="RSYSLOG_TraditionalFileFormat")
+          {% else %}
+          module(load="builtin:omfile")
+          {% endif %}
+
+# rsyslog_conf_files_output_rules:
+#
+# A set of default ``rsyslog`` options which store local system logs in files
+# located in `{{rsyslog_system_log_dir}}/` directory. This is mostly the
+# same as the default ``rsyslogd`` configuration provided in the installations.
+rsyslog_conf_files_output_rules:
+
+  - name: 'output-files'
+    type: 'output'
+    suffix: 'system'
+    path: '{{ rsyslog_config_dir }}'
+    sections:
+
+      - comment: |-
+          Log all kernel messages to the console.
+          Logging much else clutters up the screen.
+        options: |-
+          kern.*                                                 /dev/console
+        state: '{{ "present"
+                  if ("kernel-message" in rsyslog_capabilities)
+                  else "absent" }}'
+
+      - comment: |-
+          Log anything (except mail) of level info or higher.
+          Don't log private authentication messages!
+        options: |-
+          *.info;mail.none;authpriv.none;cron.none                {{rsyslog_system_log_dir}}/messages
+
+      - comment: 'The authpriv file has restricted access.'
+        options: |-
+          authpriv.*                                              {{rsyslog_system_log_dir}}/secure
+
+      - comment: 'Log all the mail messages in one place.'
+        options: |-
+          mail.*                                                  -{{rsyslog_system_log_dir}}/maillog
+
+      - comment: 'Log cron stuff'
+        options: |-
+          cron.*                                                  -{{rsyslog_system_log_dir}}/cron
+
+      - comment: 'Everybody gets emergency messages'
+        options: |-
+          *.emerg                                                  :omusrmsg:*
+
+      - comment: 'Save news errors of level crit and higher in a special file.'
+        options: |-
+          uucp,news.crit                                          {{rsyslog_system_log_dir}}/spooler
+
+      - comment: 'Save boot messages also to boot.log'
+        options: |-
+          local7.*                                                {{rsyslog_system_log_dir}}/boot.log
+
+# rsyslog_conf_remote_templates
+#
+# List of ``rsyslogd`` templates which are used to generate dynamic filenames for remote logs,
+# based on hostnames. You can add additional template configuration by writing it in the
+# `{{rsyslog_config_dir}}/*.template` files, they will be included by the main configuration.
+#
+# This section will create 20-remote-templates.conf
+rsyslog_conf_remote_templates:
+
+  - name: 'remote-templates'
+    type: 'template'
+    state: '{{ "present"
+               if ("network" in rsyslog_capabilities and "remote-files" in rsyslog_capabilities)
+               else "absent" }}'
+    sections:
+
+      - options: |-
+          #
+          # Per-Host Templates for Remote Systems
+          #
+          template(
+            name="RemoteMessage"
+            type="string"
+            string="{{rsyslog_system_log_dir}}/remote/msg/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
+          )
+
+          # Template for Remote host auth logs
+          template(
+            name="RemoteHostAuthLog"
+            type="string"
+            string="{{rsyslog_system_log_dir}}/remote/auth/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
+          )
+
+          # Template for Remote host cron logs
+          template(
+            name="RemoteHostCronLog"
+            type="string"
+            string="{{rsyslog_system_log_dir}}/remote/cron/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
+          )
+
+          # Template for Remote service auth logs
+          template(
+            name="RemoteServiceAuthLog"
+            type="string"
+            string="{{rsyslog_system_log_dir}}/remote/services/auth/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
+          )
+
+          # Template for Remote service cron logs
+          template(
+            name="RemoteServiceCronLog"
+            type="string"
+            string="{{rsyslog_system_log_dir}}/remote/services/cron/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
+          )
+
+          # Template for Remote service mail logs
+          template(
+            name="RemoteServiceMailLog"
+            type="string"
+            string="{{rsyslog_system_log_dir}}/remote/services/mail/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
+          )
+
+          # Include custom templates
+          $IncludeConfig {{rsyslog_config_dir}}/*.template
+
+# rsyslog_conf_remote_output
+#
+rsyslog_conf_remote_output:
+
+  - name: 'remote-dynamic-logs'
+    comment: 'Store remote logs in separate logfiles'
+    type: 'output'
+    suffix: 'remote'
+    state: '{{ "present"
+               if ("network" in rsyslog_capabilities and "remote-files" in rsyslog_capabilities)
+               else "absent" }}'
+    sections:
+
+      - comment: 'Per-Host Templates for Remote Systems'
+        options: |-
+          authpriv.*   action(name="remote_authpriv_host_log" type="omfile" DynaFile="RemoteHostAuthLog")
+          authpriv.*   action(name="remote_authpriv_service_log" type="omfile" DynaFile="RemoteServiceAuthLog")
+          *.info;mail.none;authpriv.none;cron.none action(name="remote_message" type="omfile" DynaFile="RemoteMessage")
+          cron.*       action(name="remote_cron_log" type="omfile" DynaFile="RemoteHostCronLog")
+          cron.*       action(name="remote_cron_service_log" type="omfile" DynaFile="RemoteServiceCronLog")
+          mail.*       action(name="remote_mail_service_log" type="omfile" DynaFile="RemoteServiceMailLog")
