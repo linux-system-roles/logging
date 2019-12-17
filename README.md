@@ -1,5 +1,5 @@
-linux-system-roles Logging
-==========================
+linux-system-roles Logging (LSR/Logging)
+========================================
 
 Guidelines for Using Logging Ansible Role
 -----------------------------------------
@@ -8,7 +8,6 @@ The `logging` role enables a RHEL admin/developer to deploy logging collectors o
 process these logs if needed to add additional metadata and ship it to a remote location to be saved and analyzed.
 
 The logging role currently supports `Rsyslog` as the log collector.
-The `Rsyslog` is based on the role created by DebOps, https://github.com/debops/ansible-rsyslog.
 
 Table of Contents
 =================
@@ -36,25 +35,20 @@ Definitions
   - [`Rsyslog`](https://www.rsyslog.com/) - The logging role default log collector used for log processing.
   - [`Viaq`](https://docs.okd.io/latest/install_config/aggregate_logging.html)- Common Logging based on OpenShift Aggregated Logging (OCP/Origin).
   - [`Elasticsearch`](https://www.elastic.co/) - Non-OpenShift standalone Elasticsearch.
-  - `Local` - Output the collected logs to a local File/Journal. Supported only for default and debops Rsyslog data at this point.
+  - `Local` - Output the collected logs to a local File / Journal (Not yet implemented). Supported only for default and basics Rsyslog data at this point.
   - `Remote Rsyslog` - Output logs to a remote Rsyslog server. - Not yet implemented
   - `Message Queue` (kafka, amqp) - Not yet implemented
-
-Deploy Default Logging Configuration Files
-==========================================
-
-``` ansible-playbook [-vvv]  --become --become-user root --connection local -i inventory_file playbook.yaml ```
-
 
 Deploy Configuration Files
 ===========================
 
 Typical ansible-playbook command line includes:
 
- - vars.yaml - to be updated by the user
+ - vars.yaml - containing LSR/Logging variables, which are to be updated by the user.
+   The contents of this file could be merged into the inventory file.
  - inventory_file - used to specify the hosts to deploy the configuration files
 
-``` ansible-playbook [-vvv] -e@vars.yaml --become --become-user root --connection local -i inventory_file playbook.yaml ```
+``` ansible-playbook [-vvv] -e@vars.yaml --become --become-user root -i inventory_file playbook.yaml ```
 
 Inventory File
 --------------
@@ -73,22 +67,70 @@ vars.yaml
 
 vars.yaml stores variables which are passed to ansible to control the tasks.
 
-Initial conf will be supplied by default.
-User can supply another conf to be used.
+Initial configuration will be supplied by default.
+User can supply further configuration to be used.
 
-**Note:**   Currently, the role supports 3 types of logs collections: default, 'viaq' and 'debops'.
-'viaq' and 'debops' can theoretically, both be added to the logs_collections and the specified configuration files are deployed, but rsyslog does not work properly with the configuration.
+Currently, the role supports 3 types of logs collections ([input_roles](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/roles/input_roles/)): `basics`, `ovirt`, and `viaq`.  And 3 types of log outputs ([output_roles](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/roles/output_roles/)): `elasticsearch`, `files`, and `forwards`.  To deploy configuration files with these input and output roles, first specify the output_role as `logging_outputs`, then input_role as `log_collections` in each `logging_outputs`.  Multiple input roles could be required based on the use cases.
 
+To make an effect with the following setting, vars.yaml has to have `logging_enabled: true`.  Unless logging_enabled is set to true, LSR/Logging does not deploy logging systems.
 
-Configure the list of outputs you want to send your logs to.
-
-vars.yaml example:
-
+**Note:** Current LSR/Logging supports rsyslog only.  In case other logging system is added to LSR/Logging in the future, it's supposed to implement the input and output roles to satisfy the logging_outputs and log_collections semantics.
 ```
-If 'viaq-k8s' is in logs_collections, logging_mmk8s_* need to be specified.
-logging_mmk8s_token:
-logging_mmk8s_ca_cert:
+logging_enabled: true
+logging_outputs:
+  -name: <output_role_name0>
+   type: <output_type0>
+   log_collections:
+     - name: <input_role_nameA>
+     - name: <input_role_nameB>
+  -name: <output_role_name1>
+   type: <output_type1>
+   log_collections:
+     - name: <input_role_nameC>
+```
 
+**vars.yaml examples:**
+
+0) Deploying default /etc/rsyslog.conf.
+```
+logging_enabled: True
+```
+
+1) Overriding existing /etc/rsyslog.conf and files in /etc/rsyslog.d with default rsyslog.conf.
+```
+logging_enabled: True
+logging_purge_confs: True
+```
+
+2) Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and outputs into the local files.
+```
+logging_enabled: True
+rsyslog_default: False
+logging_purge_confs: True
+logging_outputs:
+  - name: local-files
+    type: files
+    logs_collections:
+      - name: 'basics'
+```
+
+3) Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and remote rsyslog and outputs into the local files.
+```
+logging_enabled: True
+rsyslog_default: False
+rsyslog_capabilities: [ 'network', 'remote-files' ]
+logging_purge_confs: True
+logging_outputs:
+  - name: local-files
+    type: files
+    logs_collections:
+      - name: 'basics'
+```
+
+4) Deploying config files for collecting logs from OpenShift pods as well as RHV and forwarding them to elasticsearch.
+```
+logging_enabled: True
+rsyslog_default: False
 logging_outputs:
   - name: viaq-elasticsearch
     type: elasticsearch
@@ -101,9 +143,9 @@ logging_outputs:
     server_host: logging-es
     server_port: 9200
     index_prefix: project.
-    ca_cert:
-    cert:
-    key:
+    ca_cert: <CA_CERT>
+    cert: <USER_CERT>
+    key: <PRIVATE_KEY>
   - name: ovirt-elasticsearch
     type: elasticsearch
     logs_collections:
@@ -111,30 +153,31 @@ logging_outputs:
     server_host: logging-es-ovirt
     server_port: 9200
     index_prefix: project.ovirt-logs
-    ca_cert:
-    cert:
-    key:
+    ca_cert: <CA_CERT>
+    cert: <USER_CERT>
+    key: <PRIVATE_KEY>
   - name: custom_files-test
     type: custom_files
     custom_config_files: [ '/path/to/custom_A.conf', '/path/to/custom_B.conf' ]
 ```
 
-   See the variables section for each variable.
+   See the [variables section](#variables-in-varsyaml) for each variable.
 
-**Note:** The order of the record with type  `elasticsearch` is important. The last Elasticsearch output will get all the logs that were not cached by previous Elasticsearches instances.
+**Note:** The order of the record with type `elasticsearch` is important. The last Elasticsearch output will get all the logs that were not cached by previous Elasticsearches instances.
 
+For more details, see also [roles/rsyslog/README.md](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/README.md).
 
 Variables in vars.yaml
 ----------------------
 
 - `logging_collector`: The logs collector to use for the logs collection. Currently Rsyslog is the only supported logs collector. Defaults to `rsyslog`.
-- `logging_enabled` : When 'True' logging role will deploy specified configuration file set. Default to 'True'.
+- `logging_enabled` : When 'True', logging role will deploy specified configuration file set. Default to 'True'.
 - `logging_purge_confs`: By default, the Rsyslog configuration files are applied on top of pre-existing configuration files. To purge local files prior to setting new ones, set logging_purge_confs variable to 'True', it will move all Rsyslog configuration files to a backup directory, `/tmp/rsyslog.d-XXXXXX/backup.tgz`, before deploying the new configuration files. Defaults to 'False'.
 - `logging_mmk8s_token`: Path to token for kubernetes.  Default to "/etc/rsyslog.d/viaq/mmk8s.token".
 - `logging_mmk8s_ca_cert`: Path to CA cert for kubernetes.  Default to "/etc/rsyslog.d/viaq/mmk8s.ca.crt".
 
 - `logging_outputs`: A set of following variables to specify output configurations.  It could be an list if multiple outputs that should to be configured.
-   -  **If `type: elasticsearch`** Send logs to one or more remote elasticsearch or Viaq installations.
+   -  **If `type: elasticsearch`**, send logs to one or more remote elasticsearch or Viaq installations.
       - `name`: Name of the elasticsearch element.
       - `type`: Type of the output element. Optional values: `elasticsearch`, `local`, `custom_files`.
       - `logs_collections` : List of optional logs collections, dictionaries with `name` and `state` attributes, that were pre-configured.
@@ -155,10 +198,12 @@ Variables in vars.yaml
 playbook.yaml
 -------------
 
+```
 - name: install and configure logging on the nodes
   hosts: nodes
   roles:
     - role: logging
+```
 
 New Projects Integration
 ========================
@@ -168,7 +213,7 @@ format them and ship them to the required destination.
 It currently supports Rsyslog as the default logs collector.
 
 The projects are called `logs_collections` and the user can choose to deploy several projects at the same time.
-Each project adds a sub-role to ./logging/roles/rsyslog/roles/input_roles/.
+Each project adds a sub-role to [input_roles](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/roles/input_roles/).
 
 The sub-role usually includes `tasks` and `defaults` directories.
 The `defaults` directory includes:
@@ -185,8 +230,8 @@ The `tasks` directory includes 2 tasks file:
 
 Examples can be found in the existing projects.
 
-The available outputs are defined in /logging/roles/rsyslog/roles/output_roles/.
-Currently, It supports Elasticsearch output.
+The available outputs are defined in [output_roles](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/roles/output_roles/).
+Currently, It supports Elasticsearch, writing to local files, and forwarding to remote rsyslog.
 Additional output will be added.
 
 Planned Flows:
@@ -202,9 +247,11 @@ In-tree tests are provided that use molecule to test the role against docker con
 These tests are designed to be used by CI, but they can also be run locally to test it
 out while developing.  This is best done by installing molecule in a virtualenv:
 
-  `$ virtualenv .venv`
-  `$ source .venv/bin/activate`
-  `$ pip install molecule docker`
+```
+$ virtualenv .venv
+$ source .venv/bin/activate
+$ pip install molecule docker
+```
 
 It is required to run the tests as a user who is authorized to run the 'docker' command
 without using sudo.  This is typically accomplished by adding your user to the 'docker'
@@ -226,13 +273,13 @@ Once your virtualenv is properly set up, the tests can be run with these command
 By default, the test target will be the latest `centos` image from Docker Hub.  You
 can test against a different image/tag like so:
 
-  `$ MOLECULE_DISTRO="fedora:28" molecule test`
+  `$ MOLECULE_DISTRO="fedora:30" molecule test`
 
 Additional Resources
 ====================
 
 Additional Rsyslog custom parameters can be added to the logging role vars.yaml file,
-based on the parameters in the Rsyslog role README file under the /roles directory.
+based on the parameters in the [Rsyslog role README file](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/roles/README.md).
 
 License
 =======

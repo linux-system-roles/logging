@@ -7,6 +7,15 @@
       set_fact:
         rsyslog_enabled: "{{ logging_enabled|d(true) }}"
 
+    - name: Set use_python3 to false if python3 is not installed.
+      set_fact:
+        use_python3: false
+      when: "ansible_python_version is version('3', '<')"
+
+    - name: Check python version
+      debug:
+        msg: "Python version is {{ ansible_python_version }}; use_python3 is {{ use_python3 }}"
+
     - name: Set rsyslog_elasticsearch
       set_fact:
         rsyslog_elasticsearch: "{{ rsyslog_elasticsearch|d([]) }} + {{ [  item.0 |combine( {'logs_collections_name': item.1.name} )] }}"
@@ -17,6 +26,26 @@
         - item.0.type|d('') == 'elasticsearch'
         - item.1.state|d('present') == 'present'
 
+    - name: Set rsyslog_files
+      set_fact:
+        rsyslog_files: "{{ rsyslog_files|d([]) }} + {{ [  item.0|combine( {'logs_collections_name': item.1.name} )] }}"
+      with_subelements:
+        - "{{ logging_outputs }}"
+        - logs_collections
+      when:
+        - item.0.type|d('') == 'files'
+        - item.1.state|d('present') == 'present'
+
+    - name: Set rsyslog_forwards
+      set_fact:
+        rsyslog_forwards: "{{ rsyslog_forwards|d([]) }} + {{ [  item.0|combine( {'logs_collections_name': item.1.name} )] }}"
+      with_subelements:
+        - "{{ logging_outputs }}"
+        - logs_collections
+      when:
+        - item.0.type|d('') == 'forwards'
+        - item.1.state|d('present') == 'present'
+
     - name: Set rsyslog_logs_collections
       set_fact:
         rsyslog_logs_collections: "{{ rsyslog_logs_collections|d([]) }} + {{ [ { 'name': item.1.name, 'state': item.1.state|d('present'), 'output_name': item.0.name } ] }}"
@@ -24,7 +53,7 @@
         - "{{ logging_outputs }}"
         - logs_collections
 
-    - name: Set rsyslog_outputs
+    - name: Initialize rsyslog_outputs
       set_fact:
         rsyslog_outputs: []
 
@@ -46,7 +75,7 @@
     - name: Set rsyslog_purge_original_conf fact to purge all configuration files before saving the new ones.
       set_fact:
         rsyslog_purge_original_conf: yes
-      when: logging_purge_confs|d(no)
+      when: logging_purge_confs|d(false)
 
     - name: Set custom_config_files fact
       set_fact:
@@ -55,6 +84,14 @@
       when:
         - item.type|d('') == 'custom'
         - logging_enabled|d(true)
+
+    - name: Install python selinux library for logging_debug
+      yum:
+        name: '{{ "python3-libselinux" if use_python3 else "libselinux-python" }}'
+        state: 'latest'
+      when: logging_debug|d(false)
+      tags:
+        - skip_ansible_lint
 
     - name: Re-read facts after adding custom fact
       setup:
@@ -71,7 +108,7 @@
     - name: Delete debug file
       file:
         path: "{{ logging_role_path|d('logging') }}/debug/main.yaml"
-        state: absent
+        state: 'absent'
       ignore_errors: true
       when: logging_debug|d(false)
 

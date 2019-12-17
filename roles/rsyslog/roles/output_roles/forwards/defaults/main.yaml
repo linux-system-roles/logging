@@ -1,0 +1,37 @@
+---
+# Forwards output configuration
+# ---------------------------------
+
+# Forwards Rsyslog output configuration rules
+# ---------------------------------
+rsyslog_forwards_output_rules:
+  - '{{ rsyslog_conf_forwards_output_rules }}'
+
+# rsyslog_conf_forwards_output_rules:
+#
+# Enable log forwarding to another ``rsyslogd`` instance if it's enabled in
+# `rsyslog_forwards` variables.
+rsyslog_conf_forwards_output_rules:
+
+  - name: 'output-forwards'
+    type: 'output'
+    suffix: 'system'
+    path: '{{ rsyslog_config_dir }}'
+    state: '{{ "present"
+               if (rsyslog_forwards|d() or rsyslog_group_forwards|d() or rsyslog_host_forwards|d())
+               else "absent" }}'
+    sections:
+
+      - comment: 'Forward logs over TLS by default'
+        options: '{{ rsyslog_send_over_tls }}'
+        state: '{{ "present" if ("tls" in rsyslog_capabilities)
+                   else "absent" }}'
+
+      - comment: 'Forward logs to specified hosts'
+        options: |-
+          {% for element in (rsyslog_forwards + rsyslog_group_forwards + rsyslog_host_forwards) %}
+          # start forwarding
+          {{ element }}
+          # end forwarding
+
+          {% endfor %}
