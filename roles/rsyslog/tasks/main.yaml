@@ -159,7 +159,7 @@
 
     - name: Run deploy input sub-roles configs
       include_role:
-        name: "{{ logging_role_path|d('logging') }}/roles/rsyslog/roles/input_roles/{{ input_item.name }}"
+        name: "{{ role_path }}/roles/input_roles/{{ input_item.name }}"
       loop: "{{ rsyslog_logs_collections|flatten(1) }}"
       loop_control:
         loop_var: input_item
@@ -170,7 +170,7 @@
 
     - name: Run remove input sub-roles configs
       include_role:
-        name: "{{ logging_role_path|d('logging') }}/roles/rsyslog/roles/input_roles/{{ input_item.name }}"
+        name: "{{ role_path }}/roles/input_roles/{{ input_item.name }}"
         tasks_from: cleanup.yaml
       loop: "{{ rsyslog_logs_collections|flatten(1) }}"
       loop_control:
@@ -181,7 +181,7 @@
 
     - name: Run output sub-roles configs
       include_role:
-        name: "{{ logging_role_path|d('logging') }}/roles/rsyslog/roles/output_roles/{{ output_item }}"
+        name: "{{ role_path }}/roles/output_roles/{{ output_item }}"
       loop: "{{ rsyslog_outputs|flatten(1) }}"
       loop_control:
         loop_var: output_item
@@ -192,11 +192,10 @@
         - skip_ansible_lint
 
     - name: Enable rsyslog service
-      systemd:
-        name: rsyslog.service
-        daemon_reload: yes
+      service:
+        name: 'rsyslog'
         enabled: yes
-        state: started
+        state: 'started'
       when:
         - rsyslog_enabled|bool
         - not use_rsyslog_image|default(False)|bool

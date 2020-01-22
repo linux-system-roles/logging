@@ -83,28 +83,28 @@
 
     - name: Create rsyslog debug dir
       file:
-        path: "{{ logging_role_path|d('logging') }}/debug"
+        path: "{{ role_path }}/debug"
         state: 'directory'
         mode: '0700'
       when: logging_debug|d(false)
 
     - name: Delete debug file
       file:
-        path: "{{ logging_role_path|d('logging') }}/debug/main.yaml"
+        path: "{{ role_path }}/debug/main.yaml"
         state: 'absent'
       ignore_errors: true
       when: logging_debug|d(false)
 
     - name: Create rsyslog debug file
       lineinfile:
-        path: "{{ logging_role_path|d('logging') }}/debug/main.yaml"
+        path: "{{ role_path }}/debug/main.yaml"
         create: yes
         line: "#ANSIBLE MANAGED VARIABLES FILE"
       when: logging_debug|d(false)
 
     - name: Populate rsyslog debug file
       lineinfile:
-        path: "{{ logging_role_path|d('logging') }}/debug/main.yaml"
+        path: "{{ role_path }}/debug/main.yaml"
         create: yes
         line: "{{ item.key }}: {{ item.value| to_nice_json(indent=2) }}"
       with_dict: "{{ hostvars[inventory_hostname] }}"
@@ -114,6 +114,6 @@
 
     - name: include Rsyslog role
       include_role:
-        name: "{{ logging_role_path|d('logging') }}/roles/rsyslog"
+        name: "{{ role_path }}/roles/rsyslog"
 
   when: logging_collector|d('rsyslog') == 'rsyslog'

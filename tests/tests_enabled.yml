@@ -1,0 +1,21 @@
+
+- name: Ensure that the role runs with rsyslog_enabled=True
+  hosts: all
+  become: true
+
+  tasks:
+    - name: default run (deploy rsyslog.conf)
+      vars:
+        logging_enabled: True
+      include_role:
+        name: linux-system-roles.logging
+
+    - include: set_rsyslog_variables.yml
+
+    - name: Check rsyslog.conf size
+      assert:
+        that: rsyslog_conf_line_count.stdout.0|int > 7
+
+    - name: Check file counts in rsyslog.d
+      assert:
+        that: rsyslog_d_file_count.matched < 3

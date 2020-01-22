@@ -1,0 +1,53 @@
+
+- name: Ensure that rsyslog configured as a server listens on the port 514
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Deploy rsyslog config on the target host as a server
+      vars:
+        logging_enabled: True
+        logging_purge_confs: True
+        rsyslog_default: False
+        rsyslog_capabilities: [ 'network', 'remote-files' ]
+        logging_outputs:
+          - name: files-output
+            type: files
+            logs_collections:
+              - name: basics
+
+      include_role:
+        name: linux-system-roles.logging
+
+    - include: set_rsyslog_variables.yml
+
+    # notify restart rsyslogd is executed at the end of this test task.
+    # thus we have to force to invoke handlers
+    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+      meta: flush_handlers
+
+    - name: Install lsof
+      yum:
+        name: 'lsof'
+        state: 'present'
+
+    - name: Check rsyslog.conf size
+      assert:
+        that: rsyslog_conf_line_count.stdout.0|int <= 7
+
+    - name: Check file counts in rsyslog.d
+      assert:
+        that: rsyslog_d_file_count.matched >= 7
+
+    - name: lsof outputs for rsyslogd
+      shell: lsof -i -nP | grep rsyslogd
+      register: lsof_output
+
+    - debug:
+        msg: "lsof returned {{ lsof_output.stdout }}"
+
+    - name: Check port 514 is open for TCP
+      shell: lsof -i -nP | grep rsyslogd | grep TCP | grep 514
+
+    - name: Check port 514 is open for UDP
+      shell: lsof -i -nP | grep rsyslogd | grep UDP | grep 514
