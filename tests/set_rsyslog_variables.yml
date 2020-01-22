@@ -1,0 +1,10 @@
+---
+- name: Get info of /etc/rsyslog.conf
+  command: /usr/bin/wc -l /etc/rsyslog.conf
+  register: rsyslog_conf_line_count
+- name: Get file counts in /etc/rsyslog.d
+  find:
+    paths: /etc/rsyslog.d
+    patterns: '*.conf,*.template,*.system,*.remote'
+  register: rsyslog_d_file_count
+

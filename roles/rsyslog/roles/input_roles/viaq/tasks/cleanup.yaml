@@ -5,5 +5,5 @@
 
 - name: Remove viaq configs
   include_role:
-    name: "{{ logging_role_path|d('logging') }}/roles/rsyslog"
+    name: "{{ role_path }}/roles/rsyslog"
     tasks_from: cleanup.yaml

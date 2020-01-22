@@ -1,0 +1,44 @@
+
+- name: Ensure that the role runs with parameters to output into local files
+  hosts: all
+  become: true
+
+  tasks:
+    - name: deploy config to output into local files
+      vars:
+        logging_enabled: True
+        rsyslog_default: False
+        logging_outputs:
+          - name: files-output
+            type: files
+            logs_collections:
+              - name: basics
+      include_role:
+        name: linux-system-roles.logging
+
+    - include: set_rsyslog_variables.yml
+
+    # notify restart rsyslogd is executed at the end of this test task.
+    # thus we have to force to invoke handlers
+    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+      meta: flush_handlers
+
+    - name: Check rsyslog.conf size
+      assert:
+        that: rsyslog_conf_line_count.stdout.0|int <= 7
+
+    - name: Check file counts in rsyslog.d
+      assert:
+        that: rsyslog_d_file_count.matched >= 9
+
+    - name: Run logger to generate a test log message
+      command: /bin/logger -i -p local6.info -t testTag0 testMessage0000
+
+    - name: Check the test log message in /var/log/messages
+      command: /bin/grep testMessage0000 /var/log/messages
+      register: testMessage0000
+
+    - name: Check if the test message is in /var/log/messages
+      assert:
+        that: testMessage0000.stdout != ""
+
