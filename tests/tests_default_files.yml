@@ -6,24 +6,11 @@
   tasks:
     - name: deploy config to output into local files
       vars:
-        logging_enabled: true
+        logging_enabled: True
+        rsyslog_default: False
         logging_outputs:
           - name: files-output
             type: files
-            rsyslog_files_actions:
-              - name: test0
-                severity: info
-                exclude: authpriv.none;auth.none;cron.none;mail.none
-                path: /var/log/messages
-              - name: test1
-                facility: authpriv,auth
-                path: /var/log/secure
-              - name: test2
-                severity: emerg
-                path: :omusrmsg:*
-              - name: test3
-                facility: local7
-                path: /var/log/boot.log
             logs_collections:
               - name: basic_input
                 type: basics
@@ -54,17 +41,22 @@
         path: "{{ test_files_conf }}"
       register: stat_output_files_system
 
+    - name: Get the forwarding config stat
+      stat:
+        path: "{{ test_files_conf }}"
+      register: stat_output_files_system
+
     - name: Check if the files config exists
       assert:
         that: stat_output_files_system.stat.exists == True
 
     - name: Grep output to messages line
-      command: /bin/grep ".var.log.messages" {{ test_files_conf }}
+      command: /bin/grep "\/var\/log\/messages" {{ test_files_conf }}
       register: files_conf_messages
 
     - name: Check the filter
       assert:
-        that: files_conf_messages.stdout is match("\*.info;*authpriv.none;auth.none;cron.none;mail.none.*.var.log.messages")
+        that: files_conf_messages.stdout is match("\*.info;mail.none;authpriv.none;cron.none.*messages")
 
     - name: Run logger to generate a test log message
       command: /bin/logger -i -p local6.info -t testTag0 testMessage0000

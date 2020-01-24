@@ -245,28 +245,19 @@ rsyslog_group_allow: []
 rsyslog_host_allow: ['192.168.122.100/24']
 
 
-# Log forwarding
-# --------------
+# Files and Forwards outputs
+# --------------------------
 
-# rsyslog_forwards
+# rsyslog_files_actions
 #
-# List of ``rsyslogd`` options that configure log forwarding for all hosts in
-# the inventory.
-rsyslog_forwards: []
+# Array of dictionary to specify files to store logs for files outputs.
+rsyslog_files_actions: []
 
-# rsyslog_group_forwards
+# rsyslog_forwards_actions
 #
-# List of ``rsyslogd`` options that configure log forwarding for hosts in
-# a specific group.
-rsyslog_group_forwards: []
-
-# rsyslog_host_forwards
-#
-# List of ``rsyslogd`` options that configure log forwarding for specific hosts
-# in Ansible inventory.
-# rsyslog_host_forwards: [ '*.* @other.{{ ansible_domain }}' ]
-rsyslog_host_forwards: []
-
+# Array of dictionary to specify files to forward target host to redirect
+# the logs to the remote rsyslog servers for forwards output.
+rsyslog_forwards_actions: []
 
 # Rsyslog configuration rules
 # ---------------------------
@@ -341,7 +332,6 @@ rsyslog_common_rules:
 
   - '{{ rsyslog_conf_global_options }}'
   - '{{ rsyslog_conf_local_modules }}'
-  - '{{ rsyslog_conf_network_modules }}'
   - '{{ rsyslog_conf_common_defaults }}'
   - '{{ rsyslog_conf_send_targets_only }}'
 
@@ -391,52 +381,6 @@ rsyslog_conf_local_modules:
           module(load="immark" interval={{ (60 * 60) }})
         state: '{{ "present"
                   if ("mark" in rsyslog_capabilities)
-                  else "absent" }}'
-
-# rsyslog_conf_network_modules
-#
-# List of ``rsyslogd`` modules that receive logs from remote systems over the
-# network. They are enabled by the ``network`` capability.
-rsyslog_conf_network_modules:
-
-  - name: 'network-modules'
-    type: 'modules'
-    state: '{{ "present"
-              if ("network" in rsyslog_capabilities)
-              else "absent" }}'
-    sections:
-
-      - comment: 'Enable UDP support'
-        options: |-
-          module(load="imudp")
-        state: '{{ "present"
-                  if (rsyslog_send_over_tls_only)
-                  else "absent" }}'
-
-      - comment: 'Enable TCP support'
-        options: |-
-          module(load="imptcp")
-        state: '{{ "present"
-                  if (rsyslog_send_over_tls_only)
-                  else "absent" }}'
-
-      - comment: 'Enable Secure TCP support based on rsyslog_default_netstream_driver'
-        options: |-
-          module(
-            load="imtcp"
-            streamDriver.name="{{ rsyslog_default_netstream_driver }}"
-            streamDriver.mode="1"
-            streamDriver.authMode="{{ rsyslog_default_driver_authmode }}"
-          {% if rsyslog_default_driver_authmode != "anon" %}
-            {% if rsyslog_permitted_peers is string %}
-              permittedPeer="{{ rsyslog_permitted_peers }}"
-            {% else %}
-              permittedPeer=["{{ rsyslog_permitted_peers | join('","') }}"]
-            {% endif %}
-          {% endif %}
-          )
-        state: '{{ "present"
-                  if ("tls" in rsyslog_capabilities)
                   else "absent" }}'
 
 # rsyslog_conf_common_defaults

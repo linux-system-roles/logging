@@ -1,0 +1,10 @@
+---
+- name: Set input files facts
+  set_fact:
+    rsyslog_role_packages: "{{ rsyslog_files_input_packages|flatten }}"
+    rsyslog_role_rules: "{{ rsyslog_files_input_rules }}"
+
+- name: Remove input files example config files from rsyslog.d
+  include_role:
+    name: "{{ role_path }}/../../../"
+    tasks_from: cleanup.yaml

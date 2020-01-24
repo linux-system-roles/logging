@@ -9,7 +9,7 @@
 
     - name: Set rsyslog_elasticsearch
       set_fact:
-        rsyslog_elasticsearch: "{{ rsyslog_elasticsearch | d([]) }} + {{ [  item.0 |combine( {'logs_collections_name': item.1.name} )] }}"
+        rsyslog_elasticsearch: "{{ rsyslog_elasticsearch | d([]) }} + {{ [ item.0 | combine( {'logs_collections_name': item.1.name} )] }}"
       with_subelements:
         - "{{ logging_outputs }}"
         - logs_collections
@@ -17,29 +17,31 @@
         - item.0.type | d('') == 'elasticsearch'
         - item.1.state | d('present') == 'present'
 
-    - name: Set rsyslog_files
+    - name: Set rsyslog_files_actions
       set_fact:
-        rsyslog_files: "{{ rsyslog_files | d([]) }} + {{ [  item.0|combine( {'logs_collections_name': item.1.name} )] }}"
+        rsyslog_files_actions: "{{ rsyslog_files_actions | d([]) }} + {{ item.0.rsyslog_files_actions }}"
       with_subelements:
         - "{{ logging_outputs }}"
         - logs_collections
       when:
         - item.0.type | d('') == 'files'
+        - item.0.rsyslog_files_actions is defined
         - item.1.state | d('present') == 'present'
 
-    - name: Set rsyslog_forwards
+    - name: Set rsyslog_forwards_actions
       set_fact:
-        rsyslog_forwards: "{{ rsyslog_forwards | d([]) }} + {{ [  item.0|combine( {'logs_collections_name': item.1.name} )] }}"
+        rsyslog_forwards_actions: "{{ rsyslog_forwards_actions | d([]) }} + {{ item.0.rsyslog_forwards_actions }}"
       with_subelements:
         - "{{ logging_outputs }}"
         - logs_collections
       when:
         - item.0.type | d('') == 'forwards'
+        - item.0.rsyslog_forwards_actions is defined
         - item.1.state | d('present') == 'present'
 
     - name: Set rsyslog_logs_collections
       set_fact:
-        rsyslog_logs_collections: "{{ rsyslog_logs_collections | d([]) }} + {{ [ { 'name': item.1.name, 'type': item.1.type, 'state': item.1.state | d('present'), 'output_name': item.0.name } ] }}"
+        rsyslog_logs_collections: "{{ rsyslog_logs_collections | d([]) }} + {{ [ item.1 | combine( {'output_name': item.0.name} )] }}"
       with_subelements:
         - "{{ logging_outputs }}"
         - logs_collections
