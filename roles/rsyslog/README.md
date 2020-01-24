@@ -52,6 +52,7 @@ Currently, the role supports 3 types of logs collections ([input_roles](https://
 To make an effect with the following setting, vars.yaml has to have `rsyslog_enabled: true`.  Unless `rsyslog_enabled` is set to true, LSR/Logging does not deploy rsyslog config files.
 ```
 rsyslog_enabled: true
+rsyslog_default: false
 logging_outputs:
   -name: <output_role_name0>
    type: <output_type0>
@@ -69,21 +70,22 @@ logging_outputs:
 
 See the [variables section](#variables) for each variable.
 
-**vars.yaml examples:**
+vars.yaml examples
+------------------
 
-0. Deploying default /etc/rsyslog.conf.
+**0. Deploying default /etc/rsyslog.conf.**
 ```
 rsyslog_enabled: true
 ```
 
-0. Overriding existing /etc/rsyslog.conf and files in /etc/rsyslog.d with default rsyslog.conf.  Pre-existing config files are copied to the directory specified by `rsyslog_backup_dir`.
+**1. Overriding existing /etc/rsyslog.conf and files in /etc/rsyslog.d with default rsyslog.conf.  Pre-existing config files are copied to the directory specified by `rsyslog_backup_dir`.**
 ```
 rsyslog_enabled: true
 rsyslog_purge_original_conf: true
 rsyslog_backup_dir: /tmp/rsyslog_backup
 ```
 
-1. Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and outputs into the local files.  Pre-existing config files are copied to the directory specified by `rsyslog_backup_dir`.
+**2. Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and outputs into the local files.  Pre-existing config files are copied to the directory specified by `rsyslog_backup_dir`.**
 ```
 rsyslog_enabled: true
 rsyslog_purge_original_conf: true
@@ -96,7 +98,7 @@ logging_outputs:
         type: basics
 ```
 
-2. Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and remote rsyslog and outputs into the local files.
+**3. Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and remote rsyslog and outputs into the local files.**
 ```
 rsyslog_enabled: true
 rsyslog_capabilities: [ 'network', 'remote-files' ]
@@ -109,7 +111,30 @@ logging_outputs:
         type: basics
 ```
 
-3. Sample vars.yaml file for the viaq case.
+**4. Deploying basic LSR/Logging config files in /etc/rsyslog.d, which forwards the local system logs to the remote rsyslog.
+```
+rsyslog_enabled: true
+rsyslog_default: false
+rsyslog_purge_original_conf: true
+logging_outputs:
+  - name: output-forwards
+    type: forwards
+    rsyslog_forwards_actions:
+      - name: forward0
+        severity: info
+        protocol: udp
+        target: 10.11.12.13
+        port: 514
+      - name: forward1
+        facility: mail
+        protocol: tcp
+        target: 10.20.30.40
+        port: 514
+    logs_collections:
+      - name: 'basics'
+```
+
+**5. Sample vars.yaml file for the viaq case.**
 ```
 rsyslog_enabled: true
 rsyslog_elasticsearch:
@@ -122,7 +147,7 @@ rsyslog_elasticsearch:
     server_port: 9200
 ```
 
-4. vars.yaml to configure to handle the inputs from openshift containers
+**6. vars.yaml to configure to handle the inputs from openshift containers.**
 ```
 rsyslog_enabled: true
 # If 'viaq-k8s' is in logs collections, logging_mmk8s_* need to be specified.
@@ -200,7 +225,7 @@ The order of the list in `rsyslog_elasticsearch` is important.  The first item i
 
 The variables ca_cert, cert and key in `rsyslog_elasticsearch` specify the paths where the CA certificate, certificate and key are located in the remote host.  The variables ca_cert_src, cert_src, and key_src are paths of them to be deployed to the remote host.
 
-5. vars.yaml to configure custom config files.
+**7. vars.yaml to configure custom config files.**
 
    To include existing config files in the new ansible deployment, add the paths to `rsyslog_custom_config_files` as follows.  The specified files are copied to /etc/rsyslog.d.
 ```
@@ -238,7 +263,6 @@ Common sub-variables
 - `rsyslog_backup_dir`: By default, the Rsyslog backs up the pre-existing configuration files in a temp dir as tar-gz format - /tmp/rsyslog.d-XXXXXX/backup.tgz.  By setting a path to `rsyslog_backup_dir`, the path is used as the backup directory.  Note that the directory should exist and have the permission to create the backup file both in the file mode and the selinux.
 - `rsyslog_config_dir`: Directory to store configuration files.  Default to '/etc/rsyslog.d'.
 - `rsyslog_custom_config_files`: List of custom configuration files are deployed to /etc/rsyslog.d.  The format is an array which element is the full path to each custom configuration file.  Default to none.
-- `rsyslog_forwards`: array of log type to forward target host to redirect the logs to the remote rsyslog servers using the rsyslog rule.  E.g., `rsyslog_forwards: [ '*.crit @10.10.10.1:514', '*.info @10.10.10.11:514' ]`, where @ means the logs are sent over udp; if there are two @@, they are sent over tcp.  Note: this syntax is deprecated.
 - `rsyslog_group`: Owner group of rsyslogd.  Default to 'syslog' if `rsyslog_unprivileged` is true.  Otherwise, 'root'.
 - `rsyslog_purge_original_conf`: By default, the Rsyslog configuration files are applied on top of pre-existing configuration files. To purge local files prior to setting new ones, set `rsyslog_purge_original_conf` variable to 'true', it will move all Rsyslog configuration files to a backup directory before deploying the new configuration files. Defaults to 'false'.
 - `rsyslog_system_log_dir`: System log directory.  Default to '/var/log'.
@@ -246,8 +270,38 @@ Common sub-variables
 - `rsyslog_user`: Owner user of rsyslogd.  Default to 'syslog' if `rsyslog_unprivileged` is 'true'.  Otherwise, 'root'.
 - `rsyslog_work_dir`: Working directory.  Default to '/var/lib/rsyslog'.
 
-Viaq sub-variables
-------------------
+Files and Forwards output_role sub-variables
+----------------------------------
+- `rsyslog_files_actions`: array of dictionary to specify the facility and severity filter and the full path to store logs satisfying the filter.  It takes the sub-variables - `name`, `facility`, `severity`, `exclude`, and `path`.  Unless the name and the path are given, the element is skipped.
+Files output format
+   ```
+   rsyslog_files_actions:
+     - name: <unique_name>
+       facility: <facility_in_text, e.g., "mail"; default to "*">
+       severity: <severity_in_text, e.g., "info"; default to "*">
+       exclude: <excluded facility list separated by ';', e.g., "mail.none;auth.none"; default to nil>
+       path: </full/path/to/file/to/store/the/logs; MUST EXIST>
+   ```
+- `rsyslog_forwards_actions`: array of dictionary to specify the facility and severity filter and the host and port to forward logs satisfying the filter.  It takes the sub-variables - `name`, `facility`, `severity`, `exclude`, `protocol`, `target`, and `port`.  Unless the name and the target are given, the element is skipped.
+Forwards output format
+   ```
+   rsyslog_forwards_actions:
+     - name: <unique_name>
+       facility: <facility_in_text, e.g., "mail"; default to "*">
+       severity: <severity_in_text, e.g., "info"; default to "*">
+       exclude: <excluded facility list separated by ';', e.g., "mail.none;auth.none"; default to nil>
+       protocol: <tcp_or_udp; default to "tcp">
+       target: <target_host_name_or_ip_address; MUST EXIST>
+       port: <port_number; default to 514>
+   ```
+
+Files input_role sub-variables
+------------------------------
+- `rsyslog_input_log_path`: File name to be read by the imfile plugin. The value should be full path. Wildcard '*' is allowed in the path.  Default to `/var/log/containers/*.log`
+- `rsyslog_input_log_tag`: Tag to be added to the read logs. Default to `container`
+
+Viaq input_role sub-variables
+-----------------------------
 - `rsyslog_viaq_config_dir`: Directory to store viaq configuration files.  Default to '/etc/rsyslog.d/viaq'.
 - `rsyslog_viaq_log_dir`: Viaq log directory.  Default to '/var/log/containers'.
 - `logging_mmk8s_token`: Path to token for kubernetes.  Default to "/etc/rsyslog.d/viaq/mmk8s.token"

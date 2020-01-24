@@ -12,8 +12,15 @@ rsyslog_unprivileged: false
 #       Note: unles rsyslog_send_over_tls_only is set to true, insecure network connection
 #       is also allowed.
 rsyslog_capabilities: []
+rsyslog_basics_packages: ['rsyslog-gnutls']
 
 rsyslog_use_imuxsock: false
+
+# rsyslog_input_log_{path,tag} are parameters for the imfile.
+# rsyslog_input_log_path specifies the files to read. Wildcard '*' is allowed in the path
+# rsyslog_input_log_tag specifies the tag to be added to the logs.
+rsyslog_input_log_path: "/var/log/containers/*.log"
+rsyslog_input_log_tag: "container"
 
 # rsyslog_basics_rules
 #
@@ -64,6 +71,25 @@ rsyslog_conf_local_basics_modules:
           module(load="imptcp")
         state: '{{ "present"
                   if ("network" in rsyslog_capabilities) and (not rsyslog_send_over_tls_only)
+                  else "absent" }}'
+
+      - comment: 'Read messages sent over Secure TCP with TLS'
+        options: |-
+          module(
+            load="imtcp"
+            streamDriver.name="{{ rsyslog_default_netstream_driver }}"
+            streamDriver.mode="1"
+            streamDriver.authMode="{{ rsyslog_default_driver_authmode }}"
+          {% if rsyslog_default_driver_authmode != "anon" %}
+            {% if rsyslog_permitted_peers is string %}
+              permittedPeer="{{ rsyslog_permitted_peers }}"
+            {% else %}
+              permittedPeer=["{{ rsyslog_permitted_peers | join('","') }}"]
+            {% endif %}
+          {% endif %}
+          )
+        state: '{{ "present"
+                  if ("network" in rsyslog_capabilities) and ("tls" in rsyslog_capabilities)
                   else "absent" }}'
 
 # rsyslog_conf_default_rulesets

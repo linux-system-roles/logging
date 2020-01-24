@@ -58,5 +58,5 @@
 
 - name: Install/Update role packages and generate role configuration files (elasticsearch)
   include_role:
-    name: "{{ role_path }}/roles/rsyslog"
+    name: "{{ role_path }}/../../../"
     tasks_from: deploy.yaml

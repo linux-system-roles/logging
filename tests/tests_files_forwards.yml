@@ -6,9 +6,10 @@
   tasks:
     - name: deploy config to output into local files
       vars:
-        logging_enabled: true
+        logging_enabled: True
+        rsyslog_default: False
         logging_outputs:
-          - name: files-output
+          - name: output-files
             type: files
             rsyslog_files_actions:
               - name: test0
@@ -18,14 +19,25 @@
               - name: test1
                 facility: authpriv,auth
                 path: /var/log/secure
-              - name: test2
-                severity: emerg
-                path: :omusrmsg:*
-              - name: test3
-                facility: local7
-                path: /var/log/boot.log
             logs_collections:
-              - name: basic_input
+              - name: basic_input0
+                type: basics
+          - name: output-forwards
+            type: forwards
+            rsyslog_forwards_actions:
+              - name: severity_and_facility
+                facility: local1
+                severity: info
+                protocol: tcp
+                target: host.domain
+                port: 1514
+              - name: facility_only
+                facility: local2
+                protocol: tcp
+                target: host.domain
+                port: 2514
+            logs_collections:
+              - name: basic_input1
                 type: basics
       include_role:
         name: linux-system-roles.logging
@@ -76,4 +88,25 @@
     - name: Check if the test message is in /var/log/messages
       assert:
         that: testMessage0000.stdout != ""
+
+    - name: Set forwarding config path
+      set_fact:
+        test_forward_conf: "/etc/rsyslog.d/30-output-forwards.system"
+
+    - name: Get the forwarding config stat
+      stat:
+        path: "{{ test_forward_conf }}"
+      register: stat_output_forwards_system
+
+    - name: Check if the forwarding config exists
+      assert:
+        that: stat_output_forwards_system.stat.exists == True
+
+    - name: Grep severity_and_facility
+      command: /bin/grep "\<severity_and_facility\>" {{ test_forward_conf }}
+      register: severity_and_facility
+
+    - name: Check severity_and_facility
+      assert:
+        that: severity_and_facility.stdout is match("local1\.info action.name=.severity_and_facility.* Target=.host.domain. Port=.1514. Protocol=.tcp.*")
 

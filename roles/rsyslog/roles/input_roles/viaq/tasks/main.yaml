@@ -6,5 +6,5 @@
 
 - name: Install/Update role packages and generate role configuration files to role subdir
   include_role:
-    name: "{{ role_path }}/roles/rsyslog"
+    name: "{{ role_path }}/../../../"
     tasks_from: deploy.yaml

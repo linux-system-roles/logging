@@ -1,0 +1,94 @@
+
+- name: Ensure that the role runs with parameters to output into local files
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Set input file dir
+      set_fact:
+        test_inputfiles_dir: "/var/log/inputdirectory"
+
+    - name: deploy config to output into local files
+      vars:
+        logging_enabled: True
+        rsyslog_default: False
+        logging_outputs:
+          - name: files-output
+            type: files
+            rsyslog_files_actions:
+              - name: test0
+                severity: info
+                exclude: authpriv.none;auth.none;cron.none;mail.none
+                path: /var/log/messages
+              - name: test1
+                facility: authpriv,auth
+                path: /var/log/secure
+            logs_collections:
+              - name: files_input
+                type: files
+                rsyslog_input_log_path: "{{ test_inputfiles_dir }}/*.log"
+                rsyslog_input_log_tag: "newtag"
+      include_role:
+        name: linux-system-roles.logging
+
+    - include: set_rsyslog_variables.yml
+
+    # notify restart rsyslogd is executed at the end of this test task.
+    # thus we have to force to invoke handlers
+    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+      meta: flush_handlers
+
+    - name: Check rsyslog.conf size
+      assert:
+        that: rsyslog_conf_line_count.stdout.0|int <= 7
+
+    - name: Check file counts in rsyslog.d
+      assert:
+        that: rsyslog_d_file_count.matched >= 9
+
+    - name: Set files config path
+      set_fact:
+        test_outputfiles_conf: "/etc/rsyslog.d/30-output-files.system"
+
+    - name: Get the output files config stat
+      stat:
+        path: "{{ test_outputfiles_conf }}"
+      register: stat_output_files_system
+
+    - name: Check if the output files config exists
+      assert:
+        that: stat_output_files_system.stat.exists == True
+
+    - name: Grep output to messages line
+      command: /bin/grep ".var.log.messages" {{ test_outputfiles_conf }}
+      register: files_conf_messages
+
+    - name: Set input files config path
+      set_fact:
+        test_inputfiles_conf: "/etc/rsyslog.d/90-imfile-input.conf"
+
+    - name: Get the files config stat
+      stat:
+        path: "{{ test_inputfiles_conf }}"
+      register: stat_input_files_conf
+
+    - name: Check if the input files config exists
+      assert:
+        that: stat_input_files_conf.stat.exists == True
+
+    - name: CAt input file
+      command: /bin/cat {{ test_inputfiles_conf }}
+      register: cat_file
+
+    - name: CAt input file 2
+      debug:
+        msg: cat_file.stdout
+
+    - name: Grep input file
+      command: /bin/grep 'inputdirectory' {{ test_inputfiles_conf }}
+      register: files_conf_input_file
+
+    - name: Check the filter
+      assert:
+        that: files_conf_input_file.stdout is match("input\(type=\"imfile\" file=\"\/var\/log\/inputdirectory\/\*\.log\" tag=\"newtag\"\)")
+

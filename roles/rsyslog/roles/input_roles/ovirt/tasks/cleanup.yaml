@@ -5,5 +5,5 @@
 
 - name: Remove oVirt configs
   include_role:
-    name: "{{ role_path }}/roles/rsyslog"
+    name: "{{ role_path }}/../../../"
     tasks_from: cleanup.yaml

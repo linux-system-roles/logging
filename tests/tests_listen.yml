@@ -13,7 +13,7 @@
           - name: files-output
             type: files
             logs_collections:
-              - name: input
+              - name: basic_input
                 type: basics
 
       include_role:
