@@ -9,5 +9,3 @@ logging_outputs: []
 logging_custom_config_files: []
 
 logging_purge_confs: false
-
-use_python3: true
