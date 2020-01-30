@@ -7,15 +7,6 @@
       set_fact:
         rsyslog_enabled: "{{ logging_enabled|d(true) }}"
 
-    - name: Set use_python3 to false if python3 is not installed.
-      set_fact:
-        use_python3: false
-      when: "ansible_python_version is version('3', '<')"
-
-    - name: Check python version
-      debug:
-        msg: "Python version is {{ ansible_python_version }}; use_python3 is {{ use_python3 }}"
-
     - name: Set rsyslog_elasticsearch
       set_fact:
         rsyslog_elasticsearch: "{{ rsyslog_elasticsearch|d([]) }} + {{ [  item.0 |combine( {'logs_collections_name': item.1.name} )] }}"
@@ -84,14 +75,6 @@
       when:
         - item.type|d('') == 'custom'
         - logging_enabled|d(true)
-
-    - name: Install python selinux library for logging_debug
-      yum:
-        name: '{{ "python3-libselinux" if use_python3 else "libselinux-python" }}'
-        state: 'latest'
-      when: logging_debug|d(false)
-      tags:
-        - skip_ansible_lint
 
     - name: Re-read facts after adding custom fact
       setup:
