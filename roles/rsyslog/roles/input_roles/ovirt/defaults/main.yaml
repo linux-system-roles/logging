@@ -43,7 +43,7 @@ rsyslog_conf_local_ovirt_modules:
   - name: 'local-ovirt-modules'
     type: 'modules'
     state: '{{ "present"
-              if not (rsyslog_default | default(true) | bool)
+              if not (rsyslog_default | bool)
               else "absent" }}'
     sections:
 

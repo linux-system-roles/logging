@@ -105,40 +105,42 @@ logging_purge_confs: true
 2) Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and outputs into the local files.
 ```
 logging_enabled: true
-rsyslog_default: false
 logging_purge_confs: true
 logging_outputs:
   - name: local-files
     type: files
     logs_collections:
-      - name: basics
+      - name: system-input
+        type: basics
 ```
 
 3) Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and remote rsyslog and outputs into the local files.
 ```
 logging_enabled: true
-rsyslog_default: false
 rsyslog_capabilities: [ 'network', 'remote-files' ]
 logging_purge_confs: true
 logging_outputs:
   - name: local-files
     type: files
     logs_collections:
-      - name: basics
+      - name: system-and-remote-input
+        type: basics
 ```
 
 4) Deploying config files for collecting logs from OpenShift pods as well as RHV and forwarding them to elasticsearch.
 ```
 logging_enabled: true
-rsyslog_default: false
 logging_outputs:
   - name: viaq-elasticsearch
     type: elasticsearch
     logs_collections:
-      - name: viaq
-    # 'state' is not a mandatory field. Defaults to `present`.
-      - name: viaq-k8s
+      - name: viaq-input
+        type: viaq
+    # 'state' is not a mandatory field. Defaults to 'present'.
+      - name: viaq-k8s-input
+        type: viaq-k8s
       - name: ovirt
+        type: ovirt-input
         state: absent
     server_host: logging-es
     server_port: 9200
@@ -149,7 +151,8 @@ logging_outputs:
   - name: ovirt-elasticsearch
     type: elasticsearch
     logs_collections:
-      - name: ovirt
+      - name: ovirt-input
+        type: ovirt
     server_host: logging-es-ovirt
     server_port: 9200
     index_prefix: project.ovirt-logs
@@ -180,8 +183,9 @@ Variables in vars.yaml
    -  **If `type: elasticsearch`**, send logs to one or more remote elasticsearch or Viaq installations.
       - `name`: Name of the elasticsearch element.
       - `type`: Type of the output element. Optional values: `elasticsearch`, `local`, `custom_files`.
-      - `logs_collections` : List of optional logs collections, dictionaries with `name` and `state` attributes, that were pre-configured.
-        - `name`: The name of the pre-configured logs to collect. **Note:** Currently only ['viaq', 'viaq-k8s', 'ovirt'] are supported for the elasticsearch output.
+      - `logs_collections` : List of optional logs collections, dictionaries with `name`, `type` and `state` attributes, that were pre-configured.
+        - `name`: Unique name of the input.
+          `type`: The type of the pre-configured logs to collect. **Note:** Currently ['viaq', 'viaq-k8s', 'ovirt'] are supported for the elasticsearch output.
           
           `state`: The state of the configuration files states if they should be `present` or `absent`. Default to `present`.
       - `server_host`: Hostname elasticsearch is running on.

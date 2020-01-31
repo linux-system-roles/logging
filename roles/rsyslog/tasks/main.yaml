@@ -6,6 +6,7 @@
   when:
     - rsyslog_enabled | bool
     - not use_rsyslog_image | default(false) | bool
+  ignore_errors: yes
   tags:
     - skip_ansible_lint
 
@@ -159,7 +160,7 @@
 
     - name: Run deploy input sub-roles configs
       include_role:
-        name: "{{ role_path }}/roles/input_roles/{{ input_item.name }}"
+        name: "{{ role_path }}/roles/input_roles/{{ input_item.type }}"
       loop: "{{ rsyslog_logs_collections | flatten(1) }}"
       loop_control:
         loop_var: input_item
@@ -170,7 +171,7 @@
 
     - name: Run remove input sub-roles configs
       include_role:
-        name: "{{ role_path }}/roles/input_roles/{{ input_item.name }}"
+        name: "{{ role_path }}/roles/input_roles/{{ input_item.type }}"
         tasks_from: cleanup.yaml
       loop: "{{ rsyslog_logs_collections | flatten(1) }}"
       loop_control:

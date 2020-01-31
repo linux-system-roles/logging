@@ -2,6 +2,8 @@
 - name: Ensure that the role runs with rsyslog_enabled=true
   hosts: all
   become: true
+  vars:
+    rsyslog_default: True
 
   tasks:
     - name: default run (deploy rsyslog.conf)

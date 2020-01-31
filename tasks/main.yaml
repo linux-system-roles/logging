@@ -39,7 +39,7 @@
 
     - name: Set rsyslog_logs_collections
       set_fact:
-        rsyslog_logs_collections: "{{ rsyslog_logs_collections | d([]) }} + {{ [ { 'name': item.1.name, 'state': item.1.state | d('present'), 'output_name': item.0.name } ] }}"
+        rsyslog_logs_collections: "{{ rsyslog_logs_collections | d([]) }} + {{ [ { 'name': item.1.name, 'type': item.1.type, 'state': item.1.state | d('present'), 'output_name': item.0.name } ] }}"
       with_subelements:
         - "{{ logging_outputs }}"
         - logs_collections

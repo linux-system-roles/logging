@@ -8,13 +8,13 @@
       vars:
         logging_enabled: true
         logging_purge_confs: true
-        rsyslog_default: false
         rsyslog_capabilities: [ 'network', 'remote-files' ]
         logging_outputs:
           - name: files-output
             type: files
             logs_collections:
-              - name: basics
+              - name: input
+                type: basics
 
       include_role:
         name: linux-system-roles.logging
