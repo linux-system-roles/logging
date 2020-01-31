@@ -9,8 +9,9 @@ rsyslog_enabled: true
 
 # rsyslog_default
 #
-# Diploy default ``rsyslog`` configuration file.
-rsyslog_default: true
+# Diploy default ``rsyslog`` configuration file /etc/rsyslog.conf if it is set to true.
+# Otherwise, rsyslog.conf just includes configuration files in /etc/rsyslog.d.
+rsyslog_default: false
 
 # rsyslog_system_log_dir
 #
@@ -360,7 +361,7 @@ rsyslog_conf_global_options:
     options: |-
       global(
         defaultNetstreamDriver="{{ rsyslog_default_netstream_driver }}"
-      {% if not rsyslog_default | default(true) | bool %}
+      {% if not rsyslog_default | bool %}
         workDirectory="{{ rsyslog_work_dir }}"
       {% endif %}
       {% if rsyslog_pki | bool and "tls" in rsyslog_capabilities %}

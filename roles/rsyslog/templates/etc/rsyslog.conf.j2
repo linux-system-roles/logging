@@ -1,6 +1,6 @@
 # {{ ansible_managed }}
 
-{% if not rsyslog_default | default(true) | bool %}
+{% if not rsyslog_default | bool %}
 #
 # Include all config files in {{ rsyslog_config_dir }}
 #

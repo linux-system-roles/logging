@@ -57,11 +57,14 @@ logging_outputs:
    type: <output_type0>
    logs_collections:
      - name: <input_role_nameA>
+       type: <input_role_typeA>
      - name: <input_role_nameB>
+       type: <input_role_typeB>
   -name: <output_role_name1>
    type: <output_type1>
    logs_collections:
      - name: <input_role_nameC>
+       type: <input_role_typeC>
 ```
 
 See the [variables section](#variables) for each variable.
@@ -83,27 +86,27 @@ rsyslog_backup_dir: /tmp/rsyslog_backup
 1. Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and outputs into the local files.  Pre-existing config files are copied to the directory specified by `rsyslog_backup_dir`.
 ```
 rsyslog_enabled: true
-rsyslog_default: false
 rsyslog_purge_original_conf: true
 rsyslog_backup_dir: /tmp/rsyslog_backup
 logging_outputs:
   - name: local-files
     type: files
     logs_collections:
-      - name: basics
+      - name: system-input
+        type: basics
 ```
 
 2. Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and remote rsyslog and outputs into the local files.
 ```
 rsyslog_enabled: true
-rsyslog_default: false
 rsyslog_capabilities: [ 'network', 'remote-files' ]
 rsyslog_purge_original_conf: true
 logging_outputs:
   - name: local-files
     type: files
     logs_collections:
-      - name: basics
+      - name: system-and-remote-input
+        type: basics
 ```
 
 3. Sample vars.yaml file for the viaq case.
@@ -113,7 +116,8 @@ rsyslog_elasticsearch:
   - name: viaq-elasticsearch
     type: elasticsearch
     logs_collections:
-      - name: viaq
+      - name: viaq-input
+        type: viaq
     server_host: es-hostname
     server_port: 9200
 ```
@@ -132,9 +136,11 @@ rsyslog_outputs:
   - name: viaq-elasticsearch
     type: elasticsearch
     rsyslog_logs_collections:
-      - name: viaq
+      - name: viaq-input
+        type: viaq
         state: present
-      - name: viaq-k8s
+      - name: viaq-k8s-input'
+        type: viaq-k8s'
         state: present
     server_host: logging-es
     server_port: 9200
@@ -148,9 +154,11 @@ rsyslog_outputs:
   - name: viaq-elasticsearch-ops
     type: elasticsearch
     rsyslog_logs_collections:
-      - name: viaq
+      - name: viaq-input
+        type: viaq
         state: present
-      - name: viaq-k8s
+      - name: viaq-k8s-input
+        type: viaq-k8s
         state: present
     server_host: logging-es-ops
     server_port: 9200
@@ -270,37 +278,6 @@ The basic framework is based on debops.rsyslog and adjusted to the RHEL/Fedora s
 
 - tasks/main.yaml contains the sceries of tasks to deploy specified set of configuration files.
 
-If viaq is in `rsyslog_logs_collections`, the following tasks are executed.
-```
-TASK [rsyslog : Install/Update required packages]
-TASK [rsyslog : Create required system group]
-TASK [rsyslog : Create required system user]
-TASK [rsyslog : Create a work directory]
-TASK [rsyslog : Create a temp directory for rsyslog.d backup]
-TASK [rsyslog : Set backup dir name]
-TASK [rsyslog : Create a backup dir]
-TASK [rsyslog : Moving the contents of /etc/rsyslog.d to the backup dir]
-TASK [rsyslog : create rsyslog viaq subdir]
-TASK [rsyslog : Update directory and file permissions]
-TASK [rsyslog : Generate main rsyslog configuration]
-TASK [rsyslog : Generate viaq configuration files in rsyslog.d]
-TASK [rsyslog : Generate rsyslog viaq configuration files in rsyslog.d/viaq]
-```
-If basics is in `rsyslog_logs_collections` the following tasks are executed.
-```
-TASK [rsyslog : Install/Update required packages]
-TASK [rsyslog : Create required system group]
-TASK [rsyslog : Create required system user]
-TASK [rsyslog : Create a work directory]
-TASK [rsyslog : Create a temp directory for rsyslog.d backup]
-TASK [rsyslog : Set backup dir name]
-TASK [rsyslog : Create a backup dir]
-TASK [rsyslog : Moving the contents of /etc/rsyslog.d to the backup dir]
-TASK [rsyslog : create rsyslog viaq subdir]
-TASK [rsyslog : Update directory and file permissions]
-TASK [rsyslog : Generate main rsyslog configuration]
-TASK [rsyslog : Generate exaple configuration files in rsyslog.d]
-```
 WARNING: Pre-existing rsyslog.conf and configuration files in /etc/rsyslog.d are moved to the backup directory /tmp/rsyslog.d-XXXXXX.  If the pre-existing files need to be merged with the newly deployed files, you need to do it manually.
 
 -defaults/main.yaml defines variables to switch the deployment paths, variables to specify the locations to deploy and the configurations to be deployed.
