@@ -1,9 +1,9 @@
 ---
 # Basic logs configuration set
 # ----------------------------
-rsyslog_pki: True
+rsyslog_pki: true
 
-rsyslog_unprivileged: False
+rsyslog_unprivileged: false
 
 # rsyslog_capabilities is an array which takes 'network', 'remote-files', 'tls'
 # 'network' enables input and output over network.
@@ -13,7 +13,7 @@ rsyslog_unprivileged: False
 #       is also allowed.
 rsyslog_capabilities: []
 
-rsyslog_use_imuxsock: False
+rsyslog_use_imuxsock: false
 
 # rsyslog_basics_rules
 #
@@ -49,7 +49,7 @@ rsyslog_conf_local_basics_modules:
           {% endif %}
           # local messages are retrieved through imjournal now.
           module(load="imjournal"             # provides access to the systemd journal
-                 StateFile="{{rsyslog_work_dir}}/imjournal.state") # File to store the position in the journal
+                 StateFile="{{ rsyslog_work_dir }}/imjournal.state") # File to store the position in the journal
 
       - comment: 'Reads kernel messages (the same are read from journald)'
         options: |-
@@ -76,8 +76,8 @@ rsyslog_conf_local_basics_modules:
 # By default ``rsyslog`` use the default ruleset for local system logs,
 # and defines a separate ``remote`` ruleset for logs incoming over the
 # network from remote hosts. The local log rules are stored in
-# `{{rsyslog_config_dir}}/*.system` configuration files, and remote log
-# rules are stored in `{{rsyslog_config_dir}}/*.remote` configuration files.
+# `{{ rsyslog_config_dir }}/*.system` configuration files, and remote log
+# rules are stored in `{{ rsyslog_config_dir }}/*.remote` configuration files.
 rsyslog_conf_default_rulesets:
 
   - name: 'default-rulesets'
@@ -86,12 +86,12 @@ rsyslog_conf_default_rulesets:
 
       - comment: 'Rules for the local system logs'
         options: |-
-          $IncludeConfig {{rsyslog_config_dir}}/*.system
+          $IncludeConfig {{ rsyslog_config_dir }}/*.system
 
       - comment: 'Rules for logs incoming from remote hosts'
         options: |-
           ruleset(name="remote") {
-            $IncludeConfig {{rsyslog_config_dir}}/*.remote
+            $IncludeConfig {{ rsyslog_config_dir }}/*.remote
           }
         state: '{{ "present"
                   if ("network" in rsyslog_capabilities)
@@ -109,7 +109,7 @@ rsyslog_conf_system_input:
         options: |-
           input(name="basics_imuxsock" type="imuxsock" socket="/dev/log")
         state: '{{ "present"
-                  if rsyslog_use_imuxsock|d(False)|bool
+                  if rsyslog_use_imuxsock | d(false) | bool
                   else "absent" }}'
 
 # rsyslog_conf_network_input

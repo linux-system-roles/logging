@@ -18,7 +18,7 @@ rsyslog_conf_forwards_output_rules:
     suffix: 'system'
     path: '{{ rsyslog_config_dir }}'
     state: '{{ "present"
-               if (rsyslog_forwards|d() or rsyslog_group_forwards|d() or rsyslog_host_forwards|d())
+               if (rsyslog_forwards | d() or rsyslog_group_forwards | d() or rsyslog_host_forwards | d())
                else "absent" }}'
     sections:
 

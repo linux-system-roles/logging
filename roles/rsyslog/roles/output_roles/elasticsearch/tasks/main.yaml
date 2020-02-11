@@ -33,7 +33,7 @@
 
     - name: Update ca_cert path to /etc/rsyslog.d directory in Rsyslog
       set_fact:
-        rsyslog_elasticsearch_temp: "{{ rsyslog_elasticsearch_temp|d([]) }} + {{ [  item | combine( { 'ca_cert': item.ca_cert_src| basename , 'cert': item.cert_src| basename, 'key': item.key_src| basename } ) ] }}"
+        rsyslog_elasticsearch_temp: "{{ rsyslog_elasticsearch_temp | d([]) }} + {{ [ item | combine( { 'ca_cert': item.ca_cert_src | basename , 'cert': item.cert_src | basename, 'key': item.key_src | basename } ) ] }}"
       with_items:
         - '{{ rsyslog_elasticsearch }}'
       when:
@@ -48,12 +48,12 @@
   when:
     - rsyslog_elasticsearch is defined
     - rsyslog_elasticsearch != []
-    - use_local_omelasticsearch_cert|default(False)|bool
+    - use_local_omelasticsearch_cert | default(false) | bool
 
 # Deploy configuration files
 - name: Set Elasticsearch facts
   set_fact:
-    rsyslog_role_packages: "{{rsyslog_elasticsearch_packages|flatten([])}}"
+    rsyslog_role_packages: "{{ rsyslog_elasticsearch_packages | flatten([]) }}"
     rsyslog_role_rules: "{{ rsyslog_elasticsearch_rules }}"
 
 - name: Install/Update role packages and generate role configuration files (elasticsearch)
