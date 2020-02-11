@@ -1,12 +1,12 @@
 
-- name: Ensure that the role runs with rsyslog_enabled=True
+- name: Ensure that the role runs with rsyslog_enabled=true
   hosts: all
   become: true
 
   tasks:
     - name: default run (deploy rsyslog.conf)
       vars:
-        logging_enabled: True
+        logging_enabled: true
       include_role:
         name: linux-system-roles.logging
 

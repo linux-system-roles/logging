@@ -93,53 +93,53 @@ logging_outputs:
 
 0) Deploying default /etc/rsyslog.conf.
 ```
-logging_enabled: True
+logging_enabled: true
 ```
 
 1) Overriding existing /etc/rsyslog.conf and files in /etc/rsyslog.d with default rsyslog.conf.
 ```
-logging_enabled: True
-logging_purge_confs: True
+logging_enabled: true
+logging_purge_confs: true
 ```
 
 2) Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and outputs into the local files.
 ```
-logging_enabled: True
-rsyslog_default: False
-logging_purge_confs: True
+logging_enabled: true
+rsyslog_default: false
+logging_purge_confs: true
 logging_outputs:
   - name: local-files
     type: files
     logs_collections:
-      - name: 'basics'
+      - name: basics
 ```
 
 3) Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and remote rsyslog and outputs into the local files.
 ```
-logging_enabled: True
-rsyslog_default: False
+logging_enabled: true
+rsyslog_default: false
 rsyslog_capabilities: [ 'network', 'remote-files' ]
-logging_purge_confs: True
+logging_purge_confs: true
 logging_outputs:
   - name: local-files
     type: files
     logs_collections:
-      - name: 'basics'
+      - name: basics
 ```
 
 4) Deploying config files for collecting logs from OpenShift pods as well as RHV and forwarding them to elasticsearch.
 ```
-logging_enabled: True
-rsyslog_default: False
+logging_enabled: true
+rsyslog_default: false
 logging_outputs:
   - name: viaq-elasticsearch
     type: elasticsearch
     logs_collections:
-      - name: 'viaq'
-    # 'state' is not a mandatory field. Defaults to 'present'.
-      - name: 'viaq-k8s'
-      - name: 'ovirt'
-        state: 'absent'
+      - name: viaq
+    # 'state' is not a mandatory field. Defaults to `present`.
+      - name: viaq-k8s
+      - name: ovirt
+        state: absent
     server_host: logging-es
     server_port: 9200
     index_prefix: project.
@@ -149,7 +149,7 @@ logging_outputs:
   - name: ovirt-elasticsearch
     type: elasticsearch
     logs_collections:
-      - name: 'ovirt'
+      - name: ovirt
     server_host: logging-es-ovirt
     server_port: 9200
     index_prefix: project.ovirt-logs
@@ -171,8 +171,8 @@ Variables in vars.yaml
 ----------------------
 
 - `logging_collector`: The logs collector to use for the logs collection. Currently Rsyslog is the only supported logs collector. Defaults to `rsyslog`.
-- `logging_enabled` : When 'True', logging role will deploy specified configuration file set. Default to 'True'.
-- `logging_purge_confs`: By default, the Rsyslog configuration files are applied on top of pre-existing configuration files. To purge local files prior to setting new ones, set logging_purge_confs variable to 'True', it will move all Rsyslog configuration files to a backup directory, `/tmp/rsyslog.d-XXXXXX/backup.tgz`, before deploying the new configuration files. Defaults to 'False'.
+- `logging_enabled` : When 'true', logging role will deploy specified configuration file set. Default to 'true'.
+- `logging_purge_confs`: By default, the Rsyslog configuration files are applied on top of pre-existing configuration files. To purge local files prior to setting new ones, set logging_purge_confs variable to 'true', it will move all Rsyslog configuration files to a backup directory, `/tmp/rsyslog.d-XXXXXX/backup.tgz`, before deploying the new configuration files. Defaults to 'false'.
 - `logging_mmk8s_token`: Path to token for kubernetes.  Default to "/etc/rsyslog.d/viaq/mmk8s.token".
 - `logging_mmk8s_ca_cert`: Path to CA cert for kubernetes.  Default to "/etc/rsyslog.d/viaq/mmk8s.ca.crt".
 

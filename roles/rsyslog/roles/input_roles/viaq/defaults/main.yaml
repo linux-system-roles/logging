@@ -68,7 +68,7 @@ rsyslog_conf_viaq_formatting:
 
   - name: 'viaq_formatting'
     type: 'template'
-    path: '{{rsyslog_config_dir }}'
+    path: '{{ rsyslog_config_dir }}'
     sections:
 
       - options: |-
@@ -370,8 +370,8 @@ rsyslog_rulebase_viaq_parse_json:
 
   - name: 'parse_json'
     filename: 'parse_json.rulebase'
-    nocomment: 'true'
-    path: '{{rsyslog_config_dir }}'
+    nocomment: true
+    path: '{{ rsyslog_config_dir }}'
     sections:
 
       - options: |-
@@ -382,8 +382,8 @@ rsyslog_json_viaq_normalize_level:
 
   - name: 'normalize_level'
     filename: 'normalize_level.json'
-    nocomment: 'true'
-    path: '{{rsyslog_config_dir }}'
+    nocomment: true
+    path: '{{ rsyslog_config_dir }}'
     sections:
 
       - options: |-
@@ -412,8 +412,8 @@ rsyslog_json_viaq_prio_to_level:
 
   - name: 'prio_to_level'
     filename: 'prio_to_level.json'
-    nocomment: 'true'
-    path: '{{rsyslog_config_dir }}'
+    nocomment: true
+    path: '{{ rsyslog_config_dir }}'
     sections:
 
       - options: |-

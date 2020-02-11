@@ -6,9 +6,9 @@
   tasks:
     - name: Deploy rsyslog config on the target host as a server
       vars:
-        logging_enabled: True
-        logging_purge_confs: True
-        rsyslog_default: False
+        logging_enabled: true
+        logging_purge_confs: true
+        rsyslog_default: false
         rsyslog_capabilities: [ 'network', 'remote-files' ]
         logging_outputs:
           - name: files-output
@@ -27,9 +27,9 @@
       meta: flush_handlers
 
     - name: Install lsof
-      yum:
-        name: 'lsof'
-        state: 'present'
+      package:
+        name: lsof
+        state: present
 
     - name: Check rsyslog.conf size
       assert:

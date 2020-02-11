@@ -1,10 +1,10 @@
 # {{ ansible_managed }}
 
-{% if not rsyslog_default|default(true)|bool %}
+{% if not rsyslog_default | default(true) | bool %}
 #
-# Include all config files in {{rsyslog_config_dir}}
+# Include all config files in {{ rsyslog_config_dir }}
 #
-$IncludeConfig {{rsyslog_config_dir}}/*.conf
+$IncludeConfig {{ rsyslog_config_dir }}/*.conf
 
 {% else %}
 
@@ -37,13 +37,13 @@ module(load="imjournal"   # provides access to the systemd journal
 #### GLOBAL DIRECTIVES ####
 
 # Where to place auxiliary files
-global(workDirectory="{{rsyslog_work_dir}}")
+global(workDirectory="{{ rsyslog_work_dir }}")
 
 # Use default timestamp format
 module(load="builtin:omfile" Template="RSYSLOG_TraditionalFileFormat")
 
-# Include all config files in {{rsyslog_config_dir}}
-$IncludeConfig {{rsyslog_config_dir}}/*.conf
+# Include all config files in {{ rsyslog_config_dir }}
+$IncludeConfig {{ rsyslog_config_dir }}/*.conf
 
 #### RULES ####
 
@@ -53,26 +53,26 @@ $IncludeConfig {{rsyslog_config_dir}}/*.conf
 
 # Log anything (except mail) of level info or higher.
 # Don't log private authentication messages!
-*.info;mail.none;authpriv.none;cron.none                {{rsyslog_system_log_dir}}/messages
+*.info;mail.none;authpriv.none;cron.none                {{ rsyslog_system_log_dir }}/messages
 
 # The authpriv file has restricted access.
-authpriv.*                                              {{rsyslog_system_log_dir}}/secure
+authpriv.*                                              {{ rsyslog_system_log_dir }}/secure
 
 # Log all the mail messages in one place.
-mail.*                                                  -{{rsyslog_system_log_dir}}/maillog
+mail.*                                                  -{{ rsyslog_system_log_dir }}/maillog
 
 
 # Log cron stuff
-cron.*                                                  {{rsyslog_system_log_dir}}/cron
+cron.*                                                  {{ rsyslog_system_log_dir }}/cron
 
 # Everybody gets emergency messages
 *.emerg                                                 :omusrmsg:*
 
 # Save news errors of level crit and higher in a special file.
-uucp,news.crit                                          {{rsyslog_system_log_dir}}/spooler
+uucp,news.crit                                          {{ rsyslog_system_log_dir }}/spooler
 
 # Save boot messages also to boot.log
-local7.*                                                {{rsyslog_system_log_dir}}/boot.log
+local7.*                                                {{ rsyslog_system_log_dir }}/boot.log
 
 
 # ### sample forwarding rule ###

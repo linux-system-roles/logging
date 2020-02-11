@@ -5,41 +5,41 @@
 
     - name: Set rsyslog_enabled
       set_fact:
-        rsyslog_enabled: "{{ logging_enabled|d(true) }}"
+        rsyslog_enabled: "{{ logging_enabled | d(true) }}"
 
     - name: Set rsyslog_elasticsearch
       set_fact:
-        rsyslog_elasticsearch: "{{ rsyslog_elasticsearch|d([]) }} + {{ [  item.0 |combine( {'logs_collections_name': item.1.name} )] }}"
+        rsyslog_elasticsearch: "{{ rsyslog_elasticsearch | d([]) }} + {{ [  item.0 |combine( {'logs_collections_name': item.1.name} )] }}"
       with_subelements:
         - "{{ logging_outputs }}"
         - logs_collections
       when:
-        - item.0.type|d('') == 'elasticsearch'
-        - item.1.state|d('present') == 'present'
+        - item.0.type | d('') == 'elasticsearch'
+        - item.1.state | d('present') == 'present'
 
     - name: Set rsyslog_files
       set_fact:
-        rsyslog_files: "{{ rsyslog_files|d([]) }} + {{ [  item.0|combine( {'logs_collections_name': item.1.name} )] }}"
+        rsyslog_files: "{{ rsyslog_files | d([]) }} + {{ [  item.0|combine( {'logs_collections_name': item.1.name} )] }}"
       with_subelements:
         - "{{ logging_outputs }}"
         - logs_collections
       when:
-        - item.0.type|d('') == 'files'
-        - item.1.state|d('present') == 'present'
+        - item.0.type | d('') == 'files'
+        - item.1.state | d('present') == 'present'
 
     - name: Set rsyslog_forwards
       set_fact:
-        rsyslog_forwards: "{{ rsyslog_forwards|d([]) }} + {{ [  item.0|combine( {'logs_collections_name': item.1.name} )] }}"
+        rsyslog_forwards: "{{ rsyslog_forwards | d([]) }} + {{ [  item.0|combine( {'logs_collections_name': item.1.name} )] }}"
       with_subelements:
         - "{{ logging_outputs }}"
         - logs_collections
       when:
-        - item.0.type|d('') == 'forwards'
-        - item.1.state|d('present') == 'present'
+        - item.0.type | d('') == 'forwards'
+        - item.1.state | d('present') == 'present'
 
     - name: Set rsyslog_logs_collections
       set_fact:
-        rsyslog_logs_collections: "{{ rsyslog_logs_collections|d([]) }} + {{ [ { 'name': item.1.name, 'state': item.1.state|d('present'), 'output_name': item.0.name } ] }}"
+        rsyslog_logs_collections: "{{ rsyslog_logs_collections | d([]) }} + {{ [ { 'name': item.1.name, 'state': item.1.state | d('present'), 'output_name': item.0.name } ] }}"
       with_subelements:
         - "{{ logging_outputs }}"
         - logs_collections
@@ -50,57 +50,57 @@
 
     - name: Set rsyslog_outputs
       set_fact:
-        rsyslog_outputs: "{{ rsyslog_outputs|d([]) }} + {{ [ item.type ] }}"
+        rsyslog_outputs: "{{ rsyslog_outputs | d([]) }} + {{ [ item.type ] }}"
       with_items: "{{ logging_outputs }}"
       when: item.type is defined
 
     - set_fact:
-        rsyslog_outputs: "{{ rsyslog_outputs|d([]) | unique }}"
+        rsyslog_outputs: "{{ rsyslog_outputs | d([]) | unique }}"
       tags:
         - skip_ansible_lint
 
     - name: Set rsyslog_unprivileged fact
       set_fact:
-        rsyslog_unprivileged: "{{ logging_unprivileged|d(false) }}"
+        rsyslog_unprivileged: "{{ logging_unprivileged | d(false) }}"
 
     - name: Set rsyslog_purge_original_conf fact to purge all configuration files before saving the new ones.
       set_fact:
         rsyslog_purge_original_conf: yes
-      when: logging_purge_confs|d(false)
+      when: logging_purge_confs | d(false)
 
     - name: Set custom_config_files fact
       set_fact:
         rsyslog_custom_config_files: "{{ item.custom_config_files }}"
       with_items: "{{ logging_outputs }}"
       when:
-        - item.type|d('') == 'custom'
-        - logging_enabled|d(true)
+        - item.type | d('') == 'custom'
+        - logging_enabled | d(true)
 
     - name: Re-read facts after adding custom fact
       setup:
         filter: ansible_local
-      when: logging_debug|d(false)
+      when: logging_debug | d(false)
 
     - name: Create rsyslog debug dir
       file:
         path: "{{ role_path }}/debug"
-        state: 'directory'
-        mode: '0700'
-      when: logging_debug|d(false)
+        state: directory
+        mode: 0700
+      when: logging_debug | d(false)
 
     - name: Delete debug file
       file:
         path: "{{ role_path }}/debug/main.yaml"
-        state: 'absent'
+        state: absent
       ignore_errors: true
-      when: logging_debug|d(false)
+      when: logging_debug | d(false)
 
     - name: Create rsyslog debug file
       lineinfile:
         path: "{{ role_path }}/debug/main.yaml"
         create: yes
         line: "#ANSIBLE MANAGED VARIABLES FILE"
-      when: logging_debug|d(false)
+      when: logging_debug | d(false)
 
     - name: Populate rsyslog debug file
       lineinfile:
@@ -110,10 +110,10 @@
       with_dict: "{{ hostvars[inventory_hostname] }}"
       when:
         - item.key is match("rsyslog*")
-        - logging_debug|d(false)
+        - logging_debug | d(false)
 
     - name: include Rsyslog role
       include_role:
         name: "{{ role_path }}/roles/rsyslog"
 
-  when: logging_collector|d('rsyslog') == 'rsyslog'
+  when: logging_collector | d('rsyslog') == 'rsyslog'

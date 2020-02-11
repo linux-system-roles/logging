@@ -5,12 +5,12 @@
 # rsyslog_enabled
 #
 # Enable or disable ``rsyslog`` management.
-rsyslog_enabled: True
+rsyslog_enabled: true
 
 # rsyslog_default
 #
 # Diploy default ``rsyslog`` configuration file.
-rsyslog_default: True
+rsyslog_default: true
 
 # rsyslog_system_log_dir
 #
@@ -38,21 +38,19 @@ rsyslog_capabilities: []
 # Enable or disable unprivileged ``rsyslogd`` operation. Warning, enabling this
 # option requires additional configuration outside of the ``rsyslog``
 # role.
-rsyslog_unprivileged: '{{ "True"
-                           if (ansible_distribution in [ "CentOS", "RedHat", "Fedora" ])
-                           else "False" }}'
+rsyslog_unprivileged: '{{ ansible_distribution in [ "CentOS", "RedHat", "Fedora" ] }}'
 
 # rsyslog_message_reduction
 #
 # Enable or disable message reduction. This is disabled by default so that log
 # parsers like :program:`fail2ban` can work correctly.
-rsyslog_message_reduction: False
+rsyslog_message_reduction: false
 
 # rsyslog_purge_original_conf
 #
 # The pre-existing config files are archived in the tempdir and purged if the
-# rsyslog_purge_original_conf is set to `True`.  Default to 'False`.
-rsyslog_purge_original_conf: False
+# rsyslog_purge_original_conf is set to `true`.  Default to 'false`.
+rsyslog_purge_original_conf: false
 
 # rpm packages
 # adding rsyslog_logging_packages
@@ -82,8 +80,8 @@ rsyslog_custom_config_files: []
 # rsyslog_basics_use_traditional_timestamp_format
 #
 # Traditional timestamp format looks like 'Mar 27 14:16:47'
-# By setting False, it'd change 2020-03-27T14:16:47.139796+00:00)
-rsyslog_basics_use_traditional_timestamp_format: True
+# By setting false, it'd change 2020-03-27T14:16:47.139796+00:00)
+rsyslog_basics_use_traditional_timestamp_format: true
 
 
 # User, group, home, file ownership
@@ -93,13 +91,13 @@ rsyslog_basics_use_traditional_timestamp_format: True
 #
 # The unprivileged system user account used by the ``rsyslogd`` daemon, when
 # unprivileged operation is enabled.
-rsyslog_user: '{{ "syslog" if rsyslog_unprivileged|bool else "root" }}'
+rsyslog_user: '{{ "syslog" if rsyslog_unprivileged | bool else "root" }}'
 
 # rsyslog_group
 #
 # The unprivileged system group account used by the ``rsyslogd`` daemon, when
 # unprivileged operation is enabled.
-rsyslog_group: '{{ "syslog" if rsyslog_unprivileged|bool else "root" }}'
+rsyslog_group: '{{ "syslog" if rsyslog_unprivileged | bool else "root" }}'
 
 # rsyslog_file_owner
 #
@@ -121,7 +119,7 @@ rsyslog_file_group: 'root'
 #
 # Enable or disable support for X.509 certificates managed by pki_role,
 # used for TLS connections.
-rsyslog_pki: False
+rsyslog_pki: false
 
 # rsyslog_pki_path
 #
@@ -154,7 +152,7 @@ rsyslog_pki_key: "default.key"
 # ``gtls`` will be enabled by default if the support for PKI is enabled,
 # otherwise ``ptcp`` will be used.
 rsyslog_default_netstream_driver: '{{ "gtls"
-                                       if (rsyslog_pki|bool and
+                                       if (rsyslog_pki | bool and
                                            "tls" in rsyslog_capabilities)
                                        else "ptcp" }}'
 
@@ -185,7 +183,7 @@ rsyslog_send_over_tls: |-
 # rsyslog_send_over_tls_only
 #
 # Specify if you want only TLS communications.
-rsyslog_send_over_tls_only: False
+rsyslog_send_over_tls_only: false
 
 # rsyslog_domain
 #
@@ -275,12 +273,12 @@ rsyslog_host_forwards: []
 # rsyslog_weight_map
 #
 # This is a dictionary map of different configuration "types" corresponding to
-# numbers used to sort configuration files in `{{rsyslog_config_dir}}` directory
+# numbers used to sort configuration files in `{{ rsyslog_config_dir }}` directory
 # (configuration order is important). You can specify a type in the
 # configuration by using the ``item.type`` parameter.
 #
 # If you change the default weight map values, you will most likely need to
-# remove all files from `{{rsyslog_config_dir}}` to reset the configuration.
+# remove all files from `{{ rsyslog_config_dir }}` to reset the configuration.
 #
 # See :ref:`rsyslog_rules` for more details.
 rsyslog_weight_map:
@@ -362,10 +360,10 @@ rsyslog_conf_global_options:
     options: |-
       global(
         defaultNetstreamDriver="{{ rsyslog_default_netstream_driver }}"
-      {% if not rsyslog_default|default(true)|bool %}
+      {% if not rsyslog_default | default(true) | bool %}
         workDirectory="{{ rsyslog_work_dir }}"
       {% endif %}
-      {% if rsyslog_pki|bool and "tls" in rsyslog_capabilities %}
+      {% if rsyslog_pki | bool and "tls" in rsyslog_capabilities %}
         defaultNetstreamDriverCAFile="{{ rsyslog_pki_path + '/' + rsyslog_pki_realm + '/' + rsyslog_pki_ca }}"
       {%   if rsyslog_default_driver_authmode != "anon" or "network" in rsyslog_capabilities %}
         defaultNetstreamDriverCertFile="{{ rsyslog_pki_path + '/' + rsyslog_pki_realm + '/' + rsyslog_pki_crt }}"
@@ -457,14 +455,14 @@ rsyslog_conf_common_defaults:
           $FileCreateMode 0640
           $DirCreateMode 0755
           $Umask 0022
-          {% if rsyslog_unprivileged|bool %}
+          {% if rsyslog_unprivileged | bool %}
           $PrivDropToUser {{ rsyslog_user }}
           $PrivDropToGroup {{ rsyslog_group }}
           {% endif %}
 
       - comment: 'Log every message'
         options: |-
-          $RepeatedMsgReduction {{ "on" if rsyslog_message_reduction|bool else "off" }}
+          $RepeatedMsgReduction {{ "on" if rsyslog_message_reduction | bool else "off" }}
 
 rsyslog_conf_send_targets_only:
 
