@@ -7,8 +7,8 @@ env:
   matrix:
     - MOLECULE_DISTRO="centos:7"
     - MOLECULE_DISTRO="centos:8"
-    - MOLECULE_DISTRO="fedora:28"
-    - MOLECULE_DISTRO="fedora:29"
+    - MOLECULE_DISTRO="fedora:30"
+    - MOLECULE_DISTRO="fedora:31"
 install:
   - pip install molecule docker
   # workaround until https://github.com/ansible/molecule/issues/1727 is fixed
