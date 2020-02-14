@@ -1,10 +1,9 @@
 ---
-- name: Set Viaq facts
-  set_fact:
-    rsyslog_role_packages: "{{ rsyslog_viaq_prereq_packages|flatten|d([]) }}+{{ rsyslog_viaq_packages|flatten|d([]) }}"
-    rsyslog_role_rules: "{{ rsyslog_viaq_rules }}"
-
+# Deploy configuration files
 - name: Install/Update role packages and generate role configuration files to role subdir
+  vars:
+    __rsyslog_packages: "{{ __rsyslog_viaq_prereq_packages + __rsyslog_viaq_packages }}"
+    __rsyslog_rules: "{{ __rsyslog_viaq_rules }}"
   include_role:
     name: "{{ role_path }}/../../../"
     tasks_from: deploy.yaml

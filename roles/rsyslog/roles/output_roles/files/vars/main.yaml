@@ -1,0 +1,4 @@
+# __rsyslog_files_output_package
+#
+# List of rpm packages for Files output.
+__rsyslog_files_output_packages: []

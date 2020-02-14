@@ -1,9 +1,8 @@
-
 - name: Ensure that the role runs with rsyslog_enabled=true
   hosts: all
   become: true
   vars:
-    rsyslog_default: True
+    rsyslog_default: true
 
   tasks:
     - name: default run (deploy rsyslog.conf)
@@ -16,7 +15,7 @@
 
     - name: Check rsyslog.conf size
       assert:
-        that: rsyslog_conf_line_count.stdout.0|int > 7
+        that: rsyslog_conf_line_count.stdout.0 | int > 7
 
     - name: Check file counts in rsyslog.d
       assert:

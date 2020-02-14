@@ -12,7 +12,6 @@ rsyslog_unprivileged: false
 #       Note: unles rsyslog_send_over_tls_only is set to true, insecure network connection
 #       is also allowed.
 rsyslog_capabilities: []
-rsyslog_basics_packages: ['rsyslog-gnutls']
 
 rsyslog_use_imuxsock: false
 
@@ -22,25 +21,25 @@ rsyslog_use_imuxsock: false
 rsyslog_input_log_path: "/var/log/containers/*.log"
 rsyslog_input_log_tag: "container"
 
-# rsyslog_basics_rules
+# __rsyslog_basics_rules
 #
 # List of YAML dictionaries, each dictionary should contain ``rsyslogd``
 # configuration in a special format. See :ref:`rsyslog_rules` for more
 # details. This list specifies basics ``rsyslogd`` example configuration.
-rsyslog_basics_rules:
-  - '{{ rsyslog_conf_local_basics_modules }}'
-  - '{{ rsyslog_conf_default_rulesets }}'
-  - '{{ rsyslog_conf_system_input }}'
-  - '{{ rsyslog_conf_network_input }}'
+__rsyslog_basics_rules:
+  - '{{ __rsyslog_conf_local_basics_modules }}'
+  - '{{ __rsyslog_conf_default_rulesets }}'
+  - '{{ __rsyslog_conf_system_input }}'
+  - '{{ __rsyslog_conf_network_input }}'
 
 # Debops example configuration options
 # --------------------------------------------
 
-# rsyslog_conf_local_modules
+# __rsyslog_conf_local_modules
 #
 # List of ``rsyslogd`` modules that enable logs from the local system to be
 # received and parsed by the ``rsyslogd`` daemon.
-rsyslog_conf_local_basics_modules:
+__rsyslog_conf_local_basics_modules:
 
   - name: 'local-basics-modules'
     type: 'modules'
@@ -92,7 +91,7 @@ rsyslog_conf_local_basics_modules:
                   if ("network" in rsyslog_capabilities) and ("tls" in rsyslog_capabilities)
                   else "absent" }}'
 
-# rsyslog_conf_default_rulesets
+# __rsyslog_conf_default_rulesets
 #
 # The ``rsyslogd`` configuration can contain multiple rulesets, each one
 # connected to an input channel (see
@@ -104,7 +103,7 @@ rsyslog_conf_local_basics_modules:
 # network from remote hosts. The local log rules are stored in
 # `{{ rsyslog_config_dir }}/*.system` configuration files, and remote log
 # rules are stored in `{{ rsyslog_config_dir }}/*.remote` configuration files.
-rsyslog_conf_default_rulesets:
+__rsyslog_conf_default_rulesets:
 
   - name: 'default-rulesets'
     type: 'rules'
@@ -123,9 +122,9 @@ rsyslog_conf_default_rulesets:
                   if ("network" in rsyslog_capabilities)
                   else "absent" }}'
 
-# rsyslog_conf_system_input
+# __rsyslog_conf_system_input
 #
-rsyslog_conf_system_input:
+__rsyslog_conf_system_input:
 
   - name: 'system-input'
     type: 'input'
@@ -138,11 +137,11 @@ rsyslog_conf_system_input:
                   if rsyslog_use_imuxsock | d(false) | bool
                   else "absent" }}'
 
-# rsyslog_conf_network_input
+# __rsyslog_conf_network_input
 #
 # Configuration of UDP, TCP and TCP over TLS inputs to receive logs from remote
 # hosts, enabled by the ``network`` capability.
-rsyslog_conf_network_input:
+__rsyslog_conf_network_input:
 
   - name: 'network-input'
     type: 'input'

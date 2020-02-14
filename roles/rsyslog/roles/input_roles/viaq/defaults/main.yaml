@@ -6,37 +6,31 @@
 # adding rsyslog_logging_packages
 # ------------------
 
-# .. envvar:: rsyslog_viaq_packages
-#
-# List of rpm packages for Common Logging.
-rsyslog_viaq_prereq_packages: ['nmap-ncat', 'systemd-python', 'policycoreutils', 'checkpolicy', 'policycoreutils-python']
-rsyslog_viaq_packages: ['rsyslog-mmnormalize']
-
 # Available configuration set
 # ----------------------------
 
-rsyslog_unprivileged: 'False'
+rsyslog_unprivileged: false
 
 # Viaq Rsyslog configuration rules
 # ---------------------------
 
-rsyslog_viaq_rules:
+__rsyslog_viaq_rules:
 
-  - '{{ rsyslog_conf_local_viaq_modules }}'
-  - '{{ rsyslog_conf_viaq_main_modules }}'
-  - '{{ rsyslog_conf_viaq_formatting }}'
-  - '{{ rsyslog_rulebase_viaq_parse_json }}'
-  - '{{ rsyslog_json_viaq_normalize_level }}'
-  - '{{ rsyslog_json_viaq_prio_to_level }}'
+  - '{{ __rsyslog_conf_local_viaq_modules }}'
+  - '{{ __rsyslog_conf_viaq_main_modules }}'
+  - '{{ __rsyslog_conf_viaq_formatting }}'
+  - '{{ __rsyslog_rulebase_viaq_parse_json }}'
+  - '{{ __rsyslog_json_viaq_normalize_level }}'
+  - '{{ __rsyslog_json_viaq_prio_to_level }}'
 
 # Default Viaq configuration options
 # ---------------------------------
 
-# .. envvar:: rsyslog_conf_local_viaq_modules
+# __rsyslog_conf_local_viaq_modules
 #
 # List of ``rsyslogd`` modules that enable logs from the local system to be
 # received and parsed by the ``rsyslogd`` daemon.
-rsyslog_conf_local_viaq_modules:
+__rsyslog_conf_local_viaq_modules:
 
   - name: 'local-viaq-modules'
     type: 'modules'
@@ -46,7 +40,7 @@ rsyslog_conf_local_viaq_modules:
         options: |-
           module(load="imuxsock" SysSock.use="off")
 
-rsyslog_conf_viaq_main_modules:
+__rsyslog_conf_viaq_main_modules:
 
   - name: 'viaq_main'
     type: 'modules'
@@ -58,13 +52,13 @@ rsyslog_conf_viaq_main_modules:
 
       - options: |-
           # Read from journal
-          module(load="imjournal" StateFile="{{ rsyslog_work_dir }}/imjournal.state" UsePid="both" RateLimit.Burst="{{ imjournal_ratelimit_burst|default(1000000) }}" RateLimit.Interval="{{ imjournal_ratelimit_interval|default(10) }}" PersistStateInterval="1000" WorkAroundJournalBug="on")
+          module(load="imjournal" StateFile="{{ rsyslog_work_dir }}/imjournal.state" UsePid="both" RateLimit.Burst="{{ imjournal_ratelimit_burst | default(1000000) }}" RateLimit.Interval="{{ imjournal_ratelimit_interval | default(10) }}" PersistStateInterval="1000" WorkAroundJournalBug="on")
 
       - options: |-
           # Normalize logs
           module(load="mmnormalize")
 
-rsyslog_conf_viaq_formatting:
+__rsyslog_conf_viaq_formatting:
 
   - name: 'viaq_formatting'
     type: 'template'
@@ -366,7 +360,7 @@ rsyslog_conf_viaq_formatting:
           # add viaq logs identifier
           set $.logs_collection = "viaq";
 
-rsyslog_rulebase_viaq_parse_json:
+__rsyslog_rulebase_viaq_parse_json:
 
   - name: 'parse_json'
     filename: 'parse_json.rulebase'
@@ -378,7 +372,7 @@ rsyslog_rulebase_viaq_parse_json:
           version=2
           rule=:%.:json%
 
-rsyslog_json_viaq_normalize_level:
+__rsyslog_json_viaq_normalize_level:
 
   - name: 'normalize_level'
     filename: 'normalize_level.json'
@@ -408,7 +402,7 @@ rsyslog_json_viaq_normalize_level:
             ]
           }
 
-rsyslog_json_viaq_prio_to_level:
+__rsyslog_json_viaq_prio_to_level:
 
   - name: 'prio_to_level'
     filename: 'prio_to_level.json'

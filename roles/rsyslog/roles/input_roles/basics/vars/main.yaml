@@ -1,0 +1,4 @@
+# __rsyslog_basics_packages
+#
+# List of default rpm packages to install.
+__rsyslog_basics_packages: []

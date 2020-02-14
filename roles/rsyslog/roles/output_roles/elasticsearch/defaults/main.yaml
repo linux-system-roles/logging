@@ -2,12 +2,6 @@
 # Elasticsearch configuration
 # ---------------------
 
-# .. envvar:: rsyslog_elasticsearch_package
-#
-# List of rpm packages for Elasticsearch output.
-rsyslog_elasticsearch_packages: ['rsyslog-elasticsearch']
-
-
 # Available configuration set
 # ----------------------------
 
@@ -21,15 +15,15 @@ rsyslog_elasticsearch:
 # Elasticsearch Rsyslog configuration rules
 # ---------------------------
 
-rsyslog_elasticsearch_rules:
+__rsyslog_elasticsearch_rules:
 
-  - '{{ rsyslog_conf_es_main_modules }}'
-  - '{{ rsyslog_conf_es_elasticsearch }}'
+  - '{{ __rsyslog_conf_es_main_modules }}'
+  - '{{ __rsyslog_conf_es_elasticsearch }}'
 
 # Default elasticsearch configuration options [[[
 # ---------------------------------
 
-rsyslog_conf_es_main_modules:
+__rsyslog_conf_es_main_modules:
 
   - name: 'elasticsearch_main'
     type: 'modules'
@@ -40,7 +34,7 @@ rsyslog_conf_es_main_modules:
           # Send to ElasticSearch
           module(load="omelasticsearch")
 
-rsyslog_conf_es_elasticsearch:
+__rsyslog_conf_es_elasticsearch:
 
   - name: 'elasticsearch'
     type: 'output'

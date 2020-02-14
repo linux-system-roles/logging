@@ -1,0 +1,5 @@
+# __rsyslog_viaq_packages
+#
+# List of rpm packages for Common Logging.
+__rsyslog_viaq_prereq_packages: ['nmap-ncat', 'systemd-python', 'policycoreutils', 'checkpolicy', 'policycoreutils-python']
+__rsyslog_viaq_packages: ['rsyslog-mmnormalize']

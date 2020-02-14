@@ -1,10 +1,9 @@
 ---
 # Deploy configuration files
-- name: Set files facts
-  set_fact:
-    rsyslog_role_rules: "{{ rsyslog_files_output_rules }}"
-
 - name: Install/Update role packages and generate role configuration files for output to local files
+  vars:
+    __rsyslog_packages: "{{ __rsyslog_files_output_packages }}"
+    __rsyslog_rules: "{{ __rsyslog_files_output_rules }}"
   include_role:
     name: "{{ role_path }}/../../../"
     tasks_from: deploy.yaml

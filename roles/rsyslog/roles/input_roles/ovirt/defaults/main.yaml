@@ -6,16 +6,10 @@
 # adding rsyslog_logging_packages
 # ------------------
 
-# .. envvar:: rsyslog_logging_packages
-#
-# List of rpm packages for Common Logging.
-rsyslog_ovirt_packages: ['rsyslog-mmnormalize', 'rsyslog-mmjsonparse', 'libfastjson', 'liblognorm', 'libestr']
-rsyslog_ovirt_prereq_packages: []
-
 # Available configuration set
 # ----------------------------
 
-rsyslog_unprivileged: 'False'
+rsyslog_unprivileged: false
 
 rsyslog_elasticsearch: []
 
@@ -23,7 +17,7 @@ rsyslog_elasticsearch: []
 # oVirt Rsyslog configuration rules
 # ---------------------------
 
-rsyslog_ovirt_rules:
+__rsyslog_ovirt_rules:
   - '{{ rsyslog_conf_local_ovirt_modules }}'
   - '{{ rsyslog_conf_ovirt_main_modules }}'
   - '{{ rsyslog_conf_ovirt_formatting }}'

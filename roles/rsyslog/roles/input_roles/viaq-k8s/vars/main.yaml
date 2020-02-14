@@ -1,0 +1,4 @@
+# __rsyslog_viaq_k8s_packages
+#
+# List of rpm packages for Common Logging.
+__rsyslog_viaq_k8s_packages: ['rsyslog-mmjsonparse', 'rsyslog-mmkubernetes']

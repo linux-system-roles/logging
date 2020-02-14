@@ -2,7 +2,7 @@
 # Imfile configuration setting
 # ----------------------------
 
-rsyslog_unprivileged: False
+rsyslog_unprivileged: false
 
 # rsyslog_capabilities is an array which takes 'network', 'remote-files', 'tls'
 # 'network' enables input and output over network.
@@ -11,7 +11,7 @@ rsyslog_unprivileged: False
 #       Note: unles rsyslog_send_over_tls_only is set to true, insecure network connection
 #       is also allowed.
 rsyslog_capabilities: []
-rsyslog_files_input_packages: []
+__rsyslog_files_input_packages: []
 
 rsyslog_input_log_path: "/var/log/containers/*.log"
 rsyslog_input_log_tag: "container"
@@ -21,19 +21,19 @@ rsyslog_input_log_tag: "container"
 # List of YAML dictionaries, each dictionary should contain ``rsyslogd``
 # configuration in a special format. See :ref:`rsyslog_rules` for more
 # details. This list specifies imfile ``rsyslogd`` example configuration.
-rsyslog_files_input_rules:
-  - '{{ rsyslog_conf_imfile_modules }}'
-  - '{{ rsyslog_conf_imfile_rulesets }}'
-  - '{{ rsyslog_conf_imfile_inputs }}'
+__rsyslog_files_input_rules:
+  - '{{ __rsyslog_conf_imfile_modules }}'
+  - '{{ __rsyslog_conf_imfile_rulesets }}'
+  - '{{ __rsyslog_conf_imfile_inputs }}'
 
 # Debops example configuration options
 # --------------------------------------------
 
-# rsyslog_conf_local_modules
+# __rsyslog_conf_local_modules
 #
 # List of ``rsyslogd`` modules that enable logs from the local system to be
 # received and parsed by the ``rsyslogd`` daemon.
-rsyslog_conf_imfile_modules:
+__rsyslog_conf_imfile_modules:
 
   - name: 'imfile-modules'
     type: 'modules'
@@ -43,9 +43,9 @@ rsyslog_conf_imfile_modules:
         options: |-
           module(load="imfile" mode="inotify")
 
-# rsyslog_conf_imfile_rulesets
+# __rsyslog_conf_imfile_rulesets
 #
-rsyslog_conf_imfile_rulesets:
+__rsyslog_conf_imfile_rulesets:
 
   - name: 'imfile-rulesets'
     type: 'rules'
@@ -57,9 +57,9 @@ rsyslog_conf_imfile_rulesets:
             $IncludeConfig {{rsyslog_config_dir}}/*.files
           }
 
-# rsyslog_conf_system_inputs
+# __rsyslog_conf_system_inputs
 #
-rsyslog_conf_imfile_inputs:
+__rsyslog_conf_imfile_inputs:
 
   - name: 'imfile-input'
     type: 'input'
@@ -68,7 +68,7 @@ rsyslog_conf_imfile_inputs:
       - comment: 'Log messages from log files'
         options: |-
           # FIXME: Need to normalize a log before passing it to elasticsearch output
-          {% if rsyslog_elasticsearch is defined and rsyslog_elasticsearch|length > 0 %}
+          {% if rsyslog_elasticsearch is defined and rsyslog_elasticsearch | length > 0 %}
 
           {% for element in rsyslog_logs_collections %}
           {% if element.name is defined and element.type == "files" %}

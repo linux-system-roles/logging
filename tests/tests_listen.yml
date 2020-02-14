@@ -1,4 +1,3 @@
-
 - name: Ensure that rsyslog configured as a server listens on the port 514
   hosts: all
   become: true
@@ -33,21 +32,32 @@
 
     - name: Check rsyslog.conf size
       assert:
-        that: rsyslog_conf_line_count.stdout.0|int <= 7
+        that: rsyslog_conf_line_count.stdout.0 | int <= 7
 
     - name: Check file counts in rsyslog.d
       assert:
         that: rsyslog_d_file_count.matched >= 7
 
     - name: lsof outputs for rsyslogd
-      shell: lsof -i -nP | grep rsyslogd
-      register: lsof_output
+      shell: |
+        set -o pipefail
+        lsof -i -nP | grep rsyslogd
+      register: lsof_output0
+      changed_when: not lsof_output0.stdout
 
     - debug:
-        msg: "lsof returned {{ lsof_output.stdout }}"
+        msg: "lsof returned {{ lsof_output0.stdout }}"
 
     - name: Check port 514 is open for TCP
-      shell: lsof -i -nP | grep rsyslogd | grep TCP | grep 514
+      shell: |
+        set -o pipefail
+        lsof -i -nP | grep rsyslogd | grep TCP | grep 514
+      register: lsof_output1
+      changed_when: not lsof_output1.stdout
 
     - name: Check port 514 is open for UDP
-      shell: lsof -i -nP | grep rsyslogd | grep UDP | grep 514
+      shell: |
+        set -o pipefail
+        lsof -i -nP | grep rsyslogd | grep UDP | grep 514
+      register: lsof_output2
+      changed_when: not lsof_output2.stdout

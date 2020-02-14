@@ -4,14 +4,14 @@
 
 # Files Rsyslog output configuration rules
 # ---------------------------------
-rsyslog_files_output_rules:
-  - '{{ rsyslog_conf_files_output_modules }}'
-  - '{{ rsyslog_conf_files_output_rules }}'
-  - '{{ rsyslog_conf_remote_templates }}'
-  - '{{ rsyslog_conf_remote_output }}'
+__rsyslog_files_output_rules:
+  - '{{ __rsyslog_conf_files_output_modules }}'
+  - '{{ __rsyslog_conf_files_output_rules }}'
+  - '{{ __rsyslog_conf_remote_templates }}'
+  - '{{ __rsyslog_conf_remote_output }}'
 
-# rsyslog_conf_files_output_modules:
-rsyslog_conf_files_output_modules:
+# __rsyslog_conf_files_output_modules:
+__rsyslog_conf_files_output_modules:
 
   - name: 'output-modules'
     type: 'modules'
@@ -25,12 +25,12 @@ rsyslog_conf_files_output_modules:
           module(load="builtin:omfile")
           {% endif %}
 
-# rsyslog_conf_files_output_rules:
+# __rsyslog_conf_files_output_rules:
 #
 # A set of default ``rsyslog`` options which store local system logs in files
 # located in `{{ rsyslog_system_log_dir }}/` directory. This is mostly the
 # same as the default ``rsyslogd`` configuration provided in the installations.
-rsyslog_conf_files_output_rules:
+__rsyslog_conf_files_output_rules:
 
   - name: 'output-files'
     type: 'output'
@@ -39,7 +39,7 @@ rsyslog_conf_files_output_rules:
     sections:
 
       - options: |-
-          {% if rsyslog_files_actions is defined and rsyslog_files_actions|length > 0 %}
+          {% if rsyslog_files_actions is defined and rsyslog_files_actions | length > 0 %}
           {% for element in rsyslog_files_actions %}
           {% if element.name is defined and element.path is defined %}
           {% if element.severity is defined %}
@@ -102,14 +102,14 @@ rsyslog_conf_files_output_rules:
           local7.*                                                {{ rsyslog_system_log_dir }}/boot.log
           {% endif %}
 
-# rsyslog_conf_remote_templates
+# __rsyslog_conf_remote_templates
 #
 # List of ``rsyslogd`` templates which are used to generate dynamic filenames for remote logs,
 # based on hostnames. You can add additional template configuration by writing it in the
 # `{{ rsyslog_config_dir }}/*.template` files, they will be included by the main configuration.
 #
 # This section will create 20-remote-templates.conf
-rsyslog_conf_remote_templates:
+__rsyslog_conf_remote_templates:
 
   - name: 'remote-templates'
     type: 'template'
@@ -166,9 +166,9 @@ rsyslog_conf_remote_templates:
           # Include custom templates
           $IncludeConfig {{ rsyslog_config_dir }}/*.template
 
-# rsyslog_conf_remote_output
+# __rsyslog_conf_remote_output
 #
-rsyslog_conf_remote_output:
+__rsyslog_conf_remote_output:
 
   - name: 'remote-dynamic-logs'
     comment: 'Store remote logs in separate logfiles'

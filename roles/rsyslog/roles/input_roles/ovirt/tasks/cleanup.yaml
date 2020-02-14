@@ -1,9 +1,8 @@
 ---
-- name: Set oVirt facts
-  set_fact:
-    rsyslog_role_rules: "{{ rsyslog_ovirt_rules }}"
-
+# Deploy configuration files
 - name: Remove oVirt configs
+  vars:
+    __rsyslog_rules: "{{ __rsyslog_ovirt_rules }}"
   include_role:
     name: "{{ role_path }}/../../../"
     tasks_from: cleanup.yaml
