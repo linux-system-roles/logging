@@ -1,0 +1,5 @@
+# __rsyslog_ovirt_packages
+#
+# List of rpm packages for Common Logging.
+__rsyslog_ovirt_packages: ['rsyslog-mmnormalize', 'rsyslog-mmjsonparse', 'libfastjson', 'liblognorm', 'libestr']
+__rsyslog_ovirt_prereq_packages: []

@@ -1,13 +1,14 @@
-
 - name: Ensure that the role runs with parameters to output into local files
   hosts: all
   become: true
+  vars:
+    __test_files_conf: /etc/rsyslog.d/30-output-files.system
 
   tasks:
     - name: deploy config to output into local files
       vars:
-        logging_enabled: True
-        rsyslog_default: False
+        logging_enabled: true
+        rsyslog_default: false
         logging_outputs:
           - name: output-files
             type: files
@@ -51,28 +52,25 @@
 
     - name: Check rsyslog.conf size
       assert:
-        that: rsyslog_conf_line_count.stdout.0|int <= 7
+        that: rsyslog_conf_line_count.stdout.0 | int <= 7
 
     - name: Check file counts in rsyslog.d
       assert:
         that: rsyslog_d_file_count.matched >= 9
 
-    - name: Set files config path
-      set_fact:
-        test_files_conf: "/etc/rsyslog.d/30-output-files.system"
-
     - name: Get the files config stat
       stat:
-        path: "{{ test_files_conf }}"
+        path: "{{ __test_files_conf }}"
       register: stat_output_files_system
 
     - name: Check if the files config exists
       assert:
-        that: stat_output_files_system.stat.exists == True
+        that: stat_output_files_system.stat.exists
 
     - name: Grep output to messages line
-      command: /bin/grep ".var.log.messages" {{ test_files_conf }}
+      command: /bin/grep ".var.log.messages" {{ __test_files_conf }}
       register: files_conf_messages
+      changed_when: not files_conf_messages.stdout
 
     - name: Check the filter
       assert:
@@ -80,14 +78,17 @@
 
     - name: Run logger to generate a test log message
       command: /bin/logger -i -p local6.info -t testTag0 testMessage0000
+      register: logger_rc
+      changed_when: not logger_rc.stdout
 
     - name: Check the test log message in /var/log/messages
       command: /bin/grep testMessage0000 /var/log/messages
       register: testMessage0000
+      changed_when: not testMessage0000.stdout
 
     - name: Check if the test message is in /var/log/messages
       assert:
-        that: testMessage0000.stdout != ""
+        that: testMessage0000.stdout
 
     - name: Set forwarding config path
       set_fact:
@@ -100,13 +101,13 @@
 
     - name: Check if the forwarding config exists
       assert:
-        that: stat_output_forwards_system.stat.exists == True
+        that: stat_output_forwards_system.stat.exists
 
     - name: Grep severity_and_facility
       command: /bin/grep "\<severity_and_facility\>" {{ test_forward_conf }}
       register: severity_and_facility
+      changed_when: not severity_and_facility.stdout
 
     - name: Check severity_and_facility
       assert:
         that: severity_and_facility.stdout is match("local1\.info action.name=.severity_and_facility.* Target=.host.domain. Port=.1514. Protocol=.tcp.*")
-

@@ -7,6 +7,11 @@
 # Enable or disable ``rsyslog`` management.
 rsyslog_enabled: true
 
+# rsyslog_in_image
+#
+# true if the target host is a container and use rsyslog in the image.
+rsyslog_in_image: false
+
 # rsyslog_default
 #
 # Diploy default ``rsyslog`` configuration file /etc/rsyslog.conf if it is set to true.
@@ -54,23 +59,15 @@ rsyslog_message_reduction: false
 rsyslog_purge_original_conf: false
 
 # rpm packages
-# adding rsyslog_logging_packages
+# adding rsyslog packages
 # ------------------
 
-# rsyslog_base_packages
+# rsyslog_extra_packages
 #
-# List of default rpm packages to install.
-rsyslog_base_packages: ['rsyslog']
-
-# rsyslog_tls_packages
-#
-# List of rpm packages required for TLS support.
-rsyslog_tls_packages: ['rsyslog-gnutls', 'ca-certificates']
-
-# rsyslog_packages
-#
-# List of additional rpm packages to install.
-rsyslog_packages: []
+# List of extra rpm packages to install.
+# If custom configurations are to be installed, which requires additional rsyslog
+# packages, this variable can be used to install them.
+rsyslog_extra_packages: []
 
 # rsyslog_custom_config_files
 #
@@ -271,8 +268,6 @@ rsyslog_forwards_actions: []
 #
 # If you change the default weight map values, you will most likely need to
 # remove all files from `{{ rsyslog_config_dir }}` to reset the configuration.
-#
-# See :ref:`rsyslog_rules` for more details.
 rsyslog_weight_map:
   'global': '05'
   'globals': '05'
@@ -322,29 +317,28 @@ rsyslog_host_rules: []
 # details. This list should be used for configuration by other Ansible roles.
 rsyslog_dependent_rules: []
 
-# rsyslog_.*_rules
+# __rsyslog_.*_rules
 #
 # List of YAML dictionaries, each dictionary should contain ``rsyslogd``
-# configuration in a special format. See :ref:`rsyslog_rules` for more
-# details. This lis specifies default ``rsyslogd`` configuration enabled in the
-# role.
-rsyslog_common_rules:
+# configuration in a special format. This lis specifies default ``rsyslogd``
+# configuration enabled in the role.
+__rsyslog_common_rules:
 
-  - '{{ rsyslog_conf_global_options }}'
-  - '{{ rsyslog_conf_local_modules }}'
-  - '{{ rsyslog_conf_common_defaults }}'
-  - '{{ rsyslog_conf_send_targets_only }}'
+  - '{{ __rsyslog_conf_global_options }}'
+  - '{{ __rsyslog_conf_local_modules }}'
+  - '{{ __rsyslog_conf_common_defaults }}'
+  - '{{ __rsyslog_conf_send_targets_only }}'
 
 
 # Default configuration options
 # -----------------------------
 
-# rsyslog_conf_global_options
+# __rsyslog_conf_global_options
 #
 # Some of the global ``rsyslogd`` configuration options. See
 # http://www.rsyslog.com/doc/v8-stable/rainerscript/global.html for more
 # details.
-rsyslog_conf_global_options:
+__rsyslog_conf_global_options:
 
   - filename: '00-global.conf'
     comment: 'Global options'
@@ -366,11 +360,11 @@ rsyslog_conf_global_options:
       {% endif %}
       )
 
-# rsyslog_conf_local_modules
+# __rsyslog_conf_local_modules
 #
 # List of ``rsyslogd`` modules that enable logs from the local system to be
 # received and parsed by the ``rsyslogd`` daemon.
-rsyslog_conf_local_modules:
+__rsyslog_conf_local_modules:
 
   - name: 'local-modules'
     type: 'modules'
@@ -383,11 +377,11 @@ rsyslog_conf_local_modules:
                   if ("mark" in rsyslog_capabilities)
                   else "absent" }}'
 
-# rsyslog_conf_common_defaults
+# __rsyslog_conf_common_defaults
 #
 # List of common ``rsyslogd`` configuration, like new file owner/group and
 # permissions, work directory, configuration of message reduction.
-rsyslog_conf_common_defaults:
+__rsyslog_conf_common_defaults:
 
   - name: 'common-defaults'
     type: 'global'
@@ -409,7 +403,7 @@ rsyslog_conf_common_defaults:
         options: |-
           $RepeatedMsgReduction {{ "on" if rsyslog_message_reduction | bool else "off" }}
 
-rsyslog_conf_send_targets_only:
+__rsyslog_conf_send_targets_only:
 
   - name: 'send-targets-only'
     type: 'output'

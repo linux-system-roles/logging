@@ -2,7 +2,7 @@
 # Viaq configuration
 # ---------------------
 
-# .. envvar:: rsyslog_viaq_log_dir
+# rsyslog_viaq_log_dir
 #
 # Viaq log directory
 rsyslog_viaq_log_dir: '{{ rsyslog_system_log_dir }}/containers'
@@ -11,24 +11,19 @@ rsyslog_viaq_log_dir: '{{ rsyslog_system_log_dir }}/containers'
 # adding rsyslog_logging_packages
 # ------------------
 
-# .. envvar:: rsyslog_viaq_k8s_packages
-#
-# List of rpm packages for Common Logging.
-rsyslog_viaq_k8s_packages: ['rsyslog-mmjsonparse', 'rsyslog-mmkubernetes']
-
 # Available configuration set
 # ----------------------------
 
 # Viaq Rsyslog configuration rules
 # ---------------------------
 
-rsyslog_viaq_k8s_rules:
+__rsyslog_viaq_k8s_rules:
 
-  - '{{ rsyslog_conf_viaq_mmk8s_module }}'
-  - '{{ rsyslog_conf_viaq_mmk8s_input }}'
-  - '{{ rsyslog_rulebase_viaq_k8s_filename }}'
-  - '{{ rsyslog_rulebase_viaq_k8s_container_name }}'
-  - '{{ rsyslog_rulebase_viaq_crio }}'
+  - '{{ __rsyslog_conf_viaq_mmk8s_module }}'
+  - '{{ __rsyslog_conf_viaq_mmk8s_input }}'
+  - '{{ __rsyslog_rulebase_viaq_k8s_filename }}'
+  - '{{ __rsyslog_rulebase_viaq_k8s_container_name }}'
+  - '{{ __rsyslog_rulebase_viaq_crio }}'
 
 # Default Viaq-k8s configuration options
 # ---------------------------------
@@ -36,7 +31,7 @@ rsyslog_viaq_k8s_rules:
 logging_mmk8s_ca_cert: ''
 logging_mmk8s_token: ''
 
-rsyslog_conf_viaq_mmk8s_module:
+__rsyslog_conf_viaq_mmk8s_module:
 
   - name: 'mmk8s'
     type: 'modules'
@@ -50,7 +45,7 @@ rsyslog_conf_viaq_mmk8s_module:
           # Parse logs to JSON
           module(load="mmjsonparse")
 
-rsyslog_conf_viaq_mmk8s_input:
+__rsyslog_conf_viaq_mmk8s_input:
 
   - name: 'mmk8s'
     type: 'templates'
@@ -76,7 +71,7 @@ rsyslog_conf_viaq_mmk8s_input:
                  tokenfile="{{ logging_mmk8s_token }}" annotation_match=["."])
           }
 
-rsyslog_rulebase_viaq_k8s_filename:
+__rsyslog_rulebase_viaq_k8s_filename:
 
   - name: 'k8s_filename'
     filename: 'k8s_filename.rulebase'
@@ -88,7 +83,7 @@ rsyslog_rulebase_viaq_k8s_filename:
           version=2
           rule=:{{ rsyslog_viaq_log_dir }}/%pod_name:char-to:_%_%namespace_name:char-to:_%_%container_name_and_id:char-to:.%.log
 
-rsyslog_rulebase_viaq_k8s_container_name:
+__rsyslog_rulebase_viaq_k8s_container_name:
 
   - name: 'k8s_container_name'
     filename: 'k8s_container_name.rulebase'
@@ -103,7 +98,7 @@ rsyslog_rulebase_viaq_k8s_container_name:
           # not a kubernetes container
           rule=:%container_name:rest%
 
-rsyslog_rulebase_viaq_crio:
+__rsyslog_rulebase_viaq_crio:
 
   - name: 'crio'
     filename: 'crio.rulebase'

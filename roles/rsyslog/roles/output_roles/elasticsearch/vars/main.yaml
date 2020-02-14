@@ -1,0 +1,4 @@
+# __rsyslog_elasticsearch_package
+#
+# List of rpm packages for Elasticsearch output.
+__rsyslog_elasticsearch_packages: ['rsyslog-elasticsearch']

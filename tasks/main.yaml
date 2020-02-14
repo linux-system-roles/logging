@@ -108,7 +108,7 @@
       lineinfile:
         path: "{{ role_path }}/debug/main.yaml"
         create: yes
-        line: "{{ item.key }}: {{ item.value| to_nice_json(indent=2) }}"
+        line: "{{ item.key }}: {{ item.value | to_nice_json(indent=2) }}"
       with_dict: "{{ hostvars[inventory_hostname] }}"
       when:
         - item.key is match("rsyslog*")

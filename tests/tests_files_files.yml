@@ -1,17 +1,14 @@
-
 - name: Ensure that the role runs with parameters to output into local files
   hosts: all
   become: true
+  vars:
+    __test_inputfiles_dir: /var/log/inputdirectory
 
   tasks:
-    - name: Set input file dir
-      set_fact:
-        test_inputfiles_dir: "/var/log/inputdirectory"
-
     - name: deploy config to output into local files
       vars:
-        logging_enabled: True
-        rsyslog_default: False
+        logging_enabled: true
+        rsyslog_default: false
         logging_outputs:
           - name: files-output
             type: files
@@ -26,7 +23,7 @@
             logs_collections:
               - name: files_input
                 type: files
-                rsyslog_input_log_path: "{{ test_inputfiles_dir }}/*.log"
+                rsyslog_input_log_path: "{{ __test_inputfiles_dir }}/*.log"
                 rsyslog_input_log_tag: "newtag"
       include_role:
         name: linux-system-roles.logging
@@ -40,7 +37,7 @@
 
     - name: Check rsyslog.conf size
       assert:
-        that: rsyslog_conf_line_count.stdout.0|int <= 7
+        that: rsyslog_conf_line_count.stdout.0 | int <= 7
 
     - name: Check file counts in rsyslog.d
       assert:
@@ -57,11 +54,12 @@
 
     - name: Check if the output files config exists
       assert:
-        that: stat_output_files_system.stat.exists == True
+        that: stat_output_files_system.stat.exists
 
     - name: Grep output to messages line
       command: /bin/grep ".var.log.messages" {{ test_outputfiles_conf }}
       register: files_conf_messages
+      changed_when: files_conf_messages.stdout
 
     - name: Set input files config path
       set_fact:
@@ -74,21 +72,18 @@
 
     - name: Check if the input files config exists
       assert:
-        that: stat_input_files_conf.stat.exists == True
+        that: stat_input_files_conf.stat.exists
 
-    - name: CAt input file
+    - name: Cat input file
       command: /bin/cat {{ test_inputfiles_conf }}
       register: cat_file
-
-    - name: CAt input file 2
-      debug:
-        msg: cat_file.stdout
+      changed_when: cat_file.stdout
 
     - name: Grep input file
       command: /bin/grep 'inputdirectory' {{ test_inputfiles_conf }}
       register: files_conf_input_file
+      changed_when: files_conf_input_file.stdout
 
     - name: Check the filter
       assert:
         that: files_conf_input_file.stdout is match("input\(type=\"imfile\" file=\"\/var\/log\/inputdirectory\/\*\.log\" tag=\"newtag\"\)")
-

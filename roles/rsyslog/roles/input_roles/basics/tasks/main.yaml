@@ -1,10 +1,9 @@
 ---
-- name: Set basics facts
-  set_fact:
-    rsyslog_role_packages: "{{rsyslog_basics_packages | flatten | d([])}}"
-    rsyslog_role_rules: "{{ rsyslog_basics_rules }}"
-
+# Deploy configuration files
 - name: Install/Update basics role packages and generate example configuration files to role subdir
+  vars:
+    __rsyslog_packages: "{{ __rsyslog_basics_packages }}"
+    __rsyslog_rules: "{{ __rsyslog_basics_rules }}"
   include_role:
     name: "{{ role_path }}/../../../"
     tasks_from: deploy.yaml

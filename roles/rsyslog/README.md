@@ -338,7 +338,7 @@ WARNING: Pre-existing rsyslog.conf and configuration files in /etc/rsyslog.d are
 
 Describing how the configuration files are defined to be deployed using the viaq case.
 
-Viaq configuration files are defined in {{ rsyslog_viaq_rules }} in /roles/input_rols/viaq/defaults/main.yaml.  The set is made from the generic modules{rsyslog_conf_global_options, rsyslog_conf_local_modules, rsyslog_conf_network_modules, rsyslog_conf_common} and viaq specific configurations.
+Viaq configuration files are defined in {{ __rsyslog_viaq_rules }} in /roles/input_roles/viaq/defaults/main.yaml.  The set is made from the generic modules{__rsyslog_conf_global_options, __rsyslog_conf_local_modules, __rsyslog_conf_common_defaults} and viaq specific configurations.
 
 To make a new configuration file installed in addition to the current {{ rsyslog_viaq_rules }}, create an rsyslog config item based on the following skelton and add the title {{ rsyslog_conf_yourname }} to {{ rsyslog_viaq_rules }}.
 ```

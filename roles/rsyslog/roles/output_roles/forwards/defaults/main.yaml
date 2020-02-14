@@ -4,13 +4,13 @@
 
 # Forwards Rsyslog output configuration rules
 # ---------------------------------
-rsyslog_forwards_output_rules:
-  - '{{ rsyslog_conf_forwards_output_rules }}'
+__rsyslog_forwards_output_rules:
+  - '{{ __rsyslog_conf_forwards_output_rules }}'
 
-# rsyslog_conf_forwards_output_rules:
+# __rsyslog_conf_forwards_output_rules:
 #
 # Enable log forwarding to another ``rsyslogd`` instance if `rsyslog_forwards_actions` variables are defined.
-rsyslog_conf_forwards_output_rules:
+__rsyslog_conf_forwards_output_rules:
 
   - name: 'output-forwards'
     type: 'output'
@@ -32,29 +32,29 @@ rsyslog_conf_forwards_output_rules:
           {% if element.severity is defined %}
           {% if element.facility is defined %}
           {% if element.exclude is defined %}
-          {{ element.facility }}.{{ element.severity }};{{ element.exclude }} action(name="{{ element.name }}" type="omfwd" Target="{{ element.target }}" Port="{{ element.port|d(514) }}" Protocol="{{ element.protocol|d('tcp') }}")
+          {{ element.facility }}.{{ element.severity }};{{ element.exclude }} action(name="{{ element.name }}" type="omfwd" Target="{{ element.target }}" Port="{{ element.port | d(514) }}" Protocol="{{ element.protocol | d('tcp') }}")
           {% else %}
-          {{ element.facility }}.{{ element.severity }} action(name="{{ element.name }}" type="omfwd" Target="{{ element.target }}" Port="{{ element.port|d(514) }}" Protocol="{{ element.protocol|d('tcp') }}")
+          {{ element.facility }}.{{ element.severity }} action(name="{{ element.name }}" type="omfwd" Target="{{ element.target }}" Port="{{ element.port | d(514) }}" Protocol="{{ element.protocol | d('tcp') }}")
           {% endif %}
           {% else %}
           {% if element.exclude is defined %}
-          *.{{ element.severity }};{{ element.exclude }} action(name="{{ element.name }}" type="omfwd" Target="{{ element.target }}" Port="{{ element.port|d(514) }}" Protocol="{{ element.protocol|d('tcp') }}")
+          *.{{ element.severity }};{{ element.exclude }} action(name="{{ element.name }}" type="omfwd" Target="{{ element.target }}" Port="{{ element.port | d(514) }}" Protocol="{{ element.protocol | d('tcp') }}")
           {% else %}
-          *.{{ element.severity }} action(name="{{ element.name }}" type="omfwd" Target="{{ element.target }}" Port="{{ element.port|d(514) }}" Protocol="{{ element.protocol|d('tcp') }}")
+          *.{{ element.severity }} action(name="{{ element.name }}" type="omfwd" Target="{{ element.target }}" Port="{{ element.port | d(514) }}" Protocol="{{ element.protocol | d('tcp') }}")
           {% endif %}
           {% endif %}
           {% else %}
           {% if element.facility is defined %}
           {% if element.exclude is defined %}
-          {{ element.facility }}.*;{{ element.exclude }} action(name="{{ element.name }}" type="omfwd" Target="{{ element.target }}" Port="{{ element.port|d(514) }}" Protocol="{{ element.protocol|d('tcp') }}")
+          {{ element.facility }}.*;{{ element.exclude }} action(name="{{ element.name }}" type="omfwd" Target="{{ element.target }}" Port="{{ element.port | d(514) }}" Protocol="{{ element.protocol | d('tcp') }}")
           {% else %}
-          {{ element.facility }}.* action(name="{{ element.name }}" type="omfwd" Target="{{ element.target }}" Port="{{ element.port|d(514) }}" Protocol="{{ element.protocol|d('tcp') }}")
+          {{ element.facility }}.* action(name="{{ element.name }}" type="omfwd" Target="{{ element.target }}" Port="{{ element.port | d(514) }}" Protocol="{{ element.protocol | d('tcp') }}")
           {% endif %}
           {% else %}
           {% if element.exclude is defined %}
-          *.*;{{ element.exclude }} action(name="{{ element.name }}" type="omfwd" Target="{{ element.target }}" Port="{{ element.port|d(514) }}" Protocol="{{ element.protocol|d('tcp') }}")
+          *.*;{{ element.exclude }} action(name="{{ element.name }}" type="omfwd" Target="{{ element.target }}" Port="{{ element.port | d(514) }}" Protocol="{{ element.protocol | d('tcp') }}")
           {% else %}
-          *.* action(name="{{ element.name }}" type="omfwd" Target="{{ element.target }}" Port="{{ element.port|d(514) }}" Protocol="{{ element.protocol|d('tcp') }}")
+          *.* action(name="{{ element.name }}" type="omfwd" Target="{{ element.target }}" Port="{{ element.port | d(514) }}" Protocol="{{ element.protocol | d('tcp') }}")
           {% endif %}
           {% endif %}
           {% endif %}

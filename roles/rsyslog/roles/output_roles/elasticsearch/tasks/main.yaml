@@ -9,7 +9,7 @@
         - '{{ rsyslog_elasticsearch }}'
       when:
         - item.ca_cert_src is defined
-        - item.ca_cert_src != ""
+        - item.ca_cert_src
 
     - name: Copy local Elasticsearch certs to /etc/rsyslog.d directory in Rsyslog
       copy:
@@ -19,7 +19,7 @@
         - '{{ rsyslog_elasticsearch }}'
       when:
         - item.cert_src is defined
-        - item.cert_src != ""
+        - item.cert_src
 
     - name: Copy local Elasticsearch keys to /etc/rsyslog.d directory in Rsyslog
       copy:
@@ -29,21 +29,24 @@
         - '{{ rsyslog_elasticsearch }}'
       when:
         - item.key_src is defined
-        - item.key_src != ""
+        - item.key_src
 
     - name: Update ca_cert path to /etc/rsyslog.d directory in Rsyslog
       set_fact:
-        rsyslog_elasticsearch_temp: "{{ rsyslog_elasticsearch_temp | d([]) }} + {{ [ item | combine( { 'ca_cert': item.ca_cert_src | basename , 'cert': item.cert_src | basename, 'key': item.key_src | basename } ) ] }}"
+        __rsyslog_elasticsearch_temp: >-
+          {{ __rsyslog_elasticsearch_temp | d([]) }} +
+          {{ [ item | combine( { 'ca_cert': item.ca_cert_src | basename ,
+          'cert': item.cert_src | basename, 'key': item.key_src | basename } ) ] }}
       with_items:
         - '{{ rsyslog_elasticsearch }}'
       when:
         - item.ca_cert_src is defined
-        - item.ca_cert_src != ""
+        - item.ca_cert_src
       register: result
 
     - name: Set updated rsyslog_elasticsearch
       set_fact:
-        rsyslog_elasticsearch: "{{ rsyslog_elasticsearch_temp }}"
+        rsyslog_elasticsearch: "{{ __rsyslog_elasticsearch_temp }}"
 
   when:
     - rsyslog_elasticsearch is defined
@@ -51,12 +54,10 @@
     - use_local_omelasticsearch_cert | default(false) | bool
 
 # Deploy configuration files
-- name: Set Elasticsearch facts
-  set_fact:
-    rsyslog_role_packages: "{{ rsyslog_elasticsearch_packages | flatten([]) }}"
-    rsyslog_role_rules: "{{ rsyslog_elasticsearch_rules }}"
-
 - name: Install/Update role packages and generate role configuration files (elasticsearch)
+  vars:
+    __rsyslog_packages: "{{ __rsyslog_elasticsearch_packages }}"
+    __rsyslog_rules: "{{ __rsyslog_elasticsearch_rules }}"
   include_role:
     name: "{{ role_path }}/../../../"
     tasks_from: deploy.yaml

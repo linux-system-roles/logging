@@ -1,43 +1,34 @@
----
 - name: Install/Update required packages
   package:
-    name: "{{ lookup('flattened', rsyslog_base_packages, rsyslog_tls_packages if rsyslog_pki else [], rsyslog_packages) }}"
+    name: "{{ (__rsyslog_base_packages) + (__rsyslog_tls_packages if rsyslog_pki else []) + (rsyslog_extra_packages) }}"
     state: latest
   when:
     - rsyslog_enabled | bool
-    - not use_rsyslog_image | default(false) | bool
-  ignore_errors: yes
-  tags:
-    - skip_ansible_lint
+
+- name: Gather package facts
+  package_facts:
+    manager: auto
 
 - name: Get rsyslog version
-  package:
-    list: rsyslog
-  register: rsyslog_version
+  set_fact:
+    __rsyslog_version: >-
+      {{ ansible_facts.packages['rsyslog'][0].version
+      if ansible_facts.packages | selectattr('rsyslog', 'defined') | list | length > 0
+      else '0.0.0' }}
 
 - debug:
-    msg: "Rsyslog_version is {{ rsyslog_version }}"
+    msg: "Rsyslog_version is {{ __rsyslog_version }}, which is older than \"8.37.0-7.2\"."
+  when: __rsyslog_version is version('8.37.0-7.2', '<')
+
+- debug:
+    msg: "Rsyslog_version is {{ __rsyslog_version }}, which is newer than \"8.37.0-7.2\"."
+  when: __rsyslog_version is version('8.37.0-7.2', '>')
 
 - block:
-    - name: Set rsyslog version
+    - name: Set __rsyslog_failed_validation
       set_fact:
-        rsyslog_version: "{{ rsyslog_version.results | selectattr('yumstate','match','installed') | map(attribute='version') | list | first }}-{{ rsyslog_version.results | selectattr('yumstate','match','installed') | map(attribute='release') | list | first }}"
-      when: rsyslog_version.results | selectattr('yumstate','match','installed') | list | first is defined
-      ignore_errors: true
-
-    - name: Set rsyslog version
-      set_fact:
-        rsyslog_version: "{{ rsyslog_version.results | selectattr('yumstate','match','available') | map(attribute='version') | list | first }}-{{ rsyslog_version.results | selectattr('yumstate','match','available') | map(attribute='release') | list | first }}"
-      when: rsyslog_version.results | selectattr('yumstate','match','available') | list | first is defined
-      ignore_errors: true
-
-    - debug:
-        msg: "Rsyslog_version is {{ rsyslog_version }}"
-
-    - name: Set rsyslog_failed_validation
-      set_fact:
-        rsyslog_failed_validation: true
-      when: rsyslog_version is version('8.37.0-7.2.el7', '<')
+        __rsyslog_failed_validation: true
+      when: __rsyslog_version is version('8.37.0-7.2', '<')
   when: use_rsyslog_image | default(false) | bool
 
 - block:
@@ -76,12 +67,12 @@
     # Creating a backup dir for rsyslog.d
     - name: Set backup dir name
       set_fact:
-        backupdir: '{{ rsyslog_backup_dir | default("/tmp") }}/rsyslog.d-{{ ansible_date_time.iso8601_basic_short }}'
+        rsyslog_backup_dir: '{{ rsyslog_backup_dir | default("/tmp") }}/rsyslog.d-{{ ansible_date_time.iso8601_basic_short }}'
 
     - name: Create a backup dir
       file:
         state: directory
-        path: '{{ backupdir }}'
+        path: '{{ rsyslog_backup_dir }}'
         owner: '{{ rsyslog_user }}'
         group: '{{ rsyslog_file_group }}'
         mode: 0755
@@ -92,16 +83,19 @@
     - name: Archive the contents of {{ rsyslog_config_dir }} to the backup dir
       archive:
         path: ["{{ rsyslog_config_dir }}", /etc/rsyslog.conf]
-        dest: "{{ backupdir }}/backup.tgz"
+        dest: "{{ rsyslog_backup_dir }}/backup.tgz"
         remove: '{{ true if rsyslog_purge_original_conf | bool else false }}'
       changed_when: false
 
     - name: Update directory and file permissions
       shell: |
-        [ ! -d {{ rsyslog_system_log_dir }} ] || ( [ "$(stat -c '%G' {{ rsyslog_system_log_dir }})" = "{{ rsyslog_group }}" ] || ( chown -v root:{{ rsyslog_group }} {{ rsyslog_system_log_dir }} ; chmod -v 775 {{ rsyslog_system_log_dir }} ) )
+        [ ! -d {{ rsyslog_system_log_dir }} ] ||
+        ( [ "$(stat -c '%G' {{ rsyslog_system_log_dir }})" = "{{ rsyslog_group }}" ] ||
+        ( chown -v root:{{ rsyslog_group }} {{ rsyslog_system_log_dir }} ;
+        chmod -v 775 {{ rsyslog_system_log_dir }} ) )
       register: rsyslog_register_file_permissions
       when: rsyslog_unprivileged | bool
-      changed_when: rsyslog_register_file_permissions.stdout != ''
+      changed_when: rsyslog_register_file_permissions.stdout
 
     - name: Generate main rsyslog configuration
       template:
@@ -117,11 +111,14 @@
     - name: Generate common rsyslog configuration files in rsyslog.d
       template:
         src: 'etc/rsyslog.d/rules.conf.j2'
-        dest: '{{ rsyslog_config_dir }}/{{ item.filename | d((item.weight if item.weight | d() else rsyslog_weight_map[item.type | d("rules")]) + "-" + (item.name | d("rules")) + "." + (item.suffix | d("conf"))) }}'
+        dest: |-
+          {{ rsyslog_config_dir }}/{{ item.filename | d((item.weight if item.weight | d()
+          else rsyslog_weight_map[item.type | d("rules")]) + "-" + (item.name | d("rules")) +
+          "." + (item.suffix | d("conf"))) }}
         owner: '{{ item.owner | d("root") }}'
         group: '{{ item.group | d("root") }}'
         mode: '{{ item.mode | d("0400") }}'
-      loop: '{{ rsyslog_common_rules | flatten }}'
+      loop: '{{ __rsyslog_common_rules | flatten }}'
       when:
         - rsyslog_enabled | bool
         - rsyslog_logs_collections is defined and rsyslog_logs_collections != []
@@ -132,9 +129,12 @@
 
     - name: Remove common config files in rsyslog.d
       file:
-        path: '{{ rsyslog_config_dir }}/{{ item.filename | d((item.weight if item.weight | d() else rsyslog_weight_map[item.type | d("rules")]) + "-" + (item.name | d("rules")) + "." + (item.suffix | d("conf"))) }}'
+        path: |-
+          {{ rsyslog_config_dir }}/{{ item.filename | d((item.weight if item.weight | d() else
+          rsyslog_weight_map[item.type | d("rules")]) + "-" + (item.name | d("rules")) + "." +
+          (item.suffix | d("conf"))) }}
         state: absent
-      loop: '{{ rsyslog_common_rules | flatten }}'
+      loop: '{{ __rsyslog_common_rules | flatten }}'
       when:
         - not rsyslog_enabled | bool
         - rsyslog_logs_collections is not defined or rsyslog_logs_collections == []
@@ -199,7 +199,7 @@
         state: started
       when:
         - rsyslog_enabled | bool
-        - not use_rsyslog_image | default(false) | bool
+        - not rsyslog_in_image | default(false) | bool
 
     - name: Disable rsyslog service
       systemd:
@@ -208,13 +208,13 @@
         state: stopped
       when:
         - not rsyslog_enabled | bool
-        - not use_rsyslog_image | default(false) | bool
+        - not rsyslog_in_image | default(false) | bool
 
-  when: rsyslog_failed_validation | d(false) == false
+  when: __rsyslog_failed_validation | d(false) == false
 
 - name: Check rsyslog version
   debug:
-    msg: "Rsyslog version must be >= 8.37.0-7.2.el7"
+    msg: "Rsyslog version must be >= 8.37.0-7.2"
   when:
-    - rsyslog_failed_validation | d(false) == true
+    - __rsyslog_failed_validation | d(false) == true
     - use_rsyslog_image | default(false) | bool
