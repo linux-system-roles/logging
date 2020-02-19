@@ -13,9 +13,9 @@ Table of Contents
    * [Table of contents](#table-of-contents)
    * [Deploy Rsyslog Configuration Files](#deploy)
       * [Inventory File](#inventory-file)
-      * [vars.yaml](#vars)
-      * [playbook.yaml](#playbook)
-   * [Variables in vars.yaml](#variables)
+      * [vars.yml](#vars)
+      * [playbook.yml](#playbook)
+   * [Variables in vars.yml](#variables)
       * [Common sub-variables](#common-variables)
       * [Viaq sub-variables](#viaw)
    * [Contents of Roles](#roles)
@@ -26,9 +26,9 @@ Deploy Rsyslog Configuration Files
 
 Typical ansible-playbook command line.
 
-``` ansible-playbook [-vvv] -e@vars.yaml --become --become-user root -i inventory_file playbook.yaml ```
+``` ansible-playbook [-vvv] -e@vars.yml --become --become-user root -i inventory_file playbook.yml ```
 
-Two files - inventory_file and vars.yaml - in the command line are to be updated by the user.
+Two files - inventory_file and vars.yml - in the command line are to be updated by the user.
 
 Inventory File
 --------------
@@ -43,15 +43,15 @@ localhost ansible_user=YOUR_ANSIBLE_USER
 localhost ansible_user=YOUR_ANSIBLE_USER
 ```
 
-vars.yaml
+vars.yml
 ---------
-vars.yaml stores variables which are passed to ansible to control the tasks.  The contents of this file could be merged into the inventory file.
+vars.yml stores variables which are passed to ansible to control the tasks.  The contents of this file could be merged into the inventory file.
 
 Currently, the role supports 3 types of logs collections ([input_roles](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/roles/input_roles/)): `basics`, `ovirt`, and `viaq`.  And 3 types of log outputs ([output_roles](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/roles/output_roles/)): `elasticsearch`, `files`, and `forwards`.  To deploy rsyslog configuration files with these input and output roles, first specify the output_role as `logging_outputs`, then input_role as `logs_collections` in each `logging_outputs`.  Multiple input roles could be required based on the use cases.
 
-To make an effect with the following setting, vars.yaml has to have `rsyslog_enabled: true`.  Unless `rsyslog_enabled` is set to true, LSR/Logging does not deploy rsyslog config files.
+To make an effect with the following setting, vars.yml has to have `logging_enabled: true`.  Unless `logging_enabled` is set to true, LSR/Logging does not deploy rsyslog config files.
 ```
-rsyslog_enabled: true
+logging_enabled: true
 rsyslog_default: false
 logging_outputs:
   -name: <output_role_name0>
@@ -70,24 +70,24 @@ logging_outputs:
 
 See the [variables section](#variables) for each variable.
 
-vars.yaml examples
+vars.yml examples
 ------------------
 
 **0. Deploying default /etc/rsyslog.conf.**
 ```
-rsyslog_enabled: true
+logging_enabled: true
 ```
 
 **1. Overriding existing /etc/rsyslog.conf and files in /etc/rsyslog.d with default rsyslog.conf.  Pre-existing config files are copied to the directory specified by `rsyslog_backup_dir`.**
 ```
-rsyslog_enabled: true
+logging_enabled: true
 rsyslog_purge_original_conf: true
 rsyslog_backup_dir: /tmp/rsyslog_backup
 ```
 
 **2. Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and outputs into the local files.  Pre-existing config files are copied to the directory specified by `rsyslog_backup_dir`.**
 ```
-rsyslog_enabled: true
+logging_enabled: true
 rsyslog_purge_original_conf: true
 rsyslog_backup_dir: /tmp/rsyslog_backup
 logging_outputs:
@@ -100,7 +100,7 @@ logging_outputs:
 
 **3. Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and remote rsyslog and outputs into the local files.**
 ```
-rsyslog_enabled: true
+logging_enabled: true
 rsyslog_capabilities: [ 'network', 'remote-files' ]
 rsyslog_purge_original_conf: true
 logging_outputs:
@@ -113,7 +113,7 @@ logging_outputs:
 
 **4. Deploying basic LSR/Logging config files in /etc/rsyslog.d, which forwards the local system logs to the remote rsyslog.
 ```
-rsyslog_enabled: true
+logging_enabled: true
 rsyslog_default: false
 rsyslog_purge_original_conf: true
 logging_outputs:
@@ -134,10 +134,10 @@ logging_outputs:
       - name: 'basics'
 ```
 
-**5. Sample vars.yaml file for the viaq case.**
+**5. Sample vars.yml file for the viaq case.**
 ```
-rsyslog_enabled: true
-rsyslog_elasticsearch:
+logging_enabled: true
+logging_outputs:
   - name: viaq-elasticsearch
     type: elasticsearch
     logs_collections:
@@ -147,9 +147,9 @@ rsyslog_elasticsearch:
     server_port: 9200
 ```
 
-**6. vars.yaml to configure to handle the inputs from openshift containers.**
+**6. vars.yml to configure to handle the inputs from openshift containers.**
 ```
-rsyslog_enabled: true
+logging_enabled: true
 # If 'viaq-k8s' is in logs collections, logging_mmk8s_* need to be specified.
 logging_mmk8s_token: "{{ rsyslog_viaq_config_dir }}/mmk8s.token"
 logging_mmk8s_ca_cert: "{{ rsyslog_viaq_config_dir }}/mmk8s.ca.crt"
@@ -195,7 +195,7 @@ rsyslog_outputs:
     cert_src : "/path/to/es-cert.pem"
     key_src : "/path/to/es-key.pem"
 ```
-The key-value pairs in `rsyslog_elasticsearch` are used to configure rsyslog to send the logs to the Openshift Aggregated Logging ElasticSearch.  The elements are used in the output elasticsearch configuration 30-elasticsearch.conf as follows (note: not following the abstract syntax):
+The key-value pairs in the elasticsearch type logging_outputs are used to configure rsyslog to send the logs to the Openshift Aggregated Logging ElasticSearch.  The elements are used in the output elasticsearch configuration 30-elasticsearch.conf as follows (note: not following the abstract syntax):
 ```
 if index_prefix starts with "project." then {
   action( 
@@ -221,11 +221,11 @@ if index_prefix starts with "project." then {
   )
 }
 ```
-The order of the list in `rsyslog_elasticsearch` is important.  The first item is in the first if clause with the index_prefix value and the last item is in the else clause.  Elements in between will be placed with else if clause.
+The order of the list in the elasticsearch type logging_outputs is important.  The first item is in the first if clause with the index_prefix value and the last item is in the else clause.  Elements in between will be placed with else if clause.
 
-The variables ca_cert, cert and key in `rsyslog_elasticsearch` specify the paths where the CA certificate, certificate and key are located in the remote host.  The variables ca_cert_src, cert_src, and key_src are paths of them to be deployed to the remote host.
+The variables ca_cert, cert and key in the elasticsearch type logging_outputs specify the paths where the CA certificate, certificate and key are located in the remote host.  The variables ca_cert_src, cert_src, and key_src are paths of them to be deployed to the remote host.
 
-**7. vars.yaml to configure custom config files.**
+**7. vars.yml to configure custom config files.**
 
    To include existing config files in the new ansible deployment, add the paths to `rsyslog_custom_config_files` as follows.  The specified files are copied to /etc/rsyslog.d.
 ```
@@ -233,7 +233,7 @@ The variables ca_cert, cert and key in `rsyslog_elasticsearch` specify the paths
 rsyslog_custom_config_files: [ '/path/to/custom_A.conf', '/path/to/custom_B.conf' ]
 ```
 
-playbook.yaml
+playbook.yml
 -------------
 
 ```
@@ -244,10 +244,10 @@ playbook.yaml
       tags: [ 'role::rsyslog' ]
 ```
 
-Variables in vars.yaml
+Variables in vars.yml
 ======================
 
-- `rsyslog_enabled` : When 'true', rsyslog role will deploy specified configuration file set. Default to 'true'.
+- `logging_enabled` : When 'true', rsyslog role will deploy specified configuration file set. Default to 'true'.
 - `rsyslog_capabilities` : List of capabilities to configure.  [ 'network', 'remote-files', 'tls', 'gnutls', 'kernel-message', 'mark' ] are predefined.
    To receive remote input, you could add 'network' to `rsyslog_capabilities`, which will configure imudp as well as imptcp.
    To put logs from the remote input in the separate files, 'remote-files' is to be added to `rsyslog_capabilities`.
@@ -307,11 +307,11 @@ Viaq input_role sub-variables
 - `rsyslog_viaq_log_dir`: Viaq log directory.  Default to '/var/log/containers'.
 - `logging_mmk8s_token`: Path to token for kubernetes.  Default to "/etc/rsyslog.d/viaq/mmk8s.token"
 - `logging_mmk8s_ca_cert`: Path to CA cert for kubernetes.  Default to "/etc/rsyslog.d/viaq/mmk8s.ca.crt"
-- `use_omelasticsearch_cert` : If set to 'true', omelasticsearch is configured to use the certificates specified in `rsyslog_elasticsearch`.  Default to 'false'.
-- `use_local_omelasticsearch_cert` : If set to 'true', local files ca_cert_src, cert_src and key_src in `rsyslog_elasticsearch` will be deployed to the remote host.
+- `use_omelasticsearch_cert` : If set to 'true', omelasticsearch is configured to use the certificates specified in the elasticsearch type logging_outputs.  Default to 'false'.
+- `use_local_omelasticsearch_cert` : If set to 'true', local files ca_cert_src, cert_src and key_src in the elasticsearch type logging_outputs will be deployed to the remote host.
 
-- `rsyslog_elasticsearch`: A set of following variables to specify output elasticsearch configurations. It could be an array if multiple elasticsearch clusters to be configured.
-   If set to 'true', ca_cert_src, cert_src and key_src must be set in each `rsyslog_elasticsearch` element. Otherwise, the deployment fails. Default to 'false'.
+- For the elasticsearch type logging_outputs, a set of following variables are to specify output elasticsearch configurations. It could be an array if multiple elasticsearch clusters to be configured.
+   If set to 'true', ca_cert_src, cert_src and key_src must be set in each elasticsearch element. Otherwise, the deployment fails. Default to 'false'.
   - `name`: Name of the elasticsearch element.
   - `server_host`: Hostname elasticsearch is running on.
   - `server_port`: Port number elasticsearch is listening to.
@@ -331,15 +331,15 @@ The basic framework is based on debops.rsyslog and adjusted to the RHEL/Fedora s
 
 - templates have 2 template files, rsyslog.conf.j2 and rules.conf.j2.  The former is used to generate /etc/rsyslog.conf and the latter is for the other configuration files including mmnormalize rulebase and formatter which will be placed in ```{{ rsyslog_config_dir }}``` (default to /etc/rsyslog.d) and its subdirectories.
 
-- tasks/main.yaml contains the sceries of tasks to deploy specified set of configuration files.
+- tasks/main.yml contains the sceries of tasks to deploy specified set of configuration files.
 
 WARNING: Pre-existing rsyslog.conf and configuration files in /etc/rsyslog.d are moved to the backup directory /tmp/rsyslog.d-XXXXXX.  If the pre-existing files need to be merged with the newly deployed files, you need to do it manually.
 
--defaults/main.yaml defines variables to switch the deployment paths, variables to specify the locations to deploy and the configurations to be deployed.
+-defaults/main.yml defines variables to switch the deployment paths, variables to specify the locations to deploy and the configurations to be deployed.
 
 Describing how the configuration files are defined to be deployed using the viaq case.
 
-Viaq configuration files are defined in {{ __rsyslog_viaq_rules }} in /roles/input_roles/viaq/defaults/main.yaml.  The set is made from the generic modules{__rsyslog_conf_global_options, __rsyslog_conf_local_modules, __rsyslog_conf_common_defaults} and viaq specific configurations.
+Viaq configuration files are defined in {{ __rsyslog_viaq_rules }} in /roles/input_roles/viaq/defaults/main.yml.  The set is made from the generic modules{__rsyslog_conf_global_options, __rsyslog_conf_local_modules, __rsyslog_conf_common_defaults} and viaq specific configurations.
 
 If you are a role developer and planning to add a new default configuration to the role depo, create an rsyslog config item based on the following skelton and add the title {{ __rsyslog_conf_yourname }} to {{ __rsyslog_viaq_rules }}.
 ```
@@ -356,7 +356,7 @@ __rsyslog_conf_yourname:
           your rsyslog configuration
 
 ```
-Type is for adding prefix to the file name to manage the order of the configuration loaded.  In the viaq case, only .conf files set type 'modules', 'output', and 'template' are set.  By setting 'modules', for instance, prefix "10-" is added to the "name".  I.e., if the name is "mmk8s" and type is "modules", the file name "10-mmk8s.conf" is constructed.  'template' is mapped to '20-'; 'output' is mapped to '30-'.  The digits ensure the configuration files are loaded in the correct order.  The type and prefix mapping is defined in rsyslog_weight_map in ./roles/rsyslog/defaults/main.yaml.
+Type is for adding prefix to the file name to manage the order of the configuration loaded.  In the viaq case, only .conf files set type 'modules', 'output', and 'template' are set.  By setting 'modules', for instance, prefix "10-" is added to the "name".  I.e., if the name is "mmk8s" and type is "modules", the file name "10-mmk8s.conf" is constructed.  'template' is mapped to '20-'; 'output' is mapped to '30-'.  The digits ensure the configuration files are loaded in the correct order.  The type and prefix mapping is defined in rsyslog_weight_map in ./roles/rsyslog/defaults/main.yml.
 
 If the deploy destination is other than {{ rsyslog_config_dir }}, the path is to be set to path.
 

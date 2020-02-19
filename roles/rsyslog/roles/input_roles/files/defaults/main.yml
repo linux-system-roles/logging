@@ -67,7 +67,7 @@ __rsyslog_conf_imfile_inputs:
       - comment: 'Log messages from log files'
         options: |-
           # FIXME: Need to normalize a log before passing it to elasticsearch output
-          {% if rsyslog_elasticsearch is defined and rsyslog_elasticsearch %}
+          {% if __rsyslog_elasticsearch %}
 
           {% for element in rsyslog_logs_collections %}
           {% if element.name is defined and element.type == "files" %}

@@ -19,9 +19,9 @@ Table of Contents
    * [Deploy Default Logging Configuration Files](#deploy-default-logging-configuration-files)
    * [Deploy Configuration Files](#deploy-configuration-files)
       * [Inventory File](#inventory-file)
-      * [vars.yaml](#varsyaml)
-      * [Variables in vars.yaml](#variables-in-varsyaml)
-      * [playbook.yaml](#playbookyaml)
+      * [vars.yml](#varsyml)
+      * [Variables in vars.yml](#variables-in-varsyml)
+      * [playbook.yml](#playbookyml)
    * [New Projects Integration](#new-projects-integration)
       * [Planned Flows](#planned-flows)
    * [Testing](#testing)
@@ -44,11 +44,11 @@ Deploy Configuration Files
 
 Typical ansible-playbook command line includes:
 
- - vars.yaml - containing LSR/Logging variables, which are to be updated by the user.
+ - vars.yml - containing LSR/Logging variables, which are to be updated by the user.
    The contents of this file could be merged into the inventory file.
  - inventory_file - used to specify the hosts to deploy the configuration files
 
-``` ansible-playbook [-vvv] -e@vars.yaml --become --become-user root -i inventory_file playbook.yaml ```
+``` ansible-playbook [-vvv] -e@vars.yml --become --become-user root -i inventory_file playbook.yml ```
 
 Inventory File
 --------------
@@ -62,17 +62,17 @@ localhost ansible_user=YOUR_ANSIBLE_USER
 localhost ansible_user=YOUR_ANSIBLE_USER
 ```
 
-vars.yaml
+vars.yml
 ---------
 
-vars.yaml stores variables which are passed to ansible to control the tasks.
+vars.yml stores variables which are passed to ansible to control the tasks.
 
 Initial configuration will be supplied by default.
 User can supply further configuration to be used.
 
 Currently, the role supports 3 types of logs collections ([input_roles](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/roles/input_roles/)): `basics`, `ovirt`, and `viaq`.  And 3 types of log outputs ([output_roles](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/roles/output_roles/)): `elasticsearch`, `files`, and `forwards`.  To deploy configuration files with these input and output roles, first specify the output_role as `logging_outputs`, then input_role as `log_collections` in each `logging_outputs`.  Multiple input roles could be required based on the use cases.
 
-To make an effect with the following setting, vars.yaml has to have `logging_enabled: true`.  Unless logging_enabled is set to true, LSR/Logging does not deploy logging systems.
+To make an effect with the following setting, vars.yml has to have `logging_enabled: true`.  Unless logging_enabled is set to true, LSR/Logging does not deploy logging systems.
 
 **Note:** Current LSR/Logging supports rsyslog only.  In case other logging system is added to LSR/Logging in the future, it's supposed to implement the input and output roles to satisfy the logging_outputs and log_collections semantics.
 ```
@@ -89,7 +89,7 @@ logging_outputs:
      - name: <input_role_nameC>
 ```
 
-**vars.yaml examples:**
+**vars.yml examples:**
 
 0) Deploying default /etc/rsyslog.conf.
 ```
@@ -164,16 +164,16 @@ logging_outputs:
     custom_config_files: [ '/path/to/custom_A.conf', '/path/to/custom_B.conf' ]
 ```
 
-   See the [variables section](#variables-in-varsyaml) for each variable.
+   See the [variables section](#variables-in-varsyml) for each variable.
 
 **Note:** The order of the record with type `elasticsearch` is important. The last Elasticsearch output will get all the logs that were not cached by previous Elasticsearches instances.
 
 For more details, see also [roles/rsyslog/README.md](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/README.md).
 
-Variables in vars.yaml
+Variables in vars.yml
 ----------------------
 
-- `logging_collector`: The logs collector to use for the logs collection. Currently Rsyslog is the only supported logs collector. Defaults to `rsyslog`.
+- `logging_provider`: The logs collector to use for the logs collection. Currently Rsyslog is the only supported logs collector. Defaults to `rsyslog`.
 - `logging_enabled` : When 'true', logging role will deploy specified configuration file set. Default to 'true'.
 - `logging_purge_confs`: By default, the Rsyslog configuration files are applied on top of pre-existing configuration files. To purge local files prior to setting new ones, set logging_purge_confs variable to 'true', it will move all Rsyslog configuration files to a backup directory, `/tmp/rsyslog.d-XXXXXX/backup.tgz`, before deploying the new configuration files. Defaults to 'false'.
 - `logging_mmk8s_token`: Path to token for kubernetes.  Default to "/etc/rsyslog.d/viaq/mmk8s.token".
@@ -199,7 +199,7 @@ Variables in vars.yaml
       - `type`: Type of the output element.
       - `custom_config_files`: List of custom configuration files are deployed to /etc/rsyslog.d. [ '/path/to/custom_A.conf', '/path/to/custom_B.conf' ]. Default to none.
 
-playbook.yaml
+playbook.yml
 -------------
 
 ```
@@ -228,7 +228,7 @@ The `defaults` directory includes:
     set $.logs_collection = "project name";
 
 The `tasks` directory includes 2 tasks file:
-  - `main.yaml` - tasks for deploying the config files
+  - `main.yml` - tasks for deploying the config files
     This file is sets `__rsyslog_packages` and `__rsyslog_rules` and includes the task that deploys the files.
   - `cleanup.yml` - tasks that cleanup the files deployed for this project.
 
@@ -282,7 +282,7 @@ can test against a different image/tag like so:
 Additional Resources
 ====================
 
-Additional Rsyslog custom parameters can be added to the logging role vars.yaml file,
+Additional Rsyslog custom parameters can be added to the logging role vars.yml file,
 based on the parameters in the [Rsyslog role README file](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/roles/README.md).
 
 License

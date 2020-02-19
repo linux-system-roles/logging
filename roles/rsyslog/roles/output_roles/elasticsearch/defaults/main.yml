@@ -5,13 +5,6 @@
 # Available configuration set
 # ----------------------------
 
-rsyslog_elasticsearch:
-  - name: viaq-elasticsearch
-    server_host: logging-es
-    server_port: 9200
-    index_prefix: project.
-
-
 # Elasticsearch Rsyslog configuration rules
 # ---------------------------
 
@@ -101,7 +94,7 @@ __rsyslog_conf_es_elasticsearch:
               } else {
                   set $.index_name = exec_template("prefix_index_template");
               }
-          {% for res in rsyslog_elasticsearch %}
+          {% for res in __rsyslog_elasticsearch %}
           {% if loop.length == 1 %}
               action(
                   type="omelasticsearch"

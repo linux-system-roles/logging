@@ -7,9 +7,6 @@
 
 rsyslog_unprivileged: false
 
-rsyslog_elasticsearch: []
-
-
 # oVirt Rsyslog configuration rules
 # ---------------------------
 

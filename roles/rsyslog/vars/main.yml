@@ -1,3 +1,9 @@
+# __rsyslog_enabled
+#
+# Enable or disable ``rsyslog`` management.
+# Set to true if logging_provider=rsyslog and logging_enabled=true in logging/tasks/main.yml.
+__rsyslog_enabled: true
+
 # __rsyslog_base_packages
 #
 # List of default rpm packages to install.

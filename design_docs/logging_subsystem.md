@@ -69,7 +69,7 @@ linux-system-roles
 # How Logging role starts
 
 When ansible-playbook is executed with a playbook pointing to the logging role,
-it starts with tasks in logging/tasks/main.yaml.
+it starts with tasks in logging/tasks/main.yml.
 In the tasks, it evaluates the `logging_outputs`, `logs_collections` parameters in the loop
 to pass the dictionaries to each subsystem.
 If the `logging_output` is `files`, `rsyslog_files_actions` is evaluated.

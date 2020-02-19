@@ -2,11 +2,6 @@
 # General configuration
 # ---------------------
 
-# rsyslog_enabled
-#
-# Enable or disable ``rsyslog`` management.
-rsyslog_enabled: true
-
 # rsyslog_in_image
 #
 # true if the target host is a container and use rsyslog in the image.

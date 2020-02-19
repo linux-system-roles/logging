@@ -1,15 +1,14 @@
 ---
-# Set Rsyslog facts
+- name: Set Rsyslog facts then include rsyslog role
+  block:
 
-- block:
-
-    - name: Set rsyslog_enabled
+    - name: Set __rsyslog_enabled
       set_fact:
-        rsyslog_enabled: "{{ logging_enabled | d(true) }}"
+        __rsyslog_enabled: "{{ logging_enabled }}"
 
-    - name: Set rsyslog_elasticsearch
+    - name: Set __rsyslog_elasticsearch
       set_fact:
-        rsyslog_elasticsearch: "{{ rsyslog_elasticsearch | d([]) }} + {{ [ item.0 | combine( {'logs_collections_name': item.1.name} )] }}"
+        __rsyslog_elasticsearch: "{{ __rsyslog_elasticsearch }} + {{ [ item.0 | combine( {'logs_collections_name': item.1.name} )] }}"
       with_subelements:
         - "{{ logging_outputs }}"
         - logs_collections
@@ -92,21 +91,21 @@
 
     - name: Delete debug file
       file:
-        path: "{{ role_path }}/debug/main.yaml"
+        path: "{{ role_path }}/debug/main.yml"
         state: absent
       ignore_errors: true
       when: logging_debug | d(false)
 
     - name: Create rsyslog debug file
       lineinfile:
-        path: "{{ role_path }}/debug/main.yaml"
+        path: "{{ role_path }}/debug/main.yml"
         create: yes
         line: "#ANSIBLE MANAGED VARIABLES FILE"
       when: logging_debug | d(false)
 
     - name: Populate rsyslog debug file
       lineinfile:
-        path: "{{ role_path }}/debug/main.yaml"
+        path: "{{ role_path }}/debug/main.yml"
         create: yes
         line: "{{ item.key }}: {{ item.value | to_nice_json(indent=2) }}"
       with_dict: "{{ hostvars[inventory_hostname] }}"
@@ -114,8 +113,8 @@
         - item.key is match("rsyslog*")
         - logging_debug | d(false)
 
-    - name: include Rsyslog role
+    - name: Include Rsyslog role
       include_role:
         name: "{{ role_path }}/roles/rsyslog"
 
-  when: logging_collector | d('rsyslog') == 'rsyslog'
+  when: logging_provider == 'rsyslog'
