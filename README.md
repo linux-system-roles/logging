@@ -221,7 +221,7 @@ Each project adds a sub-role to [input_roles](https://github.com/linux-system-ro
 
 The sub-role usually includes `tasks` and `defaults` directories.
 The `defaults` directory includes:
-  - List of required packages that are **not** the base rsyslog_base_packages: ['rsyslog', 'libselinux-python']
+  - List of required packages that are **not** the base rsyslog_base_packages: ['rsyslog']
   - List of modules to load  like `imfile`, `imtcp`, etc.
   - Defines the formatting and the rulebases for parsing the logs.
   - It is required to set for all logs the project identfier for pipelining:

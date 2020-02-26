@@ -16,7 +16,7 @@ __rsyslog_files_input_packages: []
 rsyslog_input_log_path: "/var/log/containers/*.log"
 rsyslog_input_log_tag: "container"
 
-# rsyslog_files_input_rules
+# __rsyslog_files_input_rules
 #
 # List of YAML dictionaries, each dictionary should contain ``rsyslogd``
 # configuration in a special format. See :ref:`rsyslog_rules` for more
@@ -68,7 +68,7 @@ __rsyslog_conf_imfile_inputs:
       - comment: 'Log messages from log files'
         options: |-
           # FIXME: Need to normalize a log before passing it to elasticsearch output
-          {% if rsyslog_elasticsearch is defined and rsyslog_elasticsearch | length > 0 %}
+          {% if rsyslog_elasticsearch is defined and rsyslog_elasticsearch %}
 
           {% for element in rsyslog_logs_collections %}
           {% if element.name is defined and element.type == "files" %}

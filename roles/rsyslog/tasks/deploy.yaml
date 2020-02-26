@@ -4,7 +4,7 @@
     name: "{{ __rsyslog_packages }}"
     state: latest
   when:
-    - not rsyslog_in_image | default(false) | bool
+    - not rsyslog_in_image | bool
   notify: restart rsyslogd
 
 - name: Generate role configuration files in rsyslog.d and subdir

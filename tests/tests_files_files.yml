@@ -59,7 +59,7 @@
     - name: Grep output to messages line
       command: /bin/grep ".var.log.messages" {{ test_outputfiles_conf }}
       register: files_conf_messages
-      changed_when: files_conf_messages.stdout
+      changed_when: false
 
     - name: Set input files config path
       set_fact:
@@ -77,12 +77,12 @@
     - name: Cat input file
       command: /bin/cat {{ test_inputfiles_conf }}
       register: cat_file
-      changed_when: cat_file.stdout
+      changed_when: false
 
     - name: Grep input file
       command: /bin/grep 'inputdirectory' {{ test_inputfiles_conf }}
       register: files_conf_input_file
-      changed_when: files_conf_input_file.stdout
+      changed_when: false
 
     - name: Check the filter
       assert:

@@ -10,7 +10,7 @@ Each project adds a sub-role to ./logging/roles/rsyslog/roles/input_roles/.
 
 The sub-role usually includes `tasks` and `defaults` directories.
 The `defaults` directory includes:
-  - List of required packages that are **not** the base rsyslog_base_packages: ['rsyslog', 'libselinux-python']
+  - List of required packages that are **not** the base rsyslog_base_packages: ['rsyslog']
   - List of modules to load  like `imfile`, `imtcp`, etc.
   - Defines the formatting and the rulebases for parsing the logs.
   - It is required to set for all logs the project identfier for pipelining:
@@ -19,9 +19,9 @@ The `defaults` directory includes:
   - If `rsyslog_default` equals to "true", It is required to set for all logs you don't want to be processed by the default rules:
     set $.send_targets_only = "true";
 
-The `tasks` directory includes 2 tasks file:
+The `tasks` directory includes 2 task files:
   - `main.yaml` - tasks for deploying the config files
-    This file is sets `__rsyslog_packages` and `__rsyslog_rules` and includes the task that deploys the files.
+    This file sets `__rsyslog_packages` and `__rsyslog_rules` and includes the task that deploys the files.
   - `cleanup.yml` - tasks that cleanup the files deployed for this project.
 
 Examples can be found in the existing projects.
