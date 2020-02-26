@@ -59,7 +59,7 @@
     - name: Grep output to messages line
       command: /bin/grep ".var.log.messages" {{ __test_files_conf }}
       register: files_conf_messages
-      changed_when: not files_conf_messages.stdout
+      changed_when: false
 
     - name: Check the filter
       assert:
@@ -67,14 +67,13 @@
 
     - name: Run logger to generate a test log message
       command: /bin/logger -i -p local6.info -t testTag0 testMessage0000
-      register: logger_rc
-      changed_when: not logger_rc.stdout
+      changed_when: false
 
     - name: Check the test log message in /var/log/messages
       command: /bin/grep testMessage0000 /var/log/messages
       register: testMessage0000
-      changed_when: not testMessage0000.stdout
+      changed_when: false
 
     - name: Check if the test message is in /var/log/messages
       assert:
-        that: testMessage0000.stdout
+        that: testMessage0000.stdout | length > 0

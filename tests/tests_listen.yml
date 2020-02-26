@@ -43,7 +43,7 @@
         set -o pipefail
         lsof -i -nP | grep rsyslogd
       register: lsof_output0
-      changed_when: not lsof_output0.stdout
+      changed_when: false
 
     - debug:
         msg: "lsof returned {{ lsof_output0.stdout }}"
@@ -53,11 +53,11 @@
         set -o pipefail
         lsof -i -nP | grep rsyslogd | grep TCP | grep 514
       register: lsof_output1
-      changed_when: not lsof_output1.stdout
+      changed_when: false
 
     - name: Check port 514 is open for UDP
       shell: |
         set -o pipefail
         lsof -i -nP | grep rsyslogd | grep UDP | grep 514
       register: lsof_output2
-      changed_when: not lsof_output2.stdout
+      changed_when: false

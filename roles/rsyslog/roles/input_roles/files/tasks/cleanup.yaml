@@ -2,7 +2,7 @@
 # Deploy configuration files
 - name: Remove input files example config files from rsyslog.d
   vars:
-    __rsyslog_rules: "{{ rsyslog_files_input_rules }}"
+    __rsyslog_rules: "{{ __rsyslog_files_input_rules }}"
   include_role:
     name: "{{ role_path }}/../../../"
     tasks_from: cleanup.yaml

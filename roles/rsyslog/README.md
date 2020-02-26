@@ -264,6 +264,7 @@ Common sub-variables
 - `rsyslog_config_dir`: Directory to store configuration files.  Default to '/etc/rsyslog.d'.
 - `rsyslog_custom_config_files`: List of custom configuration files are deployed to /etc/rsyslog.d.  The format is an array which element is the full path to each custom configuration file.  Default to none.
 - `rsyslog_group`: Owner group of rsyslogd.  Default to 'syslog' if `rsyslog_unprivileged` is true.  Otherwise, 'root'.
+- `rsyslog_in_image`: Specifies if the target host is a container and use rsyslog in the image. Default to false.
 - `rsyslog_purge_original_conf`: By default, the Rsyslog configuration files are applied on top of pre-existing configuration files. To purge local files prior to setting new ones, set `rsyslog_purge_original_conf` variable to 'true', it will move all Rsyslog configuration files to a backup directory before deploying the new configuration files. Defaults to 'false'.
 - `rsyslog_system_log_dir`: System log directory.  Default to '/var/log'.
 - `rsyslog_unprivileged`: If set to true, you could specify non-root `rsyslog_user` and `rsyslog_group`.  If ansible_distribution is one of "CentOS", "RedHat", and "Fedora", default to true.  Otherwise, 'false'.
@@ -340,9 +341,9 @@ Describing how the configuration files are defined to be deployed using the viaq
 
 Viaq configuration files are defined in {{ __rsyslog_viaq_rules }} in /roles/input_roles/viaq/defaults/main.yaml.  The set is made from the generic modules{__rsyslog_conf_global_options, __rsyslog_conf_local_modules, __rsyslog_conf_common_defaults} and viaq specific configurations.
 
-To make a new configuration file installed in addition to the current {{ rsyslog_viaq_rules }}, create an rsyslog config item based on the following skelton and add the title {{ rsyslog_conf_yourname }} to {{ rsyslog_viaq_rules }}.
+If you are a role developer and planning to add a new default configuration to the role depo, create an rsyslog config item based on the following skelton and add the title {{ __rsyslog_conf_yourname }} to {{ __rsyslog_viaq_rules }}.
 ```
-rsyslog_conf_yourname:
+__rsyslog_conf_yourname:
 
   - name: some_name
     type: choose one of 'global' 'module' 'modules' 'template' 'templates' 'output' 'service' 'rule' 'rules' 'ruleset' 'input'

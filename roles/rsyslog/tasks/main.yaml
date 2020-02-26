@@ -1,6 +1,6 @@
 - name: Install/Update required packages
   package:
-    name: "{{ (__rsyslog_base_packages) + (__rsyslog_tls_packages if rsyslog_pki else []) + (rsyslog_extra_packages) }}"
+    name: "{{ (__rsyslog_base_packages) + (__rsyslog_tls_packages if rsyslog_pki else []) + (rsyslog_extra_packages | flatten) }}"
     state: latest
   when:
     - rsyslog_enabled | bool
@@ -29,7 +29,7 @@
       set_fact:
         __rsyslog_failed_validation: true
       when: __rsyslog_version is version('8.37.0-7.2', '<')
-  when: use_rsyslog_image | default(false) | bool
+  when: rsyslog_in_image | bool
 
 - block:
     - name: Create required system group
@@ -87,15 +87,22 @@
         remove: '{{ true if rsyslog_purge_original_conf | bool else false }}'
       changed_when: false
 
+    - name: Get directory stat
+      stat:
+        path: "{{ rsyslog_system_log_dir }}"
+      register: stat_rsyslog_system_log_dir
+
     - name: Update directory and file permissions
       shell: |
         [ ! -d {{ rsyslog_system_log_dir }} ] ||
         ( [ "$(stat -c '%G' {{ rsyslog_system_log_dir }})" = "{{ rsyslog_group }}" ] ||
         ( chown -v root:{{ rsyslog_group }} {{ rsyslog_system_log_dir }} ;
-        chmod -v 775 {{ rsyslog_system_log_dir }} ) )
+        chmod -v 0775 {{ rsyslog_system_log_dir }} ) )
       register: rsyslog_register_file_permissions
       when: rsyslog_unprivileged | bool
-      changed_when: rsyslog_register_file_permissions.stdout
+      changed_when:
+        - rsyslog_register_file_permissions.rc == 0
+        - stat_rsyslog_system_log_dir.stat.mode != "0755"
 
     - name: Generate main rsyslog configuration
       template:
@@ -210,11 +217,11 @@
         - not rsyslog_enabled | bool
         - not rsyslog_in_image | default(false) | bool
 
-  when: __rsyslog_failed_validation | d(false) == false
+  when: not __rsyslog_failed_validation | d(false)
 
 - name: Check rsyslog version
   debug:
     msg: "Rsyslog version must be >= 8.37.0-7.2"
   when:
-    - __rsyslog_failed_validation | d(false) == true
-    - use_rsyslog_image | default(false) | bool
+    - __rsyslog_failed_validation | d(false)
+    - rsyslog_in_image | default(false) | bool

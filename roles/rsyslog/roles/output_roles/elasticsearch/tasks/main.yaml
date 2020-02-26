@@ -9,7 +9,7 @@
         - '{{ rsyslog_elasticsearch }}'
       when:
         - item.ca_cert_src is defined
-        - item.ca_cert_src
+        - item.ca_cert_src | length > 0
 
     - name: Copy local Elasticsearch certs to /etc/rsyslog.d directory in Rsyslog
       copy:
@@ -19,7 +19,7 @@
         - '{{ rsyslog_elasticsearch }}'
       when:
         - item.cert_src is defined
-        - item.cert_src
+        - item.cert_src | length > 0
 
     - name: Copy local Elasticsearch keys to /etc/rsyslog.d directory in Rsyslog
       copy:
@@ -29,7 +29,7 @@
         - '{{ rsyslog_elasticsearch }}'
       when:
         - item.key_src is defined
-        - item.key_src
+        - item.key_src | length > 0
 
     - name: Update ca_cert path to /etc/rsyslog.d directory in Rsyslog
       set_fact:
@@ -41,7 +41,7 @@
         - '{{ rsyslog_elasticsearch }}'
       when:
         - item.ca_cert_src is defined
-        - item.ca_cert_src
+        - item.ca_cert_src | length > 0
       register: result
 
     - name: Set updated rsyslog_elasticsearch
