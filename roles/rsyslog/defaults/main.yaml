@@ -35,7 +35,8 @@ rsyslog_work_dir: '/var/lib/rsyslog'
 
 # rsyslog_capabilities
 #
-# List of different capabilities to configure. See :ref:`rsyslog_capabilities`
+# List of different capabilities to configure.
+# Example:
 # rsyslog_capabilities: [ 'network', 'remote-files', 'tls' ]
 rsyslog_capabilities: []
 
@@ -285,37 +286,6 @@ rsyslog_weight_map:
   'rulesets': '50'
   'input': '90'
   'inputs': '90'
-
-# rsyslog_rules
-#
-# List of YAML dictionaries, each dictionary should contain ``rsyslogd``
-# configuration in a special format. See :ref:`rsyslog_rules` for more
-# details. This list should be used for configuration of all hosts in the
-# inventory.
-rsyslog_rules: []
-
-# rsyslog_group_rules
-#
-# List of YAML dictionaries, each dictionary should contain ``rsyslogd``
-# configuration in a special format. See :ref:`rsyslog_rules` for more
-# details. This list should be used for configuration of a group of hosts in
-# the inventory.
-rsyslog_group_rules: []
-
-# rsyslog_host_rules
-#
-# List of YAML dictionaries, each dictionary should contain ``rsyslogd``
-# configuration in a special format. See :ref:`rsyslog_rules` for more
-# details. This list should be used for configuration of specific hosts in the
-# inventory.
-rsyslog_host_rules: []
-
-# rsyslog_dependent_rules
-#
-# List of YAML dictionaries, each dictionary should contain ``rsyslogd``
-# configuration in a special format. See :ref:`rsyslog_rules` for more
-# details. This list should be used for configuration by other Ansible roles.
-rsyslog_dependent_rules: []
 
 # __rsyslog_.*_rules
 #

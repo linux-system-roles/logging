@@ -18,9 +18,8 @@ rsyslog_input_log_tag: "container"
 
 # __rsyslog_files_input_rules
 #
-# List of YAML dictionaries, each dictionary should contain ``rsyslogd``
-# configuration in a special format. See :ref:`rsyslog_rules` for more
-# details. This list specifies imfile ``rsyslogd`` example configuration.
+# List of YAML dictionaries, each dictionary should contain ``rsyslogd`` configuration
+# in a special format. This list specifies ``rsyslogd`` imfile configuration.
 __rsyslog_files_input_rules:
   - '{{ __rsyslog_conf_imfile_modules }}'
   - '{{ __rsyslog_conf_imfile_rulesets }}'

@@ -2,10 +2,6 @@
 # oVirt configuration
 # ---------------------
 
-# oVirt rpm packages
-# adding rsyslog_logging_packages
-# ------------------
-
 # Available configuration set
 # ----------------------------
 
