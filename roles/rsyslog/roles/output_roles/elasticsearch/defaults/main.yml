@@ -5,12 +5,7 @@
 # Available configuration set
 # ----------------------------
 
-rsyslog_elasticsearch:
-  - name: viaq-elasticsearch
-    server_host: logging-es
-    server_port: 9200
-    index_prefix: project.
-
+rsyslog_output_elasticsearch: []
 
 # Elasticsearch Rsyslog configuration rules
 # ---------------------------
@@ -36,9 +31,8 @@ __rsyslog_conf_es_main_modules:
 
 __rsyslog_conf_es_elasticsearch:
 
-  - name: 'elasticsearch'
+  - name: 'output-elasticsearch'
     type: 'output'
-    path: '{{ rsyslog_config_dir }}'
     sections:
 
       - options: |-
@@ -70,7 +64,8 @@ __rsyslog_conf_es_elasticsearch:
               action(name="es_bulk_errors" type="omfile" template="es_template_nl" file="{{ rsyslog_work_dir }}/es-bulk-errors.log")
           }
 
-          ruleset(name="try_es") {
+          {% for res in rsyslog_output_elasticsearch %}
+          ruleset(name="{{ res.name }}") {
               if (strlen($.omes) > 0) and (strlen($.omes!status) > 0) then {
                   # retry case
                   if ($.omes!status == 200) or ($.omes!status == 201) or (($.omes!status == 409) and ($.omes!writeoperation == "create")) then {
@@ -95,121 +90,45 @@ __rsyslog_conf_es_elasticsearch:
                   # NOTE: depends on rsyslog being compiled with --enable-uuid
                   set $.es_msg_id = $uuid;
               }
-              if (strlen($.omes) > 0) and ( strlen($.omes!_index) > 0) then {
+              if (strlen($.omes) > 0) and (strlen($.omes!_index) > 0) then {
                   # retry
                   set $.index_name = $.omes!_index;
               } else {
                   set $.index_name = exec_template("prefix_index_template");
               }
-          {% for res in rsyslog_elasticsearch %}
-          {% if loop.length == 1 %}
-              action(
-                  type="omelasticsearch"
-                  name="{{ res.name | default('viaq-elasticsearch') }}"
-                  server="{{ res.server_host | default('logging-es') }}"
-                  serverport="{{ res.server_port | default(9200) | int }}"
-                  template="{{ res.template | default("es_template") }}"
-                  searchIndex="{{ res.searchIndex | default("index_template") }}"
-                  dynSearchIndex="{{ res.dynSearchIndex | default("on") }}"
-                  searchType="{{ res.searchType | default("com.redhat.viaq.common") }}"
-                  bulkmode="{{ res.bulkmode | default("on") }}"
-                  writeoperation="{{ res.writeoperation | default("create") }}"
-                  bulkid="{{ res.bulkid | default("id_template") }}"
-                  dynbulkid="{{ res.dynbulkid | default("on") }}"
-                  retryfailures="{{ res.retryfailures | default("on") }}"
-                  allowUnsignedCerts="{{ res.allowUnsignedCerts | default("off") }}"
-                  retryruleset="{{ res.retryruleset | default("try_es") }}"
-                  usehttps="{{ res.usehttps | default("on") }}"
-          {% if use_omelasticsearch_cert | default(true) %}
-                  tls.cacert="{{ res.ca_cert | default('/etc/rsyslog.d/es-ca.crt') }}"
-                  tls.mycert="{{ res.cert | default('/etc/rsyslog.d/es-cert.pem') }}"
-                  tls.myprivkey="{{ res.key | default('/etc/rsyslog.d/es-key.pem') }}"
-          {% endif %}
-              )
+              if ($.input_type == "{{ res.input_type | d('ovirt') }}") and ($.index_prefix startswith "{{ res.index_prefix }}") then {
+                  action(
+                      type="omelasticsearch"
+                      name="{{ res.name | default('viaq-elasticsearch') }}"
+                      server="{{ res.server_host | d('logging-es') }}"
+                      serverport="{{ res.server_port | d(9200) | int }}"
+                      template="{{ res.template | d("es_template") }}"
+                      searchIndex="{{ res.searchIndex | d("index_template") }}"
+                      dynSearchIndex="{{ res.dynSearchIndex | d("on") }}"
+                      searchType="{{ res.searchType | d("com.redhat.viaq.common") }}"
+                      bulkmode="{{ res.bulkmode | d("on") }}"
+                      writeoperation="{{ res.writeoperation | d("create") }}"
+                      bulkid="{{ res.bulkid | d("id_template") }}"
+                      dynbulkid="{{ res.dynbulkid | d('on') }}"
+                      allowUnsignedCerts="{{ res.allowUnsignedCerts | d("off") }}"
+          {% if not res.retryfailures | d(true) %}
+          {%   if res.retryruleset | d() | length > 0 %}
+                      retryfailures="on"
+                      retryruleset="{{ res.retryruleset }}"
+          {%   else %}
+                      retryfailures="on"
+                      retryruleset="{{ res.name }}"
+          {%   endif %}
           {% else %}
-          {% if loop.first %}
-              if ( $.logs_collection == "{{ res.logs_collections_name }}" ) and ($.index_prefix startswith "{{ res.index_prefix }}") then {
-                action(
-                    type="omelasticsearch"
-                    name="{{ res.name | default('viaq-elasticsearch') }}"
-                    server="{{ res.server_host | default('logging-es') }}"
-                    serverport="{{ res.server_port | default(9200) | int }}"
-                    template="{{ res.template | default("es_template") }}"
-                    searchIndex="{{ res.searchIndex | default("index_template") }}"
-                    dynSearchIndex="{{ res.dynSearchIndex | default("on") }}"
-                    searchType="{{ res.searchType | default("com.redhat.viaq.common") }}"
-                    bulkmode="{{ res.bulkmode | default("on") }}"
-                    writeoperation="{{ res.writeoperation | default("create") }}"
-                    bulkid="{{ res.bulkid | default("id_template") }}"
-                    dynbulkid="{{ res.dynbulkid | default("on") }}"
-                    retryfailures="{{ res.retryfailures | default("on") }}"
-                    allowUnsignedCerts="{{ res.allowUnsignedCerts | default("off") }}"
-                    retryruleset="{{ res.retryruleset | default("try_es") }}"
-                    usehttps="{{ res.usehttps | default("on") }}"
+                      retryfailures="off"
+          {% endif %}
+                      usehttps="{{ res.usehttps | default("on") }}"
           {% if use_omelasticsearch_cert | default(true) %}
-                    tls.cacert="{{ res.ca_cert | default('/etc/rsyslog.d/es-ca.crt') }}"
-                    tls.mycert="{{ res.cert | default('/etc/rsyslog.d/es-cert.pem') }}"
-                    tls.myprivkey="{{ res.key | default('/etc/rsyslog.d/es-key.pem') }}"
+                      tls.cacert="{{ res.ca_cert | default('/etc/rsyslog.d/es-ca.crt') }}"
+                      tls.mycert="{{ res.cert | default('/etc/rsyslog.d/es-cert.pem') }}"
+                      tls.myprivkey="{{ res.key | default('/etc/rsyslog.d/es-key.pem') }}"
           {% endif %}
-                )
-          {% elif loop.last %}
-              else {
-                action(
-                    type="omelasticsearch"
-                    name="{{ res.name | default('viaq-elasticsearch') }}"
-                    server="{{ res.server_host | default('logging-es') }}"
-                    serverport="{{ res.server_port | default(9200) | int }}"
-                    template="{{ res.template | default("es_template") }}"
-                    searchIndex="{{ res.searchIndex | default("index_template") }}"
-                    dynSearchIndex="{{ res.dynSearchIndex | default("on") }}"
-                    searchType="{{ res.searchType | default("com.redhat.viaq.common") }}"
-                    bulkmode="{{ res.bulkmode | default("on") }}"
-                    writeoperation="{{ res.writeoperation | default("create") }}"
-                    bulkid="{{ res.bulkid | default("id_template") }}"
-                    dynbulkid="{{ res.dynbulkid | default("on") }}"
-                    retryfailures="{{ res.retryfailures | default("on") }}"
-                    allowUnsignedCerts="{{ res.allowUnsignedCerts | default("off") }}"
-          {% if res.retryfailures | default("on") == "on" %}
-                    retryruleset="{{ res.retryruleset | default("try_es") }}"
-          {% endif %}
-                    usehttps="{{ res.usehttps | default("on") }}"
-          {% if use_omelasticsearch_cert | default(true) %}
-                    tls.cacert="{{ res.ca_cert | default('/etc/rsyslog.d/es-ca.crt') }}"
-                    tls.mycert="{{ res.cert | default('/etc/rsyslog.d/es-cert.pem') }}"
-                    tls.myprivkey="{{ res.key | default('/etc/rsyslog.d/es-key.pem') }}"
-          {% endif %}
-                )
-          {% else %}
-              else if ( $.logs_collection == "{{ res.logs_collections_name }}" ) and ($.index_prefix startswith "{{ res.index_prefix }}") then {
-                action(
-                    type="omelasticsearch"
-                    name="{{ res.name | default('viaq-elasticsearch') }}"
-                    server="{{ res.server_host | default('logging-es') }}"
-                    serverport="{{ res.server_port | default(9200) | int }}"
-                    template="{{ res.template | default("es_template") }}"
-                    searchIndex="{{ res.searchIndex | default("index_template") }}"
-                    dynSearchIndex="{{ res.dynSearchIndex | default("on") }}"
-                    searchType="{{ res.searchType | default("com.redhat.viaq.common") }}"
-                    bulkmode="{{ res.bulkmode | default("on") }}"
-                    writeoperation="{{ res.writeoperation | default("create") }}"
-                    bulkid="{{ res.bulkid | default("id_template") }}"
-                    dynbulkid="{{ res.dynbulkid | default("on") }}"
-                    retryfailures="{{ res.retryfailures | default("on") }}"
-                    allowUnsignedCerts="{{ res.allowUnsignedCerts | default("off") }}"
-          {% if res.retryfailures | default("on") == "on" %}
-                    retryruleset="{{ res.retryruleset | default("try_es") }}"
-          {% endif %}
-                    usehttps="{{ res.usehttps | default("on") }}"
-          {% if use_omelasticsearch_cert | default(true) %}
-                    tls.cacert="{{ res.ca_cert | default('/etc/rsyslog.d/es-ca.crt') }}"
-                    tls.mycert="{{ res.cert | default('/etc/rsyslog.d/es-cert.pem') }}"
-                    tls.myprivkey="{{ res.key | default('/etc/rsyslog.d/es-key.pem') }}"
-          {% endif %}
-                )
-          {% endif %}
+                  )
               }
-          {% endif %}
-          {% endfor %}
           }
-
-          call try_es
+          {% endfor %}

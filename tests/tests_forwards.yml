@@ -1,8 +1,8 @@
-- name: Deploy rsyslog conf on the target host as a client
+- name: Ensure that the role runs from imjournal inputs to the multiple omfwd output with noop configs
   hosts: all
   become: true
   vars:
-    __test_forward_conf: /etc/rsyslog.d/30-output-forwards.system
+    __test_forward_conf: /etc/rsyslog.d/30-output-forwards.conf
 
   tasks:
     - name: Deploy rsyslog config on the target host
@@ -11,43 +11,57 @@
         logging_purge_confs: true
         rsyslog_default: false
         logging_outputs:
-          - name: output-forwards
+          - name: forwards-severity_and_facility
             type: forwards
-            rsyslog_forwards_actions:
-              - name: severity_and_facility
-                facility: local1
-                severity: info
-                protocol: tcp
-                target: host.domain
-                port: 1514
-              - name: facility_only
-                facility: local2
-                protocol: tcp
-                target: host.domain
-                port: 2514
-              - name: severity_only
-                severity: err
-                protocol: tcp
-                target: host.domain
-                port: 3514
-              - name: no_severity_and_facility
-                protocol: tcp
-                target: host.domain
-                port: 4514
-              - name: no_severity_and_facility_protocol
-                target: host.domain
-                port: 5514
-              - name: no_severity_and_facility_udp
-                protocol: udp
-                target: host.domain
-                port: 6514
-              - name: no_severity_and_facility_protocol_port
-                target: host.domain
-              - name: no_severity_and_facility_protocol_port_target
-              - target: no_name.localdomain
-            logs_collections:
-              - name: basic_input
-                type: basics
+            facility: local1
+            severity: info
+            protocol: tcp
+            target: host.domain
+            port: 1514
+          - name: forwards-facility_only
+            type: forwards
+            facility: local2
+            protocol: tcp
+            target: host.domain
+            port: 2514
+          - name: forwards-severity_only
+            type: forwards
+            severity: err
+            protocol: tcp
+            target: host.domain
+            port: 3514
+          - name: forwards-no_severity_and_facility
+            type: forwards
+            protocol: tcp
+            target: host.domain
+            port: 4514
+          - name: forwards-no_severity_and_facility_protocol
+            type: forwards
+            target: host.domain
+            port: 5514
+          - name: forwards-no_severity_and_facility_udp
+            type: forwards
+            protocol: udp
+            target: host.domain
+            port: 6514
+          - name: forwards-no_severity_and_facility_protocol_port
+            type: forwards
+            target: host.domain
+          - name: forwards-no_severity_and_facility_protocol_port_target
+            type: forwards
+          - target: no_name.localdomain
+            type: forwards
+        logging_inputs:
+          - name: basic_input
+            type: basics
+        logging_flows:
+          - name: flows0
+            inputs: [ basic_input ]
+            outputs: [forwards-severity_and_facility, forwards-facility_only,
+            forwards-severity_only, forwards-no_severity_and_facility,
+            forwards-no_severity_and_facility_protocol, forwards-no_severity_and_facility_udp,
+            forwards-no_severity_and_facility_protocol_port,
+            forwards-no_severity_and_facility_protocol_port_target]
       include_role:
         name: linux-system-roles.logging
 
@@ -61,76 +75,76 @@
         that: stat_output_forwards_system.stat.exists
 
     - name: Grep severity_and_facility
-      command: /bin/grep "\<severity_and_facility\>" {{ __test_forward_conf }}
+      command: /bin/grep "\<action.*forwards-severity_and_facility\>" {{ __test_forward_conf }}
       register: severity_and_facility
       changed_when: false
 
     - name: Check severity_and_facility
       assert:
-        that: severity_and_facility.stdout is match("local1\.info action.name=.severity_and_facility.* Target=.host.domain. Port=.1514. Protocol=.tcp.*")
+        that: severity_and_facility.stdout is match(" *local1\.info action.name=.forwards-severity_and_facility.* Target=.host.domain. Port=.1514. Protocol=.tcp.*")
 
     - name: Grep facility_only
-      command: /bin/grep "\<facility_only\>" {{ __test_forward_conf }}
+      command: /bin/grep "\<action.*forwards-facility_only\>" {{ __test_forward_conf }}
       register: facility_only
       changed_when: false
 
     - name: Check facility_only
       assert:
-        that: facility_only.stdout is match("local2\.\* action.name=.facility_only.* Target=.host.domain. Port=.2514. Protocol=.tcp.")
+        that: facility_only.stdout is match(" *local2\.\* action.name=.forwards-facility_only.* Target=.host.domain. Port=.2514. Protocol=.tcp.")
 
     - name: Grep severity_only
-      command: /bin/grep "\<severity_only\>" {{ __test_forward_conf }}
+      command: /bin/grep "\<action.*forwards-severity_only\>" {{ __test_forward_conf }}
       register: severity_only
       changed_when: false
 
     - name: Check severity_only
       assert:
-        that: severity_only.stdout is match("\*\.err action.name=.severity_only.* Target=.host.domain. Port=.3514. Protocol=.tcp.*")
+        that: severity_only.stdout is match(" *\*\.err action.name=.forwards-severity_only.* Target=.host.domain. Port=.3514. Protocol=.tcp.*")
 
     - name: Grep no_severity_and_facility
-      command: /bin/grep "\<no_severity_and_facility\>" {{ __test_forward_conf }}
+      command: /bin/grep "\<action.*forwards-no_severity_and_facility\>" {{ __test_forward_conf }}
       register: no_severity_and_facility
       changed_when: false
 
     - name: Check no_severity_and_facility
       assert:
-        that: no_severity_and_facility.stdout is match("\*\.\* action.name=.no_severity_and_facility.* Target=.host.domain. Port=.4514. Protocol=.tcp.")
+        that: no_severity_and_facility.stdout is match(" *\*\.\* action.name=.forwards-no_severity_and_facility.* Target=.host.domain. Port=.4514. Protocol=.tcp.")
 
     - name: Grep no_severity_and_facility_protocol
-      command: /bin/grep "\<no_severity_and_facility_protocol\>" {{ __test_forward_conf }}
+      command: /bin/grep "\<action.*forwards-no_severity_and_facility_protocol\>" {{ __test_forward_conf }}
       register: no_severity_and_facility_protocol
       changed_when: false
 
     - name: Check no_severity_and_facility_protocol
       assert:
-        that: no_severity_and_facility_protocol.stdout is match("\*\.\* action.name=.no_severity_and_facility_protocol.* Target=.host.domain. Port=.5514. Protocol=.tcp.")
+        that: no_severity_and_facility_protocol.stdout is match(" *\*\.\* action.name=.forwards-no_severity_and_facility_protocol.* Target=.host.domain. Port=.5514. Protocol=.tcp.")
 
     - name: Grep no_severity_and_facility_udp
-      command: /bin/grep "\<no_severity_and_facility_udp\>" {{ __test_forward_conf }}
+      command: /bin/grep "\<action.*forwards-no_severity_and_facility_udp\>" {{ __test_forward_conf }}
       register: no_severity_and_facility_udp
       changed_when: false
 
     - name: Check no_severity_and_facility_udp
       assert:
-        that: no_severity_and_facility_udp.stdout is match("\*\.\* action.name=.no_severity_and_facility_udp.* Target=.host.domain. Port=.6514. Protocol=.udp.")
+        that: no_severity_and_facility_udp.stdout is match(" *\*\.\* action.name=.forwards-no_severity_and_facility_udp.* Target=.host.domain. Port=.6514. Protocol=.udp.")
 
     - name: Grep no_severity_and_facility_protocol_port
-      command: /bin/grep "\<no_severity_and_facility_protocol_port\>" {{ __test_forward_conf }}
+      command: /bin/grep "\<action.*forwards-no_severity_and_facility_protocol_port\>" {{ __test_forward_conf }}
       register: no_severity_and_facility_protocol_port
       changed_when: false
 
     - name: Check no_severity_and_facility_protocol_port
       assert:
-        that: no_severity_and_facility_protocol_port.stdout is match("\*\.\* action.name=.no_severity_and_facility_protocol_port.* Target=.host.domain. Port=.514. Protocol=.tcp.")
+        that: no_severity_and_facility_protocol_port.stdout is match(" *\*\.\* action.name=.forwards-no_severity_and_facility_protocol_port.* Target=.host.domain. Port=.514. Protocol=.tcp.")
 
     - name: Grep no_severity_and_facility_protocol_port_target
-      command: /bin/grep "\<no_severity_and_facility_protocol_port_target\>" {{ __test_forward_conf }}
+      command: /bin/grep "\<action.*forwards-no_severity_and_facility_protocol_port_target\>" {{ __test_forward_conf }}
       register: result
       changed_when: false
       failed_when: result.rc != 1
 
     - name: Grep no_name
-      command: /bin/grep "\<no_name\.localdomain\>" {{ __test_forward_conf }}
+      command: /bin/grep "\<action.*forwards-no_name\.localdomain\>" {{ __test_forward_conf }}
       register: result
       changed_when: false
       failed_when: result.rc != 1

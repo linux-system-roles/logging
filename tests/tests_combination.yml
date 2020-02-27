@@ -1,10 +1,18 @@
-- name: Ensure that the role runs with parameters from imjournal input to two omfiles and two  omfwd outputs
+- name: Ensure that the role runs with complicated flows - M x N combinations
   hosts: all
   become: true
   vars:
     __test_files_conf: /etc/rsyslog.d/30-output-files.conf
+    __test_inputfiles_dir: /var/log/inputdirectory
+    __test_tag: files_input
 
   tasks:
+    - name: Generate an input log dir {{ __test_inputfiles_dir }}
+      file:
+        path: "{{ __test_inputfiles_dir }}"
+        state: directory
+        mode: 0700
+
     - name: deploy config to output into local files
       vars:
         logging_enabled: true
@@ -33,12 +41,19 @@
             target: host.domain
             port: 2514
         logging_inputs:
-          - name: basic_input0
+          - name: basic_input
             type: basics
+            rsyslog_imjournal_ratelimit_burst: 33333
+          - name: "{{ __test_tag }}"
+            type: files
+            rsyslog_input_log_path: "{{ __test_inputfiles_dir }}/*.log"
         logging_flows:
           - name: flow_0
-            inputs: [basic_input0]
+            inputs: [basic_input]
             outputs: [files_test0, files_test1, forwards_severity_and_facility, forwards_facility_only]
+          - name: flow_1
+            inputs: ["{{ __test_tag }}"]
+            outputs: [files_test0, files_test1]
       include_role:
         name: linux-system-roles.logging
 
@@ -55,7 +70,7 @@
 
     - name: Check file counts in rsyslog.d
       assert:
-        that: rsyslog_d_file_count.matched >= 8
+        that: rsyslog_d_file_count.matched >= 9
 
     - name: Get the files config stat
       stat:
@@ -102,10 +117,53 @@
         that: stat_output_forwards_system.stat.exists
 
     - name: Grep severity_and_facility
-      command: /bin/grep "action.*forwards_severity_and_facility\>" {{ test_forward_conf }}
+      command: /bin/grep "\<action.*forwards_severity_and_facility\>" {{ test_forward_conf }}
       register: severity_and_facility
       changed_when: false
 
     - name: Check severity_and_facility
       assert:
-        that: severity_and_facility.stdout is match(" *local1\.info action.name=.forwards_severity_and_facility.* Target=.host.domain. Port=.1514. Protocol=.tcp.*")
+        that: severity_and_facility.stdout is match(" *local1\.info action.name=.forwards_severity_and_facility.* type=.omfwd. Target=.host.domain. Port=.1514. Protocol=.tcp.*")
+
+    - name: Set input files config path
+      set_fact:
+        __test_inputfiles_conf: "/etc/rsyslog.d/90-imfile-input.conf"
+
+    - name: Get the files config stat
+      stat:
+        path: "{{ __test_inputfiles_conf }}"
+      register: stat_input_files_conf
+
+    - name: Check if the input files config exists
+      assert:
+        that: stat_input_files_conf.stat.exists
+
+    - name: Grep input file
+      command: /bin/grep 'inputdirectory' {{ __test_inputfiles_conf }}
+      register: files_conf_input_file
+      changed_when: false
+
+    - name: Check the filter
+      assert:
+        that: files_conf_input_file.stdout is match(" *input\(type=\"imfile\" file=\"\/var\/log\/inputdirectory\/\*\.log\" tag=\"{{ __test_tag }}\"")
+
+    - name: Create a test log file in {{ __test_inputfiles_dir }}
+      copy:
+        dest: "{{ __test_inputfiles_dir }}/test.log"
+        content: "# log file for rsyslog testing\n"
+      changed_when: false
+
+    - name: Add a fake log message to {{ __test_inputfiles_dir }}/test.log
+      lineinfile:
+        path: "{{ __test_inputfiles_dir }}/test.log"
+        line: "<167>Mar 20 01:00:00 11.22.33.44 tag msgnum:00000000:26:abcdefghijklmnopqrstuvwxyz"
+      changed_when: false
+
+    - name: Check the fake test log message in /var/log/messages
+      command: /bin/grep "{{ __test_tag }} .*abcdefghijklmnopqrstuvwxyz" /var/log/messages
+      register: abc
+      changed_when: false
+
+    - name: Check if the fake test message is in /var/log/messages
+      assert:
+        that: abc.stdout | length > 0

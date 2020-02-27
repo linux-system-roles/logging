@@ -8,5 +8,11 @@ logging_enabled: true
 # List of output roles
 logging_outputs: []
 
+# List of input roles
+logging_inputs: []
+
+# List of flows defining the input and the output relationships
+logging_flows: []
+
 # If logging_purge_confs is set to true, existing config files will be purged.
 logging_purge_confs: false

@@ -1,20 +1,17 @@
-- name: Ensure that the role runs with parameters to output into local files
+- name: Ensure that the role runs with parameters with the simplest configuration (implicit files output)
   hosts: all
   become: true
   vars:
-    __test_files_conf: /etc/rsyslog.d/30-output-files.system
+    __test_files_conf: /etc/rsyslog.d/30-output-files.conf
 
   tasks:
     - name: deploy config to output into local files
       vars:
         logging_enabled: true
         rsyslog_default: false
-        logging_outputs:
-          - name: files-output
-            type: files
-            logs_collections:
-              - name: basic_input
-                type: basics
+        logging_inputs:
+          - name: basic_input
+            type: basics
       include_role:
         name: linux-system-roles.logging
 
@@ -31,14 +28,9 @@
 
     - name: Check file counts in rsyslog.d
       assert:
-        that: rsyslog_d_file_count.matched >= 9
+        that: rsyslog_d_file_count.matched >= 7
 
     - name: Get the files config stat
-      stat:
-        path: "{{ __test_files_conf }}"
-      register: stat_output_files_system
-
-    - name: Get the forwarding config stat
       stat:
         path: "{{ __test_files_conf }}"
       register: stat_output_files_system
@@ -54,7 +46,7 @@
 
     - name: Check the filter
       assert:
-        that: files_conf_messages.stdout is match("\*.info;mail.none;authpriv.none;cron.none.*messages")
+        that: files_conf_messages.stdout is match(" *\*.info;mail.none;authpriv.none;cron.none.*messages")
 
     - name: Run logger to generate a test log message
       command: /bin/logger -i -p local6.info -t testTag0 testMessage0000

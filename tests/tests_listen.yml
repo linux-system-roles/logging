@@ -9,12 +9,15 @@
         logging_purge_confs: true
         rsyslog_capabilities: [ 'network', 'remote-files' ]
         logging_outputs:
-          - name: files-output
+          - name: files_output
             type: files
-            logs_collections:
-              - name: basic_input
-                type: basics
-
+        logging_inputs:
+          - name: basic_input
+            type: basics
+        logging_flows:
+          - name: flows0
+            inputs: [ basic_input ]
+            outputs: [ files_output ]
       include_role:
         name: linux-system-roles.logging
 

@@ -5,9 +5,6 @@
 # Available configuration set
 # ----------------------------
 
-rsyslog_elasticsearch: []
-
-
 # oVirt Rsyslog configuration rules
 # ---------------------------
 
@@ -65,7 +62,6 @@ rsyslog_conf_ovirt_formatting:
 
   - name: 'ovirt_formatting'
     type: 'template'
-    path: '{{ rsyslog_config_dir }}'
     sections:
 
       - options: |-
@@ -95,7 +91,7 @@ rsyslog_conf_ovirt_formatting:
           {% else %}
               set $.index_prefix = "{{ rsyslog_elasticsearch_index_prefix_metrics | d("project.ovirt-metrics") }}" & "-" & "{{ ovirt_env_name | d("engine") }}" & ".";
           {% endif %}
-              set $.logs_collection = "ovirt";
+              set $.input_type = "ovirt";
               set $.send_targets_only = "true";
           }
 
@@ -133,7 +129,7 @@ rsyslog_conf_ovirt_formatting:
               set $!ovirt!cluster_name = '{{ ovirt_vds_cluster_name | d("") }}';
               set $!ipaddr4 = '{{ ansible_default_ipv4.address }}';
               set $!ovirt!engine_fqdn = '{{ ovirt_engine_fqdn | d("") }}';
-              set $.logs_collection = "ovirt";
+              set $.input_type = "ovirt";
               set $!ovirt!class = $.ovirt!class;
               set $!ovirt!thread = $.ovirt!thread;
               set $.send_targets_only = "true";
@@ -151,7 +147,6 @@ rsyslog_rulebase_ovirt_engine:
   - name: 'ovirt_engine'
     filename: 'ovirt_engine.rulebase'
     nocomment: true
-    path: '{{ rsyslog_config_dir }}'
     sections:
       - options: |-
           version=2
@@ -162,7 +157,6 @@ rsyslog_rulebase_ovirt_vdsm:
   - name: 'ovirt_vdsm'
     filename: 'ovirt_vdsm.rulebase'
     nocomment: true
-    path: '{{ rsyslog_config_dir }}'
     sections:
       - options: |-
           version=2
@@ -173,7 +167,6 @@ rsyslog_rulebase_ovirt_parse_json:
   - name: 'parse_json'
     filename: 'parse_json.rulebase'
     nocomment: true
-    path: '{{ rsyslog_config_dir }}'
     sections:
 
       - options: |-

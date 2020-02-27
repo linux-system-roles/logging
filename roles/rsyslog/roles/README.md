@@ -5,7 +5,7 @@ linux-system-roles-rsyslog/roles
 
 The input roles include Rsyslog configurations, for different projects, that user can collectd logs on.
 
-The projects are called `logs_collections` and the user can choose to deploy several projects at the same time.
+The projects are called `logging_inputs` and the user can choose to deploy several projects at the same time.
 Each project adds a sub-role to ./logging/roles/rsyslog/roles/input_roles/.
 
 The sub-role usually includes `tasks` and `defaults` directories.
@@ -14,8 +14,8 @@ The `defaults` directory includes:
   - List of modules to load  like `imfile`, `imtcp`, etc.
   - Defines the formatting and the rulebases for parsing the logs.
   - It is required to set for all logs the project identfier for pipelining:
-    set $.logs_collection = "project name";
-    For example: In `ovirt` input role, in the default/main.yml, for every log `$.logs_collection` is set to `ovirt`.
+    set $.input_type = "input type";
+    For example: In `ovirt` input role, in the default/main.yml, for every log `$.input_type` is set to `ovirt`.
   - If `rsyslog_default` equals to "true", It is required to set for all logs you don't want to be processed by the default rules:
     set $.send_targets_only = "true";
 

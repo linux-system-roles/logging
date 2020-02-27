@@ -1,40 +1,35 @@
-- name: Ensure that the role runs with parameters from imjournal to four omfiles outputs
+- name: Ensure that the role runs with parameters from imjournal to two omfwd outputs and implicit omfile output
   hosts: all
   become: true
   vars:
     __test_files_conf: /etc/rsyslog.d/30-output-files.conf
 
-
   tasks:
     - name: deploy config to output into local files
       vars:
         logging_enabled: true
-        logging_purge_confs: true
+        rsyslog_default: false
         logging_outputs:
-          - name: files_output0
-            type: files
-            facility: authpriv,auth
-            path: /var/log/secure
-          - name: files_output1
-            type: files
+          - name: forwards_severity_and_facility
+            type: forwards
+            facility: local1
             severity: info
-            exclude: authpriv.none;auth.none;cron.none;mail.none
-            path: /var/log/messages
-          - name: files_output2
-            type: files
-            severity: emerg
-            path: :omusrmsg:*
-          - name: files_output3
-            type: files
-            facility: local7
-            path: /var/log/boot.log
+            protocol: tcp
+            target: host.domain
+            port: 1514
+          - name: forwards_facility_only
+            type: forwards
+            facility: local2
+            protocol: tcp
+            target: host.domain
+            port: 2514
         logging_inputs:
-          - name: basic_input
+          - name: basic_input0
             type: basics
         logging_flows:
-          - name: flow_0
-            inputs: [basic_input]
-            outputs: [files_output0, files_output1, files_output2, files_output3]
+          - name: flow0
+            inputs: [basic_input0]
+            outputs: [default_files, forwards_severity_and_facility, forwards_facility_only]
       include_role:
         name: linux-system-roles.logging
 
@@ -51,7 +46,7 @@
 
     - name: Check file counts in rsyslog.d
       assert:
-        that: rsyslog_d_file_count.matched >= 6
+        that: rsyslog_d_file_count.matched >= 8
 
     - name: Get the files config stat
       stat:
@@ -69,7 +64,7 @@
 
     - name: Check the filter
       assert:
-        that: files_conf_messages.stdout is match(" *\*.info;*authpriv.none;auth.none;cron.none;mail.none.*.var.log.messages")
+        that: files_conf_messages.stdout is match(" *\*.info;mail.none;authpriv.none;cron.none.*.var.log.messages")
 
     - name: Run logger to generate a test log message
       command: /bin/logger -i -p local6.info -t testTag0 testMessage0000
@@ -83,3 +78,25 @@
     - name: Check if the test message is in /var/log/messages
       assert:
         that: testMessage0000.stdout | length > 0
+
+    - name: Set forwarding config path
+      set_fact:
+        test_forward_conf: "/etc/rsyslog.d/30-output-forwards.conf"
+
+    - name: Get the forwarding config stat
+      stat:
+        path: "{{ test_forward_conf }}"
+      register: stat_output_forwards_system
+
+    - name: Check if the forwarding config exists
+      assert:
+        that: stat_output_forwards_system.stat.exists
+
+    - name: Grep severity_and_facility
+      command: /bin/grep "\<action.*forwards_severity_and_facility\>" {{ test_forward_conf }}
+      register: severity_and_facility
+      changed_when: false
+
+    - name: Check severity_and_facility
+      assert:
+        that: severity_and_facility.stdout is match(" *local1\.info action.name=.forwards_severity_and_facility.* Target=.host.domain. Port=.1514. Protocol=.tcp.*")

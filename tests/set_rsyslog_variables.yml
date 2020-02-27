@@ -6,5 +6,5 @@
 - name: Get file counts in /etc/rsyslog.d
   find:
     paths: /etc/rsyslog.d
-    patterns: '*.conf,*.template,*.system,*.remote'
+    patterns: '*.conf,*.template,*.remote'
   register: rsyslog_d_file_count

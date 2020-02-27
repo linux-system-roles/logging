@@ -6,7 +6,7 @@
         src: '{{ item.ca_cert_src }}'
         dest: '{{ rsyslog_config_dir }}'
       with_items:
-        - '{{ rsyslog_elasticsearch }}'
+        - '{{ rsyslog_output_elasticsearch }}'
       when:
         - item.ca_cert_src is defined
         - item.ca_cert_src | length > 0
@@ -16,7 +16,7 @@
         src: '{{ item.cert_src }}'
         dest: '{{ rsyslog_config_dir }}'
       with_items:
-        - '{{ rsyslog_elasticsearch }}'
+        - '{{ rsyslog_output_elasticsearch }}'
       when:
         - item.cert_src is defined
         - item.cert_src | length > 0
@@ -26,7 +26,7 @@
         src: '{{ item.key_src }}'
         dest: '{{ rsyslog_config_dir }}'
       with_items:
-        - '{{ rsyslog_elasticsearch }}'
+        - '{{ rsyslog_output_elasticsearch }}'
       when:
         - item.key_src is defined
         - item.key_src | length > 0
@@ -38,19 +38,18 @@
           {{ [ item | combine( { 'ca_cert': item.ca_cert_src | basename ,
           'cert': item.cert_src | basename, 'key': item.key_src | basename } ) ] }}
       with_items:
-        - '{{ rsyslog_elasticsearch }}'
+        - '{{ rsyslog_output_elasticsearch }}'
       when:
         - item.ca_cert_src is defined
         - item.ca_cert_src | length > 0
       register: result
 
-    - name: Set updated rsyslog_elasticsearch
+    - name: Set updated rsyslog_output_elasticsearch
       set_fact:
-        rsyslog_elasticsearch: "{{ __rsyslog_elasticsearch_temp }}"
+        rsyslog_output_elasticsearch: "{{ __rsyslog_elasticsearch_temp }}"
 
   when:
-    - rsyslog_elasticsearch is defined
-    - rsyslog_elasticsearch != []
+    - rsyslog_output_elasticsearch | d([])
     - use_local_omelasticsearch_cert | default(false) | bool
 
 # Deploy configuration files

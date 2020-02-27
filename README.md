@@ -70,23 +70,32 @@ vars.yml stores variables which are passed to ansible to control the tasks.
 Initial configuration will be supplied by default.
 User can supply further configuration to be used.
 
-Currently, the role supports 3 types of logs collections ([input_roles](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/roles/input_roles/)): `basics`, `ovirt`, and `viaq`.  And 3 types of log outputs ([output_roles](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/roles/output_roles/)): `elasticsearch`, `files`, and `forwards`.  To deploy configuration files with these input and output roles, first specify the output_role as `logging_outputs`, then input_role as `log_collections` in each `logging_outputs`.  Multiple input roles could be required based on the use cases.
+Currently, the role supports 3 types of logs collections ([input_roles](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/roles/input_roles/)): `basics`, `ovirt`, and `viaq`.  And 3 types of log outputs ([output_roles](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/roles/output_roles/)): `elasticsearch`, `files`, and `forwards`.  To deploy configuration files with these input and output roles, first specify the output_role as `logging_outputs`, then input_role as `logging_inputs`.  For define the flow from inputs to outputs, use `logging_flows`.  The `logging_flows` is made from, `name`, `inputs`, and `outputs`, where `inputs` is a list of `logging_inputs name` values and `outputs` is a list of `logging_outputs name` values.
 
 To make an effect with the following setting, vars.yml has to have `logging_enabled: true`.  Unless logging_enabled is set to true, LSR/Logging does not deploy logging systems.
 
-**Note:** Current LSR/Logging supports rsyslog only.  In case other logging system is added to LSR/Logging in the future, it's supposed to implement the input and output roles to satisfy the logging_outputs and log_collections semantics.
+**Note:** Current LSR/Logging supports rsyslog only.  In case other logging system is added to LSR/Logging in the future, it's supposed to implement the input and output roles to satisfy the logging_outputs and logging_inputs semantics.
+
+This is an example of the logging configuration to show log messages from input_role_nameA are passed to output_role_name0 and output_role_name1; log messages from input_role_nameB are to output_role_name1, only.
 ```
 logging_enabled: true
 logging_outputs:
-  -name: <output_role_name0>
-   type: <output_type0>
-   log_collections:
-     - name: <input_role_nameA>
-     - name: <input_role_nameB>
-  -name: <output_role_name1>
-   type: <output_type1>
-   log_collections:
-     - name: <input_role_nameC>
+  - name: output_role_name0
+    type: output_type0
+  - name: output_role_name1
+    type: output_type1
+logging_inputs:
+  - name: input_role_nameA
+    type: input_typeA
+  - name: input_role_nameB
+    type: input_typeB
+logging_flows:
+  - name: flow_nameX
+    inputs: [input_role_nameA]
+    outputs: [output_role_name0, output_role_name1]
+  - name: flow_nameY
+    inputs: [input_role_nameB]
+    outputs: [output_role_name1]
 ```
 
 **vars.yml examples:**
@@ -102,16 +111,28 @@ logging_enabled: true
 logging_purge_confs: true
 ```
 
-2) Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and outputs into the local files.
+2) Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system (e.g. systemd journald), and outputs into local files (e.g. /var/log/messages).
 ```
 logging_enabled: true
 logging_purge_confs: true
 logging_outputs:
   - name: local-files
     type: files
-    logs_collections:
-      - name: system-input
-        type: basics
+logging_inputs:
+  - name: system-input
+    type: basics
+logging_flows:
+  - name: flow0
+    inputs: [system-input]
+    outputs: [local-files]
+```
+If inputs are specified, but no flows or outputs are specified, the default is to write the input to the predefined system log files e.g. /var/log/messages.
+```
+logging_enabled: true
+logging_purge_confs: true
+logging_inputs:
+  - name: system-input
+    type: basics
 ```
 
 3) Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and remote rsyslog and outputs into the local files.
@@ -122,9 +143,13 @@ logging_purge_confs: true
 logging_outputs:
   - name: local-files
     type: files
-    logs_collections:
-      - name: system-and-remote-input
-        type: basics
+logging_inputs:
+  - name: system-and-remote-input
+    type: basics
+logging_flows:
+  - name: flow0
+    inputs: [system-and-remote-input]
+    outputs: [local-files]
 ```
 
 4) Deploying config files for collecting logs from OpenShift pods as well as RHV and forwarding them to elasticsearch.
@@ -133,15 +158,6 @@ logging_enabled: true
 logging_outputs:
   - name: viaq-elasticsearch
     type: elasticsearch
-    logs_collections:
-      - name: viaq-input
-        type: viaq
-    # 'state' is not a mandatory field. Defaults to 'present'.
-      - name: viaq-k8s-input
-        type: viaq-k8s
-      - name: ovirt
-        type: ovirt-input
-        state: absent
     server_host: logging-es
     server_port: 9200
     index_prefix: project.
@@ -150,54 +166,81 @@ logging_outputs:
     key: <PRIVATE_KEY>
   - name: ovirt-elasticsearch
     type: elasticsearch
-    logs_collections:
-      - name: ovirt-input
-        type: ovirt
     server_host: logging-es-ovirt
     server_port: 9200
     index_prefix: project.ovirt-logs
     ca_cert: <CA_CERT>
     cert: <USER_CERT>
     key: <PRIVATE_KEY>
+  - name: files-output
+    type: files
   - name: custom_files-test
     type: custom_files
     custom_config_files: [ '/path/to/custom_A.conf', '/path/to/custom_B.conf' ]
+logging_inputs:
+  - name: viaq-input
+    type: viaq
+  - name: viaq-k8s-input
+    type: viaq-k8s
+  - name: ovirt
+    type: ovirt-input
+logging_flows:
+  - name: flow0
+    inputs: [viaq-input, viaq-k8s-input]
+    outputs: [viaq-elasticsearch]
+  - name: flow1
+    inputs: [ovirt-input]
+    outputs: [ovirt-elasticsearch, files-output]
 ```
+In this example, viaq-input and viaq-k8s-input are passed to viaq-elasticsearch; ovirt-input is passed to the ovirt-elasticsearch as well as files-output.
 
-   See the [variables section](#variables-in-varsyml) for each variable.
-
-**Note:** The order of the record with type `elasticsearch` is important. The last Elasticsearch output will get all the logs that were not cached by previous Elasticsearches instances.
+See the [variables section](#variables-in-varsyml) for each variable.
 
 For more details, see also [roles/rsyslog/README.md](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/README.md).
 
 Variables in vars.yml
 ----------------------
 
-- `logging_collector`: The logs collector to use for the logs collection. Currently Rsyslog is the only supported logs collector. Defaults to `rsyslog`.
+- `logging_collector`: The logs collector to use for the logs collection. Currently Rsyslog is the only supported logs collector. Defaults to `rsyslog`. WARNING: this is going to be renamed to logging_provider.
 - `logging_enabled` : When 'true', logging role will deploy specified configuration file set. Default to 'true'.
 - `logging_purge_confs`: By default, the Rsyslog configuration files are applied on top of pre-existing configuration files. To purge local files prior to setting new ones, set logging_purge_confs variable to 'true', it will move all Rsyslog configuration files to a backup directory, `/tmp/rsyslog.d-XXXXXX/backup.tgz`, before deploying the new configuration files. Defaults to 'false'.
 - `logging_mmk8s_token`: Path to token for kubernetes.  Default to "/etc/rsyslog.d/mmk8s.token".
 - `logging_mmk8s_ca_cert`: Path to CA cert for kubernetes.  Default to "/etc/rsyslog.d/mmk8s.ca.crt".
-
 - `logging_outputs`: A set of following variables to specify output configurations.  It could be an list if multiple outputs that should to be configured.
-   -  **If `type: elasticsearch`**, send logs to one or more remote elasticsearch or Viaq installations.
-      - `name`: Name of the elasticsearch element.
-      - `type`: Type of the output element. Optional values: `elasticsearch`, `local`, `custom_files`.
-      - `logs_collections` : List of optional logs collections, dictionaries with `name`, `type` and `state` attributes, that were pre-configured.
-        - `name`: Unique name of the input.
-          `type`: The type of the pre-configured logs to collect. **Note:** Currently ['viaq', 'viaq-k8s', 'ovirt'] are supported for the elasticsearch output.
-          
-          `state`: The state of the configuration files states if they should be `present` or `absent`. Default to `present`.
+   - `name`: Unique name of the output
+   - `type`: Type of the output element. Currently, `elasticsearch`, `files`, and `forwards` are supported. The `type` is used to specify a role in roles/rsyslog/roles/output_roles/.
+   -  ** `type: elasticsearch`**
       - `server_host`: Hostname elasticsearch is running on.
       - `server_port`: Port number elasticsearch is listening to.
       - `index_prefix`: Elasticsearch index prefix the particular log will be indexed to.
+      - `input_type`: Specifying the input type. Type `ovirt` and `viaq` are supported. Default to `ovirt`.
+      - `retryfailures`: Specifying whether retries or not in case of failure. on or off.  Default to on.
       - `ca_cert`: Path to CA cert for ElasticSearch.  Default to '/etc/rsyslog.d/es-ca.crt'
       - `cert`: Path to cert for ElasticSearch.  Default to '/etc/rsyslog.d/es-cert.pem'
       - `key`: Path to key for ElasticSearch.  Default to "/etc/rsyslog.d/es-key.pem"
+   -  ** `type: files`**
+      - `facility`: facility; default to `*`
+      - `severity`: severity; default to `*`
+      - `exclude`: exclude; default to none.
+      - `path`: path to the output file.  Must have.  If `path` is not defined, the files instance is dropped.
+      These values are used in the omfile action as follows:
+      ```
+      facility.severity;exclude path
+      ```
+   -  ** `type: forwards`**
+      - `facility`: facility; default to `*`
+      - `severity`: severity; default to `*`
+      - `protocol`: protocol; tcp or udp; default to tcp.
+      - `target`: target host (fqdn).  Must have.  If `target` is not defined, the forwards instance is dropped.
+      - `port`: port; default to 514.
    -  **If `type: custom`** To include existing config files in the new ansible deployment, add the paths to custom_config_files as follows.  The specified files are copied to /etc/rsyslog.d.
       - `name`: Name of the custom file output element.
       - `type`: Type of the output element.
       - `custom_config_files`: List of custom configuration files are deployed to /etc/rsyslog.d. [ '/path/to/custom_A.conf', '/path/to/custom_B.conf' ]. Default to none.
+- `logging_inputs` : List of optional logs collections, dictionaries with `name`, `type` and `state` attributes, that were pre-configured.
+        - `name`: Unique name of the input.
+          `type`: The type of the pre-configured logs to collect. **Note:** Currently ['viaq', 'viaq-k8s', 'ovirt'] are supported for the elasticsearch output.
+          `state`: The state of the configuration files states if they should be `present` or `absent`. Default to `present`.
 
 playbook.yml
 -------------
@@ -216,7 +259,7 @@ This role is a generic wrapper for deploying and configuring the log collectors 
 format them and ship them to the required destination.
 It currently supports Rsyslog as the default logs collector.
 
-The projects are called `logs_collections` and the user can choose to deploy several projects at the same time.
+The projects are called `logging_inputs` and the user can choose to deploy several projects at the same time.
 Each project adds a sub-role to [input_roles](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/roles/input_roles/).
 
 The sub-role usually includes `tasks` and `defaults` directories.
@@ -225,7 +268,7 @@ The `defaults` directory includes:
   - List of modules to load  like `imfile`, `imtcp`, etc.
   - Defines the formatting and the rulebases for parsing the logs.
   - It is required to set for all logs the project identfier for pipelining:
-    set $.logs_collection = "project name";
+    set $.input_type = "input type";
 
 The `tasks` directory includes 2 tasks file:
   - `main.yml` - tasks for deploying the config files
@@ -278,6 +321,29 @@ By default, the test target will be the latest `centos` image from Docker Hub.  
 can test against a different image/tag like so:
 
   `$ MOLECULE_DISTRO="fedora:30" molecule test`
+
+CI tests
+========
+The tests are tests/tests_*.yml, which are triggered when a pull request is submitted.
+
+To run the tests manually,
+1. Download CentOS qcow2 image from https://cloud.centos.org/centos/.
+2. Run the following command from the `tests` directory, which spawns an openshift node locally and runs the test yml on it.
+   ```
+   TEST_SUBJECTS=/path/to/downloaded_your_CentOS_7_or_8_image.qcow2 ansible-playbook [-vvvv] -i /usr/share/ansible/inventory/standard-inventory-qcow2 tests_something.yml
+   ```
+3. To debug it, add `TEST_DEBUG=true` prior to `ansible-playbook`.
+4. Once the ansible-playbook is finished, you could ssh to the node as follows:
+   ```
+   ssh -p PID -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /tmp/inventory-cloudRANDOMSTR/identity root@127.0.0.3
+   ```
+   The PID is returned from the following command line.
+   ```
+   ps -ef | grep "linux-system-roles.logging.tests" | egrep -v grep | awk '{print $28}' | awk -F':' '{print $3}' | awk -F'-' '{print $1}'
+   ```
+5. When the debugging is done, run `ps -ef | grep standard-inventory-qcow2` and kill the pid to clean up the node.
+
+For more details, see also https://github.com/linux-system-roles/test-harness.
 
 Additional Resources
 ====================
