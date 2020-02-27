@@ -31,7 +31,6 @@ __rsyslog_conf_viaq_mmk8s_module:
 
   - name: 'mmk8s'
     type: 'modules'
-    path: '{{ rsyslog_config_dir }}'
     sections:
 
       - options: |-
@@ -45,7 +44,6 @@ __rsyslog_conf_viaq_mmk8s_input:
 
   - name: 'mmk8s'
     type: 'templates'
-    path: '{{ rsyslog_config_dir }}'
     sections:
 
       - options: |-
@@ -72,7 +70,6 @@ __rsyslog_rulebase_viaq_k8s_filename:
   - name: 'k8s_filename'
     filename: 'k8s_filename.rulebase'
     nocomment: true
-    path: '{{ rsyslog_config_dir }}'
     sections:
 
       - options: |-
@@ -84,7 +81,6 @@ __rsyslog_rulebase_viaq_k8s_container_name:
   - name: 'k8s_container_name'
     filename: 'k8s_container_name.rulebase'
     nocomment: true
-    path: '{{ rsyslog_config_dir }}'
     sections:
 
       - options: |-
@@ -99,7 +95,6 @@ __rsyslog_rulebase_viaq_crio:
   - name: 'crio'
     filename: 'crio.rulebase'
     nocomment: true
-    path: '{{ rsyslog_config_dir }}'
     sections:
       - options: |-
           version=2

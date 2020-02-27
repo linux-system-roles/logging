@@ -47,7 +47,7 @@ vars.yml
 ---------
 vars.yml stores variables which are passed to ansible to control the tasks.  The contents of this file could be merged into the inventory file.
 
-Currently, the role supports 3 types of logs collections ([input_roles](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/roles/input_roles/)): `basics`, `ovirt`, and `viaq`.  And 3 types of log outputs ([output_roles](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/roles/output_roles/)): `elasticsearch`, `files`, and `forwards`.  To deploy rsyslog configuration files with these input and output roles, first specify the output_role as `logging_outputs`, then input_role as `logs_collections` in each `logging_outputs`.  Multiple input roles could be required based on the use cases.
+Currently, the role supports 3 types of logs collections ([input_roles](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/roles/input_roles/)): `basics`, `ovirt`, and `viaq`.  And 3 types of log outputs ([output_roles](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/roles/output_roles/)): `elasticsearch`, `files`, and `forwards`.  To deploy rsyslog configuration files with these input and output roles, first specify the output_role as `logging_outputs`, then input_role as `logging_inputs` in each `logging_outputs`.  Multiple input roles could be required based on the use cases.
 
 To make an effect with the following setting, vars.yml has to have `logging_enabled: true`.  Unless `logging_enabled` is set to true, LSR/Logging does not deploy rsyslog config files.
 ```
@@ -56,16 +56,22 @@ rsyslog_default: false
 logging_outputs:
   -name: <output_role_name0>
    type: <output_type0>
-   logs_collections:
-     - name: <input_role_nameA>
-       type: <input_role_typeA>
-     - name: <input_role_nameB>
-       type: <input_role_typeB>
   -name: <output_role_name1>
    type: <output_type1>
-   logs_collections:
-     - name: <input_role_nameC>
-       type: <input_role_typeC>
+logging_inputs:
+  - name: <input_role_nameA>
+    type: <input_role_typeA>
+  - name: <input_role_nameB>
+    type: <input_role_typeB>
+  - name: <input_role_nameC>
+    type: <input_role_typeC>
+logging_flows:
+  - name: <flowX>
+    inputs: [<input_role_nameA>, <input_role_nameB>]
+    outputs: [<output_role_name0>]
+  - name: <flowY>
+    inputs: [<input_role_nameC>]
+    outputs: [<output_role_name1>]
 ```
 
 See the [variables section](#variables) for each variable.
@@ -85,30 +91,46 @@ rsyslog_purge_original_conf: true
 rsyslog_backup_dir: /tmp/rsyslog_backup
 ```
 
-**2. Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and outputs into the local files.  Pre-existing config files are copied to the directory specified by `rsyslog_backup_dir`.**
+**2. Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and outputs into the local files, which actions are predefined. Pre-existing config files are copied to the directory specified by `rsyslog_backup_dir`.**
 ```
 logging_enabled: true
-rsyslog_purge_original_conf: true
+logging_purge_confs: true
 rsyslog_backup_dir: /tmp/rsyslog_backup
 logging_outputs:
   - name: local-files
     type: files
-    logs_collections:
-      - name: system-input
-        type: basics
+logging_inputs:
+  - name: system-input
+    type: basics
+logging_flows:
+  - name: flow0
+    inputs: [system-input]
+    outputs: [local-files]
+```
+If inputs are specified, but no flows or outputs are specified, the default is to write the input to the predefined system log files e.g. /var/log/messages.
+```
+logging_enabled: true
+logging_purge_confs: true
+logging_inputs:
+  - name: system-input
+    type: basics
 ```
 
 **3. Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and remote rsyslog and outputs into the local files.**
 ```
 logging_enabled: true
 rsyslog_capabilities: [ 'network', 'remote-files' ]
-rsyslog_purge_original_conf: true
+logging_purge_confs: true
 logging_outputs:
   - name: local-files
     type: files
-    logs_collections:
-      - name: system-and-remote-input
-        type: basics
+logging_inputs:
+  - name: system-and-remote-input
+    type: basics
+logging_flows:
+  - name: flow0
+    inputs: [system-and-remote-input]
+    outputs: [local-files]
 ```
 
 **4. Deploying basic LSR/Logging config files in /etc/rsyslog.d, which forwards the local system logs to the remote rsyslog.
@@ -117,50 +139,58 @@ logging_enabled: true
 rsyslog_default: false
 rsyslog_purge_original_conf: true
 logging_outputs:
-  - name: output-forwards
+  - name: output-forwards0
     type: forwards
-    rsyslog_forwards_actions:
-      - name: forward0
-        severity: info
-        protocol: udp
-        target: 10.11.12.13
-        port: 514
-      - name: forward1
-        facility: mail
-        protocol: tcp
-        target: 10.20.30.40
-        port: 514
-    logs_collections:
-      - name: 'basics'
+    severity: info
+    protocol: udp
+    target: 10.11.12.13
+    port: 514
+  - name: output-forwards1
+    type: forwards
+    facility: mail
+    protocol: tcp
+    target: 10.20.30.40
+    port: 514
+logging_inputs:
+  - name: basic-input
+    type: basics
+logging_flows:
+  - name: flows0
+    inputs: [basic-input]
+    outputs: [output-forwards0, output-forwards1]
 ```
 
-**5. Sample vars.yml file for the viaq case.**
+**5. Sample vars.yml file for the viaq case. (not implemented yet) **
 ```
 logging_enabled: true
 logging_outputs:
   - name: viaq-elasticsearch
     type: elasticsearch
-    logs_collections:
-      - name: viaq-input
-        type: viaq
     server_host: es-hostname
     server_port: 9200
+logging_inputs:
+  - name: viaq-input
+    type: viaq
+logging_flows:
+  - name: flow0
+    inputs: [viaq]
+    outputs: [viaq-elasticsearch]
 ```
 
-**6. vars.yml to configure to handle the inputs from openshift containers.**
+**6. vars.yml to configure to handle the inputs from openshift containers. (obsolete) **
 ```
 logging_enabled: true
 # If 'viaq-k8s' is in logs collections, logging_mmk8s_* need to be specified.
 logging_mmk8s_token: "{{ rsyslog_config_dir }}/mmk8s.token"
 logging_mmk8s_ca_cert: "{{ rsyslog_config_dir }}/mmk8s.ca.crt"
-# If use_omelasticsearch_cert is true, ca_cert, cert and key in rsyslog_outputs needs to be set.
+# If use_omelasticsearch_cert is true, ca_cert, cert and key in logging_outputs needs to be set.
 use_omelasticsearch_cert: true
 # If use_local_omelasticsearch_cert is true, local files ca_cert_src, cert_src and key_src will be deployed to the remote host.
 use_local_omelasticsearch_cert: true
-rsyslog_outputs:
+logging_outputs:
   - name: viaq-elasticsearch
     type: elasticsearch
-    rsyslog_logs_collections:
+    logging_inputs:
       - name: viaq-input
         type: viaq
         state: present
@@ -178,7 +208,7 @@ rsyslog_outputs:
     key_src : "/path/to/es-key.pem"
   - name: viaq-elasticsearch-ops
     type: elasticsearch
-    rsyslog_logs_collections:
+    logging_inputs:
       - name: viaq-input
         type: viaq
         state: present
@@ -270,33 +300,32 @@ Common sub-variables
 
 Files and Forwards output_role sub-variables
 ----------------------------------
-- `rsyslog_files_actions`: array of dictionary to specify the facility and severity filter and the full path to store logs satisfying the filter.  It takes the sub-variables - `name`, `facility`, `severity`, `exclude`, and `path`.  Unless the name and the path are given, the element is skipped.
+- `files`: array of dictionary to specify the facility and severity filter and the full path to store logs satisfying the filter.  It takes the sub-variables - `name`, `facility`, `severity`, `exclude`, and `path`.  Unless the name and the path are given, the element is skipped.
 Files output format
    ```
-   rsyslog_files_actions:
-     - name: <unique_name>
-       facility: <facility_in_text, e.g., "mail"; default to "*">
-       severity: <severity_in_text, e.g., "info"; default to "*">
-       exclude: <excluded facility list separated by ';', e.g., "mail.none;auth.none"; default to nil>
-       path: </full/path/to/file/to/store/the/logs; MUST EXIST>
+   - name: <unique_name>
+     type: files
+     facility: <facility_in_text, e.g., "mail"; default to "*">
+     severity: <severity_in_text, e.g., "info"; default to "*">
+     exclude: <excluded facility list separated by ';', e.g., "mail.none;auth.none"; default to nil>
+     path: </full/path/to/file/to/store/the/logs; MUST EXIST>
    ```
-- `rsyslog_forwards_actions`: array of dictionary to specify the facility and severity filter and the host and port to forward logs satisfying the filter.  It takes the sub-variables - `name`, `facility`, `severity`, `exclude`, `protocol`, `target`, and `port`.  Unless the name and the target are given, the element is skipped.
+- `forwards`: array of dictionary to specify the facility and severity filter and the host and port to forward logs satisfying the filter.  It takes the sub-variables - `name`, `facility`, `severity`, `exclude`, `protocol`, `target`, and `port`.  Unless the name and the target are given, the element is skipped.
 Forwards output format
    ```
-   rsyslog_forwards_actions:
-     - name: <unique_name>
-       facility: <facility_in_text, e.g., "mail"; default to "*">
-       severity: <severity_in_text, e.g., "info"; default to "*">
-       exclude: <excluded facility list separated by ';', e.g., "mail.none;auth.none"; default to nil>
-       protocol: <tcp_or_udp; default to "tcp">
-       target: <target_host_name_or_ip_address; MUST EXIST>
-       port: <port_number; default to 514>
+   - name: <unique_name>
+     type: forwards
+     facility: <facility_in_text, e.g., "mail"; default to "*">
+     severity: <severity_in_text, e.g., "info"; default to "*">
+     exclude: <excluded facility list separated by ';', e.g., "mail.none;auth.none"; default to nil>
+     protocol: <tcp_or_udp; default to "tcp">
+     target: <target_host_name_or_ip_address; MUST EXIST>
+     port: <port_number; default to 514>
    ```
 
 Files input_role sub-variables
 ------------------------------
 - `rsyslog_input_log_path`: File name to be read by the imfile plugin. The value should be full path. Wildcard '*' is allowed in the path.  Default to `/var/log/containers/*.log`
-- `rsyslog_input_log_tag`: Tag to be added to the read logs. Default to `container`
 
 Viaq input_role sub-variables
 -----------------------------
@@ -312,6 +341,8 @@ Viaq input_role sub-variables
   - `server_host`: Hostname elasticsearch is running on.
   - `server_port`: Port number elasticsearch is listening to.
   - `index_prefix`: Elasticsearch index prefix the particular log is to be indexed.
+  - `input_type`: Specifying the input type. Type `ovirt` and `viaq` are supported. Default to `ovirt`.
+  - `retryfailures`: Specifying whether retries or not in case of failure. on or off.  Default to on.
   - `ca_cert`: Path to CA cert for ElasticSearch.  Default to '/etc/rsyslog.d/es-ca.crt'
   - `cert`: Path to cert for ElasticSearch.  Default to '/etc/rsyslog.d/es-cert.pem'
   - `key`: Path to key for ElasticSearch.  Default to "/etc/rsyslog.d/es-key.pem"

@@ -6,59 +6,28 @@
       set_fact:
         rsyslog_enabled: "{{ logging_enabled | d(true) }}"
 
-    - name: Set rsyslog_elasticsearch
+    - name: Set rsyslog_output_elasticsearch for the omelasticsearch output
       set_fact:
-        rsyslog_elasticsearch: "{{ rsyslog_elasticsearch | d([]) }} + {{ [ item.0 | combine( {'logs_collections_name': item.1.name} )] }}"
-      with_subelements:
-        - "{{ logging_outputs }}"
-        - logs_collections
+        rsyslog_output_elasticsearch: "{{ logging_outputs | selectattr('name', 'defined') | selectattr('type', 'defined') | selectattr('type', '==', 'elasticsearch') | list }}"
+
+    - name: Set rsyslog_output_files for the omfile outputs
+      set_fact:
+        rsyslog_output_files: "{{ logging_outputs | selectattr('name', 'defined') | selectattr('type', 'defined') | selectattr('type', '==', 'files') | list }}"
+
+    - name: Set files output if rsyslog_output_files is empty and logging_inputs is not empty
+      set_fact:
+        rsyslog_output_files: [ {"name": "default_files", "type": "files"} ]
       when:
-        - item.0.type | d('') == 'elasticsearch'
-        - item.1.state | d('present') == 'present'
+        - rsyslog_output_files | d([]) | length == 0
+        - logging_inputs | d([])
 
-    - name: Set rsyslog_files_actions
+    - name: Set rsyslog_output_forwards for the omfwd output
       set_fact:
-        rsyslog_files_actions: "{{ rsyslog_files_actions | d([]) }} + {{ item.0.rsyslog_files_actions }}"
-      with_subelements:
-        - "{{ logging_outputs }}"
-        - logs_collections
-      when:
-        - item.0.type | d('') == 'files'
-        - item.0.rsyslog_files_actions is defined
-        - item.1.state | d('present') == 'present'
-
-    - name: Set rsyslog_forwards_actions
-      set_fact:
-        rsyslog_forwards_actions: "{{ rsyslog_forwards_actions | d([]) }} + {{ item.0.rsyslog_forwards_actions }}"
-      with_subelements:
-        - "{{ logging_outputs }}"
-        - logs_collections
-      when:
-        - item.0.type | d('') == 'forwards'
-        - item.0.rsyslog_forwards_actions is defined
-        - item.1.state | d('present') == 'present'
-
-    - name: Set rsyslog_logs_collections
-      set_fact:
-        rsyslog_logs_collections: "{{ rsyslog_logs_collections | d([]) }} + {{ [ item.1 | combine( {'output_name': item.0.name} )] }}"
-      with_subelements:
-        - "{{ logging_outputs }}"
-        - logs_collections
-
-    - name: Initialize rsyslog_outputs
-      set_fact:
-        rsyslog_outputs: []
+        rsyslog_output_forwards: "{{ logging_outputs | selectattr('name', 'defined') | selectattr('type', 'defined') | selectattr('target', 'defined') | selectattr('type', '==', 'forwards') | list }}"
 
     - name: Set rsyslog_outputs
       set_fact:
-        rsyslog_outputs: "{{ rsyslog_outputs | d([]) }} + {{ [ item.type ] }}"
-      with_items: "{{ logging_outputs }}"
-      when: item.type is defined
-
-    - set_fact:
-        rsyslog_outputs: "{{ rsyslog_outputs | d([]) | unique }}"
-      tags:
-        - skip_ansible_lint
+        rsyslog_outputs: '{{ rsyslog_output_elasticsearch | d([]) }} + {{ rsyslog_output_files | d([]) }} + {{ rsyslog_output_forwards | d([]) }}'
 
     - name: Set rsyslog_purge_original_conf fact to purge all configuration files before saving the new ones.
       set_fact:
@@ -103,7 +72,7 @@
       lineinfile:
         path: "{{ role_path }}/debug/main.yml"
         create: yes
-        line: "{{ item.key }}: {{ item.value | to_nice_json(indent=2) }}"
+        line: "{{ item.key }}: {{ item.value | d() | to_nice_json(indent=2) }}"
       with_dict: "{{ hostvars[inventory_hostname] }}"
       when:
         - item.key is match("rsyslog*")

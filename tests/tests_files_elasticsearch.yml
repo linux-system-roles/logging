@@ -1,0 +1,81 @@
+- name: Ensure that the role runs with parameters from imfile to two elasticsearch outputs
+  hosts: all
+  become: true
+  vars:
+    __test_inputfiles_dir: /var/log/inputdirectory
+
+  tasks:
+    - name: deploy config to send to elasticsearch
+      vars:
+        logging_enabled: true
+        rsyslog_default: false
+        logging_outputs:
+          - name: elasticsearch_output
+            type: elasticsearch
+            server_host: logging-es
+            server_port: 9200
+            index_prefix: project.
+            input_type: ovirt
+            retryfailures: off
+            ca_cert: "/etc/rsyslog.d/es-ca.crt"
+            cert: "/etc/rsyslog.d/es-cert.pem"
+            key: "/etc/rsyslog.d/es-key.pem"
+          - name: elasticsearch_output_ops
+            type: elasticsearch
+            server_host: logging-es-ops
+            server_port: 9200
+            index_prefix: .operations.
+            input_type: viaq
+            retryfailures: off
+            ca_cert: "/etc/rsyslog.d/es-ca.crt"
+            cert: "/etc/rsyslog.d/es-cert.pem"
+            key: "/etc/rsyslog.d/es-key.pem"
+        logging_inputs:
+          - name: files_input
+            type: files
+            rsyslog_input_log_path: "{{ __test_inputfiles_dir }}/*.log"
+        logging_flows:
+          - name: flow_0
+            inputs: [files_input]
+            outputs: [elasticsearch_output, elasticsearch_output_ops]
+      include_role:
+        name: linux-system-roles.logging
+
+    - include: set_rsyslog_variables.yml
+
+    # notify restart rsyslogd is executed at the end of this test task.
+    # thus we have to force to invoke handlers
+    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+      meta: flush_handlers
+
+    - name: Check rsyslog.conf size
+      assert:
+        that: rsyslog_conf_line_count.stdout.0 | int <= 7
+
+    - name: Check file counts in rsyslog.d
+      assert:
+        that: rsyslog_d_file_count.matched >= 9
+
+    - name: Set files config path
+      set_fact:
+        test_inputfiles_conf: "/etc/rsyslog.d/90-imfile-input.conf"
+        test_outputfiles_conf: "/etc/rsyslog.d/30-output-elasticsearch.conf"
+
+    - name: Get the output files config stat
+      stat:
+        path: "{{ test_outputfiles_conf }}"
+      register: stat_output_files_system
+
+    - name: Check if the output files config exists
+      assert:
+        that: stat_output_files_system.stat.exists
+
+    - name: Check ops ruleset exists in {{ test_outputfiles_conf }}
+      command: /bin/grep "ruleset.name=.elasticsearch_output_ops" {{ test_outputfiles_conf }}
+      register: es_ops_ruleset
+      changed_when: false
+
+    - name: Check call point for ops ruleset exists in {{ test_outputfiles_conf }}
+      command: /bin/grep "call elasticsearch_output_ops" {{ test_inputfiles_conf }}
+      register: es_call_ops_ruleset
+      changed_when: false

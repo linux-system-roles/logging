@@ -34,73 +34,50 @@ __rsyslog_conf_files_output_rules:
 
   - name: 'output-files'
     type: 'output'
-    suffix: 'system'
-    path: '{{ rsyslog_config_dir }}'
     sections:
 
       - options: |-
-          {% if rsyslog_files_actions | d([]) %}
-          {% for element in rsyslog_files_actions %}
-          {% if element.name is defined and element.path is defined %}
-          {% if element.severity is defined %}
-          {% if element.facility is defined %}
-          {% if element.exclude is defined %}
-          {{ element.facility }}.{{ element.severity }};{{ element.exclude }} {{ element.path }}
-          {% else %}
-          {{ element.facility }}.{{ element.severity }} {{ element.path }}
-          {% endif %}
-          {% else %}
-          {% if element.exclude is defined %}
-          *.{{ element.severity }};{{ element.exclude }} {{ element.path }}
-          {% else %}
-          *.{{ element.severity }} {{ element.path }}
-          {% endif %}
-          {% endif %}
-          {% else %}
-          {% if element.facility is defined %}
-          {% if element.exclude is defined %}
-          {{ element.facility }}.*;{{ element.exclude }} {{ element.path }}
-          {% else %}
-          {{ element.facility }}.* {{ element.path }}
-          {% endif %}
-          {% else %}
-          {% if element.exclude is defined %}
-          *.*;{{ element.exclude }} {{ element.path }}
-          {% else %}
-          *.* {{ element.path }}
-          {% endif %}
-          {% endif %}
-          {% endif %}
-          {% endif %}
+          {% for element in rsyslog_output_files %}
+          {%   if element.path is defined %}
+          {%     if element.exclude is defined %}
+          ruleset(name="{{ element.name }}") {
+            {{ element.facility | d('*') }}.{{ element.severity | d('*') }};{{ element.exclude }} {{ element.path }}
+          }
+          {%     else %}
+          ruleset(name="{{ element.name }}") {
+            {{ element.facility | d('*') }}.{{ element.severity | d('*') }} {{ element.path }}
+          }
+          {%     endif %}
+          {%   else %}
+          ruleset(name="{{ element.name }}") {
+              # Log all kernel messages to the console.
+              # Logging much else clutters up the screen.
+              kern.*                                                 /dev/console
 
+              # Log anything (except mail) of level info or higher.
+              # Don't log private authentication messages!
+              *.info;mail.none;authpriv.none;cron.none                {{ rsyslog_system_log_dir }}/messages
+
+              # The authpriv file has restricted access.
+              authpriv.*                                              {{ rsyslog_system_log_dir }}/secure
+
+              # Log all the mail messages in one place.
+              mail.*                                                  -{{ rsyslog_system_log_dir }}/maillog
+
+              # Log cron stuff
+              cron.*                                                  -{{ rsyslog_system_log_dir }}/cron
+
+              # Everybody gets emergency messages
+              *.emerg                                                  :omusrmsg:*
+
+              # Save news errors of level crit and higher in a special file.
+              uucp,news.crit                                          {{ rsyslog_system_log_dir }}/spooler
+
+              # Save boot messages also to boot.log
+              local7.*                                                {{ rsyslog_system_log_dir }}/boot.log
+          }
+          {%   endif %}
           {% endfor %}
-          {% else %}
-          # Log all kernel messages to the console.
-          # Logging much else clutters up the screen.
-          kern.*                                                 /dev/console
-
-          # Log anything (except mail) of level info or higher.
-          # Don't log private authentication messages!
-          *.info;mail.none;authpriv.none;cron.none                {{ rsyslog_system_log_dir }}/messages
-
-          # The authpriv file has restricted access.
-          authpriv.*                                              {{ rsyslog_system_log_dir }}/secure
-
-          # Log all the mail messages in one place.
-          mail.*                                                  -{{ rsyslog_system_log_dir }}/maillog
-
-          # Log cron stuff
-          cron.*                                                  -{{ rsyslog_system_log_dir }}/cron
-
-          # Everybody gets emergency messages
-          *.emerg                                                  :omusrmsg:*
-
-          # Save news errors of level crit and higher in a special file.
-          uucp,news.crit                                          {{ rsyslog_system_log_dir }}/spooler
-
-          # Save boot messages also to boot.log
-          local7.*                                                {{ rsyslog_system_log_dir }}/boot.log
-          {% endif %}
 
 # __rsyslog_conf_remote_templates
 #
@@ -170,7 +147,7 @@ __rsyslog_conf_remote_templates:
 #
 __rsyslog_conf_remote_output:
 
-  - name: 'remote-dynamic-logs'
+  - name: 'dynamic-logs'
     comment: 'Store remote logs in separate logfiles'
     type: 'output'
     suffix: 'remote'

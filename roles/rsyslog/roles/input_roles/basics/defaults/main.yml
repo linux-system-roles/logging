@@ -13,11 +13,9 @@ rsyslog_capabilities: []
 
 rsyslog_use_imuxsock: false
 
-# rsyslog_input_log_{path,tag} are parameters for the imfile.
+# rsyslog_input_log_path is a parameter for the imfile.
 # rsyslog_input_log_path specifies the files to read. Wildcard '*' is allowed in the path
-# rsyslog_input_log_tag specifies the tag to be added to the logs.
 rsyslog_input_log_path: "/var/log/containers/*.log"
-rsyslog_input_log_tag: "container"
 
 # __rsyslog_basics_rules
 #
@@ -29,30 +27,15 @@ __rsyslog_basics_rules:
   - '{{ __rsyslog_conf_system_input }}'
   - '{{ __rsyslog_conf_network_input }}'
 
-# Debops example configuration options
-# --------------------------------------------
-
-# __rsyslog_conf_local_modules
+# __rsyslog_conf_local_basics_modules
 #
 # List of ``rsyslogd`` modules that enable logs from the local system to be
 # received and parsed by the ``rsyslogd`` daemon.
 __rsyslog_conf_local_basics_modules:
 
-  - name: 'local-basics-modules'
+  - name: 'basics-modules'
     type: 'modules'
     sections:
-
-      - comment: 'Log messages sent to local UNIX socket'
-        options: |-
-          module(load="imuxsock"    # provides support for local system logging (e.g. via logger command)
-          {% if rsyslog_use_imuxsock %}
-                 SysSock.Use="on")  # Turn on message reception via local log socket.
-          {% else %}
-                 SysSock.Use="off") # Turn off message reception via local log socket.
-          {% endif %}
-          # local messages are retrieved through imjournal now.
-          module(load="imjournal"             # provides access to the systemd journal
-                 StateFile="{{ rsyslog_work_dir }}/imjournal.state") # File to store the position in the journal
 
       - comment: 'Reads kernel messages (the same are read from journald)'
         options: |-
@@ -61,13 +44,70 @@ __rsyslog_conf_local_basics_modules:
                   if ("kernel-message" in rsyslog_capabilities)
                   else "absent" }}'
 
+      - comment: 'System log messages'
+        options: |-
+          # Log messages sent to local UNIX socket
+          module(load="imuxsock"    # provides support for local system logging (e.g. via logger command)
+          {% if rsyslog_use_imuxsock %}
+                 SysSock.Use="on")  # Turn on message reception via local log socket.
+          {% else %}
+                 SysSock.Use="off") # Turn off message reception via local log socket.
+          {% endif %}
+          # Read from journald
+          {% for input in logging_inputs %}
+          {%   if loop.first and input.type == "basics" %}
+          module(load="imjournal"
+                 StateFile="{{ rsyslog_work_dir }}/imjournal.state"
+                 RateLimit.Burst="{{ input.rsyslog_imjournal_ratelimit_burst | d(20000) }}"
+                 RateLimit.Interval="{{ input.rsyslog_imjournal_ratelimit_interval | d(600) }}"
+                 PersistStateInterval="{{ input.rsyslog_imjournal_persist_state_interval | d(10) }}")
+          {%   endif %}
+          {% endfor %}
+          {% set indict = {} %}
+          {% set input_list = [] %}
+          {% for input in logging_inputs %}
+          {%   set _ = indict.__setitem__(input.name, input) %}
+          {%   if input.type == "basics" %}
+          {%     set input_list = input_list.append( input.name ) %}
+          {%   endif %}
+          {% endfor %}
+          {% set rsyslog_flows = logging_flows | d([ {"name": "default_flow", "inputs": input_list, "outputs": ["default_files"]} ], true) %}
+          {% set outdict = {} %}
+          {% for flow in rsyslog_flows %}
+          {%   for oname in flow.outputs %}
+          {%     set _ = outdict.__setitem__(oname, outdict.get(oname,[])|union(flow.inputs)) %}
+          {%   endfor %}
+          {% endfor %}
+          {% for output in rsyslog_outputs %}
+          {%   if outdict[output.name] | d(false) %}
+          if
+          {%     for inputname in outdict[output.name] %}
+          {%       if not loop.first %}
+            or
+          {%       endif %}
+          {%       set input = indict[inputname] %}
+          {%       if input.type == "basics" %}
+            ($inputname == "imjournal")
+          {%       elif input.type == "files" %}
+            ($syslogtag == "{{ input.name }}")
+          {%       endif %}
+          {%     endfor %}
+            then {
+              call {{ output.name }}
+          }
+          {%   endif %}
+          {% endfor %}
+
+  - name: 'remote-modules'
+    type: 'modules'
+    state: '{{ "present" if "network" in rsyslog_capabilities else "absent" }}'
+    sections:
+
       - comment: 'Read messages sent over UDP or plain TCP without TLS'
         options: |-
           module(load="imudp")
           module(load="imptcp")
-        state: '{{ "present"
-                  if ("network" in rsyslog_capabilities) and (not rsyslog_send_over_tls_only)
-                  else "absent" }}'
+        state: '{{ "present" if not rsyslog_send_over_tls_only else "absent" }}'
 
       - comment: 'Read messages sent over Secure TCP with TLS'
         options: |-
@@ -84,40 +124,7 @@ __rsyslog_conf_local_basics_modules:
             {% endif %}
           {% endif %}
           )
-        state: '{{ "present"
-                  if ("network" in rsyslog_capabilities) and ("tls" in rsyslog_capabilities)
-                  else "absent" }}'
-
-# __rsyslog_conf_default_rulesets
-#
-# The ``rsyslogd`` configuration can contain multiple rulesets, each one
-# connected to an input channel (see
-# http://www.rsyslog.com/doc/v8-stable/concepts/multi_ruleset.html for more
-# details).
-#
-# By default ``rsyslog`` use the default ruleset for local system logs,
-# and defines a separate ``remote`` ruleset for logs incoming over the
-# network from remote hosts. The local log rules are stored in
-# `{{ rsyslog_config_dir }}/*.system` configuration files, and remote log
-# rules are stored in `{{ rsyslog_config_dir }}/*.remote` configuration files.
-__rsyslog_conf_default_rulesets:
-
-  - name: 'default-rulesets'
-    type: 'rules'
-    sections:
-
-      - comment: 'Rules for the local system logs'
-        options: |-
-          $IncludeConfig {{ rsyslog_config_dir }}/*.system
-
-      - comment: 'Rules for logs incoming from remote hosts'
-        options: |-
-          ruleset(name="remote") {
-            $IncludeConfig {{ rsyslog_config_dir }}/*.remote
-          }
-        state: '{{ "present"
-                  if ("network" in rsyslog_capabilities)
-                  else "absent" }}'
+        state: '{{ "present" if "tls" in rsyslog_capabilities else "absent" }}'
 
 # __rsyslog_conf_system_input
 #
@@ -125,14 +132,12 @@ __rsyslog_conf_system_input:
 
   - name: 'system-input'
     type: 'input'
+    state: '{{ "present" if rsyslog_use_imuxsock | d(false) | bool else "absent" }}'
     sections:
 
       - comment: 'Log messages from imuxsock'
         options: |-
           input(name="basics_imuxsock" type="imuxsock" socket="/dev/log")
-        state: '{{ "present"
-                  if rsyslog_use_imuxsock | d(false) | bool
-                  else "absent" }}'
 
 # __rsyslog_conf_network_input
 #

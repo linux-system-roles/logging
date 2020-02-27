@@ -93,7 +93,7 @@
       loop: '{{ __rsyslog_common_rules | flatten }}'
       when:
         - rsyslog_enabled | bool
-        - rsyslog_logs_collections | d([])
+        - logging_inputs | d([])
         - item.filename | d() or item.name | d()
         - item.state is undefined or item.state != 'absent'
         - item.options | d() or item.sections | d()
@@ -109,7 +109,7 @@
       loop: '{{ __rsyslog_common_rules | flatten }}'
       when:
         - not rsyslog_enabled | bool
-        - rsyslog_logs_collections is not defined or rsyslog_logs_collections == []
+        - logging_inputs | d([])
         - item.filename | d() or item.name | d()
         - item.options | d() or item.sections | d()
         - item.state is defined and item.state == 'absent'
@@ -133,7 +133,7 @@
     - name: Run deploy input sub-roles configs
       include_role:
         name: "{{ role_path }}/roles/input_roles/{{ input_item.type }}"
-      loop: "{{ rsyslog_logs_collections | flatten(1) }}"
+      loop: "{{ logging_inputs | flatten(1) }}"
       loop_control:
         loop_var: input_item
       when:
@@ -145,7 +145,7 @@
       include_role:
         name: "{{ role_path }}/roles/input_roles/{{ input_item.type }}"
         tasks_from: cleanup.yml
-      loop: "{{ rsyslog_logs_collections | flatten(1) }}"
+      loop: "{{ logging_inputs | flatten(1) }}"
       loop_control:
         loop_var: input_item
       when:
@@ -154,7 +154,7 @@
 
     - name: Run output sub-roles configs
       include_role:
-        name: "{{ role_path }}/roles/output_roles/{{ output_item }}"
+        name: "{{ role_path }}/roles/output_roles/{{ output_item.type }}"
       loop: "{{ rsyslog_outputs | flatten(1) }}"
       loop_control:
         loop_var: output_item

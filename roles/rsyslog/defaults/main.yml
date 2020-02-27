@@ -188,16 +188,8 @@ rsyslog_tcp_tls_port: '6514'
 # Files and Forwards outputs
 # --------------------------
 
-# rsyslog_files_actions
-#
-# Array of dictionary to specify files to store logs for files outputs.
-rsyslog_files_actions: []
-
-# rsyslog_forwards_actions
-#
-# Array of dictionary to specify files to forward target host to redirect
-# the logs to the remote rsyslog servers for forwards output.
-rsyslog_forwards_actions: []
+rsyslog_output_files: []
+rsyslog_output_forwards: []
 
 # Rsyslog configuration rules
 # ---------------------------
@@ -239,6 +231,7 @@ __rsyslog_common_rules:
   - '{{ __rsyslog_conf_global_options }}'
   - '{{ __rsyslog_conf_local_modules }}'
   - '{{ __rsyslog_conf_common_defaults }}'
+  - '{{ __rsyslog_conf_default_rulesets }}'
   - '{{ __rsyslog_conf_send_targets_only }}'
 
 
@@ -280,14 +273,12 @@ __rsyslog_conf_local_modules:
 
   - name: 'local-modules'
     type: 'modules'
+    state: '{{ "present" if "mark" in rsyslog_capabilities else "absent" }}'
     sections:
 
       - comment: 'provides --MARK-- message capability'
         options: |-
           module(load="immark" interval={{ (60 * 60) }})
-        state: '{{ "present"
-                  if ("mark" in rsyslog_capabilities)
-                  else "absent" }}'
 
 # __rsyslog_conf_common_defaults
 #
@@ -302,6 +293,22 @@ __rsyslog_conf_common_defaults:
       - comment: 'Log every message'
         options: |-
           $RepeatedMsgReduction {{ "on" if rsyslog_message_reduction | bool else "off" }}
+
+# __rsyslog_conf_default_rulesets
+#
+# ruleset `remote` directs to the files output role, which is implemented in `filename.remote`.
+__rsyslog_conf_default_rulesets:
+
+  - name: 'default-rulesets'
+    type: 'rules'
+    state: '{{ "present" if ("network" in rsyslog_capabilities) else "absent" }}'
+    sections:
+
+      - comment: 'Rules for logs incoming from remote hosts'
+        options: |-
+          ruleset(name="remote") {
+            $IncludeConfig {{ rsyslog_config_dir }}/*.remote
+          }
 
 __rsyslog_conf_send_targets_only:
 

@@ -7,7 +7,6 @@
 
 __rsyslog_viaq_rules:
 
-  - '{{ __rsyslog_conf_local_viaq_modules }}'
   - '{{ __rsyslog_conf_viaq_main_modules }}'
   - '{{ __rsyslog_conf_viaq_formatting }}'
   - '{{ __rsyslog_rulebase_viaq_parse_json }}'
@@ -16,20 +15,6 @@ __rsyslog_viaq_rules:
 
 # Default Viaq configuration options
 # ---------------------------------
-
-# __rsyslog_conf_local_viaq_modules
-#
-# List of ``rsyslogd`` modules that enable logs from the local system to be
-# received and parsed by the ``rsyslogd`` daemon.
-__rsyslog_conf_local_viaq_modules:
-
-  - name: 'local-viaq-modules'
-    type: 'modules'
-    sections:
-
-      - comment: 'Log messages sent to local UNIX socket with use=off'
-        options: |-
-          module(load="imuxsock" SysSock.use="off")
 
 __rsyslog_conf_viaq_main_modules:
 
@@ -42,10 +27,6 @@ __rsyslog_conf_viaq_main_modules:
           module(load="imfile" mode="inotify")
 
       - options: |-
-          # Read from journal
-          module(load="imjournal" StateFile="{{ rsyslog_work_dir }}/imjournal.state" UsePid="both" RateLimit.Burst="{{ imjournal_ratelimit_burst | default(1000000) }}" RateLimit.Interval="{{ imjournal_ratelimit_interval | default(10) }}" PersistStateInterval="1000" WorkAroundJournalBug="on")
-
-      - options: |-
           # Normalize logs
           module(load="mmnormalize")
 
@@ -53,7 +34,6 @@ __rsyslog_conf_viaq_formatting:
 
   - name: 'viaq_formatting'
     type: 'template'
-    path: '{{ rsyslog_config_dir }}'
     sections:
 
       - options: |-
@@ -349,14 +329,13 @@ __rsyslog_conf_viaq_formatting:
           }
           unset $!metadata;
           # add viaq logs identifier
-          set $.logs_collection = "viaq";
+          set $.input_type = "viaq";
 
 __rsyslog_rulebase_viaq_parse_json:
 
   - name: 'parse_json'
     filename: 'parse_json.rulebase'
     nocomment: true
-    path: '{{ rsyslog_config_dir }}'
     sections:
 
       - options: |-
@@ -368,7 +347,6 @@ __rsyslog_json_viaq_normalize_level:
   - name: 'normalize_level'
     filename: 'normalize_level.json'
     nocomment: true
-    path: '{{ rsyslog_config_dir }}'
     sections:
 
       - options: |-
@@ -398,7 +376,6 @@ __rsyslog_json_viaq_prio_to_level:
   - name: 'prio_to_level'
     filename: 'prio_to_level.json'
     nocomment: true
-    path: '{{ rsyslog_config_dir }}'
     sections:
 
       - options: |-
