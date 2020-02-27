@@ -2,7 +2,7 @@
 # Deploy configuration files
 - name: Install/Update role packages and generate role configuration files to role subdir
   vars:
-    __rsyslog_packages: "{{ __rsyslog_ovirt_prereq_packages | d([]) + __rsyslog_ovirt_packages | d([]) }}"
+    __rsyslog_packages: "{{ __rsyslog_ovirt_prereq_packages + __rsyslog_ovirt_packages }}"
     __rsyslog_rules: "{{ __rsyslog_ovirt_rules }}"
   include_role:
     name: "{{ role_path }}/../../../"

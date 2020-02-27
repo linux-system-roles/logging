@@ -261,7 +261,7 @@ It is required to run the tests as a user who is authorized to run the 'docker' 
 without using sudo.  This is typically accomplished by adding your user to the 'docker'
 group on your system.
 
-Additionally, there is a challenge around python-libselinux on platforms that use SELinux.
+Additionally, there is a challenge around python-libselinux (python3-libselinux for python3) on platforms that use SELinux.
 If you are using a virtualenv, you need to make sure that the selinux python module is
 available in the virtualenv.  Even if it is installed on your ansible controller host
 and the target host, some of the tasks that are delegated to the locahost will use the

@@ -7,10 +7,6 @@
 # Viaq log directory
 rsyslog_viaq_log_dir: '{{ rsyslog_system_log_dir }}/containers'
 
-# Viaq rpm packages
-# adding rsyslog_logging_packages
-# ------------------
-
 # Available configuration set
 # ----------------------------
 
