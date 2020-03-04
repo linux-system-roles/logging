@@ -254,7 +254,7 @@ out while developing.  This is best done by installing molecule in a virtualenv:
 ```
 $ virtualenv .venv
 $ source .venv/bin/activate
-$ pip install molecule docker
+$ pip install 'molecule<3' docker
 ```
 
 It is required to run the tests as a user who is authorized to run the 'docker' command
