@@ -10,7 +10,7 @@ env:
     - MOLECULE_DISTRO="fedora:30"
     - MOLECULE_DISTRO="fedora:31"
 install:
-  - pip install molecule docker
+  - pip install 'molecule<3' docker
   # workaround until https://github.com/ansible/molecule/issues/1727 is fixed
   - pip uninstall -y testinfra
   - pip install testinfra
