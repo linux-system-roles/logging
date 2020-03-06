@@ -60,4 +60,4 @@
     __rsyslog_rules: "{{ __rsyslog_elasticsearch_rules }}"
   include_role:
     name: "{{ role_path }}/../../../"
-    tasks_from: deploy.yaml
+    tasks_from: deploy.yml

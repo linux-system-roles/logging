@@ -1,4 +1,4 @@
-- name: Ensure that the role runs with rsyslog_enabled=true
+- name: Ensure that the role runs with logging_enabled=true
   hosts: all
   become: true
   vars:

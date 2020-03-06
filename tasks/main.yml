@@ -1,7 +1,6 @@
 ---
-# Set Rsyslog facts
-
-- block:
+- name: Set Rsyslog facts then include rsyslog role
+  block:
 
     - name: Set rsyslog_enabled
       set_fact:
@@ -92,21 +91,21 @@
 
     - name: Delete debug file
       file:
-        path: "{{ role_path }}/debug/main.yaml"
+        path: "{{ role_path }}/debug/main.yml"
         state: absent
       ignore_errors: true
       when: logging_debug | d(false)
 
     - name: Create rsyslog debug file
       lineinfile:
-        path: "{{ role_path }}/debug/main.yaml"
+        path: "{{ role_path }}/debug/main.yml"
         create: yes
         line: "#ANSIBLE MANAGED VARIABLES FILE"
       when: logging_debug | d(false)
 
     - name: Populate rsyslog debug file
       lineinfile:
-        path: "{{ role_path }}/debug/main.yaml"
+        path: "{{ role_path }}/debug/main.yml"
         create: yes
         line: "{{ item.key }}: {{ item.value | to_nice_json(indent=2) }}"
       with_dict: "{{ hostvars[inventory_hostname] }}"
@@ -114,7 +113,7 @@
         - item.key is match("rsyslog*")
         - logging_debug | d(false)
 
-    - name: include Rsyslog role
+    - name: Include Rsyslog role
       include_role:
         name: "{{ role_path }}/roles/rsyslog"
 

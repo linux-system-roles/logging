@@ -15,12 +15,12 @@ The `defaults` directory includes:
   - Defines the formatting and the rulebases for parsing the logs.
   - It is required to set for all logs the project identfier for pipelining:
     set $.logs_collection = "project name";
-    For example: In `ovirt` input role, in the default/main.yaml, for every log `$.logs_collection` is set to `ovirt`.
+    For example: In `ovirt` input role, in the default/main.yml, for every log `$.logs_collection` is set to `ovirt`.
   - If `rsyslog_default` equals to "true", It is required to set for all logs you don't want to be processed by the default rules:
     set $.send_targets_only = "true";
 
 The `tasks` directory includes 2 task files:
-  - `main.yaml` - tasks for deploying the config files
+  - `main.yml` - tasks for deploying the config files
     This file sets `__rsyslog_packages` and `__rsyslog_rules` and includes the task that deploys the files.
   - `cleanup.yml` - tasks that cleanup the files deployed for this project.
 
