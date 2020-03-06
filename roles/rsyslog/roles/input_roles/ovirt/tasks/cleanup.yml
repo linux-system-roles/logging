@@ -5,4 +5,4 @@
     __rsyslog_rules: "{{ __rsyslog_ovirt_rules }}"
   include_role:
     name: "{{ role_path }}/../../../"
-    tasks_from: cleanup.yaml
+    tasks_from: cleanup.yml

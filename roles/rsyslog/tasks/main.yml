@@ -179,7 +179,7 @@
     - name: Run remove input sub-roles configs
       include_role:
         name: "{{ role_path }}/roles/input_roles/{{ input_item.type }}"
-        tasks_from: cleanup.yaml
+        tasks_from: cleanup.yml
       loop: "{{ rsyslog_logs_collections | flatten(1) }}"
       loop_control:
         loop_var: input_item

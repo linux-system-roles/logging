@@ -10,7 +10,7 @@ Basics input role handles following inputs.
 - `imuxsock` - reads system logs from unix socket.  `off`, by default.  If `rsyslog_use_imuxsock` is set to `true`, `on`.
 - `imjournal` - reads system logs from `systemd-journald`.
 - `imklog` - reads kernel messages.  If `kernel-message` is in `rsyslog_capabilities`, `imklog` is enabled.  Disabled, by default.
-- `imfile` - reads messages from file. If `file-input` is in `rsyslog_capabilities`, `imfile` is enabled.  Disabled, by default.  Plus, when rsyslog_elasticsearch is configured, the messages are passed to the elasticsearch output config.  (Note: normalizing/reformatting is TBD.)
+- `imfile` - reads messages from file. If `file-input` is in `rsyslog_capabilities`, `imfile` is enabled.  Disabled, by default.  Plus, when elasticsearch type logging_outputs is configured, the messages are passed to the elasticsearch output config.  (Note: normalizing/reformatting is TBD.)
 
 Basically, these system lots are handled by \*.system output roles, that `files` and `forwards` belong to.
 

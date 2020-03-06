@@ -2,10 +2,11 @@
 # Default logging collector is Rsyslog
 logging_collector: rsyslog
 
+# Unless logging_enabled is set to true, logging role is no-op
 logging_enabled: true
 
+# List of output roles
 logging_outputs: []
 
-logging_custom_config_files: []
-
+# If logging_purge_confs is set to true, existing config files will be purged.
 logging_purge_confs: false
