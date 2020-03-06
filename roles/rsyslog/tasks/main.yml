@@ -2,7 +2,7 @@
   package:
     name: "{{ (__rsyslog_base_packages) + (__rsyslog_tls_packages if rsyslog_pki else []) + (rsyslog_extra_packages | flatten) }}"
     state: latest
-  when: __rsyslog_enabled
+  when: __rsyslog_enabled | bool
 
 - name: Gather package facts
   package_facts:

@@ -15,3 +15,5 @@ __rsyslog_base_packages: ['rsyslog']
 __rsyslog_tls_packages: ['rsyslog-gnutls', 'ca-certificates']
 
 __rsyslog_current_provider: "{{ logging_provider }}"
+
+__rsyslog_elasticsearch: []

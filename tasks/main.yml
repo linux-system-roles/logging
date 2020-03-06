@@ -4,7 +4,7 @@
 
     - name: Set __rsyslog_enabled
       set_fact:
-        __rsyslog_enabled: "{{ logging_enabled }}"
+        __rsyslog_enabled: "{{ logging_enabled | bool }}"
 
     - name: Set __rsyslog_elasticsearch
       set_fact:
