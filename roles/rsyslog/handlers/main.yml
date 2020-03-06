@@ -1,4 +1,8 @@
 ---
+- name: EXPERIMENTAL - set __rsyslog_current_provider back to logging_provider
+  set_fact:
+    logging_provider: "{{ __rsyslog_current_provider }}"
+
 - name: restart rsyslogd
   service:
     name: rsyslog

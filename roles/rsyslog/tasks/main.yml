@@ -23,6 +23,10 @@
     msg: "Rsyslog_version is {{ __rsyslog_version }}, which is newer than \"8.37.0-7.2\"."
   when: __rsyslog_version is version('8.37.0-7.2', '>')
 
+- name: EXPERIMENTAL - set __rsyslog_current_provider back to logging_provider
+  set_fact:
+    logging_provider: "{{ __rsyslog_current_provider }}"
+
 - block:
     - name: Set __rsyslog_failed_validation
       set_fact:
