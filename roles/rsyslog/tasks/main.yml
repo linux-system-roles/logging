@@ -13,7 +13,7 @@
   set_fact:
     __rsyslog_version: >-
       {{ ansible_facts.packages['rsyslog'][0].version
-      if ansible_facts.packages | selectattr('rsyslog', 'defined') | list | length > 0
+      if ansible_facts.packages | json_query('rsyslog')
       else '0.0.0' }}
 
 - debug:

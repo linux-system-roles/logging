@@ -14,6 +14,7 @@ install:
   # workaround until https://github.com/ansible/molecule/issues/1727 is fixed
   - pip uninstall -y testinfra
   - pip install testinfra
+  - pip install jmespath
 script:
   - molecule test
 branches:
