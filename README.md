@@ -176,8 +176,8 @@ Variables in vars.yml
 - `logging_collector`: The logs collector to use for the logs collection. Currently Rsyslog is the only supported logs collector. Defaults to `rsyslog`.
 - `logging_enabled` : When 'true', logging role will deploy specified configuration file set. Default to 'true'.
 - `logging_purge_confs`: By default, the Rsyslog configuration files are applied on top of pre-existing configuration files. To purge local files prior to setting new ones, set logging_purge_confs variable to 'true', it will move all Rsyslog configuration files to a backup directory, `/tmp/rsyslog.d-XXXXXX/backup.tgz`, before deploying the new configuration files. Defaults to 'false'.
-- `logging_mmk8s_token`: Path to token for kubernetes.  Default to "/etc/rsyslog.d/viaq/mmk8s.token".
-- `logging_mmk8s_ca_cert`: Path to CA cert for kubernetes.  Default to "/etc/rsyslog.d/viaq/mmk8s.ca.crt".
+- `logging_mmk8s_token`: Path to token for kubernetes.  Default to "/etc/rsyslog.d/mmk8s.token".
+- `logging_mmk8s_ca_cert`: Path to CA cert for kubernetes.  Default to "/etc/rsyslog.d/mmk8s.ca.crt".
 
 - `logging_outputs`: A set of following variables to specify output configurations.  It could be an list if multiple outputs that should to be configured.
    -  **If `type: elasticsearch`**, send logs to one or more remote elasticsearch or Viaq installations.
@@ -191,9 +191,9 @@ Variables in vars.yml
       - `server_host`: Hostname elasticsearch is running on.
       - `server_port`: Port number elasticsearch is listening to.
       - `index_prefix`: Elasticsearch index prefix the particular log will be indexed to.
-      - `ca_cert`: Path to CA cert for ElasticSearch.  Default to '/etc/rsyslog.d/elasticsearch/es-ca.crt'
-      - `cert`: Path to cert for ElasticSearch.  Default to '/etc/rsyslog.d/elasticsearch/es-cert.pem'
-      - `key`: Path to key for ElasticSearch.  Default to "/etc/rsyslog.d/elasticsearch/es-key.pem"
+      - `ca_cert`: Path to CA cert for ElasticSearch.  Default to '/etc/rsyslog.d/es-ca.crt'
+      - `cert`: Path to cert for ElasticSearch.  Default to '/etc/rsyslog.d/es-cert.pem'
+      - `key`: Path to key for ElasticSearch.  Default to "/etc/rsyslog.d/es-key.pem"
    -  **If `type: custom`** To include existing config files in the new ansible deployment, add the paths to custom_config_files as follows.  The specified files are copied to /etc/rsyslog.d.
       - `name`: Name of the custom file output element.
       - `type`: Type of the output element.
