@@ -128,7 +128,7 @@
       loop: '{{ __rsyslog_common_rules | flatten }}'
       when:
         - rsyslog_enabled | bool
-        - rsyslog_logs_collections is defined and rsyslog_logs_collections != []
+        - rsyslog_logs_collections | d([])
         - item.filename | d() or item.name | d()
         - item.state is undefined or item.state != 'absent'
         - item.options | d() or item.sections | d()
@@ -173,7 +173,7 @@
         loop_var: input_item
       when:
         - rsyslog_enabled | bool
-        - input_item is defined and input_item != []
+        - input_item | d([])
         - input_item.state | d('present') != 'absent'
 
     - name: Run remove input sub-roles configs
@@ -184,7 +184,7 @@
       loop_control:
         loop_var: input_item
       when:
-        - input_item is defined and input_item != []
+        - input_item | d([])
         - input_item.state | d('present') == 'absent'
 
     - name: Run output sub-roles configs
@@ -195,7 +195,7 @@
         loop_var: output_item
       when:
         - rsyslog_enabled | bool
-        - output_item is defined and output_item != []
+        - output_item | d([])
       tags:
         - skip_ansible_lint
 
