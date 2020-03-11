@@ -20,3 +20,14 @@
     - name: Check file counts in rsyslog.d
       assert:
         that: rsyslog_d_file_count.matched < 3
+
+    - name: Get rsyslog_version_str
+      command: /bin/grep "^# rsyslog version is " /etc/rsyslog.conf
+      register: rsyslog_version_str
+      changed_when: false
+
+    - name: Check rsyslog_version
+      assert:
+        that: rsyslog_version | d() and rsyslog_version != "0.0.0"
+      vars:
+        rsyslog_version: "{{ rsyslog_version_str.stdout | regex_search('[0-9]*\\.[0-9]*\\.[0-9]*') }}"

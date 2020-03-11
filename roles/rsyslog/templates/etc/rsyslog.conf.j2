@@ -1,5 +1,5 @@
 # {{ ansible_managed }}
-
+# rsyslog version is {{ __rsyslog_version }}.
 {% if not rsyslog_default | bool %}
 #
 # Include all config files in {{ rsyslog_config_dir }}
