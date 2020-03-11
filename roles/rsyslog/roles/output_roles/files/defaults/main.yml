@@ -39,7 +39,7 @@ __rsyslog_conf_files_output_rules:
     sections:
 
       - options: |-
-          {% if rsyslog_files_actions is defined and rsyslog_files_actions %}
+          {% if rsyslog_files_actions | d([]) %}
           {% for element in rsyslog_files_actions %}
           {% if element.name is defined and element.path is defined %}
           {% if element.severity is defined %}
