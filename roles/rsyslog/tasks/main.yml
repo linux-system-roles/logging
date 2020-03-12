@@ -54,6 +54,14 @@
         - rsyslog_unprivileged | bool
         - rsyslog_user != 'root'
 
+    - name: Create the config directory if it does not exist
+      file:
+        state: directory
+        path: '{{ rsyslog_config_dir }}'
+        owner: '{{ rsyslog_user }}'
+        group: '{{ rsyslog_file_group }}'
+        mode: 0755
+
     # Creating a work directory
     - name: Create a work directory
       file:
