@@ -32,34 +32,12 @@
   when: rsyslog_in_image | bool
 
 - block:
-    - name: Create required system group
-      group:
-        name: '{{ rsyslog_group }}'
-        state: present
-        system: true
-      when:
-        - rsyslog_unprivileged | bool
-        - rsyslog_group != 'root'
-
-    - name: Create required system user
-      user:
-        name: '{{ rsyslog_user }}'
-        group: '{{ rsyslog_group }}'
-        home: '{{ rsyslog_system_log_dir }}'
-        shell: '/bin/false'
-        state: present
-        createhome: false
-        system: true
-      when:
-        - rsyslog_unprivileged | bool
-        - rsyslog_user != 'root'
-
     - name: Create the config directory if it does not exist
       file:
         state: directory
         path: '{{ rsyslog_config_dir }}'
-        owner: '{{ rsyslog_user }}'
-        group: '{{ rsyslog_file_group }}'
+        owner: 'root'
+        group: 'root'
         mode: 0755
 
     # Creating a work directory
@@ -67,8 +45,8 @@
       file:
         state: directory
         path: '{{ rsyslog_work_dir }}'
-        owner: '{{ rsyslog_user }}'
-        group: '{{ rsyslog_file_group }}'
+        owner: 'root'
+        group: 'root'
         mode: 0700
 
     # Creating a backup dir for rsyslog.d
@@ -80,8 +58,8 @@
       file:
         state: directory
         path: '{{ rsyslog_backup_dir }}'
-        owner: '{{ rsyslog_user }}'
-        group: '{{ rsyslog_file_group }}'
+        owner: 'root'
+        group: 'root'
         mode: 0755
       changed_when: false
 
@@ -94,29 +72,29 @@
         remove: '{{ true if rsyslog_purge_original_conf | bool else false }}'
       changed_when: false
 
-    - name: Get directory stat
+    - name: Get directory stat of rsyslog_system_log_dir (/var/log)
       stat:
         path: "{{ rsyslog_system_log_dir }}"
-      register: stat_rsyslog_system_log_dir
+      register: __rsyslog_system_log_dir_stat
 
     - name: Update directory and file permissions
-      shell: |
-        [ ! -d {{ rsyslog_system_log_dir }} ] ||
-        ( [ "$(stat -c '%G' {{ rsyslog_system_log_dir }})" = "{{ rsyslog_group }}" ] ||
-        ( chown -v root:{{ rsyslog_group }} {{ rsyslog_system_log_dir }} ;
-        chmod -v 0775 {{ rsyslog_system_log_dir }} ) )
-      register: rsyslog_register_file_permissions
-      when: rsyslog_unprivileged | bool
-      changed_when:
-        - rsyslog_register_file_permissions.rc == 0
-        - stat_rsyslog_system_log_dir.stat.mode != "0755"
+      file:
+        state: directory
+        path: '{{ rsyslog_system_log_dir }}'
+        owner: 'root'
+        group: 'root'
+        mode: 0755
+      when:
+        - not __rsyslog_system_log_dir_stat.stat.isdir
+        - __rsyslog_system_log_dir_stat.stat.uid != 0 or __rsyslog_system_log_dir_stat.stat.gid != 0
+        - __rsyslog_system_log_dir_stat.stat.mode != '0755'
 
     - name: Generate main rsyslog configuration
       template:
         src: 'etc/rsyslog.conf.j2'
         dest: '/etc/rsyslog.conf'
-        owner: '{{ rsyslog_user }}'
-        group: '{{ rsyslog_group }}'
+        owner: 'root'
+        group: 'root'
         mode: '0400'
       when:
         - rsyslog_enabled | bool

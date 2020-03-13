@@ -263,12 +263,9 @@ Common sub-variables
 - `rsyslog_backup_dir`: By default, the Rsyslog backs up the pre-existing configuration files in a temp dir as tar-gz format - /tmp/rsyslog.d-XXXXXX/backup.tgz.  By setting a path to `rsyslog_backup_dir`, the path is used as the backup directory.  Note that the directory should exist and have the permission to create the backup file both in the file mode and the selinux.
 - `rsyslog_config_dir`: Directory to store configuration files.  Default to '/etc/rsyslog.d'.
 - `rsyslog_custom_config_files`: List of custom configuration files are deployed to /etc/rsyslog.d.  The format is an array which element is the full path to each custom configuration file.  Default to none.
-- `rsyslog_group`: Owner group of rsyslogd.  Default to 'syslog' if `rsyslog_unprivileged` is true.  Otherwise, 'root'.
 - `rsyslog_in_image`: Specifies if the target host is a container and use rsyslog in the image. Default to false.
 - `rsyslog_purge_original_conf`: By default, the Rsyslog configuration files are applied on top of pre-existing configuration files. To purge local files prior to setting new ones, set `rsyslog_purge_original_conf` variable to 'true', it will move all Rsyslog configuration files to a backup directory before deploying the new configuration files. Defaults to 'false'.
 - `rsyslog_system_log_dir`: System log directory.  Default to '/var/log'.
-- `rsyslog_unprivileged`: If set to true, you could specify non-root `rsyslog_user` and `rsyslog_group`.  If ansible_distribution is one of "CentOS", "RedHat", and "Fedora", default to true.  Otherwise, 'false'.
-- `rsyslog_user`: Owner user of rsyslogd.  Default to 'syslog' if `rsyslog_unprivileged` is 'true'.  Otherwise, 'root'.
 - `rsyslog_work_dir`: Working directory.  Default to '/var/lib/rsyslog'.
 
 Files and Forwards output_role sub-variables

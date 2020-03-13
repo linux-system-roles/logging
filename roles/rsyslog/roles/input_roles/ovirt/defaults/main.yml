@@ -5,8 +5,6 @@
 # Available configuration set
 # ----------------------------
 
-rsyslog_unprivileged: false
-
 rsyslog_elasticsearch: []
 
 

@@ -60,10 +60,6 @@
       tags:
         - skip_ansible_lint
 
-    - name: Set rsyslog_unprivileged fact
-      set_fact:
-        rsyslog_unprivileged: "{{ logging_unprivileged | d(false) }}"
-
     - name: Set rsyslog_purge_original_conf fact to purge all configuration files before saving the new ones.
       set_fact:
         rsyslog_purge_original_conf: yes

@@ -3,8 +3,6 @@
 # ----------------------------
 rsyslog_pki: true
 
-rsyslog_unprivileged: false
-
 # rsyslog_capabilities is an array which takes 'network', 'remote-files', 'tls'
 # 'network' enables input and output over network.
 # 'remote-files' allows input from remote hosts are separately stored from the local logs.
