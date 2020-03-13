@@ -70,7 +70,6 @@
         owner: '{{ rsyslog_user }}'
         group: '{{ rsyslog_file_group }}'
         mode: 0700
-      changed_when: false
 
     # Creating a backup dir for rsyslog.d
     - name: Set backup dir name
