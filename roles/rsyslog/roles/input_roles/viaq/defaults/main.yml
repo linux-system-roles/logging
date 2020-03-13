@@ -2,11 +2,6 @@
 # Viaq configuration
 # ---------------------
 
-# Available configuration set
-# ----------------------------
-
-rsyslog_unprivileged: false
-
 # Viaq Rsyslog configuration rules
 # ---------------------------
 
