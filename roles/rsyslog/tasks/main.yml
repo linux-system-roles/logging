@@ -36,18 +36,12 @@
       file:
         state: directory
         path: '{{ rsyslog_config_dir }}'
-        owner: 'root'
-        group: 'root'
-        mode: 0755
 
     # Creating a work directory
     - name: Create a work directory
       file:
         state: directory
         path: '{{ rsyslog_work_dir }}'
-        owner: 'root'
-        group: 'root'
-        mode: 0700
 
     # Creating a backup dir for rsyslog.d
     - name: Set backup dir name
@@ -58,9 +52,7 @@
       file:
         state: directory
         path: '{{ rsyslog_backup_dir }}'
-        owner: 'root'
-        group: 'root'
-        mode: 0755
+        mode: 0700
       changed_when: false
 
     # Back up the pre-existing rsyslog config files in the backup dir,
@@ -81,20 +73,15 @@
       file:
         state: directory
         path: '{{ rsyslog_system_log_dir }}'
-        owner: 'root'
-        group: 'root'
-        mode: 0755
-      when:
-        - not __rsyslog_system_log_dir_stat.stat.isdir
-        - __rsyslog_system_log_dir_stat.stat.uid != 0 or __rsyslog_system_log_dir_stat.stat.gid != 0
-        - __rsyslog_system_log_dir_stat.stat.mode != '0755'
+        mode: '0700'
+      when: (not __rsyslog_system_log_dir_stat.stat.isdir) or
+            (__rsyslog_system_log_dir_stat.stat.uid != 0 or __rsyslog_system_log_dir_stat.stat.gid != 0) or
+            (__rsyslog_system_log_dir_stat.stat.mode != '0700')
 
     - name: Generate main rsyslog configuration
       template:
         src: 'etc/rsyslog.conf.j2'
         dest: '/etc/rsyslog.conf'
-        owner: 'root'
-        group: 'root'
         mode: '0400'
       when:
         - rsyslog_enabled | bool
