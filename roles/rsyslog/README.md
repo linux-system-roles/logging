@@ -359,7 +359,7 @@ Type is for adding prefix to the file name to manage the order of the configurat
 
 If the deploy destination is other than {{ rsyslog_config_dir }}, the path is to be set to path.
 
-By default, the generated configuration file starts with a comment "# Ansible managed".  It could break some type of configurations.  For instance, "version=2" must be the first line in a rulebase file.  To avoid having "# Ansible managed", set true to nocomment.
+By default, the generated configuration file starts with a comment "# Ansible managed - DO NOT EDIT".  It could break some type of configurations.  For instance, "version=2" must be the first line in a rulebase file.  To avoid having "# Ansible managed", set true to nocomment.
 
 Some full path configuration may be referred from other configuration file, e.g., 20-viaq_formattiong.conf refers parse_json.rulebase as follows.
 ```
