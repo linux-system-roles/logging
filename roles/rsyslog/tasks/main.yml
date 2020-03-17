@@ -64,25 +64,18 @@
         remove: '{{ true if rsyslog_purge_original_conf | bool else false }}'
       changed_when: false
 
-    - name: Get directory stat of rsyslog_system_log_dir (/var/log)
-      stat:
-        path: "{{ rsyslog_system_log_dir }}"
-      register: __rsyslog_system_log_dir_stat
-
-    - name: Update directory and file permissions
+    - name: Create logging directory if it does not exist or the ownership and/or modes are different.
       file:
         state: directory
         path: '{{ rsyslog_system_log_dir }}'
+        owner: 'root'
+        group: 'root'
         mode: '0700'
-      when: (not __rsyslog_system_log_dir_stat.stat.isdir) or
-            (__rsyslog_system_log_dir_stat.stat.uid != 0 or __rsyslog_system_log_dir_stat.stat.gid != 0) or
-            (__rsyslog_system_log_dir_stat.stat.mode != '0700')
 
     - name: Generate main rsyslog configuration
       template:
         src: 'etc/rsyslog.conf.j2'
         dest: '/etc/rsyslog.conf'
-        mode: '0400'
       when:
         - rsyslog_enabled | bool
       notify: restart rsyslogd
@@ -96,7 +89,7 @@
           "." + (item.suffix | d("conf"))) }}
         owner: '{{ item.owner | d("root") }}'
         group: '{{ item.group | d("root") }}'
-        mode: '{{ item.mode | d("0400") }}'
+        mode: '{{ item.mode | d("0644") }}'
       loop: '{{ __rsyslog_common_rules | flatten }}'
       when:
         - rsyslog_enabled | bool
@@ -132,7 +125,7 @@
         dest: '{{ rsyslog_config_dir }}'
         owner: '{{ item.owner | d("root") }}'
         group: '{{ item.group | d("root") }}'
-        mode: '{{ item.mode | d("0400") }}'
+        mode: '{{ item.mode | d("0644") }}'
       loop: '{{ rsyslog_custom_config_files | flatten }}'
       when: (rsyslog_enabled | bool)
       notify: restart rsyslogd
