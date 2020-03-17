@@ -16,7 +16,7 @@
       "-" + (item.name | d("rules")) + "." + (item.suffix | d("conf"))) }}
     owner: '{{ item.owner | d("root") }}'
     group: '{{ item.group | d("root") }}'
-    mode: '{{ item.mode  | d("0400") }}'
+    mode: '{{ item.mode  | d("0644") }}'
   loop: '{{ __rsyslog_rules | flatten }}'
   when:
     - item.filename | d() or item.name | d()
