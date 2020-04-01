@@ -13,8 +13,8 @@
   set_fact:
     __rsyslog_version: >-
       {{ ansible_facts.packages['rsyslog'][0].version
-      if ansible_facts.packages | json_query('rsyslog')
-      else '0.0.0' }}
+         if 'rsyslog' in ansible_facts.packages
+         else '0.0.0' }}
 
 - debug:
     msg: "Rsyslog_version is {{ __rsyslog_version }}, which is older than \"8.37.0-7.2\"."
