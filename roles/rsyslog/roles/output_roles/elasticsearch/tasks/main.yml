@@ -59,5 +59,5 @@
     __rsyslog_packages: "{{ __rsyslog_elasticsearch_packages }}"
     __rsyslog_rules: "{{ __rsyslog_elasticsearch_rules }}"
   include_role:
-    name: "{{ role_path }}/../../../"
+    name: "{{ role_path | dirname | dirname | dirname }}"
     tasks_from: deploy.yml
