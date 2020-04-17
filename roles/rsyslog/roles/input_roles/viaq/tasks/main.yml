@@ -5,5 +5,5 @@
     __rsyslog_packages: "{{ __rsyslog_viaq_prereq_packages + __rsyslog_viaq_packages }}"
     __rsyslog_rules: "{{ __rsyslog_viaq_rules }}"
   include_role:
-    name: "{{ role_path | dirname | dirname | dirname }}"
+    name: "{{ role_path | dirname | dirname | dirname ~ '/rsyslog' }}"
     tasks_from: deploy.yml
