@@ -1,6 +1,6 @@
 ---
 # Deploy configuration files
-- name: Remove viaq configs
+- name: Remove viaq configuration files from /etc/rsyslog.d
   vars:
     __rsyslog_rules: "{{ __rsyslog_viaq_rules }}"
   include_role:

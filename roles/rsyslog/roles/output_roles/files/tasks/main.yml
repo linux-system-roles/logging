@@ -1,6 +1,6 @@
 ---
 # Deploy configuration files
-- name: Install/Update role packages and generate role configuration files for output to local files
+- name: Install/Update files output packages and generate configuration files in /etc/rsyslog.d
   vars:
     __rsyslog_packages: "{{ __rsyslog_files_output_packages }}"
     __rsyslog_rules: "{{ __rsyslog_files_output_rules }}"

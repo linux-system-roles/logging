@@ -54,7 +54,7 @@
     - use_local_omelasticsearch_cert | default(false) | bool
 
 # Deploy configuration files
-- name: Install/Update role packages and generate role configuration files (elasticsearch)
+- name: Install/Update elasticsearch logging packages and generate configuration files in /etc/rsyslog.d
   vars:
     __rsyslog_packages: "{{ __rsyslog_elasticsearch_packages }}"
     __rsyslog_rules: "{{ __rsyslog_elasticsearch_rules }}"

@@ -1,6 +1,6 @@
 ---
 # Deploy configuration files
-- name: Install/Update role packages and generate role configuration files to role subdir
+- name: Install/Update viaq-k8s packages and generate configuration files in /etc/rsyslog.d
   vars:
     __rsyslog_packages: "{{ __rsyslog_viaq_k8s_packages }}"
     __rsyslog_rules: "{{ __rsyslog_viaq_k8s_rules }}"

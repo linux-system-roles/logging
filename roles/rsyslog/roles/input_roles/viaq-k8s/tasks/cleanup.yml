@@ -1,6 +1,6 @@
 ---
 # Deploy configuration files
-- name: Remove Viaq-k8s role config files from subdir
+- name: Remove viaq-k8s input configuration files from /etc/rsyslog.d
   vars:
     __rsyslog_rules: "{{ __rsyslog_viaq_k8s_rules }}"
   include_role:
