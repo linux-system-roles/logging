@@ -1,6 +1,6 @@
 ---
 # Deploy configuration files
-- name: Install/Update role packages and generate role configuration files to role subdir
+- name: Install/Update oVirt logging packages and generate configuration files in /etc/rsyslog.d
   vars:
     __rsyslog_packages: "{{ __rsyslog_ovirt_prereq_packages + __rsyslog_ovirt_packages }}"
     __rsyslog_rules: "{{ __rsyslog_ovirt_rules }}"

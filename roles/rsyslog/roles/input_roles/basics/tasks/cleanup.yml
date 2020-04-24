@@ -1,6 +1,6 @@
 ---
 # Deploy configuration files
-- name: Remove basics example config files from rsyslog.d
+- name: Remove basics input configuration files from /etc/rsyslog.d
   vars:
     __rsyslog_rules: "{{ __rsyslog_basics_rules }}"
   include_role:

@@ -1,6 +1,6 @@
 ---
 # Deploy configuration files
-- name: Install/Update basics role packages and generate example configuration files to role subdir
+- name: Install/Update basics input packages and generate configuration files in /etc/rsyslog.d
   vars:
     __rsyslog_packages: "{{ __rsyslog_basics_packages }}"
     __rsyslog_rules: "{{ __rsyslog_basics_rules }}"
