@@ -154,13 +154,48 @@
 
     - name: Run output sub-roles configs
       include_role:
-        name: "{{ role_path }}/roles/output_roles/{{ output_item.type }}"
+        name: "{{ subrole }}"
+      vars:
+        subrole: "{{ role_path }}/roles/output_roles/{{ output_item.type }}"
       loop: "{{ rsyslog_outputs | flatten(1) }}"
       loop_control:
         loop_var: output_item
       when:
         - rsyslog_enabled | bool
         - output_item | d([])
+        - subrole is directory
+      tags:
+        - skip_ansible_lint
+
+    - name: Include output sub-vars 
+      include_vars:
+        name: "{{ varfile }}"
+      vars:
+        varfile: "outputs/{{ output_item.type }}.yml"
+        varfile_abspath: "{{ role_path }}/vars/{{ varfile }}.yml"
+      loop: "{{ rsyslog_outputs | flatten(1) }}"
+      loop_control:
+        loop_var: output_item
+      when:
+        - rsyslog_enabled | bool
+        - output_item | d([])
+        - varfile_abspath is exists
+      tags:
+        - skip_ansible_lint
+
+    - name: Run output sub-tasks 
+      include_tasks:
+        name: "{{ tasks }}"
+      vars:
+        tasks: "outputs/{{ output_item.type }}.yml"
+        tasks_abspath: "{{ role_path }}/tasks/{{ tasks }}"
+      loop: "{{ rsyslog_outputs | flatten(1) }}"
+      loop_control:
+        loop_var: output_item
+      when:
+        - rsyslog_enabled | bool
+        - output_item | d([])
+        - tasks_abspath is exists
       tags:
         - skip_ansible_lint
 
