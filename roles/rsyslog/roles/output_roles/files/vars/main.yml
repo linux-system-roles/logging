@@ -1,6 +1,0 @@
-# Local file output rpm packages
-
-# __rsyslog_files_output_packages
-#
-# List of rpm packages for Files output.
-__rsyslog_files_output_packages: []

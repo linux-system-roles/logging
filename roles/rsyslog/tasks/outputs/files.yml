@@ -3,7 +3,6 @@
 - name: Install/Update files output packages and generate configuration files in /etc/rsyslog.d
   vars:
     __rsyslog_packages: "{{ __rsyslog_files_output_packages }}"
-    __rsyslog_rules: "{{ __rsyslog_files_output_rules }}"
-  include_role:
-    name: "{{ role_path | dirname | dirname | dirname }}"
-    tasks_from: deploy.yml
+    __rsyslog_rules: "{{ __rsyslog_test2 }}"
+  include_tasks:
+    name: deploy.yml
