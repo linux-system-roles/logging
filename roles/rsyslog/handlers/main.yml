@@ -3,10 +3,3 @@
   service:
     name: rsyslog
     state: restarted
-  when: not __rsyslogd_restarted | d(false)
-  listen: 'restart rsyslogd'
-
-- name: set rsyslogd restarted
-  set_fact:
-    __rsyslogd_restarted: true
-  listen: 'restart rsyslogd'

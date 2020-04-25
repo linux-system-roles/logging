@@ -1,6 +1,6 @@
 # Rsyslog
 
-## Input Roles
+## Input Tasks
 
 ### basics
 
@@ -27,9 +27,10 @@ The remote logs are handed to \*.remote via remote ruleset.  Then, the logs are 
 
 ### viaq-k8s
 
-## Output Roles
+## Output Tasks
 
 ### elasticsearch
+- `omelasticsearch` - configure outputs to elasticsearch.  See also [tests_files_elasticsearch.yml](../tests/tests__files_elasticsearch.yml) for an example.
 
 ### files
 - `builtin:omfile` - configure outputs to the local files.  If rsyslog_files is not defined or empty, the predefined configuration is deployed, which is the same as the file outputs to the part in rsyslog.conf in the rsyslog rpm package.  If rsyslog_files are configured, the file outputs are generated according to the config params (See also [basics inputs/files outputs/flows](logging_subsystem.md#basics-inputsfiles-outputsflows) as well as [tests_files.yml](../tests/tests_files.yml) and [tests_files_forwards.yml](../tests/tests_files_forwards.yml) for examples.)

@@ -1,6 +1,0 @@
-# rpm packages for forwards output
-
-# __rsyslog_forwards_output_packages
-#
-# List of rpm packages for Forwards output.
-__rsyslog_forwards_output_packages: []

@@ -1,0 +1,61 @@
+---
+- block:
+    # This block collect certificates from local location and copies them to /etc/rsyslog.d directory
+    - name: Copy local Elasticsearch ca_certs to /etc/rsyslog.d directory in Rsyslog
+      copy:
+        src: '{{ item.ca_cert_src }}'
+        dest: '{{ rsyslog_config_dir }}'
+      with_items:
+        - '{{ rsyslog_output_elasticsearch }}'
+      when:
+        - item.ca_cert_src is defined
+        - item.ca_cert_src | length > 0
+
+    - name: Copy local Elasticsearch certs to /etc/rsyslog.d directory in Rsyslog
+      copy:
+        src: '{{ item.cert_src }}'
+        dest: '{{ rsyslog_config_dir }}'
+      with_items:
+        - '{{ rsyslog_output_elasticsearch }}'
+      when:
+        - item.cert_src is defined
+        - item.cert_src | length > 0
+
+    - name: Copy local Elasticsearch keys to /etc/rsyslog.d directory in Rsyslog
+      copy:
+        src: '{{ item.key_src }}'
+        dest: '{{ rsyslog_config_dir }}'
+      with_items:
+        - '{{ rsyslog_output_elasticsearch }}'
+      when:
+        - item.key_src is defined
+        - item.key_src | length > 0
+
+    - name: Update ca_cert path to /etc/rsyslog.d directory in Rsyslog
+      set_fact:
+        __rsyslog_elasticsearch_temp: >-
+          {{ __rsyslog_elasticsearch_temp | d([]) }} +
+          {{ [ item | combine( { 'ca_cert': item.ca_cert_src | basename ,
+          'cert': item.cert_src | basename, 'key': item.key_src | basename } ) ] }}
+      with_items:
+        - '{{ rsyslog_output_elasticsearch }}'
+      when:
+        - item.ca_cert_src is defined
+        - item.ca_cert_src | length > 0
+      register: result
+
+    - name: Set updated rsyslog_output_elasticsearch
+      set_fact:
+        rsyslog_output_elasticsearch: "{{ __rsyslog_elasticsearch_temp }}"
+
+  when:
+    - rsyslog_output_elasticsearch | d([])
+    - use_local_omelasticsearch_cert | default(false) | bool
+
+# Deploy configuration files
+- name: Install/Update elasticsearch logging packages and generate configuration files in /etc/rsyslog.d
+  vars:
+    __rsyslog_packages: "{{ __rsyslog_elasticsearch_packages }}"
+    __rsyslog_rules: "{{ __rsyslog_elasticsearch_rules }}"
+  include_tasks:
+    file: deploy.yml

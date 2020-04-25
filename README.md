@@ -36,7 +36,7 @@ Definitions
   - [`Viaq`](https://docs.okd.io/latest/install_config/aggregate_logging.html)- Common Logging based on OpenShift Aggregated Logging (OCP/Origin).
   - [`Elasticsearch`](https://www.elastic.co/) - Non-OpenShift standalone Elasticsearch.
   - `Local` - Output the collected logs to a local File / Journal (Not yet implemented). Supported only for default and basics Rsyslog data at this point.
-  - `Remote Rsyslog` - Output logs to a remote Rsyslog server. - Not yet implemented
+  - `Remote Rsyslog` - Output logs to a remote Rsyslog server.
   - `Message Queue` (kafka, amqp) - Not yet implemented
 
 Deploy Configuration Files
@@ -70,32 +70,32 @@ vars.yml stores variables which are passed to ansible to control the tasks.
 Initial configuration will be supplied by default.
 User can supply further configuration to be used.
 
-Currently, the role supports 3 types of logs collections ([input_roles](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/roles/input_roles/)): `basics`, `ovirt`, and `viaq`.  And 3 types of log outputs ([output_roles](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/roles/output_roles/)): `elasticsearch`, `files`, and `forwards`.  To deploy configuration files with these input and output roles, first specify the output_role as `logging_outputs`, then input_role as `logging_inputs`.  For define the flow from inputs to outputs, use `logging_flows`.  The `logging_flows` is made from, `name`, `inputs`, and `outputs`, where `inputs` is a list of `logging_inputs name` values and `outputs` is a list of `logging_outputs name` values.
+Currently, the logging role supports four types of logs collections ([inputs](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/tasks/inputs/)): `basics`, `files`, `ovirt`, and `viaq`.  And 3 types of log outputs ([outputs](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/tasks/outputs/)): `elasticsearch`, `files`, and `forwards`.  To deploy configuration files with these inputs and outputs, first specify the outputs as `logging_outputs`, then inputs as `logging_inputs`.  For define the flow from inputs to outputs, use `logging_flows`.  The `logging_flows` is made from, `name`, `inputs`, and `outputs`, where `inputs` is a list of `logging_inputs name` values and `outputs` is a list of `logging_outputs name` values.
 
 To make an effect with the following setting, vars.yml has to have `logging_enabled: true`.  Unless logging_enabled is set to true, LSR/Logging does not deploy logging systems.
 
-**Note:** Current LSR/Logging supports rsyslog only.  In case other logging system is added to LSR/Logging in the future, it's supposed to implement the input and output roles to satisfy the logging_outputs and logging_inputs semantics.
+**Note:** Current LSR/Logging supports rsyslog only.  In case other logging system is added to LSR/Logging in the future, it's supposed to implement the input and output tasks to satisfy the logging_outputs and logging_inputs semantics.
 
-This is an example of the logging configuration to show log messages from input_role_nameA are passed to output_role_name0 and output_role_name1; log messages from input_role_nameB are to output_role_name1, only.
+This is an example of the logging configuration to show log messages from input_nameA are passed to output_name0 and output_name1; log messages from input_nameB are to output_name1, only.
 ```
 logging_enabled: true
 logging_outputs:
-  - name: output_role_name0
+  - name: output_name0
     type: output_type0
-  - name: output_role_name1
+  - name: output_name1
     type: output_type1
 logging_inputs:
-  - name: input_role_nameA
+  - name: input_nameA
     type: input_typeA
-  - name: input_role_nameB
+  - name: input_nameB
     type: input_typeB
 logging_flows:
   - name: flow_nameX
-    inputs: [input_role_nameA]
-    outputs: [output_role_name0, output_role_name1]
+    inputs: [input_nameA]
+    outputs: [output_name0, output_name1]
   - name: flow_nameY
-    inputs: [input_role_nameB]
-    outputs: [output_role_name1]
+    inputs: [input_nameB]
+    outputs: [output_name1]
 ```
 
 **vars.yml examples:**
@@ -208,7 +208,7 @@ Variables in vars.yml
 - `logging_mmk8s_ca_cert`: Path to CA cert for kubernetes.  Default to "/etc/rsyslog.d/mmk8s.ca.crt".
 - `logging_outputs`: A set of following variables to specify output configurations.  It could be an list if multiple outputs that should to be configured.
    - `name`: Unique name of the output
-   - `type`: Type of the output element. Currently, `elasticsearch`, `files`, and `forwards` are supported. The `type` is used to specify a role in roles/rsyslog/roles/output_roles/.
+   - `type`: Type of the output element. Currently, `elasticsearch`, `files`, and `forwards` are supported. The `type` is used to specify a task type which corresponds to a directory name in roles/rsyslog/tasks/outputs/.
    -  ** `type: elasticsearch`**
       - `server_host`: Hostname elasticsearch is running on.
       - `server_port`: Port number elasticsearch is listening to.
@@ -260,24 +260,23 @@ format them and ship them to the required destination.
 It currently supports Rsyslog as the default logs collector.
 
 The projects are called `logging_inputs` and the user can choose to deploy several projects at the same time.
-Each project adds a sub-role to [input_roles](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/roles/input_roles/).
+Each project adds a sub-task to [inputs](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/tasks/inputs/) with the matching var file in [inputs](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/vars/inputs/).
 
-The sub-role usually includes `tasks` and `defaults` directories.
-The `defaults` directory includes:
+The sub-task/main.yml in [inputs](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/vars/inputs/) usually contains.
   - List of required packages that are **not** the base rsyslog_base_packages: ['rsyslog']
   - List of modules to load  like `imfile`, `imtcp`, etc.
   - Defines the formatting and the rulebases for parsing the logs.
-  - It is required to set for all logs the project identfier for pipelining:
+  - It is required to set for all logs the project identifier for pipelining:
     set $.input_type = "input type";
 
-The `tasks` directory includes 2 tasks file:
+The `tasks/sub-task` directory includes 2 tasks file:
   - `main.yml` - tasks for deploying the config files
     This file is sets `__rsyslog_packages` and `__rsyslog_rules` and includes the task that deploys the files.
   - `cleanup.yml` - tasks that cleanup the files deployed for this project.
 
 Examples can be found in the existing projects.
 
-The available outputs are defined in [output_roles](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/roles/output_roles/).
+The available outputs are defined in [outputs](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/tasks/outputs/).
 Currently, It supports Elasticsearch, writing to local files, and forwarding to remote rsyslog.
 Additional output will be added.
 
@@ -324,13 +323,15 @@ can test against a different image/tag like so:
 
 CI tests
 ========
-The tests are tests/tests_*.yml, which are triggered when a pull request is submitted.
+The tests are tests/tests_*.yml, which are triggered when a pull request is submitted.  Each tests_testname.yml is written in the ansible format. The file is made from the test logging_outputs, logging_inputs and logging_flows configuration, ansible exection, and the test result checking.
+
+It is triggered when a pull request is submitted and its commit is updated.
 
 To run the tests manually,
 1. Download CentOS qcow2 image from https://cloud.centos.org/centos/.
 2. Run the following command from the `tests` directory, which spawns an openshift node locally and runs the test yml on it.
    ```
-   TEST_SUBJECTS=/path/to/downloaded_your_CentOS_7_or_8_image.qcow2 ansible-playbook [-vvvv] -i /usr/share/ansible/inventory/standard-inventory-qcow2 tests_something.yml
+   TEST_SUBJECTS=/path/to/downloaded_your_CentOS_7_or_8_image.qcow2 ansible-playbook [-vvvv] -i /usr/share/ansible/inventory/standard-inventory-qcow2 tests_testname.yml
    ```
 3. To debug it, add `TEST_DEBUG=true` prior to `ansible-playbook`.
 4. Once the ansible-playbook is finished, you could ssh to the node as follows:

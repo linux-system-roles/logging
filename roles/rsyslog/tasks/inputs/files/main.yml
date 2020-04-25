@@ -1,0 +1,8 @@
+---
+# Deploy configuration files
+- name: Install/Update files input packages and generate configuration files in /etc/rsyslog.d
+  vars:
+    __rsyslog_packages: "{{ __rsyslog_files_input_packages }}"
+    __rsyslog_rules: "{{ __rsyslog_files_input_rules }}"
+  include_tasks:
+    file: deploy.yml
