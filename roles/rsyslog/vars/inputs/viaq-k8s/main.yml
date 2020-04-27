@@ -34,7 +34,7 @@ logging_mmk8s_token: ''
 
 __rsyslog_conf_viaq_mmk8s_module:
 
-  - name: 'mmk8s'
+  - name: 'input-viaq-k8s-modules'
     type: 'modules'
     sections:
 
@@ -47,7 +47,7 @@ __rsyslog_conf_viaq_mmk8s_module:
 
 __rsyslog_conf_viaq_mmk8s_input:
 
-  - name: 'mmk8s'
+  - name: 'input-viaq-k8s-templates'
     type: 'templates'
     sections:
 
@@ -72,7 +72,7 @@ __rsyslog_conf_viaq_mmk8s_input:
 
 __rsyslog_rulebase_viaq_k8s_filename:
 
-  - name: 'k8s_filename'
+  - name: 'input-viaq-k8s-filename'
     filename: 'k8s_filename.rulebase'
     nocomment: true
     sections:
@@ -83,7 +83,7 @@ __rsyslog_rulebase_viaq_k8s_filename:
 
 __rsyslog_rulebase_viaq_k8s_container_name:
 
-  - name: 'k8s_container_name'
+  - name: 'input-viaq-k8s-container-name'
     filename: 'k8s_container_name.rulebase'
     nocomment: true
     sections:
@@ -97,7 +97,7 @@ __rsyslog_rulebase_viaq_k8s_container_name:
 
 __rsyslog_rulebase_viaq_crio:
 
-  - name: 'crio'
+  - name: 'input-viaq-k8s-crio'
     filename: 'crio.rulebase'
     nocomment: true
     sections:

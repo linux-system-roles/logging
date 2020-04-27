@@ -6,3 +6,16 @@
     __rsyslog_rules: "{{ __rsyslog_basics_rules }}"
   include_tasks:
     file: deploy.yml
+
+- name: Create basics input configuration files in /etc/rsyslog.d
+  vars:
+    __basics_input: "{{ lookup('template', 'input_basics.j2') }}"
+    __rsyslog_packages: []
+    __rsyslog_rules: [ { "name": "input-basics-{{ basics_item.name }}", "type": "input", "weight": "11",
+                         "sections": [ { "options": "{{ __basics_input }}" } ] } ]
+  include_tasks:
+    file: deploy.yml
+  loop: '{{ logging_inputs }}'
+  loop_control:
+    loop_var: basics_item
+  when: basics_item.type | d() == 'basics'

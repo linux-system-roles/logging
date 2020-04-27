@@ -19,7 +19,6 @@ rsyslog_input_log_path: "/var/log/containers/*.log"
 # in a special format. This list specifies ``rsyslogd`` imfile configuration.
 __rsyslog_files_input_rules:
   - '{{ __rsyslog_conf_imfile_modules }}'
-  - '{{ __rsyslog_conf_imfile_inputs }}'
 
 # Debops example configuration options
 # --------------------------------------------
@@ -30,58 +29,10 @@ __rsyslog_files_input_rules:
 # received and parsed by the ``rsyslogd`` daemon.
 __rsyslog_conf_imfile_modules:
 
-  - name: 'imfile-modules'
+  - name: 'input-files-modules'
     type: 'modules'
     sections:
 
       - comment: 'Reads log messages from file'
         options: |-
           module(load="imfile" mode="inotify")
-
-__rsyslog_conf_imfile_inputs:
-
-  - name: 'imfile-input'
-    type: 'input'
-    sections:
-
-      - comment: 'Log messages from log files'
-        options: |-
-          {% for input in logging_inputs %}
-          {%   if input.type == "files" %}
-          input(type="imfile" file="{{ input.rsyslog_input_log_path | d(rsyslog_input_log_path) }}" tag="{{ input.name }}")
-          {%   endif %}
-          {% endfor %}
-          {% set indict = {} %}
-          {% set input_list = [] %}
-          {% for input in logging_inputs %}
-          {%   set _ = indict.__setitem__(input.name, input) %}
-          {%   if input.type == "files" %}
-          {%     set input_list = input_list.append( input.name ) %}
-          {%   endif %}
-          {% endfor %}
-          {% set rsyslog_flows = logging_flows | d([ {"name": "default_flow", "inputs": input_list, "outputs": ["default_files"]} ], true) %}
-          {% set outdict = {} %}
-          {% for flow in rsyslog_flows %}
-          {%   for oname in flow.outputs %}
-          {%     set _ = outdict.__setitem__(oname, outdict.get(oname,[])|union(flow.inputs)) %}
-          {%   endfor %}
-          {% endfor %}
-          {% for output in rsyslog_outputs %}
-          {%   if outdict[output.name] | d(false) %}
-          if
-          {%     for inputname in outdict[output.name] %}
-          {%       if not loop.first %}
-            or
-          {%       endif %}
-          {%       set input = indict[inputname] %}
-          {%       if input.type == "basics" %}
-            ($inputname == "imjournal")
-          {%       elif input.type == "files" %}
-            ($syslogtag == "{{ input.name }}")
-          {%       endif %}
-          {%     endfor %}
-            then {
-              call {{ output.name }}
-          }
-          {%   endif %}
-          {% endfor %}

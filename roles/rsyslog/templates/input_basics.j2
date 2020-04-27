@@ -1,0 +1,34 @@
+{% set rsyslog_flows = logging_flows | d([ {"name": "default_flow", "inputs": [ basics_item.name ], "outputs": ["default_files"]} ], true) %}
+{% set indict = {} %}
+{% for input in logging_inputs %}
+{%   set _ = indict.__setitem__(input.name, input) %}
+{% endfor %}
+{% set outdict = {} %}
+{% for flow in rsyslog_flows %}
+{%   if flow.inputs | intersect([basics_item.name]) %}
+{%     for oname in flow.outputs %}
+{%       set _ = outdict.__setitem__(oname, outdict.get(oname,[])|union([basics_item.name])) %}
+{%     endfor %}
+{%   endif %}
+{% endfor %}
+{% for output in rsyslog_outputs %}
+{%   if outdict[output.name] | d(false) %}
+if
+{%     for inputname in outdict[output.name] %}
+{%       if inputname == basics_item.name %}
+{%         if not loop.first %}
+  or
+{%         endif %}
+{%         set input = indict[inputname] %}
+{%         if input.type == "basics" %}
+  ($inputname == "imjournal")
+{%         elif input.type == "basics" %}
+  ($syslogtag == "{{ input.name }}")
+{%         endif %}
+{%       endif %}
+{%     endfor %}
+  then {
+    call {{ output.name }}
+}
+{%   endif %}
+{% endfor %}

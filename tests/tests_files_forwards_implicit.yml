@@ -2,7 +2,8 @@
   hosts: all
   become: true
   vars:
-    __test_files_conf: /etc/rsyslog.d/30-output-files.conf
+    __test_files_conf: /etc/rsyslog.d/30-output-files-default_files.conf
+    __test_forwards_conf: "/etc/rsyslog.d/30-output-forwards-forwards_severity_and_facility.conf"
 
   tasks:
     - name: deploy config to output into local files
@@ -79,13 +80,9 @@
       assert:
         that: testMessage0000.stdout | length > 0
 
-    - name: Set forwarding config path
-      set_fact:
-        test_forward_conf: "/etc/rsyslog.d/30-output-forwards.conf"
-
     - name: Get the forwarding config stat
       stat:
-        path: "{{ test_forward_conf }}"
+        path: "{{ __test_forwards_conf }}"
       register: stat_output_forwards_system
 
     - name: Check if the forwarding config exists
@@ -93,7 +90,7 @@
         that: stat_output_forwards_system.stat.exists
 
     - name: Grep severity_and_facility
-      command: /bin/grep "\<action.*forwards_severity_and_facility\>" {{ test_forward_conf }}
+      command: /bin/grep "\<action.*forwards_severity_and_facility\>" {{ __test_forwards_conf }}
       register: severity_and_facility
       changed_when: false
 

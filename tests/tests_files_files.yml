@@ -4,6 +4,9 @@
   vars:
     __test_inputfiles_dir0: /var/log/inputdirectory0
     __test_inputfiles_dir1: /var/log/inputdirectory1
+    __test_inputfiles_conf0: /etc/rsyslog.d/90-input-files-files_input0.conf
+    __test_inputfiles_conf1: /etc/rsyslog.d/90-input-files-files_input1.conf
+    __test_outputfiles_conf: /etc/rsyslog.d/30-output-files-files_output0.conf
 
   tasks:
     - name: deploy config to output into local files
@@ -49,13 +52,9 @@
       assert:
         that: rsyslog_d_file_count.matched >= 7
 
-    - name: Set files config path
-      set_fact:
-        test_outputfiles_conf: "/etc/rsyslog.d/30-output-files.conf"
-
     - name: Get the output files config stat
       stat:
-        path: "{{ test_outputfiles_conf }}"
+        path: "{{ __test_outputfiles_conf }}"
       register: stat_output_files_system
 
     - name: Check if the output files config exists
@@ -63,42 +62,42 @@
         that: stat_output_files_system.stat.exists
 
     - name: Grep output to messages line
-      command: /bin/grep ".var.log.messages" {{ test_outputfiles_conf }}
+      command: /bin/grep ".var.log.messages" {{ __test_outputfiles_conf }}
       register: files_conf_messages
       changed_when: false
 
-    - name: Set input files config path
-      set_fact:
-        __test_inputfiles_conf: "/etc/rsyslog.d/90-imfile-input.conf"
-
-    - name: Get the files config stat
+    - name: Get the files config stat 0
       stat:
-        path: "{{ __test_inputfiles_conf }}"
-      register: stat_input_files_conf
+        path: "{{ __test_inputfiles_conf0 }}"
+      register: stat_input_files_conf0
 
-    - name: Check if the input files config exists
+    - name: Check if the input files config exists 0
       assert:
-        that: stat_input_files_conf.stat.exists
+        that: stat_input_files_conf0.stat.exists
 
-    - name: Cat input file
-      command: /bin/cat {{ __test_inputfiles_conf }}
-      register: cat_file
-      changed_when: false
+    - name: Get the files config stat 1
+      stat:
+        path: "{{ __test_inputfiles_conf1 }}"
+      register: stat_input_files_conf1
+
+    - name: Check if the input files config exists 1
+      assert:
+        that: stat_input_files_conf1.stat.exists
 
     - name: Grep input file 0
-      command: /bin/grep 'inputdirectory0' {{ __test_inputfiles_conf }}
-      register: files_conf_input_file
+      command: /bin/grep 'inputdirectory0' {{ __test_inputfiles_conf0 }}
+      register: files_conf_input_file0
       changed_when: false
 
     - name: Check the filter 0
       assert:
-        that: files_conf_input_file.stdout is match(" *input\(type=\"imfile\" file=\"\/var\/log\/inputdirectory0\/\*\.log\" tag=\"files_input0\"\)")
+        that: files_conf_input_file0.stdout is match(" *input\(type=\"imfile\" file=\"\/var\/log\/inputdirectory0\/\*\.log\" tag=\"files_input0\"\)")
 
     - name: Grep input file 1
-      command: /bin/grep 'inputdirectory1' {{ __test_inputfiles_conf }}
-      register: files_conf_input_file
+      command: /bin/grep 'inputdirectory1' {{ __test_inputfiles_conf1 }}
+      register: files_conf_input_file1
       changed_when: false
 
     - name: Check the filter 1
       assert:
-        that: files_conf_input_file.stdout is match(" *input\(type=\"imfile\" file=\"\/var\/log\/inputdirectory1\/\*\.log\" tag=\"files_input1\"\)")
+        that: files_conf_input_file1.stdout is match(" *input\(type=\"imfile\" file=\"\/var\/log\/inputdirectory1\/\*\.log\" tag=\"files_input1\"\)")

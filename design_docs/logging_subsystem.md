@@ -12,6 +12,7 @@ logging/
 ├── defaults
 │   └── main.yml
 ├── design_docs
+│   ├── Changelogs.md
 │   ├── logging_subsystem.md
 │   ├── README.md
 │   ├── rsyslog_input_output_roles.md
@@ -26,7 +27,6 @@ logging/
 │       ├── molecule.yml
 │       ├── playbook.yml
 │       ├── tests
-│       │   │
 │       │   └── test_default.py
 │       └── yaml-lint.yml
 ├── README.md
@@ -65,10 +65,15 @@ logging/
 │       │       └── forwards
 │       │           └── main.yml
 │       ├── templates
-│       │   └── etc
-│       │       ├── rsyslog.conf.j2
-│       │       └── rsyslog.d
-│       │           └── rules.conf.j2
+│       │   ├── etc
+│       │   │   ├── rsyslog.conf.j2
+│       │   │   └── rsyslog.d
+│       │   │       └── rules.conf.j2
+│       │   ├── input_basics.j2
+│       │   ├── input_files.j2
+│       │   ├── output_elasticsearch.j2
+│       │   ├── output_files.j2
+│       │   └── output_forwards.j2
 │       └── vars
 │           ├── inputs
 │           │   ├── basics
@@ -89,10 +94,8 @@ logging/
 │               │   └── main.yml
 │               └── forwards
 │                   └── main.yml
-├── tasks
-│   ├── main.yml
-│   └── main.yml.new
-└── tox.ini
+└── tasks
+    └── main.yml
 ```
 
 # How Logging role starts

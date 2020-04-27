@@ -62,3 +62,13 @@ To use completely pre-determined filename:
 ```
 - filename: 'fixed-filename.conf'
 ```
+
+### Supporting template for each Sub-configuration
+
+Each sub-configuration uses the following template to generate a configuration file containing one operation.
+- [input_basics.j2](../roles/rsyslog/templates/input_basics.j2)
+- [input_files.j2](../roles/rsyslog/templates/input_files.j2)
+- [output_elasticsearch.j2](../roles/rsyslog/templates/output_elasticsearch.j2)
+- [output_files.j2](../roles/rsyslog/templates/output_files.j2)
+- [output_forwards.j2](../roles/rsyslog/templates/output_forwards.j2)
+
