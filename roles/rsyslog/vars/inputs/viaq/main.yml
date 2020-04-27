@@ -28,7 +28,7 @@ __rsyslog_viaq_rules:
 
 __rsyslog_conf_viaq_main_modules:
 
-  - name: 'viaq_main'
+  - name: 'input-viaq-modules'
     type: 'modules'
     sections:
 
@@ -42,7 +42,7 @@ __rsyslog_conf_viaq_main_modules:
 
 __rsyslog_conf_viaq_formatting:
 
-  - name: 'viaq_formatting'
+  - name: 'input-viaq-formatting'
     type: 'template'
     sections:
 
@@ -343,7 +343,7 @@ __rsyslog_conf_viaq_formatting:
 
 __rsyslog_rulebase_viaq_parse_json:
 
-  - name: 'parse_json'
+  - name: 'input-viaq-parse-json'
     filename: 'parse_json.rulebase'
     nocomment: true
     sections:
@@ -354,7 +354,7 @@ __rsyslog_rulebase_viaq_parse_json:
 
 __rsyslog_json_viaq_normalize_level:
 
-  - name: 'normalize_level'
+  - name: 'input-viaq-normalize-level'
     filename: 'normalize_level.json'
     nocomment: true
     sections:
@@ -383,7 +383,7 @@ __rsyslog_json_viaq_normalize_level:
 
 __rsyslog_json_viaq_prio_to_level:
 
-  - name: 'prio_to_level'
+  - name: 'input-viaq-prio-to-level'
     filename: 'prio_to_level.json'
     nocomment: true
     sections:

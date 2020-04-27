@@ -25,7 +25,7 @@ __rsyslog_elasticsearch_rules:
 
 __rsyslog_conf_es_main_modules:
 
-  - name: 'elasticsearch_main'
+  - name: 'output-elasticsearch-module'
     type: 'modules'
 
     sections:
@@ -68,72 +68,3 @@ __rsyslog_conf_es_elasticsearch:
           ruleset(name="error_es") {
               action(name="es_bulk_errors" type="omfile" template="es_template_nl" file="{{ rsyslog_work_dir }}/es-bulk-errors.log")
           }
-
-          {% for res in rsyslog_output_elasticsearch %}
-          ruleset(name="{{ res.name }}") {
-              if (strlen($.omes) > 0) and (strlen($.omes!status) > 0) then {
-                  # retry case
-                  if ($.omes!status == 200) or ($.omes!status == 201) or (($.omes!status == 409) and ($.omes!writeoperation == "create")) then {
-                      stop # successful
-                  }
-                  if ($.omes!writeoperation == "unknown") or (strlen($.omes!error!type) == 0) or (strlen($.omes!error!reason) == 0) then {
-                      call error_es
-                      stop
-                  }
-                  if ($.omes!status == 400) or ($.omes!status < 200) then {
-                      call error_es
-                      stop
-                  }
-                  # else fall through to retry operation
-              }
-              if strlen($!es_msg_id) > 0 then {
-                  set $.es_msg_id = $!es_msg_id;
-              } else if (strlen($.omes) > 0) and (strlen($.omes!_id) > 0) then {
-                  # retry
-                  set $.es_msg_id = $.omes!_id;
-              } else {
-                  # NOTE: depends on rsyslog being compiled with --enable-uuid
-                  set $.es_msg_id = $uuid;
-              }
-              if (strlen($.omes) > 0) and (strlen($.omes!_index) > 0) then {
-                  # retry
-                  set $.index_name = $.omes!_index;
-              } else {
-                  set $.index_name = exec_template("prefix_index_template");
-              }
-              if ($.input_type == "{{ res.input_type | d('ovirt') }}") and ($.index_prefix startswith "{{ res.index_prefix }}") then {
-                  action(
-                      type="omelasticsearch"
-                      name="{{ res.name | default('viaq-elasticsearch') }}"
-                      server="{{ res.server_host | d('logging-es') }}"
-                      serverport="{{ res.server_port | d(9200) | int }}"
-                      template="{{ res.template | d("es_template") }}"
-                      searchIndex="{{ res.searchIndex | d("index_template") }}"
-                      dynSearchIndex="{{ res.dynSearchIndex | d("on") }}"
-                      searchType="{{ res.searchType | d("com.redhat.viaq.common") }}"
-                      bulkmode="{{ res.bulkmode | d("on") }}"
-                      writeoperation="{{ res.writeoperation | d("create") }}"
-                      bulkid="{{ res.bulkid | d("id_template") }}"
-                      dynbulkid="{{ res.dynbulkid | d('on') }}"
-                      allowUnsignedCerts="{{ res.allowUnsignedCerts | d("off") }}"
-          {% if not res.retryfailures | d(true) %}
-          {%   if res.retryruleset | d() | length > 0 %}
-                      retryfailures="on"
-                      retryruleset="{{ res.retryruleset }}"
-          {%   else %}
-                      retryfailures="on"
-                      retryruleset="{{ res.name }}"
-          {%   endif %}
-          {% else %}
-                      retryfailures="off"
-          {% endif %}
-                      usehttps="{{ res.usehttps | default("on") }}"
-          {% if use_omelasticsearch_cert | default(true) %}
-                      tls.cacert="{{ res.ca_cert | default('/etc/rsyslog.d/es-ca.crt') }}"
-                      tls.mycert="{{ res.cert | default('/etc/rsyslog.d/es-cert.pem') }}"
-                      tls.myprivkey="{{ res.key | default('/etc/rsyslog.d/es-key.pem') }}"
-          {% endif %}
-                  )
-              }
-          }
-          {% endfor %}

@@ -3,6 +3,8 @@
   become: true
   vars:
     __test_inputfiles_dir: /var/log/inputdirectory
+    __test_inputfiles_conf: /etc/rsyslog.d/90-input-files-files_input.conf
+    __test_outputfiles_conf: /etc/rsyslog.d/31-output-elasticsearch-elasticsearch_output_ops.conf
 
   tasks:
     - name: deploy config to send to elasticsearch
@@ -56,26 +58,21 @@
       assert:
         that: rsyslog_d_file_count.matched >= 9
 
-    - name: Set files config path
-      set_fact:
-        test_inputfiles_conf: "/etc/rsyslog.d/90-imfile-input.conf"
-        test_outputfiles_conf: "/etc/rsyslog.d/30-output-elasticsearch.conf"
-
     - name: Get the output files config stat
       stat:
-        path: "{{ test_outputfiles_conf }}"
+        path: "{{ __test_outputfiles_conf }}"
       register: stat_output_files_system
 
     - name: Check if the output files config exists
       assert:
         that: stat_output_files_system.stat.exists
 
-    - name: Check ops ruleset exists in {{ test_outputfiles_conf }}
-      command: /bin/grep "ruleset.name=.elasticsearch_output_ops" {{ test_outputfiles_conf }}
+    - name: Check ops ruleset exists in {{ __test_outputfiles_conf }}
+      command: /bin/grep "ruleset.name=.elasticsearch_output_ops" {{ __test_outputfiles_conf }}
       register: es_ops_ruleset
       changed_when: false
 
-    - name: Check call point for ops ruleset exists in {{ test_outputfiles_conf }}
-      command: /bin/grep "call elasticsearch_output_ops" {{ test_inputfiles_conf }}
+    - name: Check call point for ops ruleset exists in {{ __test_inputfiles_conf }}
+      command: /bin/grep "call elasticsearch_output_ops" {{ __test_inputfiles_conf }}
       register: es_call_ops_ruleset
       changed_when: false

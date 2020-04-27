@@ -6,3 +6,15 @@
     __rsyslog_rules: "{{ __rsyslog_files_output_rules }}"
   include_tasks:
     file: deploy.yml
+
+- name: Create files output configuration files in /etc/rsyslog.d
+  vars:
+    __files_output: "{{ lookup('template', 'output_files.j2') }}"
+    __rsyslog_packages: []
+    __rsyslog_rules: [ { "name": "output-files-{{ files_item.name }}", "type": "output",
+                         "sections": [ { "options": "{{ __files_output }}" } ] } ]
+  include_tasks:
+    file: deploy.yml
+  loop: '{{ rsyslog_output_files }}'
+  loop_control:
+    loop_var: files_item

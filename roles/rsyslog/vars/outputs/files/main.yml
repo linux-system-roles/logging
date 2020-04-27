@@ -12,14 +12,13 @@ __rsyslog_files_output_packages: []
 # ---------------------------------
 __rsyslog_files_output_rules:
   - '{{ __rsyslog_conf_files_output_modules }}'
-  - '{{ __rsyslog_conf_files_output_rules }}'
   - '{{ __rsyslog_conf_remote_templates }}'
   - '{{ __rsyslog_conf_remote_output }}'
 
 # __rsyslog_conf_files_output_modules:
 __rsyslog_conf_files_output_modules:
 
-  - name: 'output-modules'
+  - name: 'output-files-modules'
     type: 'modules'
     sections:
 
@@ -30,60 +29,6 @@ __rsyslog_conf_files_output_modules:
           {% else %}
           module(load="builtin:omfile")
           {% endif %}
-
-# __rsyslog_conf_files_output_rules:
-#
-# A set of default ``rsyslog`` options which store local system logs in files
-# located in `{{ __rsyslog_system_log_dir }}/` directory. This is mostly the
-# same as the default ``rsyslogd`` configuration provided in the installations.
-__rsyslog_conf_files_output_rules:
-
-  - name: 'output-files'
-    type: 'output'
-    sections:
-
-      - options: |-
-          {% for element in rsyslog_output_files %}
-          {%   if element.path is defined %}
-          {%     if element.exclude is defined %}
-          ruleset(name="{{ element.name }}") {
-            {{ element.facility | d('*') }}.{{ element.severity | d('*') }};{{ element.exclude }} {{ element.path }}
-          }
-          {%     else %}
-          ruleset(name="{{ element.name }}") {
-            {{ element.facility | d('*') }}.{{ element.severity | d('*') }} {{ element.path }}
-          }
-          {%     endif %}
-          {%   else %}
-          ruleset(name="{{ element.name }}") {
-              # Log all kernel messages to the console.
-              # Logging much else clutters up the screen.
-              kern.*                                                 /dev/console
-
-              # Log anything (except mail) of level info or higher.
-              # Don't log private authentication messages!
-              *.info;mail.none;authpriv.none;cron.none                {{ __rsyslog_system_log_dir }}/messages
-
-              # The authpriv file has restricted access.
-              authpriv.*                                              {{ __rsyslog_system_log_dir }}/secure
-
-              # Log all the mail messages in one place.
-              mail.*                                                  -{{ __rsyslog_system_log_dir }}/maillog
-
-              # Log cron stuff
-              cron.*                                                  -{{ __rsyslog_system_log_dir }}/cron
-
-              # Everybody gets emergency messages
-              *.emerg                                                  :omusrmsg:*
-
-              # Save news errors of level crit and higher in a special file.
-              uucp,news.crit                                          {{ __rsyslog_system_log_dir }}/spooler
-
-              # Save boot messages also to boot.log
-              local7.*                                                {{ __rsyslog_system_log_dir }}/boot.log
-          }
-          {%   endif %}
-          {% endfor %}
 
 # __rsyslog_conf_remote_templates
 #

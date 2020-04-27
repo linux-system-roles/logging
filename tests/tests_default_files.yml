@@ -2,7 +2,7 @@
   hosts: all
   become: true
   vars:
-    __test_files_conf: /etc/rsyslog.d/30-output-files.conf
+    __test_files_conf: /etc/rsyslog.d/30-output-files-default_files.conf
 
   tasks:
     - name: deploy config to output into local files

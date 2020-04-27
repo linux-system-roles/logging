@@ -2,9 +2,11 @@
   hosts: all
   become: true
   vars:
-    __test_files_conf: /etc/rsyslog.d/30-output-files.conf
-    __test_inputfiles_dir: /var/log/inputdirectory
+    __test_files_conf: /etc/rsyslog.d/30-output-files-files_test0.conf
+    __test_forwards_conf_s_f: /etc/rsyslog.d/30-output-forwards-forwards_severity_and_facility.conf
     __test_tag: files_input
+    __test_inputfiles_conf: /etc/rsyslog.d/90-input-files-{{ __test_tag }}.conf
+    __test_inputfiles_dir: /var/log/inputdirectory
 
   tasks:
     - name: Generate an input log dir {{ __test_inputfiles_dir }}
@@ -109,13 +111,9 @@
       assert:
         that: testMessage0000.stdout | length > 0
 
-    - name: Set forwarding config path
-      set_fact:
-        test_forward_conf: "/etc/rsyslog.d/30-output-forwards.conf"
-
     - name: Get the forwarding config stat
       stat:
-        path: "{{ test_forward_conf }}"
+        path: "{{ __test_forwards_conf_s_f }}"
       register: stat_output_forwards_system
 
     - name: Check if the forwarding config exists
@@ -123,17 +121,13 @@
         that: stat_output_forwards_system.stat.exists
 
     - name: Grep severity_and_facility
-      command: /bin/grep "\<action.*forwards_severity_and_facility\>" {{ test_forward_conf }}
+      command: /bin/grep "\<action.*forwards_severity_and_facility\>" {{ __test_forwards_conf_s_f }}
       register: severity_and_facility
       changed_when: false
 
     - name: Check severity_and_facility
       assert:
         that: severity_and_facility.stdout is match(" *local1\.info action.name=.forwards_severity_and_facility.* type=.omfwd. Target=.host.domain. Port=.1514. Protocol=.tcp.*")
-
-    - name: Set input files config path
-      set_fact:
-        __test_inputfiles_conf: "/etc/rsyslog.d/90-imfile-input.conf"
 
     - name: Get the files config stat
       stat:

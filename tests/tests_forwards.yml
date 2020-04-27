@@ -2,7 +2,14 @@
   hosts: all
   become: true
   vars:
-    __test_forward_conf: /etc/rsyslog.d/30-output-forwards.conf
+    __test_forward_conf_s_f: /etc/rsyslog.d/30-output-forwards-forwards-severity_and_facility.conf
+    __test_forward_conf_f: /etc/rsyslog.d/30-output-forwards-forwards-facility_only.conf
+    __test_forward_conf_s: /etc/rsyslog.d/30-output-forwards-forwards-severity_only.conf
+    __test_forward_conf_no: /etc/rsyslog.d/30-output-forwards-forwards-no_severity_and_facility.conf
+    __test_forward_conf_no_p: /etc/rsyslog.d/30-output-forwards-forwards-no_severity_and_facility_protocol.conf
+    __test_forward_conf_no_udp: /etc/rsyslog.d/30-output-forwards-forwards-no_severity_and_facility_udp.conf
+    __test_forward_conf_no_p_p: /etc/rsyslog.d/30-output-forwards-forwards-no_severity_and_facility_protocol_port.conf
+
 
   tasks:
     - name: Deploy rsyslog config on the target host
@@ -58,16 +65,16 @@
           - name: flows0
             inputs: [ basic_input ]
             outputs: [forwards-severity_and_facility, forwards-facility_only,
-            forwards-severity_only, forwards-no_severity_and_facility,
-            forwards-no_severity_and_facility_protocol, forwards-no_severity_and_facility_udp,
-            forwards-no_severity_and_facility_protocol_port,
-            forwards-no_severity_and_facility_protocol_port_target]
+                      forwards-severity_only, forwards-no_severity_and_facility,
+                      forwards-no_severity_and_facility_protocol, forwards-no_severity_and_facility_udp,
+                      forwards-no_severity_and_facility_protocol_port,
+                      forwards-no_severity_and_facility_protocol_port_target]
       include_role:
         name: linux-system-roles.logging
 
     - name: Get the forwarding config stat
       stat:
-        path: "{{ __test_forward_conf }}"
+        path: "{{ __test_forward_conf_s_f }}"
       register: stat_output_forwards_system
 
     - name: Check if the forwarding config exists
@@ -75,7 +82,7 @@
         that: stat_output_forwards_system.stat.exists
 
     - name: Grep severity_and_facility
-      command: /bin/grep "\<action.*forwards-severity_and_facility\>" {{ __test_forward_conf }}
+      command: /bin/grep "\<action.*forwards-severity_and_facility\>" {{ __test_forward_conf_s_f }}
       register: severity_and_facility
       changed_when: false
 
@@ -84,7 +91,7 @@
         that: severity_and_facility.stdout is match(" *local1\.info action.name=.forwards-severity_and_facility.* Target=.host.domain. Port=.1514. Protocol=.tcp.*")
 
     - name: Grep facility_only
-      command: /bin/grep "\<action.*forwards-facility_only\>" {{ __test_forward_conf }}
+      command: /bin/grep "\<action.*forwards-facility_only\>" {{ __test_forward_conf_f }}
       register: facility_only
       changed_when: false
 
@@ -93,7 +100,7 @@
         that: facility_only.stdout is match(" *local2\.\* action.name=.forwards-facility_only.* Target=.host.domain. Port=.2514. Protocol=.tcp.")
 
     - name: Grep severity_only
-      command: /bin/grep "\<action.*forwards-severity_only\>" {{ __test_forward_conf }}
+      command: /bin/grep "\<action.*forwards-severity_only\>" {{ __test_forward_conf_s }}
       register: severity_only
       changed_when: false
 
@@ -102,7 +109,7 @@
         that: severity_only.stdout is match(" *\*\.err action.name=.forwards-severity_only.* Target=.host.domain. Port=.3514. Protocol=.tcp.*")
 
     - name: Grep no_severity_and_facility
-      command: /bin/grep "\<action.*forwards-no_severity_and_facility\>" {{ __test_forward_conf }}
+      command: /bin/grep "\<action.*forwards-no_severity_and_facility\>" {{ __test_forward_conf_no }}
       register: no_severity_and_facility
       changed_when: false
 
@@ -111,7 +118,7 @@
         that: no_severity_and_facility.stdout is match(" *\*\.\* action.name=.forwards-no_severity_and_facility.* Target=.host.domain. Port=.4514. Protocol=.tcp.")
 
     - name: Grep no_severity_and_facility_protocol
-      command: /bin/grep "\<action.*forwards-no_severity_and_facility_protocol\>" {{ __test_forward_conf }}
+      command: /bin/grep "\<action.*forwards-no_severity_and_facility_protocol\>" {{ __test_forward_conf_no_p }}
       register: no_severity_and_facility_protocol
       changed_when: false
 
@@ -120,7 +127,7 @@
         that: no_severity_and_facility_protocol.stdout is match(" *\*\.\* action.name=.forwards-no_severity_and_facility_protocol.* Target=.host.domain. Port=.5514. Protocol=.tcp.")
 
     - name: Grep no_severity_and_facility_udp
-      command: /bin/grep "\<action.*forwards-no_severity_and_facility_udp\>" {{ __test_forward_conf }}
+      command: /bin/grep "\<action.*forwards-no_severity_and_facility_udp\>" {{ __test_forward_conf_no_udp }}
       register: no_severity_and_facility_udp
       changed_when: false
 
@@ -129,7 +136,7 @@
         that: no_severity_and_facility_udp.stdout is match(" *\*\.\* action.name=.forwards-no_severity_and_facility_udp.* Target=.host.domain. Port=.6514. Protocol=.udp.")
 
     - name: Grep no_severity_and_facility_protocol_port
-      command: /bin/grep "\<action.*forwards-no_severity_and_facility_protocol_port\>" {{ __test_forward_conf }}
+      command: /bin/grep "\<action.*forwards-no_severity_and_facility_protocol_port\>" {{ __test_forward_conf_no_p_p }}
       register: no_severity_and_facility_protocol_port
       changed_when: false
 
@@ -138,13 +145,13 @@
         that: no_severity_and_facility_protocol_port.stdout is match(" *\*\.\* action.name=.forwards-no_severity_and_facility_protocol_port.* Target=.host.domain. Port=.514. Protocol=.tcp.")
 
     - name: Grep no_severity_and_facility_protocol_port_target
-      command: /bin/grep "\<action.*forwards-no_severity_and_facility_protocol_port_target\>" {{ __test_forward_conf }}
+      shell: /bin/grep "\<action.*forwards-no_severity_and_facility_protocol_port_target\>" /etc/rsyslog.d/30-output-forwards*.conf
       register: result
       changed_when: false
       failed_when: result.rc != 1
 
     - name: Grep no_name
-      command: /bin/grep "\<action.*forwards-no_name\.localdomain\>" {{ __test_forward_conf }}
+      shell: /bin/grep "\<action.*forwards-no_name\.localdomain\>" /etc/rsyslog.d/30-output-forwards*.conf
       register: result
       changed_when: false
       failed_when: result.rc != 1

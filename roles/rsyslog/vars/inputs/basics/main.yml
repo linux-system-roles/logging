@@ -29,7 +29,6 @@ rsyslog_input_log_path: "/var/log/containers/*.log"
 # in a special format. This list specifies ``rsyslogd`` basic input configuration.
 __rsyslog_basics_rules:
   - '{{ __rsyslog_conf_local_basics_modules }}'
-  - '{{ __rsyslog_conf_default_rulesets }}'
   - '{{ __rsyslog_conf_system_input }}'
   - '{{ __rsyslog_conf_network_input }}'
 
@@ -39,7 +38,7 @@ __rsyslog_basics_rules:
 # received and parsed by the ``rsyslogd`` daemon.
 __rsyslog_conf_local_basics_modules:
 
-  - name: 'basics-modules'
+  - name: 'input-basics-modules'
     type: 'modules'
     sections:
 
@@ -67,40 +66,6 @@ __rsyslog_conf_local_basics_modules:
                  RateLimit.Burst="{{ input.rsyslog_imjournal_ratelimit_burst | d(20000) }}"
                  RateLimit.Interval="{{ input.rsyslog_imjournal_ratelimit_interval | d(600) }}"
                  PersistStateInterval="{{ input.rsyslog_imjournal_persist_state_interval | d(10) }}")
-          {%   endif %}
-          {% endfor %}
-          {% set indict = {} %}
-          {% set input_list = [] %}
-          {% for input in logging_inputs %}
-          {%   set _ = indict.__setitem__(input.name, input) %}
-          {%   if input.type == "basics" %}
-          {%     set input_list = input_list.append( input.name ) %}
-          {%   endif %}
-          {% endfor %}
-          {% set rsyslog_flows = logging_flows | d([ {"name": "default_flow", "inputs": input_list, "outputs": ["default_files"]} ], true) %}
-          {% set outdict = {} %}
-          {% for flow in rsyslog_flows %}
-          {%   for oname in flow.outputs %}
-          {%     set _ = outdict.__setitem__(oname, outdict.get(oname,[])|union(flow.inputs)) %}
-          {%   endfor %}
-          {% endfor %}
-          {% for output in rsyslog_outputs %}
-          {%   if outdict[output.name] | d(false) %}
-          if
-          {%     for inputname in outdict[output.name] %}
-          {%       if not loop.first %}
-            or
-          {%       endif %}
-          {%       set input = indict[inputname] %}
-          {%       if input.type == "basics" %}
-            ($inputname == "imjournal")
-          {%       elif input.type == "files" %}
-            ($syslogtag == "{{ input.name }}")
-          {%       endif %}
-          {%     endfor %}
-            then {
-              call {{ output.name }}
-          }
           {%   endif %}
           {% endfor %}
 
@@ -136,7 +101,7 @@ __rsyslog_conf_local_basics_modules:
 #
 __rsyslog_conf_system_input:
 
-  - name: 'system-input'
+  - name: 'input-imuxsock'
     type: 'input'
     state: '{{ "present" if rsyslog_use_imuxsock | d(false) | bool else "absent" }}'
     sections:

@@ -2,7 +2,7 @@
   hosts: all
   become: true
   vars:
-    __test_files_conf: /etc/rsyslog.d/30-output-files.conf
+    __test_files_conf: /etc/rsyslog.d/30-output-files-files-output.conf
     logging_system_log_dir: '/var/log/rsyslog'
 
   tasks:

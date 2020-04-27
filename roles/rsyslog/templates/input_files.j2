@@ -1,0 +1,35 @@
+input(type="imfile" file="{{ files_item.rsyslog_input_log_path | d(rsyslog_input_log_path) }}" tag="{{ files_item.name }}")
+{% set rsyslog_flows = logging_flows | d([ {"name": "default_flow", "inputs": [ files_item.name ], "outputs": ["default_files"]} ], true) %}
+{% set indict = {} %}
+{% for input in logging_inputs %}
+{%   set _ = indict.__setitem__(input.name, input) %}
+{% endfor %}
+{% set outdict = {} %}
+{% for flow in rsyslog_flows %}
+{%   if flow.inputs | intersect([files_item.name]) %}
+{%     for oname in flow.outputs %}
+{%       set _ = outdict.__setitem__(oname, outdict.get(oname,[])|union([files_item.name])) %}
+{%     endfor %}
+{%   endif %}
+{% endfor %}
+{% for output in rsyslog_outputs %}
+{%   if outdict[output.name] | d(false) %}
+if
+{%     for inputname in outdict[output.name] %}
+{%       if inputname == files_item.name %}
+{%         if not loop.first %}
+  or
+{%         endif %}
+{%         set input = indict[inputname] %}
+{%         if input.type == "basics" %}
+  ($inputname == "imjournal")
+{%         elif input.type == "files" %}
+  ($syslogtag == "{{ input.name }}")
+{%         endif %}
+{%       endif %}
+{%     endfor %}
+  then {
+    call {{ output.name }}
+}
+{%   endif %}
+{% endfor %}
