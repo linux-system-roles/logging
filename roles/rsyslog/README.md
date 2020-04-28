@@ -138,7 +138,7 @@ logging_flows:
 ```
 logging_enabled: true
 rsyslog_default: false
-rsyslog_purge_original_conf: true
+logging_purge_confs: true
 logging_outputs:
   - name: output-forwards0
     type: forwards
@@ -209,8 +209,6 @@ Common sub-variables
 - `rsyslog_config_dir`: Directory to store configuration files.  Default to '/etc/rsyslog.d'.
 - `rsyslog_custom_config_files`: List of custom configuration files are deployed to /etc/rsyslog.d.  The format is an array which element is the full path to each custom configuration file.  Default to none.
 - `rsyslog_in_image`: Specifies if the target host is a container and use rsyslog in the image. Default to false.
-- `rsyslog_purge_original_conf`: By default, the Rsyslog configuration files are applied on top of pre-existing configuration files. To purge local files prior to setting new ones, set `rsyslog_purge_original_conf` variable to 'true', it will move all Rsyslog configuration files to a backup directory before deploying the new configuration files. Defaults to 'false'.
-- `rsyslog_system_log_dir`: System log directory.  Default to '/var/log'.
 - `rsyslog_work_dir`: Working directory.  Default to '/var/lib/rsyslog'.
 
 Elasticsearch, Files and Forwards outputs sub-variables

@@ -34,7 +34,7 @@ __rsyslog_conf_files_output_modules:
 # __rsyslog_conf_files_output_rules:
 #
 # A set of default ``rsyslog`` options which store local system logs in files
-# located in `{{ rsyslog_system_log_dir }}/` directory. This is mostly the
+# located in `{{ __rsyslog_system_log_dir }}/` directory. This is mostly the
 # same as the default ``rsyslogd`` configuration provided in the installations.
 __rsyslog_conf_files_output_rules:
 
@@ -62,25 +62,25 @@ __rsyslog_conf_files_output_rules:
 
               # Log anything (except mail) of level info or higher.
               # Don't log private authentication messages!
-              *.info;mail.none;authpriv.none;cron.none                {{ rsyslog_system_log_dir }}/messages
+              *.info;mail.none;authpriv.none;cron.none                {{ __rsyslog_system_log_dir }}/messages
 
               # The authpriv file has restricted access.
-              authpriv.*                                              {{ rsyslog_system_log_dir }}/secure
+              authpriv.*                                              {{ __rsyslog_system_log_dir }}/secure
 
               # Log all the mail messages in one place.
-              mail.*                                                  -{{ rsyslog_system_log_dir }}/maillog
+              mail.*                                                  -{{ __rsyslog_system_log_dir }}/maillog
 
               # Log cron stuff
-              cron.*                                                  -{{ rsyslog_system_log_dir }}/cron
+              cron.*                                                  -{{ __rsyslog_system_log_dir }}/cron
 
               # Everybody gets emergency messages
               *.emerg                                                  :omusrmsg:*
 
               # Save news errors of level crit and higher in a special file.
-              uucp,news.crit                                          {{ rsyslog_system_log_dir }}/spooler
+              uucp,news.crit                                          {{ __rsyslog_system_log_dir }}/spooler
 
               # Save boot messages also to boot.log
-              local7.*                                                {{ rsyslog_system_log_dir }}/boot.log
+              local7.*                                                {{ __rsyslog_system_log_dir }}/boot.log
           }
           {%   endif %}
           {% endfor %}
@@ -108,42 +108,42 @@ __rsyslog_conf_remote_templates:
           template(
             name="RemoteMessage"
             type="string"
-            string="{{ rsyslog_system_log_dir }}/remote/msg/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
+            string="{{ __rsyslog_system_log_dir }}/remote/msg/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
           )
 
           # Template for Remote host auth logs
           template(
             name="RemoteHostAuthLog"
             type="string"
-            string="{{ rsyslog_system_log_dir }}/remote/auth/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
+            string="{{ __rsyslog_system_log_dir }}/remote/auth/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
           )
 
           # Template for Remote host cron logs
           template(
             name="RemoteHostCronLog"
             type="string"
-            string="{{ rsyslog_system_log_dir }}/remote/cron/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
+            string="{{ __rsyslog_system_log_dir }}/remote/cron/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
           )
 
           # Template for Remote service auth logs
           template(
             name="RemoteServiceAuthLog"
             type="string"
-            string="{{ rsyslog_system_log_dir }}/remote/services/auth/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
+            string="{{ __rsyslog_system_log_dir }}/remote/services/auth/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
           )
 
           # Template for Remote service cron logs
           template(
             name="RemoteServiceCronLog"
             type="string"
-            string="{{ rsyslog_system_log_dir }}/remote/services/cron/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
+            string="{{ __rsyslog_system_log_dir }}/remote/services/cron/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
           )
 
           # Template for Remote service mail logs
           template(
             name="RemoteServiceMailLog"
             type="string"
-            string="{{ rsyslog_system_log_dir }}/remote/services/mail/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
+            string="{{ __rsyslog_system_log_dir }}/remote/services/mail/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
           )
 
           # Include custom templates

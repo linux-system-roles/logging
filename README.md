@@ -203,7 +203,6 @@ Variables in vars.yml
 
 - `logging_collector`: The logs collector to use for the logs collection. Currently Rsyslog is the only supported logs collector. Defaults to `rsyslog`. WARNING: this is going to be renamed to logging_provider.
 - `logging_enabled` : When 'true', logging role will deploy specified configuration file set. Default to 'true'.
-- `logging_purge_confs`: By default, the Rsyslog configuration files are applied on top of pre-existing configuration files. To purge local files prior to setting new ones, set logging_purge_confs variable to 'true', it will move all Rsyslog configuration files to a backup directory, `/tmp/rsyslog.d-XXXXXX/backup.tgz`, before deploying the new configuration files. Defaults to 'false'.
 - `logging_mmk8s_token`: Path to token for kubernetes.  Default to "/etc/rsyslog.d/mmk8s.token".
 - `logging_mmk8s_ca_cert`: Path to CA cert for kubernetes.  Default to "/etc/rsyslog.d/mmk8s.ca.crt".
 - `logging_outputs`: A set of following variables to specify output configurations.  It could be an list if multiple outputs that should to be configured.
@@ -241,6 +240,9 @@ Variables in vars.yml
         - `name`: Unique name of the input.
           `type`: The type of the pre-configured logs to collect. **Note:** Currently ['viaq', 'viaq-k8s', 'ovirt'] are supported for the elasticsearch output.
           `state`: The state of the configuration files states if they should be `present` or `absent`. Default to `present`.
+
+- `logging_purge_confs`: By default, the Rsyslog configuration files are applied on top of pre-existing configuration files. To purge local files prior to setting new ones, set logging_purge_confs variable to 'true', it will move all Rsyslog configuration files to a backup directory, `/tmp/rsyslog.d-XXXXXX/backup.tgz`, before deploying the new configuration files. Defaults to 'false'.
+- `logging_system_log_dir`: System log directory.  Default to '/var/log'.
 
 playbook.yml
 -------------
