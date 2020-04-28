@@ -2,11 +2,6 @@
 # General configuration
 # ---------------------
 
-# rsyslog_enabled
-#
-# Enable or disable ``rsyslog`` management.
-rsyslog_enabled: true
-
 # rsyslog_in_image
 #
 # true if the target host is a container and use rsyslog in the image.
@@ -17,11 +12,6 @@ rsyslog_in_image: false
 # Diploy default ``rsyslog`` configuration file /etc/rsyslog.conf if it is set to true.
 # Otherwise, rsyslog.conf just includes configuration files in /etc/rsyslog.d.
 rsyslog_default: false
-
-# rsyslog_system_log_dir
-#
-# Top directory to place logs
-rsyslog_system_log_dir: '/var/log'
 
 # rsyslog_config_dir
 #
@@ -45,12 +35,6 @@ rsyslog_capabilities: []
 # Enable or disable message reduction. This is disabled by default so that log
 # parsers like :program:`fail2ban` can work correctly.
 rsyslog_message_reduction: false
-
-# rsyslog_purge_original_conf
-#
-# The pre-existing config files are archived in the tempdir and purged if the
-# rsyslog_purge_original_conf is set to `true`.  Default to 'false`.
-rsyslog_purge_original_conf: false
 
 # rpm packages
 # adding rsyslog packages

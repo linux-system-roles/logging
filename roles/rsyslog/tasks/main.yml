@@ -3,7 +3,7 @@
     name: "{{ (__rsyslog_base_packages) + (__rsyslog_tls_packages if rsyslog_pki else []) + (rsyslog_extra_packages | flatten) }}"
     state: latest
   when:
-    - rsyslog_enabled | bool
+    - __rsyslog_enabled | bool
 
 - name: Gather package facts
   package_facts:
@@ -61,13 +61,13 @@
       archive:
         path: ["{{ rsyslog_config_dir }}", /etc/rsyslog.conf]
         dest: "{{ rsyslog_backup_dir }}/backup.tgz"
-        remove: '{{ true if rsyslog_purge_original_conf | bool else false }}'
+        remove: '{{ true if __rsyslog_purge_original_conf | bool else false }}'
       changed_when: false
 
     - name: Create logging directory if it does not exist or the ownership and/or modes are different.
       file:
         state: directory
-        path: '{{ rsyslog_system_log_dir }}'
+        path: '{{ __rsyslog_system_log_dir }}'
         owner: 'root'
         group: 'root'
         mode: '0700'
@@ -77,7 +77,7 @@
         src: 'etc/rsyslog.conf.j2'
         dest: '/etc/rsyslog.conf'
       when:
-        - rsyslog_enabled | bool
+        - __rsyslog_enabled | bool
       notify: restart rsyslogd
 
     - name: Generate common rsyslog configuration files in rsyslog.d
@@ -92,7 +92,7 @@
         mode: '{{ item.mode | d("0644") }}'
       loop: '{{ __rsyslog_common_rules | flatten }}'
       when:
-        - rsyslog_enabled | bool
+        - __rsyslog_enabled | bool
         - logging_inputs | d([])
         - item.filename | d() or item.name | d()
         - item.state is undefined or item.state != 'absent'
@@ -108,7 +108,7 @@
         state: absent
       loop: '{{ __rsyslog_common_rules | flatten }}'
       when:
-        - not rsyslog_enabled | bool
+        - not __rsyslog_enabled | bool
         - logging_inputs | d([])
         - item.filename | d() or item.name | d()
         - item.options | d() or item.sections | d()
@@ -127,7 +127,7 @@
         group: '{{ item.group | d("root") }}'
         mode: '{{ item.mode | d("0644") }}'
       loop: '{{ rsyslog_custom_config_files | flatten }}'
-      when: (rsyslog_enabled | bool)
+      when: __rsyslog_enabled | bool
       notify: restart rsyslogd
 
     - name: Include input sub-vars
@@ -139,7 +139,7 @@
       loop_control:
         loop_var: input_item
       when:
-        - rsyslog_enabled | bool
+        - __rsyslog_enabled | bool
         - input_item | d([])
       tags:
         - skip_ansible_lint
@@ -153,7 +153,7 @@
       loop_control:
         loop_var: input_item
       when:
-        - rsyslog_enabled | bool
+        - __rsyslog_enabled | bool
         - input_item | d([])
       tags:
         - skip_ansible_lint
@@ -179,7 +179,7 @@
       loop_control:
         loop_var: output_item
       when:
-        - rsyslog_enabled | bool
+        - __rsyslog_enabled | bool
         - output_item | d([])
       tags:
         - skip_ansible_lint
@@ -193,7 +193,7 @@
       loop_control:
         loop_var: output_item
       when:
-        - rsyslog_enabled | bool
+        - __rsyslog_enabled | bool
         - output_item | d([])
       tags:
         - skip_ansible_lint
@@ -204,7 +204,7 @@
         enabled: yes
         state: started
       when:
-        - rsyslog_enabled | bool
+        - __rsyslog_enabled | bool
         - not rsyslog_in_image | default(false) | bool
 
     - name: Disable rsyslog service
@@ -213,7 +213,7 @@
         enabled: no
         state: stopped
       when:
-        - not rsyslog_enabled | bool
+        - not __rsyslog_enabled | bool
         - not rsyslog_in_image | default(false) | bool
 
   when: not __rsyslog_failed_validation | d(false)

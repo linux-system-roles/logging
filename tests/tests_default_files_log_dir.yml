@@ -1,0 +1,75 @@
+- name: Ensure that the role runs with parameters to output into local files in a specified path
+  hosts: all
+  become: true
+  vars:
+    __test_files_conf: /etc/rsyslog.d/30-output-files.conf
+    logging_system_log_dir: '/var/log/rsyslog'
+
+  tasks:
+    - name: deploy config to output into local files
+      vars:
+        logging_enabled: true
+        rsyslog_default: false
+        logging_outputs:
+          - name: files-output
+            type: files
+        logging_inputs:
+          - name: basic-input
+            type: basics
+        logging_flows:
+          - name: flows0
+            inputs: [basic-input]
+            outputs: [files-output]
+      include_role:
+        name: linux-system-roles.logging
+
+    - include: set_rsyslog_variables.yml
+
+    # notify restart rsyslogd is executed at the end of this test task.
+    # thus we have to force to invoke handlers
+    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+      meta: flush_handlers
+
+    - name: Check rsyslog.conf size
+      assert:
+        that: rsyslog_conf_line_count.stdout.0 | int <= 7
+
+    - name: Check file counts in rsyslog.d
+      assert:
+        that: rsyslog_d_file_count.matched >= 7
+
+    - name: Get the files config stat
+      stat:
+        path: "{{ __test_files_conf }}"
+      register: stat_output_files_system
+
+    - name: Get the forwarding config stat
+      stat:
+        path: "{{ __test_files_conf }}"
+      register: stat_output_files_system
+
+    - name: Check if the files config exists
+      assert:
+        that: stat_output_files_system.stat.exists
+
+    - name: Run logger to generate a test log message
+      command: /bin/logger -i -p local6.info -t testTag0 testMessage0000
+      changed_when: false
+
+    - name: Grep output to messages line
+      command: /bin/grep '{{ logging_system_log_dir }}/messages' {{ __test_files_conf }}
+      register: files_conf_messages
+      changed_when: false
+
+    - name: Check the filter
+      assert:
+        that: files_conf_messages.stdout is match(" *\*.info;mail.none;authpriv.none;cron.none.*messages")
+
+    - name: Check the test log message in {{ logging_system_log_dir }}/messages
+      command: /bin/grep testMessage0000 {{ logging_system_log_dir }}/messages
+      register: testMessage0000
+      changed_when: false
+
+    - name: Check if the test message is in {{ logging_system_log_dir }}/messages
+      assert:
+        that: testMessage0000.stdout | length > 0

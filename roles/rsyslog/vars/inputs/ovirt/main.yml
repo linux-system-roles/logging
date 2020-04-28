@@ -96,7 +96,7 @@ rsyslog_conf_ovirt_formatting:
           }
 
           {% if collect_ovirt_engine_log %}
-          input(type="imfile" file="{{ rsyslog_system_log_dir }}/ovirt-engine/engine.log" tag="ovirt.engine" reopenOnTruncate="on"
+          input(type="imfile" file="{{ __rsyslog_system_log_dir }}/ovirt-engine/engine.log" tag="ovirt.engine" reopenOnTruncate="on"
                 startmsg.regex="^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}")
 
           if $syslogtag == 'ovirt.engine' then {
@@ -105,7 +105,7 @@ rsyslog_conf_ovirt_formatting:
           {% endif %}
 
           {% if collect_ovirt_vdsm_log %}
-          input(type="imfile" file="{{ rsyslog_system_log_dir }}/vdsm/vdsm.log" tag="ovirt.vdsm" reopenOnTruncate="on"
+          input(type="imfile" file="{{ __rsyslog_system_log_dir }}/vdsm/vdsm.log" tag="ovirt.vdsm" reopenOnTruncate="on"
                 startmsg.regex="^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}")
 
           if $syslogtag == 'ovirt.vdsm' then {
