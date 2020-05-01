@@ -9,10 +9,9 @@
 
 - name: Create forwards output configuration files in /etc/rsyslog.d
   vars:
-    __forwards_output: "{{ lookup('template', 'output_forwards.j2') }}"
     __rsyslog_packages: []
     __rsyslog_rules: [ { "name": "output-forwards-{{ forwards_item.name }}", "type": "output",
-                         "sections": [ { "options": "{{ __forwards_output }}" } ] } ]
+                         "sections": [ { "options": "{{ lookup('template', 'output_forwards.j2') }}" } ] } ]
   include_tasks:
     file: deploy.yml
   loop: '{{ rsyslog_output_forwards }}'

@@ -62,10 +62,9 @@
 
 - name: Create elasticsearch output configuration files in /etc/rsyslog.d
   vars:
-    __elasticsearch_output: "{{ lookup('template', 'output_elasticsearch.j2') }}"
     __rsyslog_packages: []
     __rsyslog_rules: [ { "name": "output-elasticsearch-{{ es_item.name }}", "type": "output", "weight": "31",
-                         "sections": [ { "options": "{{ __elasticsearch_output }}" } ] } ]
+                         "sections": [ { "options": "{{ lookup('template', 'output_elasticsearch.j2') }}" } ] } ]
   include_tasks:
     file: deploy.yml
   loop: '{{ rsyslog_output_elasticsearch }}'
