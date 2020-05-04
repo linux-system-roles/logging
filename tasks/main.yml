@@ -69,12 +69,13 @@
         - item.key is match("rsyslog*")
         - logging_debug | d(false)
 
-    - name: Include Rsyslog role
-      vars:
-        __rsyslog_enabled: "{{ logging_enabled }}"
-        __rsyslog_purge_original_conf: "{{ logging_purge_confs }}"
-        __rsyslog_system_log_dir: "{{ logging_system_log_dir }}"
-      include_role:
-        name: "{{ role_path }}/roles/rsyslog"
+  when: logging_provider == 'rsyslog'
 
-  when: logging_collector | d('rsyslog') == 'rsyslog'
+- name: Include Rsyslog role
+  vars:
+    __rsyslog_enabled: "{{ logging_enabled }}"
+    __rsyslog_purge_original_conf: "{{ logging_purge_confs }}"
+    __rsyslog_system_log_dir: "{{ logging_system_log_dir }}"
+  include_role:
+    name: "{{ role_path }}/roles/rsyslog"
+  when: logging_provider == 'rsyslog'

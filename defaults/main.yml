@@ -1,6 +1,6 @@
 ---
-# Default logging collector is Rsyslog
-logging_collector: rsyslog
+# Default logging provider is Rsyslog
+logging_provider: rsyslog
 
 # Unless logging_enabled is set to true, logging role is no-op
 logging_enabled: true
