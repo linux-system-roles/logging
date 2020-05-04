@@ -1,6 +1,5 @@
-{% if item.nocomment is undefined or item.nocomment != 'true' %}
+{% if not item.nocomment | d(false) %}
 # {{ ansible_managed }}
-
 {% endif %}
 {% macro print_config(element) %}
 {%   if element is mapping %}

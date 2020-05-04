@@ -9,12 +9,16 @@
 
 - name: Create files input configuration files in /etc/rsyslog.d
   vars:
-    __rsyslog_input_decl: 'input(type="imfile" file="{{ files_item.rsyslog_input_log_path | d(rsyslog_input_log_path) }}" tag="{{ files_item.name }}")'
     __rsyslog_input_name: "{{ files_item.name }}"
     __rsyslog_input_type: "{{ files_item.type }}"
     __rsyslog_packages: []
-    __rsyslog_rules: [ { "name": "input-files-{{ files_item.name }}", "type": "input",
-                         "sections": [ { "options": "{{ lookup('template', 'input_template.j2') }}" } ] } ]
+    __rsyslog_rules:
+      - name: "input-files-{{ files_item.name }}"
+        type: input
+        sections:
+          - options: |-
+              input(type="imfile" file="{{ files_item.rsyslog_input_log_path | d(rsyslog_input_log_path) }}" tag="{{ files_item.name }}")
+              {{ lookup('template', 'input_template.j2') }}
   include_tasks:
     file: deploy.yml
   loop: '{{ logging_inputs }}'

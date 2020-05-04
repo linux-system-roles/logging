@@ -1,0 +1,123 @@
+- name: Ensure that the role runs with parameters from ovirt to two elasticsearch outputs and local files output
+  hosts: all
+  become: true
+  vars:
+    __test_ovirt_collectd_conf: /etc/rsyslog.d/90-input-ovirt-ovirt_collectd_input.conf
+    __test_ovirt_engine_conf: /etc/rsyslog.d/90-input-ovirt-ovirt_engine_input.conf
+    __test_ovirt_vdsm_conf: /etc/rsyslog.d/90-input-ovirt-ovirt_vdsm_input.conf
+    __test_ovirt_bogus_conf: /etc/rsyslog.d/90-input-ovirt-ovirt_bogus_input.conf
+    __test_collectd_name: ovirt_collectd_input
+    __test_engine_name: ovirt_engine_input
+    __test_vdsm_name: ovirt_vdsm_input
+    __test_collectd_port: 44514
+    __test_metrics_index: project.ovirt-metrics
+    __test_logs_index: project.ovirt-logs
+    __test_engine_input: /var/log/ovirt-engine/engine.log
+    __test_vdsm_input: /var/log/vdsm/vdsm.log
+
+  tasks:
+    - name: deploy config to send to elasticsearch
+      vars:
+        logging_purge_confs: true
+        logging_outputs:
+          - name: default_files
+            type: file
+          - name: elasticsearch_output
+            type: elasticsearch
+            server_host: logging-es
+            server_port: 9200
+            index_prefix: project.
+            input_type: ovirt
+            retryfailures: off
+            ca_cert: "/etc/rsyslog.d/es-ca.crt"
+            cert: "/etc/rsyslog.d/es-cert.pem"
+            key: "/etc/rsyslog.d/es-key.pem"
+          - name: elasticsearch_output_ops
+            type: elasticsearch
+            server_host: logging-es-ops
+            server_port: 9200
+            index_prefix: .operations.
+            input_type: ovirt
+            retryfailures: off
+            ca_cert: "/etc/rsyslog.d/es-ca.crt"
+            cert: "/etc/rsyslog.d/es-cert.pem"
+            key: "/etc/rsyslog.d/es-key.pem"
+        logging_inputs:
+          - name: basic_input
+            type: basics
+          - name: "{{ __test_collectd_name }}"
+            type: ovirt
+            subtype: collectd
+          - name: "{{ __test_engine_name }}"
+            type: ovirt
+            subtype: engine
+          - name: "{{ __test_vdsm_name }}"
+            type: ovirt
+            subtype: vdsm
+          - name: ovirt_bogus_input
+            type: ovirt
+            subtype: bogus
+        logging_flows:
+          - name: flow_0
+            inputs: ["{{ __test_collectd_name }}", "{{ __test_engine_name }}", "{{ __test_vdsm_name }}"]
+            outputs: [elasticsearch_output, elasticsearch_output_ops]
+          - name: flow_1
+            inputs: [basic_input]
+            outputs: [default_files]
+      include_role:
+        name: linux-system-roles.logging
+
+    - include: set_rsyslog_variables.yml
+
+    # notify restart rsyslogd is executed at the end of this test task.
+    # thus we have to force to invoke handlers
+    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+      meta: flush_handlers
+
+    - name: Check rsyslog.conf size
+      assert:
+        that: rsyslog_conf_line_count.stdout.0 | int <= 7
+
+    - name: Check file counts in rsyslog.d
+      assert:
+        that: rsyslog_d_file_count.matched >= 18
+
+    - name: Check "{{ __test_ovirt_collectd_conf }}, {{ __test_ovirt_engine_conf }}, {{ __test_ovirt_vdsm_conf }}"
+      stat:
+        path: "{{ item }}"
+      register: __result
+      loop:
+        - "{{ __test_ovirt_collectd_conf }}"
+        - "{{ __test_ovirt_engine_conf }}"
+        - "{{ __test_ovirt_vdsm_conf }}"
+      failed_when: not __result.stat.exists
+
+    - name: Check "{{ __test_ovirt_bogus_conf }} does not exist"
+      stat:
+        path: "{{ __test_ovirt_bogus_conf }}"
+      register: __result
+      failed_when: __result.stat.exists
+
+    - name: Check ovirt_collectd_port is "{{ __test_collectd_port }}"
+      command: /bin/grep "input .name=\"{{ __test_collectd_name }}\".*port=\"{{ __test_collectd_port }}\"" {{ __test_ovirt_collectd_conf }}
+      changed_when: false
+
+    - name: Check index_prefix is "{{ __test_metrics_index }}" in "{{ __test_ovirt_collectd_conf }}"
+      command: /bin/grep "set $\.index_prefix = \"{{ __test_metrics_index }}\"" {{ __test_ovirt_collectd_conf }}
+      changed_when: false
+
+    - name: Check input file is "{{ __test_engine_input }}" in "{{ __test_ovirt_engine_conf }}"
+      command: /bin/grep "input(type=\"imfile\" file=\"{{ __test_engine_input }}\" tag=\"{{ __test_engine_name }}\"" {{ __test_ovirt_engine_conf }}
+      changed_when: false
+
+    - name: Check index_prefix is "{{ __test_logs_index }}" in "{{ __test_ovirt_engine_conf }}"
+      command: /bin/grep "set $\.index_prefix = \"{{ __test_logs_index }}\"" {{ __test_ovirt_engine_conf }}
+      changed_when: false
+
+    - name: Check input file is "{{ __test_vdsm_input }}" in "{{ __test_ovirt_vdsm_conf }}"
+      command: /bin/grep "input(type=\"imfile\" file=\"{{ __test_vdsm_input }}\" tag=\"{{ __test_vdsm_name }}\"" {{ __test_ovirt_vdsm_conf }}
+      changed_when: false
+
+    - name: Check index_prefix is "{{ __test_logs_index }}" in "{{ __test_ovirt_vdsm_conf }}"
+      command: /bin/grep "set $\.index_prefix = \"{{ __test_logs_index }}\"" {{ __test_ovirt_vdsm_conf }}
+      changed_when: false

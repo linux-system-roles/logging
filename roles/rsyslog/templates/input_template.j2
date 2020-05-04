@@ -1,4 +1,3 @@
-{{ __rsyslog_input_decl }}
 {% set rsyslog_flows = logging_flows | d([ {"name": "default_flow", "inputs": [ __rsyslog_input_name ], "outputs": ["default_files"]} ], true) %}
 {% set indict = {} %}
 {% for input in logging_inputs %}
@@ -24,7 +23,7 @@ if
 {%         if input.type == "basics" %}
   ($inputname == "imjournal")
 {%         elif input.type == __rsyslog_input_type %}
-  ($syslogtag == "{{ input.name }}")
+  ($syslogtag == "{{ input.name }}" or (strlen($.syslogtag) > 0 and ($.syslogtag == "{{ input.name }}")))
 {%         endif %}
 {%       endif %}
 {%     endfor %}

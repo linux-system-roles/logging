@@ -63,8 +63,8 @@ logging/
 │       │   │   ├── rsyslog.conf.j2
 │       │   │   └── rsyslog.d
 │       │   │       └── rules.conf.j2
-│       │   ├── input_basics.j2
-│       │   ├── input_files.j2
+│       │   ├── input_template.j2
+│       │   ├── ovirt_input_files.j2
 │       │   ├── output_elasticsearch.j2
 │       │   ├── output_files.j2
 │       │   └── output_forwards.j2
