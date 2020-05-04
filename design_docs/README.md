@@ -11,4 +11,6 @@ Design Doc Contents
 
 [input and output flows](rsyslog_inputs_outputs_flows.md)
 
+[ovirt_support](rsyslog_ovirt_support.md)
+
 [Changelogs](Changelogs.md)

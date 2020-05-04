@@ -216,7 +216,6 @@ __rsyslog_common_rules:
   - '{{ __rsyslog_conf_local_modules }}'
   - '{{ __rsyslog_conf_common_defaults }}'
   - '{{ __rsyslog_conf_default_rulesets }}'
-  - '{{ __rsyslog_conf_send_targets_only }}'
 
 
 # Default configuration options
@@ -293,16 +292,3 @@ __rsyslog_conf_default_rulesets:
           ruleset(name="remote") {
             $IncludeConfig {{ rsyslog_config_dir }}/*.remote
           }
-
-__rsyslog_conf_send_targets_only:
-
-  - name: 'send-targets-only'
-    type: 'output'
-    weight: '40'
-    comment: 'Stops logs that should only be sent to defined targets'
-    options: |-
-      if ( strlen($.send_targets_only) > 0 ) then {
-          if ( $.send_targets_only == 'true' ) then {
-              stop
-          }
-      }

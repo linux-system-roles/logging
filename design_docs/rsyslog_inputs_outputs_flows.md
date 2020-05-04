@@ -20,12 +20,12 @@ Leftover tasks, other roles to be changed and eliminating `rsyslog_default`, are
 
 [0] - ovirt, viaq, and viaq-k8s need to update to support the flow controls.
 
-## How the flow controle works
+## How the flow control works
 
 ### Outputs
 Each output action is in the ruleset which name is the logging_outputs name.
 
-Output config file name is constructed of prefix 2 digits, `output`, type of the output, and type of configuration or the unique name of the output item concatinated by `-` with suffix `.conf`. For instance, an elasticsearch config file defining the module is `10-output-elasticsearch-module.conf`, where `elasticsearch` is the type of output, and `module` is the type of configuration. Another example, a output files config file which item has the unique name `files_output` is 30-output-files-files_output.conf. The 2 digits are defined in rsyslog_weight_map as described in [templates](rsyslog_templates.md). Also, it could be reassigned in each internal __rsyslog_rules.
+Output config file name is constructed of prefix 2 digits, `output`, type of the output, and type of configuration or the unique name of the output item concatenated by `-` with suffix `.conf`. For instance, an elasticsearch config file defining the module is `10-output-elasticsearch-module.conf`, where `elasticsearch` is the type of output, and `module` is the type of configuration. Another example, a output files config file which item has the unique name `files_output` is 30-output-files-files_output.conf. The 2 digits are defined in rsyslog_weight_map as described in [templates](rsyslog_templates.md). Also, it could be reassigned in each internal __rsyslog_rules.
 
 Looking into the contents of the action configuration file, one configuration file contains one action wrapped in a ruleset with a unique name. The following ruleset example has the name `files_output` and is for logging the messages in the local file /var/log/messages. This output type is `files`.  Log messages are passed to the ruleset by "call files_output" from an input.
 ```
@@ -48,7 +48,7 @@ logging_outputs
 The logging_inputs variables in the inventory specifies the input methods (plugins) to get the log messages.
 Currently, basics type (`imjournal` and `imtcp`, `imptcp`, `imudp`) and files type (`imfiles) are supported.
 
-The file's naming convention is similar to the outputs. When the input type can have multiple logging inputs such has reading from log files, the same number of input configuration files are generated and its name is constructed of prefix 2 digits, `input`, type of the input, and the unique name of the input item concatinated by `-` with suffix `.conf`.
+The file's naming convention is similar to the outputs. When the input type can have multiple logging inputs such has reading from log files, the same number of input configuration files are generated and its name is constructed of prefix 2 digits, `input`, type of the input, and the unique name of the input item concatenated by `-` with suffix `.conf`.
 
 The contents of an input configuration file has the caller point to the ruleset name in the output configuration based on the flow definition described next.
 
@@ -233,20 +233,6 @@ logging_inputs:
 ```
 
 ## To Do's
-### Input type ovirt
-The input ovirt is made from two inputs (`imfile`, `imtcp`) and the formatting part.
-The target outputs are fixed and no need to be configured by the users in the inventory file. (Please correct if this assumption is wrong.)
-Reading the ovirt/defaults/main.yml,
-if the condition `{% if collect_ovirt_vdsm_log or collect_ovirt_engine_log %}` or
-` $syslogtag startswith 'collectd'` is true, the log message is stored in the elasticsearch only. -- [1]
-Otherwise, the logs are stored in the elasticsearch as well as in the local files (by the original rsyslog.conf).
-That is, the code would be changed so that:
-- If the conditions [1] are satisfied, the logs are to be sent to the elasticsearch output only by `call unique_elasticsearch_output_name`.
-- Otherwise, `call unique_elasticsearch_output_name` and `call files`, by which the logs are sent to the both outputs.
-If this change works as expected, we could safely eliminate rsyslog_default and 40-send-targets-only.conf with .send_targets_only that reduces an extra config file.
-
-There is a test case tests_files_elasticsearch.yml in the tests directory (WARNING: It is not tested with elasticsearch yet. It just checks the syntax of the rsyslog config files.)
-
 ### Input viaq + viaq-k8s
 The input viaq and viaq-k8s are tightly coupled,
 where viaq is made from the `imfile` module call and the viaq formatting; viaq-k8s contains openshift specific code such as the location of the logging and code to get the meta data from kubernetes.

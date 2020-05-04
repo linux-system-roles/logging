@@ -4,7 +4,7 @@
 
 ### rsyslog.conf
 
-The primary configurarion file rsyslog.conf is managed by the rsyslog_default parameter.
+The primary configuration file rsyslog.conf is managed by the rsyslog_default parameter.
 If it is set to `true`, the default rsyslog.conf from the rsyslog rpm package is copied to /etc.
 If it is set to `false`, just the rsyslog.conf file only contains `$IncludeConfig /config/path/*.conf`
 and all the configurations are done in the sub-configuration files in rsyslog.d.
@@ -45,7 +45,7 @@ configure_line1
 .....
 ```
 
-Further controles are available.
+Further controls are available.
 To change the file suffix to `system`:
 ```
 - name: filename
@@ -66,8 +66,8 @@ To use completely pre-determined filename:
 ### Supporting template for each Sub-configuration
 
 Each sub-configuration uses the following template to generate a configuration file containing one operation.
-- [input_basics.j2](../roles/rsyslog/templates/input_basics.j2)
-- [input_files.j2](../roles/rsyslog/templates/input_files.j2)
+- [input_template.j2](../roles/rsyslog/templates/input_template.j2)
+- [ovirt_input_template.j2](../roles/rsyslog/templates/ovirt_input_template.j2)
 - [output_elasticsearch.j2](../roles/rsyslog/templates/output_elasticsearch.j2)
 - [output_files.j2](../roles/rsyslog/templates/output_files.j2)
 - [output_forwards.j2](../roles/rsyslog/templates/output_forwards.j2)

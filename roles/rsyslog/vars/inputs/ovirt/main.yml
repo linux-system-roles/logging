@@ -1,4 +1,14 @@
 ---
+# oVirt rpm packages
+# adding rsyslog_logging_packages
+# ------------------
+
+# rsyslog_logging_packages
+#
+# List of rpm packages for Common Logging.
+__rsyslog_ovirt_packages: ['rsyslog-mmnormalize', 'rsyslog-mmjsonparse', 'libfastjson', 'liblognorm', 'libestr']
+__rsyslog_ovirt_prereq_packages: []
+
 # oVirt configuration
 # ---------------------
 
@@ -9,36 +19,34 @@
 # ---------------------------
 
 __rsyslog_ovirt_rules:
-  - '{{ rsyslog_conf_local_ovirt_modules }}'
+  - '{{ rsyslog_conf_ovirt_local_modules }}'
   - '{{ rsyslog_conf_ovirt_main_modules }}'
-  - '{{ rsyslog_conf_ovirt_formatting }}'
-  - '{{ rsyslog_rulebase_ovirt_parse_json }}'
   - '{{ rsyslog_rulebase_ovirt_engine }}'
   - '{{ rsyslog_rulebase_ovirt_vdsm }}'
+  - '{{ rsyslog_rulebase_ovirt_parse_json }}'
 
 # Default oVirt configuration options
 # -----------------------------------
 
-# .. envvar:: rsyslog_conf_local_ovirt_modules
+# rsyslog_conf_ovirt_local_modules
 #
 # List of ``rsyslogd`` modules that enable logs from the local system to be
 # received and parsed by the ``rsyslogd`` daemon.
-rsyslog_conf_local_ovirt_modules:
+rsyslog_conf_ovirt_local_modules:
 
-  - name: 'local-ovirt-modules'
+  - name: 'input-ovirt-local_modules'
     type: 'modules'
-    state: '{{ "present"
-              if not (rsyslog_default | bool)
-              else "absent" }}'
     sections:
 
-      - comment: 'Log messages sent to local UNIX socket with use=off'
-        options: |-
-          module(load="imuxsock" SysSock.use="off")
+      - options: |-
+          {% if logging_inputs | selectattr('name', 'defined') | selectattr('type', 'defined') | selectattr('type', '==', 'basics') | list | length == 0 %}
+          # Log messages sent to local UNIX socket with use=off'
+          module(load="imuxsock" SysSock.Use="off")
+          {% endif %}
 
 rsyslog_conf_ovirt_main_modules:
 
-  - name: 'ovirt_main'
+  - name: 'input-ovirt-main-modules'
     type: 'modules'
     sections:
 
@@ -58,89 +66,10 @@ rsyslog_conf_ovirt_main_modules:
           # Parse logs to JSON
           module(load="mmjsonparse")
 
-rsyslog_conf_ovirt_formatting:
-
-  - name: 'ovirt_formatting'
-    type: 'template'
-    sections:
-
       - options: |-
-          # formatting
-
           template(name="cnvt_to_viaq_timestamp" type="list") {
               property(name="TIMESTAMP" dateFormat="rfc3339")
           }
-
-          input (name="ovirt_imtcp" type="imtcp" port="{{ rsyslog_read_collectd_port | d(44514) }}")
-          if $syslogtag startswith 'collectd' then {
-              set $!original_raw_message = $msg;
-              action(name="collectd_mmjsonparse" type="mmjsonparse" cookie="") # parse entire message as json
-              set $!@timestamp = exec_template('cnvt_to_viaq_timestamp');
-              unset $!time;
-              if $!collectd!plugin == 'virt' then {
-                  set $!ovirt!entity = 'vms';
-              } else {
-                  set $!ovirt!entity = 'hosts';
-              }
-          }
-
-          # add eventrouter
-          if $syslogtag startswith 'collectd' then {
-          {% if ovirt_env_uuid_logs is defined %}
-              set $.index_prefix = "{{ rsyslog_elasticsearch_index_prefix_metrics | d("project.ovirt-metrics") }}" & "-" & "{{ ovirt_env_name | d("engine") }}" & "." & "{{ ovirt_env_uuid_metrics }}" & ".";
-          {% else %}
-              set $.index_prefix = "{{ rsyslog_elasticsearch_index_prefix_metrics | d("project.ovirt-metrics") }}" & "-" & "{{ ovirt_env_name | d("engine") }}" & ".";
-          {% endif %}
-              set $.input_type = "ovirt";
-              set $.send_targets_only = "true";
-          }
-
-          {% if collect_ovirt_engine_log %}
-          input(type="imfile" file="{{ __rsyslog_system_log_dir }}/ovirt-engine/engine.log" tag="ovirt.engine" reopenOnTruncate="on"
-                startmsg.regex="^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}")
-
-          if $syslogtag == 'ovirt.engine' then {
-            action(name="ovirt-engine_mmnormalize" type="mmnormalize" rulebase="{{ rsyslog_config_dir }}/ovirt_engine.rulebase" path="$.ovirt")
-          }
-          {% endif %}
-
-          {% if collect_ovirt_vdsm_log %}
-          input(type="imfile" file="{{ __rsyslog_system_log_dir }}/vdsm/vdsm.log" tag="ovirt.vdsm" reopenOnTruncate="on"
-                startmsg.regex="^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}")
-
-          if $syslogtag == 'ovirt.vdsm' then {
-            action(name="ovirt-vdsm_mmnormalize" type="mmnormalize" rulebase="{{ rsyslog_config_dir }}/ovirt_vdsm.rulebase" path="$.ovirt")
-          }
-          {% endif %}
-
-          {% if collect_ovirt_vdsm_log or collect_ovirt_engine_log%}
-          if $syslogtag startswith "ovirt" then {
-          {% if ovirt_env_uuid_logs is defined %}
-              set $.index_prefix = "{{ rsyslog_elasticsearch_index_prefix_logs | d("project.ovirt-logs") }}" & "-" & "{{ ovirt_env_name | d("engine") }}" & "." & "{{ ovirt_env_uuid_logs }}" & ".";
-          {% else %}
-              set $.index_prefix = "{{ rsyslog_elasticsearch_index_prefix_logs | d("project.ovirt-logs") }}" & "-" & "{{ ovirt_env_name | d("engine") }}" & ".";
-          {% endif %}
-            # Add ovirt logs specific metadata
-              set $!@timestamp = $.ovirt!date & "T" & $.ovirt!time & "." & $.ovirt!msec & $.ovirt!tz;
-              set $!service = $syslogtag;
-              set $!message = $.ovirt!message;
-              set $!level = $.ovirt!level;
-              set $!hostname = '{{ ansible_fqdn }}';
-              set $!ovirt!cluster_name = '{{ ovirt_vds_cluster_name | d("") }}';
-              set $!ipaddr4 = '{{ ansible_default_ipv4.address }}';
-              set $!ovirt!engine_fqdn = '{{ ovirt_engine_fqdn | d("") }}';
-              set $.input_type = "ovirt";
-              set $!ovirt!class = $.ovirt!class;
-              set $!ovirt!thread = $.ovirt!thread;
-              set $.send_targets_only = "true";
-
-              unset $!metadata;
-
-              if ($syslogtag == 'ovirt.engine') and ($.ovirt!correlationid != "") then {
-                set $!ovirt!correlationid = $.ovirt!correlationid;
-              }
-          }
-          {% endif %}
 
 rsyslog_rulebase_ovirt_engine:
 

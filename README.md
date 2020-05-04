@@ -324,7 +324,7 @@ can test against a different image/tag like so:
 
 CI tests
 ========
-The tests are tests/tests_*.yml, which are triggered when a pull request is submitted.  Each tests_testname.yml is written in the ansible format. The file is made from the test logging_outputs, logging_inputs and logging_flows configuration, ansible exection, and the test result checking.
+The tests are tests/tests_*.yml, which are triggered when a pull request is submitted.  Each tests_testname.yml is written in the ansible format. The file is made from the test logging_outputs, logging_inputs and logging_flows configuration, ansible execution, and the test result checking.
 
 It is triggered when a pull request is submitted and its commit is updated.
 

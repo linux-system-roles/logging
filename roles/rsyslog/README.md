@@ -248,7 +248,7 @@ Elasticsearch, Files and Forwards outputs sub-variables
      server_host: <elasticsearch hostname>
      server_port: <elasticsearch port, default to 9200>
      index_prefix: <prefix to use in the elasticsearch index file>
-     input_type: <input tyle, e.g., ovirt>
+     input_type: <input type, e.g., ovirt>
      retryfailures: on|off, default to on
      ca_cert: <path to ca.crt>
      cert: <path to es-cert.pem>
@@ -297,12 +297,12 @@ Viaq inputs sub-variables
   - `index_prefix`: Elasticsearch index prefix the particular log is to be indexed.
   - `input_type`: Specifying the input type. Type `ovirt` and `viaq` are supported. Default to `ovirt`.
   - `retryfailures`: Specifying whether retries or not in case of failure. on or off.  Default to on.
-  - `ca_cert`: Path to CA cert for ElasticSearch.  Default to '/etc/rsyslog.d/es-ca.crt'
-  - `cert`: Path to cert for ElasticSearch.  Default to '/etc/rsyslog.d/es-cert.pem'
-  - `key`: Path to key for ElasticSearch.  Default to "/etc/rsyslog.d/es-key.pem"
-  - `ca_cert_src`: Path to the local CA cert file to deploy for ElasticSearch.
-  - `cert_src`: Path to the local cert file to deploy for ElasticSearch.
-  - `key_src`: Path to the local key file to deploy for ElasticSearch.
+  - `ca_cert`: Path to CA cert for Elasticsearch.  Default to '/etc/rsyslog.d/es-ca.crt'
+  - `cert`: Path to cert for Elasticsearch.  Default to '/etc/rsyslog.d/es-cert.pem'
+  - `key`: Path to key for Elasticsearch.  Default to "/etc/rsyslog.d/es-key.pem"
+  - `ca_cert_src`: Path to the local CA cert file to deploy for Elasticsearch.
+  - `cert_src`: Path to the local cert file to deploy for Elasticsearch.
+  - `key_src`: Path to the local key file to deploy for Elasticsearch.
 
 Contents of Roles
 =================
@@ -312,7 +312,7 @@ The basic framework is based on debops.rsyslog and adjusted to the RHEL/Fedora s
 
 - templates have 2 template files, rsyslog.conf.j2 and rules.conf.j2.  The former is used to generate /etc/rsyslog.conf and the latter is for the other configuration files including mmnormalize rulebase and formatter which will be placed in ```{{ rsyslog_config_dir }}``` (default to /etc/rsyslog.d) and its subdirectories.
 
-- tasks/main.yml contains the sceries of tasks to deploy specified set of configuration files.
+- tasks/main.yml contains the series of tasks to deploy specified set of configuration files.
 
 WARNING: Pre-existing rsyslog.conf and configuration files in /etc/rsyslog.d are moved to the backup directory /tmp/rsyslog.d-XXXXXX.  If the pre-existing files need to be merged with the newly deployed files, you need to do it manually.
 
@@ -322,7 +322,7 @@ Describing how the configuration files are defined to be deployed using the viaq
 
 Viaq configuration files are defined in {{ __rsyslog_viaq_rules }} in /roles/input_roles/viaq/defaults/main.yml.  The set is made from the generic modules{__rsyslog_conf_global_options, __rsyslog_conf_local_modules, __rsyslog_conf_common_defaults} and viaq specific configurations.
 
-If you are a role developer and planning to add a new default configuration to the role depo, create an rsyslog config item based on the following skelton and add the title {{ __rsyslog_conf_yourname }} to {{ __rsyslog_viaq_rules }}.
+If you are a role developer and planning to add a new default configuration to the role depo, create an rsyslog config item based on the following skeleton and add the title {{ __rsyslog_conf_yourname }} to {{ __rsyslog_viaq_rules }}.
 ```
 __rsyslog_conf_yourname:
 
@@ -343,7 +343,7 @@ If the deploy destination is other than {{ rsyslog_config_dir }}, the path is to
 
 By default, the generated configuration file starts with a comment "# Ansible managed".  It could break some type of configurations.  For instance, "version=2" must be the first line in a rulebase file.  To avoid having "# Ansible managed", set true to nocomment.
 
-Some full path configuration may be referred from other configuration file, e.g., 20-viaq_formattiong.conf refers parse_json.rulebase as follows.
+Some full path configuration may be referred from other configuration file, e.g., 20-viaq_formatting.conf refers parse_json.rulebase as follows.
 ```
 action(type="mmnormalize" ruleBase="{{ rsyslog_config_dir }}/parse_json.rulebase" variable="$!MESSAGE")
 ```

@@ -9,12 +9,15 @@
 
 - name: Create basics input configuration files in /etc/rsyslog.d
   vars:
-    __rsyslog_input_decl: ""
     __rsyslog_input_name: "{{ basics_item.name }}"
     __rsyslog_input_type: "{{ basics_item.type }}"
     __rsyslog_packages: []
-    __rsyslog_rules: [ { "name": "input-basics-{{ basics_item.name }}", "type": "input", "weight": "11",
-                         "sections": [ { "options": "{{ lookup('template', 'input_template.j2') }}" } ] } ]
+    __rsyslog_rules:
+      - name: "input-basics-{{ basics_item.name }}"
+        type: input
+        weight: "11"
+        sections:
+          - options: "{{ lookup('template', 'input_template.j2') }}"
   include_tasks:
     file: deploy.yml
   loop: '{{ logging_inputs }}'
