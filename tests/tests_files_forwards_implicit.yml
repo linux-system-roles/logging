@@ -8,8 +8,6 @@
   tasks:
     - name: deploy config to output into local files
       vars:
-        logging_enabled: true
-        rsyslog_default: false
         logging_outputs:
           - name: forwards_severity_and_facility
             type: forwards

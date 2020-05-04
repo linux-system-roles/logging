@@ -7,7 +7,6 @@
   tasks:
     - name: deploy config to output into local files
       vars:
-        logging_enabled: true
         logging_purge_confs: true
         logging_outputs:
           - name: files_output0

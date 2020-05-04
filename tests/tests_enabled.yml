@@ -6,8 +6,6 @@
 
   tasks:
     - name: default run (deploy rsyslog.conf)
-      vars:
-        logging_enabled: true
       include_role:
         name: linux-system-roles.logging
 

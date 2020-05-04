@@ -9,8 +9,6 @@
   tasks:
     - name: deploy config to send to elasticsearch
       vars:
-        logging_enabled: true
-        rsyslog_default: false
         logging_outputs:
           - name: elasticsearch_output
             type: elasticsearch

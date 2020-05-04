@@ -5,7 +5,6 @@
   tasks:
     - name: Deploy rsyslog config on the target host as a server
       vars:
-        logging_enabled: true
         logging_purge_confs: true
         rsyslog_capabilities: [ 'network', 'remote-files' ]
         logging_outputs:
