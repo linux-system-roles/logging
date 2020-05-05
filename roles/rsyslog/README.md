@@ -116,7 +116,7 @@ logging_inputs:
     type: basics
 ```
 
-**3. Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and outputs into the local files, which each acrion is defined.
+**3. Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the remote rsyslog and outputs into the local files per host.
 ```
 logging_purge_confs: true
 rsyslog_backup_dir: /tmp/rsyslog_backup
@@ -124,11 +124,7 @@ logging_outputs:
   - name: files_output0
     type: files
     severity: info
-    exclude:
-      - authpriv.none
-      - auth.none
-      - cron.none
-      - mail.none
+    exclude: [authpriv.none, auth.none, cron.none, mail.none]
     path: /var/log/messages
   - name: files_output1
     type: files
@@ -147,19 +143,44 @@ logging_flows:
 
 **4. Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and remote rsyslog and outputs into the local files.**
 ```
-logging_enabled: true
-rsyslog_capabilities: [ 'network', 'remote-files' ]
-logging_purge_confs: true
-logging_outputs:
-  - name: local-files
-    type: files
-logging_inputs:
-  - name: system-and-remote-input
-    type: basics
-logging_flows:
-  - name: flow0
-    inputs: [system-and-remote-input]
-    outputs: [local-files]
+        logging_outputs:
+          - name: remote_files_output
+            type: remote_files
+        logging_inputs:
+          - name: remote_udp_input
+            type: remote
+            udp_port: 11514
+          - name: remote_tcp_input
+            type: remote
+            tcp_port: 22514
+        logging_flows:
+          - name: flow_0
+            inputs: [remote_udp_input, remote_tcp_input]
+            outputs: [remote_files_output]
+```
+If more detailed outputs to be configured instead of using the default paths, they are configurable as follows.
+```
+        logging_outputs:
+          - name: remote_files_output0
+            type: remote_files
+            remote_log_path: /var/log/remote/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log
+            severity: info
+            exclude: [authpriv.none]
+          - name: remote_files_output1
+            type: remote_files
+            remote_sub_path: others/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log
+            facility: authpriv
+        logging_inputs:
+          - name: remote_udp_input
+            type: remote
+            udp_port: 11514
+          - name: remote_tcp_input
+            type: remote
+            tcp_port: 22514
+        logging_flows:
+          - name: flow_0
+            inputs: [remote_udp_input, remote_tcp_input]
+            outputs: [remote_files_output0, remote_files_output1]
 ```
 
 **5. Deploying basic LSR/Logging config files in /etc/rsyslog.d, which forwards the local system logs to the remote rsyslog.
@@ -221,14 +242,12 @@ Variables in vars.yml
 ======================
 
 - `logging_enabled` : When 'true', rsyslog role will deploy specified configuration file set. Default to 'true'.
-- `rsyslog_capabilities` : List of capabilities to configure.  [ 'network', 'remote-files', 'tls', 'gnutls', 'kernel-message', 'mark' ] are predefined.
-   To receive remote input, you could add 'network' to `rsyslog_capabilities`, which will configure imudp as well as imptcp.
-   To put logs from the remote input in the separate files, 'remote-files' is to be added to `rsyslog_capabilities`.
-   To make the network communication safe, enable `rsyslog_pki` and add `tls` to `rsyslog_capabilities`.
+- `rsyslog_capabilities` : List of capabilities to configure.  [ 'tls', 'gnutls', 'kernel-message', 'mark' ] are predefined.
+   To make the network communication safe, enable `rsyslog_pki` and add `tls` to `rsyslog_capabilities`. (TBD)
    To log all kernel messages to the console, add `kernel-message` to `rsyslog_capabilities`.
    To add `-- MARK --` message every hour, add `mark` to `rsyslog_capabilities`.
 - `rsyslog_default`: If set as `true`, rsyslog.conf will be configured with default configurations and rules.
-- `rsyslog_pki` : When 'true', pki related variables are configured, which are `rsyslog_pki_path`, `rsyslog_pki_realm`, `rsyslog_pki_ca`, `rsyslog_pki_crt`, `rsyslog_pki_key`.  In addition, if 'tls' is included in `rsyslog_capabilities`, it enables to forward logs over TLS.  Default to 'false'.
+- `rsyslog_pki` : When 'true', pki related variables are configured, which are `rsyslog_pki_path`, `rsyslog_pki_realm`, `rsyslog_pki_ca`, `rsyslog_pki_crt`, `rsyslog_pki_key`.  In addition, if 'tls' is included in `rsyslog_capabilities`, it enables to forward logs over TLS.  Default to 'false'. (TBD)
 - `rsyslog_send_over_tls_only` : When 'true', insecure connection is not allowed.  I.e., it requires `tls` in `rsyslog_capabilities`.  Default to 'false'.
 
 Common sub-variables
@@ -239,7 +258,7 @@ Common sub-variables
 - `rsyslog_in_image`: Specifies if the target host is a container and use rsyslog in the image. Default to false.
 - `rsyslog_work_dir`: Working directory.  Default to '/var/lib/rsyslog'.
 
-Elasticsearch, Files and Forwards outputs sub-variables
+Elasticsearch, Files, Remote_files, and Forwards outputs sub-variables
 ----------------------------------
 - `elasticsearch`: array of dictionary to specify the parameters to forward the log messages to elasticsearch.
    ```
@@ -261,7 +280,7 @@ Files output format
      type: files
      facility: <facility_in_text, e.g., "mail"; default to "*">
      severity: <severity_in_text, e.g., "info"; default to "*">
-     exclude: <excluded facility list; default to none>
+     exclude: <excluded list; default to none>
      path: </full/path/to/file/to/store/the/logs; MUST EXIST>
    ```
 - `forwards`: array of dictionary to specify the facility and severity filter and the host and port to forward logs satisfying the filter.  It takes the sub-variables - `name`, `facility`, `severity`, `exclude`, `protocol`, `target`, and `port`.  Unless the name and the target are given, the element is skipped.
@@ -271,15 +290,37 @@ Forwards output format
      type: forwards
      facility: <facility_in_text, e.g., "mail"; default to "*">
      severity: <severity_in_text, e.g., "info"; default to "*">
-     exclude: <excluded facility list; default to none>
+     exclude: <excluded list; default to none>
      protocol: <tcp_or_udp; default to "tcp">
      target: <target_host_name_or_ip_address; MUST EXIST>
      port: <port_number; default to 514>
    ```
+- `remote_files`: array of dictionary to specify the facility and severity filter and the full path or the relative path to store logs satisfying the filter.  It takes the sub-variables - `name`, `facility`, `severity`, `exclude`, and `remote_log_path` or `remote_sub_path`.  Unless the name and one of remote_log_path or remote_sub_path are given, the default remote_files is configured.
+Remote_files output format
+   ```
+   - name: <unique_name>
+     type: files
+     facility: <facility_in_text, e.g., "mail"; default to "*">
+     severity: <severity_in_text, e.g., "info"; default to "*">
+     exclude: <excluded list, e.g., [mail.none, auth.none]; default to none>
+     remote_log_path: </full/path/to/file/to/store/the/logs>
+     remote_sub_path: <relative/path/from/`logging_system_log_dir`/to/file/to/store/the/logs>
+   ```
+
+Basics inputs sub-variables
+------------------------------
+- `rsyslog_imjournal_ratelimit_burst`: set to imjournal RateLimit.Burst. Default to 20000.
+- `rsyslog_imjournal_ratelimit_interval`: set to imjournal RateLimit.Interval. Default to 600.
+- `rsyslog_imjournal_persist_state_interval`: set to imjournal PersistStateInterval. Default to 10.
 
 Files inputs sub-variables
 ------------------------------
 - `rsyslog_input_log_path`: File name to be read by the imfile plugin. The value should be full path. Wildcard '*' is allowed in the path.  Default to `/var/log/containers/*.log`
+
+Remote inputs sub-variables
+- `udp_port`: if the port number is given, rsyslog is configured to listen at the udp port number. Default to 514.
+- `tcp_port`: if the port number is given, rsyslog is configured to listen at the tcp port number. Default to 514.
+- `tcp_tls_port`: if the port number is given, rsyslog is configured to listen at the tls tcp port number. Default to 6514.
 
 Viaq inputs sub-variables
 -----------------------------

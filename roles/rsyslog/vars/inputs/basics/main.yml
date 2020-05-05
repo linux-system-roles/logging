@@ -19,10 +19,6 @@ rsyslog_capabilities: []
 
 rsyslog_use_imuxsock: false
 
-# rsyslog_input_log_path is a parameter for the imfile.
-# rsyslog_input_log_path specifies the files to read. Wildcard '*' is allowed in the path
-rsyslog_input_log_path: "/var/log/containers/*.log"
-
 # __rsyslog_basics_rules
 #
 # List of YAML dictionaries, each dictionary should contain ``rsyslogd`` configuration
@@ -30,7 +26,6 @@ rsyslog_input_log_path: "/var/log/containers/*.log"
 __rsyslog_basics_rules:
   - '{{ __rsyslog_conf_local_basics_modules }}'
   - '{{ __rsyslog_conf_system_input }}'
-  - '{{ __rsyslog_conf_network_input }}'
 
 # __rsyslog_conf_local_basics_modules
 #
@@ -69,34 +64,6 @@ __rsyslog_conf_local_basics_modules:
           {%   endif %}
           {% endfor %}
 
-  - name: 'remote-modules'
-    type: 'modules'
-    state: '{{ "present" if "network" in rsyslog_capabilities else "absent" }}'
-    sections:
-
-      - comment: 'Read messages sent over UDP or plain TCP without TLS'
-        options: |-
-          module(load="imudp")
-          module(load="imptcp")
-        state: '{{ "present" if not rsyslog_send_over_tls_only else "absent" }}'
-
-      - comment: 'Read messages sent over Secure TCP with TLS'
-        options: |-
-          module(
-            load="imtcp"
-            streamDriver.name="{{ rsyslog_default_netstream_driver }}"
-            streamDriver.mode="1"
-            streamDriver.authMode="{{ rsyslog_default_driver_authmode }}"
-          {% if rsyslog_default_driver_authmode != "anon" %}
-            {% if rsyslog_permitted_peers is string %}
-              permittedPeer="{{ rsyslog_permitted_peers }}"
-            {% else %}
-              permittedPeer=["{{ rsyslog_permitted_peers | join('","') }}"]
-            {% endif %}
-          {% endif %}
-          )
-        state: '{{ "present" if "tls" in rsyslog_capabilities else "absent" }}'
-
 # __rsyslog_conf_system_input
 #
 __rsyslog_conf_system_input:
@@ -109,47 +76,3 @@ __rsyslog_conf_system_input:
       - comment: 'Log messages from imuxsock'
         options: |-
           input(name="basics_imuxsock" type="imuxsock" socket="/dev/log")
-
-# __rsyslog_conf_network_input
-#
-# Configuration of UDP, TCP and TCP over TLS inputs to receive logs from remote
-# hosts, enabled by the ``network`` capability.
-__rsyslog_conf_network_input:
-
-  - name: 'network-input'
-    type: 'input'
-    state: '{{ "present"
-              if ("network" in rsyslog_capabilities)
-              else "absent" }}'
-    sections:
-
-      - options: |-
-          # Log messages from remote hosts over UDP
-          input(
-            name="basics_imudp"
-            type="imudp"
-            port="{{ rsyslog_udp_port }}"
-            ruleset="remote"
-          )
-          # Log messages from remote hosts over plain TCP
-          input(
-            name="basics_imptcp"
-            type="imptcp"
-            port="{{ rsyslog_tcp_port }}"
-            ruleset="remote"
-          )
-        state: '{{ "present"
-                  if (not rsyslog_send_over_tls_only)
-                  else "absent" }}'
-
-      - comment: 'Log messages from remote hosts over TLS'
-        options: |-
-          input(
-            name="basics_imtcp"
-            type="imtcp"
-            port="{{ rsyslog_tcp_tls_port }}"
-            ruleset="remote"
-          )
-        state: '{{ "present"
-                  if ("tls" in rsyslog_capabilities)
-                  else "absent" }}'

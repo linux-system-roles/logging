@@ -1,0 +1,14 @@
+---
+- name: Create files output configuration files in /etc/rsyslog.d
+  vars:
+    __rsyslog_packages: "{{ __rsyslog_remote_files_output_packages }}"
+    __rsyslog_rules:
+      - name: "output-files-{{ remote_files_item.name }}"
+        type: "output"
+        sections:
+          - options: "{{ lookup('template', 'output_remote_files.j2') }}"
+  include_tasks:
+    file: deploy.yml
+  loop: '{{ rsyslog_output_remote_files }}'
+  loop_control:
+    loop_var: remote_files_item

@@ -12,8 +12,6 @@ __rsyslog_files_output_packages: []
 # ---------------------------------
 __rsyslog_files_output_rules:
   - '{{ __rsyslog_conf_files_output_modules }}'
-  - '{{ __rsyslog_conf_remote_templates }}'
-  - '{{ __rsyslog_conf_remote_output }}'
 
 # __rsyslog_conf_files_output_modules:
 __rsyslog_conf_files_output_modules:
@@ -29,89 +27,3 @@ __rsyslog_conf_files_output_modules:
           {% else %}
           module(load="builtin:omfile")
           {% endif %}
-
-# __rsyslog_conf_remote_templates
-#
-# List of ``rsyslogd`` templates which are used to generate dynamic filenames for remote logs,
-# based on hostnames. You can add additional template configuration by writing it in the
-# `{{ rsyslog_config_dir }}/*.template` files, they will be included by the main configuration.
-#
-# This section will create 20-remote-templates.conf
-__rsyslog_conf_remote_templates:
-
-  - name: 'remote-templates'
-    type: 'template'
-    state: '{{ "present"
-               if ("network" in rsyslog_capabilities and "remote-files" in rsyslog_capabilities)
-               else "absent" }}'
-    sections:
-
-      - options: |-
-          #
-          # Per-Host Templates for Remote Systems
-          #
-          template(
-            name="RemoteMessage"
-            type="string"
-            string="{{ __rsyslog_system_log_dir }}/remote/msg/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
-          )
-
-          # Template for Remote host auth logs
-          template(
-            name="RemoteHostAuthLog"
-            type="string"
-            string="{{ __rsyslog_system_log_dir }}/remote/auth/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
-          )
-
-          # Template for Remote host cron logs
-          template(
-            name="RemoteHostCronLog"
-            type="string"
-            string="{{ __rsyslog_system_log_dir }}/remote/cron/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
-          )
-
-          # Template for Remote service auth logs
-          template(
-            name="RemoteServiceAuthLog"
-            type="string"
-            string="{{ __rsyslog_system_log_dir }}/remote/services/auth/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
-          )
-
-          # Template for Remote service cron logs
-          template(
-            name="RemoteServiceCronLog"
-            type="string"
-            string="{{ __rsyslog_system_log_dir }}/remote/services/cron/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
-          )
-
-          # Template for Remote service mail logs
-          template(
-            name="RemoteServiceMailLog"
-            type="string"
-            string="{{ __rsyslog_system_log_dir }}/remote/services/mail/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
-          )
-
-          # Include custom templates
-          $IncludeConfig {{ rsyslog_config_dir }}/*.template
-
-# __rsyslog_conf_remote_output
-#
-__rsyslog_conf_remote_output:
-
-  - name: 'dynamic-logs'
-    comment: 'Store remote logs in separate logfiles'
-    type: 'output'
-    suffix: 'remote'
-    state: '{{ "present"
-               if ("network" in rsyslog_capabilities and "remote-files" in rsyslog_capabilities)
-               else "absent" }}'
-    sections:
-
-      - comment: 'Per-Host Templates for Remote Systems'
-        options: |-
-          authpriv.*   action(name="remote_authpriv_host_log" type="omfile" DynaFile="RemoteHostAuthLog")
-          authpriv.*   action(name="remote_authpriv_service_log" type="omfile" DynaFile="RemoteServiceAuthLog")
-          *.info;mail.none;authpriv.none;cron.none action(name="remote_message" type="omfile" DynaFile="RemoteMessage")
-          cron.*       action(name="remote_cron_log" type="omfile" DynaFile="RemoteHostCronLog")
-          cron.*       action(name="remote_cron_service_log" type="omfile" DynaFile="RemoteServiceCronLog")
-          mail.*       action(name="remote_mail_service_log" type="omfile" DynaFile="RemoteServiceMailLog")

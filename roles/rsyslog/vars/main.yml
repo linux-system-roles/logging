@@ -9,3 +9,46 @@ __rsyslog_base_packages: ['rsyslog']
 __rsyslog_tls_packages: ['rsyslog-gnutls', 'ca-certificates']
 
 rsyslog_use_imuxsock: false
+#
+# Firewall, UDP, TCP ports
+# ------------------------
+
+# default rsyslog port
+#
+# The incoming TCP/UDP port used for remote logging.
+__rsyslog_default_port: '514'
+
+# default rsyslog tcp port
+#
+# The incoming TCP TLS port used for remote logging.
+__rsyslog_default_tls_port: '6514'
+
+# Rsyslog configuration rules
+# ---------------------------
+
+# rsyslog_weight_map
+#
+# This is a dictionary map of different configuration "types" corresponding to
+# numbers used to sort configuration files in `{{ rsyslog_config_dir }}` directory
+# (configuration order is important). You can specify a type in the
+# configuration by using the ``item.type`` parameter.
+#
+# If you change the default weight map values, you will most likely need to
+# remove all files from `{{ rsyslog_config_dir }}` to reset the configuration.
+rsyslog_weight_map:
+  'global': '05'
+  'globals': '05'
+  'module': '10'
+  'modules': '10'
+  'template': '20'
+  'templates': '20'
+  'output': '30'
+  'outputs': '30'
+  'service': '30'
+  'services': '30'
+  'rule': '50'
+  'rules': '50'
+  'ruleset': '50'
+  'rulesets': '50'
+  'input': '90'
+  'inputs': '90'

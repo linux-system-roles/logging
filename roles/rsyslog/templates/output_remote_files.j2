@@ -1,0 +1,60 @@
+{% if remote_files_item.remote_log_path | d() or remote_files_item.remote_sub_path | d() %}
+{%   if remote_files_item.remote_log_path | d() %}
+{%     set __remote_log_path = remote_files_item.remote_log_path %}
+{%   else %}
+{%     set __remote_log_path = __rsyslog_system_log_dir ~ remote_files_item.remote_sub_path %}
+{%   endif %}
+{%   if remote_files_item.comment | d() %}
+# {{ remote_files_item.comment }}
+{%   endif %}
+template(
+  name="{{ remote_files_item.name }}_template"
+  type="string"
+  string="{{ __remote_log_path }}"
+)
+ruleset(name="{{ remote_files_item.name }}") {
+    # Store remote logs in separate logfiles
+{%   if forwards_item.exclude | d([]) %}
+    {{ remote_files_item.facility | d('*') }}.{{ remote_files_item.severity | d('*') }};{{ remote_files_item.exclude | join(';') }} action(name="{{ remote_files_item.name }}" type="omfile" DynaFile="{{ remote_files_item.name }}_template")
+{% else %}
+    {{ remote_files_item.facility | d('*') }}.{{ remote_files_item.severity | d('*') }} action(name="{{ remote_files_item.name }}" type="omfile" DynaFile="{{ remote_files_item.name }}_template")
+{% endif %}
+}
+{% else %}
+{%   set __remote_log_path = __rsyslog_system_log_dir ~ '/remote' %}
+# Per-Host Templates for Remote Systems
+template(
+  name="RemoteMessage"
+  type="string"
+  string="{{ __remote_log_path }}/msg/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
+)
+
+# Template for Remote host auth logs
+template(
+  name="RemoteHostAuthLog"
+  type="string"
+  string="{{ __remote_log_path }}/auth/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
+)
+
+# Template for Remote host cron logs
+template(
+  name="RemoteHostCronLog"
+  type="string"
+  string="{{ __remote_log_path }}/cron/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
+)
+
+# Template for Remote service mail logs
+template(
+  name="RemoteHostMailLog"
+  type="string"
+  string="{{ __remote_log_path }}/mail/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
+)
+
+ruleset(name="{{ remote_files_item.name }}") {
+    # Store remote logs in separate logfiles
+    authpriv.*   action(name="remote_authpriv_host_log" type="omfile" DynaFile="RemoteHostAuthLog")
+    *.info;mail.none;authpriv.none;cron.none action(name="remote_message" type="omfile" DynaFile="RemoteMessage")
+    cron.*       action(name="remote_cron_log" type="omfile" DynaFile="RemoteHostCronLog")
+    mail.*       action(name="remote_mail_service_log" type="omfile" DynaFile="RemoteHostMailLog")
+}
+{% endif %}

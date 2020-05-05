@@ -71,4 +71,4 @@ Each sub-configuration uses the following template to generate a configuration f
 - [output_elasticsearch.j2](../roles/rsyslog/templates/output_elasticsearch.j2)
 - [output_files.j2](../roles/rsyslog/templates/output_files.j2)
 - [output_forwards.j2](../roles/rsyslog/templates/output_forwards.j2)
-
+- [output_remote_files.j2](../roles/rsyslog/templates/output_remote_files.j2)
