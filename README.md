@@ -36,7 +36,7 @@ Definitions
   - [`Viaq`](https://docs.okd.io/latest/install_config/aggregate_logging.html)- Common Logging based on OpenShift Aggregated Logging (OCP/Origin).
   - [`Elasticsearch`](https://www.elastic.co/) - Non-OpenShift standalone Elasticsearch.
   - `Local` - Output the collected logs to a local File / Journal (Not yet implemented). Supported only for default and basics Rsyslog data at this point.
-  - `Remote Rsyslog` - Output logs to a remote Rsyslog server.
+  - `Remote Rsyslog` - Input logs from or output logs to a remote Rsyslog server.
   - `Message Queue` (kafka, amqp) - Not yet implemented
 
 Deploy Configuration Files
@@ -70,7 +70,7 @@ vars.yml stores variables which are passed to ansible to control the tasks.
 Initial configuration will be supplied by default.
 User can supply further configuration to be used.
 
-Currently, the logging role supports four types of logs collections ([inputs](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/tasks/inputs/)): `basics`, `files`, `ovirt`, and `viaq`.  And 3 types of log outputs ([outputs](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/tasks/outputs/)): `elasticsearch`, `files`, and `forwards`.  To deploy configuration files with these inputs and outputs, first specify the outputs as `logging_outputs`, then inputs as `logging_inputs`.  For define the flow from inputs to outputs, use `logging_flows`.  The `logging_flows` is made from, `name`, `inputs`, and `outputs`, where `inputs` is a list of `logging_inputs name` values and `outputs` is a list of `logging_outputs name` values.
+Currently, the logging role supports 5 types of logging inputs ([inputs](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/tasks/inputs/)): `basics`, `files`, `ovirt`, `remote`, and `viaq`.  And 4 types of outputs ([outputs](https://github.com/linux-system-roles/logging/tree/master/roles/rsyslog/tasks/outputs/)): `elasticsearch`, `files`, `forwards`, and `remote_files`.  To deploy configuration files with these inputs and outputs, specify the inputs as `logging_inputs` and the outputs as `logging_outputs`. For definining the flow from inputs to outputs, use `logging_flows`.  The `logging_flows` has 3 sub variables `name`, `inputs`, and `outputs`, where `inputs` is a list of `logging_inputs name` values and `outputs` is a list of `logging_outputs name` values.
 
 To make an effect with the following setting, vars.yml has to have `logging_enabled: true`.  Unless logging_enabled is set to true, LSR/Logging does not deploy logging systems.
 
@@ -135,21 +135,46 @@ logging_inputs:
     type: basics
 ```
 
-3) Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and remote rsyslog and outputs into the local files.
+3) Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the remote rsyslog and outputs into the local files per host.
 ```
-logging_enabled: true
-rsyslog_capabilities: [ 'network', 'remote-files' ]
-logging_purge_confs: true
 logging_outputs:
-  - name: local-files
-    type: files
+  - name: remote_files_output
+    type: remote_files
 logging_inputs:
-  - name: system-and-remote-input
-    type: basics
+  - name: remote_udp_input
+    type: remote
+    udp_port: 11514
+  - name: remote_tcp_input
+    type: remote
+    tcp_port: 22514
 logging_flows:
-  - name: flow0
-    inputs: [system-and-remote-input]
-    outputs: [local-files]
+  - name: flow_0
+    inputs: [remote_udp_input, remote_tcp_input]
+    outputs: [remote_files_output]
+```
+If more detailed outputs to be configured instead of using the default paths, they are configurable as follows.
+```
+logging_outputs:
+  - name: remote_files_output0
+    type: remote_files
+    remote_log_path: /var/log/remote/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log
+    severity: info
+    exclude: [authpriv.none]
+  - name: remote_files_output1
+    type: remote_files
+    remote_sub_path: others/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log
+    facility: authpriv
+logging_inputs:
+  - name: remote_udp_input
+    type: remote
+    udp_port: 11514
+  - name: remote_tcp_input
+    type: remote
+    tcp_port: 22514
+logging_flows:
+  - name: flow_0
+    inputs: [remote_udp_input, remote_tcp_input]
+    outputs: [remote_files_output0, remote_files_output1]
 ```
 
 4) Deploying config files for collecting logs from OpenShift pods as well as RHV and forwarding them to elasticsearch.
@@ -206,7 +231,7 @@ Variables in vars.yml
 - `logging_mmk8s_ca_cert`: Path to CA cert for kubernetes.  Default to "/etc/rsyslog.d/mmk8s.ca.crt".
 - `logging_outputs`: A set of following variables to specify output configurations.  It could be an list if multiple outputs that should to be configured.
    - `name`: Unique name of the output
-   - `type`: Type of the output element. Currently, `elasticsearch`, `files`, and `forwards` are supported. The `type` is used to specify a task type which corresponds to a directory name in roles/rsyslog/tasks/outputs/.
+   - `type`: Type of the output element. Currently, `elasticsearch`, `files`, `forwards`, and `remote_files` are supported. The `type` is used to specify a task type which corresponds to a directory name in roles/rsyslog/{tasks,vars}/outputs/.
    -  ** `type: elasticsearch`**
       - `server_host`: Hostname elasticsearch is running on.
       - `server_port`: Port number elasticsearch is listening to.
@@ -235,10 +260,27 @@ Variables in vars.yml
       - `name`: Name of the custom file output element.
       - `type`: Type of the output element.
       - `custom_config_files`: List of custom configuration files are deployed to /etc/rsyslog.d. [ '/path/to/custom_A.conf', '/path/to/custom_B.conf' ]. Default to none.
+   -  ** `type: remote_files`**
+      - `facility`: facility; default to `*`
+      - `severity`: severity; default to `*`
+      - `exclude`: exclude list; default to none.
+      - `remote_log_path`: full path to store the filtered logs.
+      - `remote_sub_path`: relative path to logging_system_log_dir to store the filtered logs.
+	                       if `remote_log_path` nor `remote_sub_path` are not specified, the remote_file output configured with the default settings.
 - `logging_inputs` : List of optional logs collections, dictionaries with `name`, `type` and `state` attributes, that were pre-configured.
         - `name`: Unique name of the input.
-          `type`: The type of the pre-configured logs to collect. **Note:** Currently ['viaq', 'viaq-k8s', 'ovirt'] are supported for the elasticsearch output.
+          `type`: The type of the log inputs. **Note:** Currently [`basics`, `files`, `ovirt`, `remote`, and `viaq`] are supported.
           `state`: The state of the configuration files states if they should be `present` or `absent`. Default to `present`.
+   -  ** `type: basics`**
+      - `rsyslog_imjournal_ratelimit_burst`: set to imjournal RateLimit.Burst. Default to 20000.
+      - `rsyslog_imjournal_ratelimit_interval`: set to imjournal RateLimit.Interval. Default to 600.
+      - `rsyslog_imjournal_persist_state_interval`: set to imjournal PersistStateInterval. Default to 10.
+   -  ** `type: files`**
+      - `rsyslog_input_log_path`: File name to be read by the imfile plugin. The value should be full path. Wildcard '*' is allowed in the path.  Default to `/var/log/containers/*.log`.
+   -  ** `type: remote_files`**
+      - `udp_port`: if the port number is given, rsyslog is configured to listen at the udp port number. Default to 514.
+      - `tcp_port`: if the port number is given, rsyslog is configured to listen at the tcp port number. Default to 514.
+      - `tcp_tls_port`: if the port number is given, rsyslog is configured to listen at the tls tcp port number. Default to 6514.
 
 - `logging_provider`: The logging collector to use for the logging provider. Currently Rsyslog is the only supported logging provider. Defaults to `rsyslog`.
 - `logging_purge_confs`: By default, the Rsyslog configuration files are applied on top of pre-existing configuration files. To purge local files prior to setting new ones, set logging_purge_confs variable to 'true', it will move all Rsyslog configuration files to a backup directory, `/tmp/rsyslog.d-XXXXXX/backup.tgz`, before deploying the new configuration files. Defaults to 'false'.
@@ -283,7 +325,7 @@ Additional output will be added.
 
 Planned Flows:
 --------------
-  - `Rsyslog` -> `Local` (RHEL Default) / `Viaq` [1] / `Elasticsearch` / `Remote Rsyslog` / `message Queue (kafka, amqp)`
+  - `Rsyslog` -> `Local` (RHEL Default) / `Viaq` [1] / `message Queue (kafka, amqp)`
 
 [1] Rsyslog to Viaq currently means doing output to the OCP Elasticsearch using client cert auth.
     In the future we want to support Rsyslog to OCP rsyslog using RELP, or Rsyslog to mux using fluent relp input plugin, or message queue.

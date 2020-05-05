@@ -1,22 +1,34 @@
-- name: Ensure that rsyslog configured as a server listens on the port 514
+- name: Ensure that the role runs from inputs from the remote rsyslog to the local files outputs.
   hosts: all
   become: true
 
   tasks:
-    - name: Deploy rsyslog config on the target host as a server
+    - name: deploy config receiving from the remote hosts and writing them to the local files
       vars:
         logging_purge_confs: true
-        rsyslog_capabilities: [ 'network', 'remote-files' ]
         logging_outputs:
-          - name: files_output
-            type: files
+          - name: remote_files_output0
+            type: remote_files
+            remote_log_path: /var/log/remote/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log
+            comment: "This is a comment 0."
+            severity: info
+            exclude:
+              - authpriv.none
+          - name: remote_files_output1
+            type: remote_files
+            remote_sub_path: others/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log
+            facility: authpriv
         logging_inputs:
-          - name: basic_input
-            type: basics
+          - name: remote_udp_input
+            type: remote
+            udp_port: 514
+          - name: remote_tcp_input
+            type: remote
+            tcp_port: 514
         logging_flows:
-          - name: flows0
-            inputs: [ basic_input ]
-            outputs: [ files_output ]
+          - name: flow_0
+            inputs: [remote_udp_input, remote_tcp_input]
+            outputs: [remote_files_output0, remote_files_output1]
       include_role:
         name: linux-system-roles.logging
 
@@ -26,6 +38,21 @@
     # thus we have to force to invoke handlers
     - name: Force all notified handlers to run at this point, not waiting for normal sync points
       meta: flush_handlers
+
+    - name: Check rsyslog.conf size
+      assert:
+        that: rsyslog_conf_line_count.stdout.0 | int <= 7
+
+    - name: Check file counts in rsyslog.d
+      assert:
+        that: rsyslog_d_file_count.matched >= 8
+
+    # Checking 'error' in stdout from systemctl status is for detecting the case in which rsyslog is running,
+    # but some functionality is disabled due to some error, e.g., error: 'tls.cacert' file couldn't be accessed.
+    - name: Check rsyslog errors
+      command: systemctl status rsyslog
+      register: systemctl_result
+      failed_when: "'error' in systemctl_result.stdout or systemctl_result.rc != 0"
 
     - name: Install lsof
       package:
@@ -38,14 +65,7 @@
 
     - name: Check file counts in rsyslog.d
       assert:
-        that: rsyslog_d_file_count.matched >= 7
-
-    # Checking 'error' in stdout from systemctl status is for detecting the case in which rsyslog is running,
-    # but some functionality is disabled due to some error, e.g., error: 'tls.cacert' file couldn't be accessed.
-    - name: Check rsyslog errors
-      command: systemctl status rsyslog
-      register: systemctl_result
-      failed_when: "'error' in systemctl_result.stdout or systemctl_result.rc != 0"
+        that: rsyslog_d_file_count.matched >= 9
 
     - name: lsof outputs for rsyslogd
       shell: |
@@ -61,12 +81,10 @@
       shell: |
         set -o pipefail
         lsof -i -nP | grep rsyslogd | grep TCP | grep 514
-      register: lsof_output1
       changed_when: false
 
     - name: Check port 514 is open for UDP
       shell: |
         set -o pipefail
         lsof -i -nP | grep rsyslogd | grep UDP | grep 514
-      register: lsof_output2
       changed_when: false

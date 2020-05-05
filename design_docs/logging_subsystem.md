@@ -8,7 +8,7 @@ It is designed to satisfy following requirements.
 - The existing scenario, especially an input ovirt + output elasticsearch should not be affected by the updates.
 
 ```
-logging/
+logging
 ├── defaults
 │   └── main.yml
 ├── design_docs
@@ -46,6 +46,9 @@ logging/
 │       │   │   │   └── main.yml
 │       │   │   ├── ovirt
 │       │   │   │   └── main.yml
+│       │   │   ├── remote
+│       │   │   │   ├── cleanup.yml
+│       │   │   │   └── main.yml
 │       │   │   ├── viaq
 │       │   │   │   └── main.yml
 │       │   │   └── viaq-k8s
@@ -56,7 +59,9 @@ logging/
 │       │       │   └── main.yml
 │       │       ├── files
 │       │       │   └── main.yml
-│       │       └── forwards
+│       │       ├── forwards
+│       │       │   └── main.yml
+│       │       └── remote_files
 │       │           └── main.yml
 │       ├── templates
 │       │   ├── etc
@@ -67,7 +72,8 @@ logging/
 │       │   ├── ovirt_input_files.j2
 │       │   ├── output_elasticsearch.j2
 │       │   ├── output_files.j2
-│       │   └── output_forwards.j2
+│       │   ├── output_forwards.j2
+│       │   └── output_remote_files.j2
 │       └── vars
 │           ├── inputs
 │           │   ├── basics
@@ -75,6 +81,8 @@ logging/
 │           │   ├── files
 │           │   │   └── main.yml
 │           │   ├── ovirt
+│           │   │   └── main.yml
+│           │   ├── remote
 │           │   │   └── main.yml
 │           │   ├── viaq
 │           │   │   └── main.yml
@@ -86,7 +94,9 @@ logging/
 │               │   └── main.yml
 │               ├── files
 │               │   └── main.yml
-│               └── forwards
+│               ├── forwards
+│               │   └── main.yml
+│               └── remote_files
 │                   └── main.yml
 └── tasks
     └── main.yml

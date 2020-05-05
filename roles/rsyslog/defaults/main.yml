@@ -150,60 +150,11 @@ rsyslog_permitted_peers: ['*.{{ rsyslog_domain }}']
 # server over TLS.
 rsyslog_send_permitted_peers: '{{ rsyslog_permitted_peers }}'
 
-
-# Firewall, UDP, TCP ports
-# ------------------------
-
-# rsyslog_udp_port
-#
-# The incoming UDP port used for remote logging.
-rsyslog_udp_port: '514'
-
-# rsyslog_tcp_port
-#
-# The incoming TCP port used for remote logging.
-rsyslog_tcp_port: '514'
-
-# rsyslog_tcp_tls_port
-#
-# The incoming TCP TLS port used for remote logging.
-rsyslog_tcp_tls_port: '6514'
-
 # Files and Forwards outputs
 # --------------------------
 
 rsyslog_output_files: []
 rsyslog_output_forwards: []
-
-# Rsyslog configuration rules
-# ---------------------------
-
-# rsyslog_weight_map
-#
-# This is a dictionary map of different configuration "types" corresponding to
-# numbers used to sort configuration files in `{{ rsyslog_config_dir }}` directory
-# (configuration order is important). You can specify a type in the
-# configuration by using the ``item.type`` parameter.
-#
-# If you change the default weight map values, you will most likely need to
-# remove all files from `{{ rsyslog_config_dir }}` to reset the configuration.
-rsyslog_weight_map:
-  'global': '05'
-  'globals': '05'
-  'module': '10'
-  'modules': '10'
-  'template': '20'
-  'templates': '20'
-  'output': '30'
-  'outputs': '30'
-  'service': '30'
-  'services': '30'
-  'rule': '50'
-  'rules': '50'
-  'ruleset': '50'
-  'rulesets': '50'
-  'input': '90'
-  'inputs': '90'
 
 # __rsyslog_.*_rules
 #
@@ -215,7 +166,6 @@ __rsyslog_common_rules:
   - '{{ __rsyslog_conf_global_options }}'
   - '{{ __rsyslog_conf_local_modules }}'
   - '{{ __rsyslog_conf_common_defaults }}'
-  - '{{ __rsyslog_conf_default_rulesets }}'
 
 
 # Default configuration options
@@ -276,19 +226,3 @@ __rsyslog_conf_common_defaults:
       - comment: 'Log every message'
         options: |-
           $RepeatedMsgReduction {{ "on" if rsyslog_message_reduction | bool else "off" }}
-
-# __rsyslog_conf_default_rulesets
-#
-# ruleset `remote` directs to the files output role, which is implemented in `filename.remote`.
-__rsyslog_conf_default_rulesets:
-
-  - name: 'default-rulesets'
-    type: 'rules'
-    state: '{{ "present" if ("network" in rsyslog_capabilities) else "absent" }}'
-    sections:
-
-      - comment: 'Rules for logs incoming from remote hosts'
-        options: |-
-          ruleset(name="remote") {
-            $IncludeConfig {{ rsyslog_config_dir }}/*.remote
-          }

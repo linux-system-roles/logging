@@ -1,0 +1,11 @@
+{% if remote_item.udp_port | d() %}
+# Log messages from remote hosts over UDP
+input(name="{{ remote_item.name }}" type="imudp" port="{{ remote_item.udp_port | d(__rsyslog_default_port) }}")
+{% elif remote_item.tcp_port | d() %}
+# Log messages from remote hosts over plain TCP
+input(name="{{ remote_item.name }}" type="imptcp" port="{{ remote_item.tcp_port | d(__rsyslog_default_port) }}")
+{% else %}
+# Log messages from remote hosts over TLS
+input(name="{{ remote_item.name }}" type="imtcp" port="{{ remote_item.tcp_tls_port | d(__rsyslog_default_tls_port) }}")
+{% endif %}
+{{ lookup('template', 'input_template.j2') }}
