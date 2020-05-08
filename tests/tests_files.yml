@@ -51,6 +51,12 @@
       assert:
         that: rsyslog_d_file_count.matched >= 6
 
+    - name: Check rsyslog errors
+      shell: |
+        systemctl status rsyslog | grep error
+      register: result
+      failed_when: result.rc == 0
+
     - name: Get the files config stat
       stat:
         path: "{{ __test_files_conf }}"
