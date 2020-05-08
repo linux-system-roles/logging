@@ -19,6 +19,12 @@
       assert:
         that: rsyslog_d_file_count.matched < 3
 
+    - name: Check rsyslog errors
+      shell: |
+        systemctl status rsyslog | grep error
+      register: result
+      failed_when: result.rc == 0
+
     - name: Get rsyslog_version_str
       command: /bin/grep "^# rsyslog version is " /etc/rsyslog.conf
       register: rsyslog_version_str
