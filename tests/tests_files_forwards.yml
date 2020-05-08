@@ -12,7 +12,11 @@
           - name: files_test0
             type: files
             severity: info
-            exclude: authpriv.none;auth.none;cron.none;mail.none
+            exclude:
+              - authpriv.none
+              - auth.none
+              - cron.none
+              - mail.none
             path: /var/log/messages
           - name: files_test1
             type: files

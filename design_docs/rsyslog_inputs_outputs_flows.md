@@ -40,7 +40,7 @@ logging_outputs
   - name: files_output
     type: files
     severity: info
-    exclude: authpriv.none;auth.none;cron.none;mail.none
+    exclude: [authpriv.none, auth.none, cron.none, mail.none]
     path: /var/log/messages
 ```
 

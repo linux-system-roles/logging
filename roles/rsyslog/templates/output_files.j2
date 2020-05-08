@@ -1,13 +1,11 @@
 {% if files_item.path is defined %}
-{%   if files_item.exclude is defined %}
 ruleset(name="{{ files_item.name }}") {
-    {{ files_item.facility | d('*') }}.{{ files_item.severity | d('*') }};{{ files_item.exclude }} {{ files_item.path }}
-}
+{%   if files_item.exclude | d([]) %}
+    {{ files_item.facility | d('*') }}.{{ files_item.severity | d('*') }};{{ files_item.exclude | join(';') }} {{ files_item.path }}
 {%   else %}
-ruleset(name="{{ files_item.name }}") {
     {{ files_item.facility | d('*') }}.{{ files_item.severity | d('*') }} {{ files_item.path }}
-}
 {%   endif %}
+}
 {% else %}
 ruleset(name="{{ files_item.name }}") {
     # Log all kernel messages to the console.
