@@ -2,12 +2,25 @@
   hosts: all
   become: true
   vars:
-    __rsyslog_version: "N/A"
     __test_inputfiles_dir: /var/log/inputdirectory
     __test_inputfiles_conf: /etc/rsyslog.d/90-input-files-files_input.conf
-    __test_outputfiles_conf: /etc/rsyslog.d/31-output-elasticsearch-elasticsearch_output_ops.conf
+    __test_outputfiles_conf: /etc/rsyslog.d/31-output-elasticsearch-elasticsearch_output.conf
+    __test_ca_cert: /tmp/es-ca.crt
+    __test_cert: /tmp/es-cert.pem
+    __test_key: /tmp/es-key.pem
 
   tasks:
+    - name: generate test files
+      copy:
+        dest: "{{ item }}"
+        content:
+          This is a fake {{ item }}.
+      delegate_to: localhost
+      loop:
+        - "{{ __test_ca_cert }}"
+        - "{{ __test_cert }}"
+        - "{{ __test_key }}"
+
     - name: deploy config to send to elasticsearch
       vars:
         logging_outputs:
@@ -18,15 +31,10 @@
             index_prefix: project.
             input_type: ovirt
             retryfailures: off
-            use_cert: false
-          - name: elasticsearch_output_ops
-            type: elasticsearch
-            server_host: logging-es-ops
-            server_port: 9200
-            index_prefix: .operations.
-            input_type: viaq
-            retryfailures: off
-            use_cert: false
+            use_cert: true
+            ca_cert_src: "{{ __test_ca_cert }}"
+            cert_src: "{{ __test_cert }}"
+            key_src: "{{ __test_key }}"
         logging_inputs:
           - name: files_input
             type: files
@@ -45,33 +53,34 @@
     - name: Force all notified handlers to run at this point, not waiting for normal sync points
       meta: flush_handlers
 
-    - name: Check rsyslog version
-      assert:
-        that: __rsyslog_version != "N/A" and __rsyslog_version != "0.0.0"
-
     - name: Check rsyslog.conf size
       assert:
-        that: rsyslog_conf_stat.stat.size < 1000
+        that: rsyslog_conf_line_count.stdout.0 | int <= 7
 
     - name: Check file counts in rsyslog.d
       assert:
         that: rsyslog_d_file_count.matched >= 9
 
-    - name: Get the output files config stat
+    - name: Check if the output files config exists
       stat:
         path: "{{ __test_outputfiles_conf }}"
-      register: stat_output_files_system
 
-    - name: Check if the output files config exists
-      assert:
-        that: stat_output_files_system.stat.exists
+    - name: Check if the copied ca cert file exists
+      stat:
+        path: "/etc/rsyslog.d/{{ __test_ca_cert | basename }}"
 
-    - name: Check ops ruleset exists in {{ __test_outputfiles_conf }}
-      command: /bin/grep "ruleset.name=.elasticsearch_output_ops" {{ __test_outputfiles_conf }}
-      register: es_ops_ruleset
-      changed_when: false
+    - name: Check if the copied cert file exists
+      stat:
+        path: "/etc/rsyslog.d/{{ __test_cert | basename }}"
 
-    - name: Check call point for ops ruleset exists in {{ __test_inputfiles_conf }}
-      command: /bin/grep "call elasticsearch_output_ops" {{ __test_inputfiles_conf }}
-      register: es_call_ops_ruleset
+    - name: Check if the copied key file exists
+      stat:
+        path: "/etc/rsyslog.d/{{ __test_key | basename }}"
+
+    - name: Check key/certs in {{ __test_outputfiles_conf }}
+      command: /bin/grep "tls\.{{ item.key }}=.\/etc\/rsyslog\.d\/{{ item.value | basename }}." {{ __test_outputfiles_conf }}
+      with_dict:
+        - cacert: "{{ __test_ca_cert }}"
+        - mycert: "{{ __test_cert }}"
+        - myprivkey: "{{ __test_key }}"
       changed_when: false

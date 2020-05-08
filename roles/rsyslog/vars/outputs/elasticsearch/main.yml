@@ -31,7 +31,7 @@ __rsyslog_conf_es_main_modules:
     sections:
 
       - options: |-
-          # Send to ElasticSearch
+          # Send to Elasticsearch
           module(load="omelasticsearch")
 
 __rsyslog_conf_es_elasticsearch:

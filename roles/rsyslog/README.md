@@ -260,15 +260,23 @@ Elasticsearch, Files, Remote_files, and Forwards outputs sub-variables
 - `elasticsearch`: array of dictionary to specify the parameters to forward the log messages to elasticsearch.
    ```
    - name: <unique_name>
-     type: elasticsearch
-     server_host: <elasticsearch hostname>
-     server_port: <elasticsearch port, default to 9200>
-     index_prefix: <prefix to use in the elasticsearch index file>
-     input_type: <input type, e.g., ovirt>
-     retryfailures: on|off, default to on
-     ca_cert: <path to ca.crt>
-     cert: <path to es-cert.pem>
-     key: <path to es-key.pem>
+     type:          elasticsearch
+     server_host:   Hostname elasticsearch is running on.
+     server_port:   Port number elasticsearch is listening to. Default to 9200.
+     index_prefix:  Elasticsearch index prefix the particular log is to be indexed.
+     input_type:    Specifying the input type. Type ovirt and viaq are supported. Default to ovirt.
+     retryfailures: Specifying whether retries or not in case of failure. on or off.  Default to on.
+     use_cert:      If true, access to Elasticsearch using ca_cert, cert and key. Default to true.
+	                Triplets {ca_cert, cert, key} and/or {ca_cert_src, cert_src, key_src} are required.
+     ca_cert:       Path to CA cert for Elasticsearch.  Default to '/etc/rsyslog.d/es-ca.crt'
+     cert:          Path to cert for Elasticsearch.  Default to '/etc/rsyslog.d/es-cert.pem'
+     key:           Path to key for Elasticsearch.  Default to "/etc/rsyslog.d/es-key.pem"
+     ca_cert_src:   Path to the CA cert file on the local host to copy to the target host.
+	                If ca_cert is specified, copied to the location. Otherwise, to rsyslog_config_dir.
+     cert_src:      Path to the cert file on the local host to copy to the target host.
+	                If cert is specified, copied to the location. Otherwise, to rsyslog_config_dir.
+     key_src:       Path to the key file on the local host to copy to the target host.
+	                If key is specified, copied to the location. Otherwise, to rsyslog_config_dir.
    ```
 - `files`: array of dictionary to specify the facility and severity filter and the full path to store logs satisfying the filter.  It takes the sub-variables - `name`, `facility`, `severity`, `exclude`, and `path`.  Unless the name and the path are given, the element is skipped.
 Files output format
@@ -324,23 +332,6 @@ Viaq inputs sub-variables
 - `rsyslog_viaq_log_dir`: Viaq log directory.  Default to '/var/log/containers'.
 - `logging_mmk8s_token`: Path to token for kubernetes.  Default to "/etc/rsyslog.d/mmk8s.token"
 - `logging_mmk8s_ca_cert`: Path to CA cert for kubernetes.  Default to "/etc/rsyslog.d/mmk8s.ca.crt"
-- `use_omelasticsearch_cert` : If set to 'true', omelasticsearch is configured to use the certificates specified in the elasticsearch type logging_outputs.  Default to 'false'.
-- `use_local_omelasticsearch_cert` : If set to 'true', local files ca_cert_src, cert_src and key_src in the elasticsearch type logging_outputs will be deployed to the remote host.
-
-- For the elasticsearch type logging_outputs, a set of following variables are to specify output elasticsearch configurations. It could be an array if multiple elasticsearch clusters to be configured.
-   If set to 'true', ca_cert_src, cert_src and key_src must be set in each elasticsearch element. Otherwise, the deployment fails. Default to 'false'.
-  - `name`: Name of the elasticsearch element.
-  - `server_host`: Hostname elasticsearch is running on.
-  - `server_port`: Port number elasticsearch is listening to.
-  - `index_prefix`: Elasticsearch index prefix the particular log is to be indexed.
-  - `input_type`: Specifying the input type. Type `ovirt` and `viaq` are supported. Default to `ovirt`.
-  - `retryfailures`: Specifying whether retries or not in case of failure. on or off.  Default to on.
-  - `ca_cert`: Path to CA cert for Elasticsearch.  Default to '/etc/rsyslog.d/es-ca.crt'
-  - `cert`: Path to cert for Elasticsearch.  Default to '/etc/rsyslog.d/es-cert.pem'
-  - `key`: Path to key for Elasticsearch.  Default to "/etc/rsyslog.d/es-key.pem"
-  - `ca_cert_src`: Path to the local CA cert file to deploy for Elasticsearch.
-  - `cert_src`: Path to the local cert file to deploy for Elasticsearch.
-  - `key_src`: Path to the local key file to deploy for Elasticsearch.
 
 Contents of Roles
 =================
