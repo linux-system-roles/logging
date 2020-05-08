@@ -110,14 +110,42 @@ logging_flows:
 ```
 If inputs are specified, but no flows or outputs are specified, the default is to write the input to the predefined system log files e.g. /var/log/messages.
 ```
-logging_enabled: true
 logging_purge_confs: true
 logging_inputs:
   - name: system-input
     type: basics
 ```
 
-**3. Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and remote rsyslog and outputs into the local files.**
+**3. Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and outputs into the local files, which each acrion is defined.
+```
+logging_purge_confs: true
+rsyslog_backup_dir: /tmp/rsyslog_backup
+logging_outputs:
+  - name: files_output0
+    type: files
+    severity: info
+    exclude:
+      - authpriv.none
+      - auth.none
+      - cron.none
+      - mail.none
+    path: /var/log/messages
+  - name: files_output1
+    type: files
+    severity: emerg
+    path: :omusrmsg:*
+  - name: files_output2
+    <<snip>>
+logging_inputs:
+  - name: system-input
+    type: basics
+logging_flows:
+  - name: flow0
+    inputs: [system-input]
+    outputs: [files_output0, files_output1, files_output2, ...]
+```
+
+**4. Deploying basic LSR/Logging config files in /etc/rsyslog.d, which handle inputs from the local system and remote rsyslog and outputs into the local files.**
 ```
 logging_enabled: true
 rsyslog_capabilities: [ 'network', 'remote-files' ]
@@ -134,7 +162,7 @@ logging_flows:
     outputs: [local-files]
 ```
 
-**4. Deploying basic LSR/Logging config files in /etc/rsyslog.d, which forwards the local system logs to the remote rsyslog.
+**5. Deploying basic LSR/Logging config files in /etc/rsyslog.d, which forwards the local system logs to the remote rsyslog.
 ```
 logging_enabled: true
 rsyslog_default: false
@@ -161,7 +189,7 @@ logging_flows:
     outputs: [output-forwards0, output-forwards1]
 ```
 
-**5. Sample vars.yml file for the viaq case. (not implemented yet) **
+**6. Sample vars.yml file for the viaq case. (not implemented yet) **
 ```
 logging_enabled: true
 logging_outputs:
@@ -233,7 +261,7 @@ Files output format
      type: files
      facility: <facility_in_text, e.g., "mail"; default to "*">
      severity: <severity_in_text, e.g., "info"; default to "*">
-     exclude: <excluded facility list separated by ';', e.g., "mail.none;auth.none"; default to nil>
+     exclude: <excluded facility list; default to none>
      path: </full/path/to/file/to/store/the/logs; MUST EXIST>
    ```
 - `forwards`: array of dictionary to specify the facility and severity filter and the host and port to forward logs satisfying the filter.  It takes the sub-variables - `name`, `facility`, `severity`, `exclude`, `protocol`, `target`, and `port`.  Unless the name and the target are given, the element is skipped.
@@ -243,7 +271,7 @@ Forwards output format
      type: forwards
      facility: <facility_in_text, e.g., "mail"; default to "*">
      severity: <severity_in_text, e.g., "info"; default to "*">
-     exclude: <excluded facility list separated by ';', e.g., "mail.none;auth.none"; default to nil>
+     exclude: <excluded facility list; default to none>
      protocol: <tcp_or_udp; default to "tcp">
      target: <target_host_name_or_ip_address; MUST EXIST>
      port: <port_number; default to 514>

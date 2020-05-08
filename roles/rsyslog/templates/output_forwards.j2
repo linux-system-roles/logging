@@ -1,9 +1,7 @@
-{% if forwards_item.exclude is defined %}
 ruleset(name="{{ forwards_item.name }}") {
-    {{ forwards_item.facility | d('*') }}.{{ forwards_item.severity | d('*') }};{{ forwards_item.exclude }} action(name="{{ forwards_item.name }}" type="omfwd" Target="{{ forwards_item.target }}" Port="{{ forwards_item.port | d(514) }}" Protocol="{{ forwards_item.protocol | d('tcp') }}")
-}
+{%   if forwards_item.exclude | d([]) %}
+    {{ forwards_item.facility | d('*') }}.{{ forwards_item.severity | d('*') }};{{ forwards_item.exclude | join(';') }} action(name="{{ forwards_item.name }}" type="omfwd" Target="{{ forwards_item.target }}" Port="{{ forwards_item.port | d(514) }}" Protocol="{{ forwards_item.protocol | d('tcp') }}")
 {% else %}
-ruleset(name="{{ forwards_item.name }}") {
     {{ forwards_item.facility | d('*') }}.{{ forwards_item.severity | d('*') }} action(name="{{ forwards_item.name }}" type="omfwd" Target="{{ forwards_item.target }}" Port="{{ forwards_item.port | d(514) }}" Protocol="{{ forwards_item.protocol | d('tcp') }}")
-}
 {% endif %}
+}

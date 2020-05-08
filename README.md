@@ -219,11 +219,11 @@ Variables in vars.yml
    -  ** `type: files`**
       - `facility`: facility; default to `*`
       - `severity`: severity; default to `*`
-      - `exclude`: exclude; default to none.
+      - `exclude`: exclude list; default to none.
       - `path`: path to the output file.  Must have.  If `path` is not defined, the files instance is dropped.
       These values are used in the omfile action as follows:
       ```
-      facility.severity;exclude path
+      facility.severity;<semicolon separated exclude list> path
       ```
    -  ** `type: forwards`**
       - `facility`: facility; default to `*`
