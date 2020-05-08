@@ -56,7 +56,7 @@ ruleset(name="{{ es_item.name }}") {
             retryfailures="off"
 {% endif %}
             usehttps="{{ es_item.usehttps | default("on") }}"
-{% if use_omelasticsearch_cert | default(true) %}
+{% if es_item.use_cert | default(true) %}
             tls.cacert="{{ es_item.ca_cert | default('/etc/rsyslog.d/es-ca.crt') }}"
             tls.mycert="{{ es_item.cert | default('/etc/rsyslog.d/es-cert.pem') }}"
             tls.myprivkey="{{ es_item.key | default('/etc/rsyslog.d/es-key.pem') }}"
