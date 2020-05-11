@@ -20,10 +20,9 @@
         that: rsyslog_d_file_count.matched < 3
 
     - name: Check rsyslog errors
-      shell: |
-        systemctl status rsyslog | grep error
-      register: result
-      failed_when: result.rc == 0
+      command: systemctl status rsyslog
+      register: systemctl_result
+      failed_when: "'error' in systemctl_result.stderr"
 
     - name: Get rsyslog_version_str
       command: /bin/grep "^# rsyslog version is " /etc/rsyslog.conf
