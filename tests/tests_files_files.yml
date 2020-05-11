@@ -51,10 +51,9 @@
         that: rsyslog_d_file_count.matched >= 7
 
     - name: Check rsyslog errors
-      shell: |
-        systemctl status rsyslog | grep error
-      register: result
-      failed_when: result.rc == 0
+      command: systemctl status rsyslog
+      register: systemctl_result
+      failed_when: "'error' in systemctl_result.stderr"
 
     - name: Get the output files config stat
       stat:
