@@ -50,7 +50,7 @@
     - name: Check rsyslog errors
       command: systemctl status rsyslog
       register: systemctl_result
-      failed_when: "'error' in systemctl_result.stderr"
+      failed_when: "'error' in systemctl_result.stdout"
 
     - name: Get the files config stat
       stat:

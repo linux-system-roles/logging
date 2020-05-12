@@ -22,7 +22,7 @@
     - name: Check rsyslog errors
       command: systemctl status rsyslog
       register: systemctl_result
-      failed_when: "'error' in systemctl_result.stderr"
+      failed_when: "'error' in systemctl_result.stdout"
 
     - name: Get rsyslog_version_str
       command: /bin/grep "^# rsyslog version is " /etc/rsyslog.conf
