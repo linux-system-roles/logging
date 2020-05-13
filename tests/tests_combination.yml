@@ -72,10 +72,12 @@
       assert:
         that: rsyslog_d_file_count.matched >= 9
 
+    # Checking 'error' in stdout from systemctl status is for detecting the case in which rsyslog is running,
+    # but some functionality is disabled due to some error, e.g., error: 'tls.cacert' file couldn't be accessed.
     - name: Check rsyslog errors
       command: systemctl status rsyslog
       register: systemctl_result
-      failed_when: "'error' in systemctl_result.stdout"
+      failed_when: "'error' in systemctl_result.stdout or systemctl_result.rc != 0"
 
     - name: Get the files config stat
       stat:
