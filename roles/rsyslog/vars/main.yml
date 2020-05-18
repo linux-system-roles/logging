@@ -8,7 +8,6 @@ __rsyslog_base_packages: ['rsyslog']
 # List of rpm packages required for TLS support.
 __rsyslog_tls_packages: ['rsyslog-gnutls', 'ca-certificates']
 
-rsyslog_use_imuxsock: false
 #
 # Firewall, UDP, TCP ports
 # ------------------------

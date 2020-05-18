@@ -17,13 +17,6 @@ rsyslog_config_dir: '/etc/rsyslog.d'
 # Rsyslog work directory
 rsyslog_work_dir: '/var/lib/rsyslog'
 
-# rsyslog_capabilities
-#
-# List of different capabilities to configure.
-# Example:
-# rsyslog_capabilities: [ 'network', 'remote-files', 'tls' ]
-rsyslog_capabilities: []
-
 # rsyslog_message_reduction
 #
 # Enable or disable message reduction. This is disabled by default so that log
@@ -56,11 +49,7 @@ rsyslog_basics_use_traditional_timestamp_format: true
 # Encrypted communication
 # ------------------------
 
-# rsyslog_pki
-#
-# Enable or disable support for X.509 certificates managed by pki_role,
-# used for TLS connections.
-rsyslog_pki: false
+# X.509 certificates related variables
 
 # rsyslog_pki_path
 #
@@ -87,15 +76,19 @@ rsyslog_pki_crt: "default.crt"
 # Name of the private key file used by the ``rsyslog`` role.
 rsyslog_pki_key: "default.key"
 
+# Lookup rsyslog netwrok stream driver
+__rsyslog_encryption_map:
+  'none': 'ptcp'
+  'ptcp': 'ptcp'
+  'tls': 'gtls'
+  'gtls': 'gtls'
+  'gnutls': 'gtls'
+  'openssl': 'openssl'
+
 # rsyslog_default_netstream_driver
 #
-# Specify the default netstrap driver used by the ``imtcp`` module. The
-# ``gtls`` will be enabled by default if the support for PKI is enabled,
-# otherwise ``ptcp`` will be used.
-rsyslog_default_netstream_driver: '{{ "gtls"
-                                       if (rsyslog_pki | bool and
-                                           "tls" in rsyslog_capabilities)
-                                       else "ptcp" }}'
+# Specify the default netstrap driver used by the ``imtcp`` module.
+rsyslog_default_netstream_driver: '{{ __rsyslog_encryption_map[logging_encryption] | d("ptcp") }}'
 
 # rsyslog_default_driver_authmode
 #
@@ -120,11 +113,6 @@ rsyslog_send_over_tls: |-
   {%   endif %}
   {% endif %}
   $ActionSendStreamDriverMode 1
-
-# rsyslog_send_over_tls_only
-#
-# Specify if you want only TLS communications.
-rsyslog_send_over_tls_only: false
 
 # rsyslog_domain
 #
@@ -178,9 +166,9 @@ __rsyslog_conf_global_options:
       global(
         defaultNetstreamDriver="{{ rsyslog_default_netstream_driver }}"
         workDirectory="{{ rsyslog_work_dir }}"
-      {% if rsyslog_pki | bool and "tls" in rsyslog_capabilities %}
+      {% if __rsyslog_encryption_map[logging_encryption] | d("ptcp") != "ptcp" %}
         defaultNetstreamDriverCAFile="{{ rsyslog_pki_path + '/' + rsyslog_pki_realm + '/' + rsyslog_pki_ca }}"
-      {%   if rsyslog_default_driver_authmode != "anon" or "network" in rsyslog_capabilities %}
+      {%   if rsyslog_default_driver_authmode != "anon" %}
         defaultNetstreamDriverCertFile="{{ rsyslog_pki_path + '/' + rsyslog_pki_realm + '/' + rsyslog_pki_crt }}"
         defaultNetstreamDriverKeyFile="{{ rsyslog_pki_path + '/' + rsyslog_pki_realm + '/' + rsyslog_pki_key }}"
       {%   endif %}
@@ -198,12 +186,12 @@ __rsyslog_conf_local_modules:
 
   - name: 'local-modules'
     type: 'modules'
-    state: '{{ "present" if "mark" in rsyslog_capabilities else "absent" }}'
+    state: '{{ "present" if logging_mark else "absent" }}'
     sections:
 
-      - comment: 'provides --MARK-- message capability'
-        options: |-
-          module(load="immark" interval={{ (60 * 60) }})
+      - options: |-
+          # Mark message periodically by immark, if set to true.
+          module(load="immark" interval={{ logging_mark_interval }})
 
 # __rsyslog_conf_common_defaults
 #

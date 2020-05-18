@@ -1,0 +1,17 @@
+{% if basics_item.kernel_message | d(false) | bool %}
+module(load="imklog" permitnonkernelfacility="on")
+{% endif %}
+{% if basics_item.use_imuxsock | d(false) | bool %}
+module(load="imuxsock"    # provides support for local system logging (e.g. via logger command)
+       SysSock.Use="on")  # Turn on message reception via local log socket.
+input(name="basics_imuxsock" type="imuxsock" socket="/dev/log")
+{% else %}
+module(load="imuxsock"    # provides support for local system logging (e.g. via logger command)
+       SysSock.Use="off") # Turn off message reception via local log socket.
+module(load="imjournal"
+       StateFile="{{ rsyslog_work_dir }}/imjournal.state"
+       RateLimit.Burst="{{ input.rsyslog_imjournal_ratelimit_burst | d(20000) }}"
+       RateLimit.Interval="{{ input.rsyslog_imjournal_ratelimit_interval | d(600) }}"
+       PersistStateInterval="{{ input.rsyslog_imjournal_persist_state_interval | d(10) }}")
+{% endif %}
+{{ lookup('template', 'input_template.j2') }}

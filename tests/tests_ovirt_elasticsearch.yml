@@ -85,7 +85,7 @@
 
     - name: Check file counts in rsyslog.d
       assert:
-        that: rsyslog_d_file_count.matched >= 18
+        that: rsyslog_d_file_count.matched >= 17
 
     - name: Check "{{ __test_ovirt_collectd_conf }}, {{ __test_ovirt_engine_conf }}, {{ __test_ovirt_vdsm_conf }}"
       stat:

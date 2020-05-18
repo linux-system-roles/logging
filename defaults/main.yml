@@ -19,3 +19,15 @@ logging_purge_confs: false
 
 # Variable to specify the directory to put the local output files to store logs.
 logging_system_log_dir: /var/log
+
+# Specifying rsyslog encryption library
+# one of the implementations is allowed none, ptcp, tls, gtls, gnutls, openssl
+# Note: none->ptcp, tls,gtls,gnutls->gtls, openssl->openssl
+# Default to ptcp
+logging_encryption: ptcp
+
+# Mark message periodically by immark, if set to true.
+logging_mark: false
+
+# Interval for logging_mark in seconds.
+logging_mark_interval: 3600
