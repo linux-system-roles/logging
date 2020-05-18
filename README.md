@@ -274,7 +274,6 @@ The sub-task/main.yml in [inputs](https://github.com/linux-system-roles/logging/
 The `tasks/sub-task` directory includes 2 tasks file:
   - `main.yml` - tasks for deploying the config files
     This file is sets `__rsyslog_packages` and `__rsyslog_rules` and includes the task that deploys the files.
-  - `cleanup.yml` - tasks that cleanup the files deployed for this project.
 
 Examples can be found in the existing projects.
 

@@ -38,23 +38,17 @@ logging/
 │       │   └── main.yml
 │       ├── README.md
 │       ├── tasks
-│       │   ├── cleanup.yml
 │       │   ├── deploy.yml
 │       │   ├── inputs
 │       │   │   ├── basics
-│       │   │   │   ├── cleanup.yml
 │       │   │   │   └── main.yml
 │       │   │   ├── files
-│       │   │   │   ├── cleanup.yml
 │       │   │   │   └── main.yml
 │       │   │   ├── ovirt
-│       │   │   │   ├── cleanup.yml
 │       │   │   │   └── main.yml
 │       │   │   ├── viaq
-│       │   │   │   ├── cleanup.yml
 │       │   │   │   └── main.yml
 │       │   │   └── viaq-k8s
-│       │   │       ├── cleanup.yml
 │       │   │       └── main.yml
 │       │   ├── main.yml
 │       │   └── outputs
