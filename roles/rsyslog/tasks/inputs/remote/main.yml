@@ -2,7 +2,7 @@
 # Deploy configuration files
 - name: Install/Update remote input packages and generate configuration files in /etc/rsyslog.d
   vars:
-    __rsyslog_packages: []
+    __rsyslog_packages: "{{ __rsyslog_remote_packages }}"
     __rsyslog_rules:
       - name: "input-remote-modules"
         type: modules

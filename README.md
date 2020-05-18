@@ -276,6 +276,8 @@ Variables in vars.yml
           `type`: The type of the log inputs. **Note:** Currently [`basics`, `files`, `ovirt`, `remote`, and `viaq`] are supported.
           `state`: The state of the configuration files states if they should be `present` or `absent`. Default to `present`.
    -  ** `type: basics`**
+      - `kernel_message`: load `imklog`.
+      - `use_imuxsock`: use `imuxsock` instead of `imjournal`.
       - `rsyslog_imjournal_ratelimit_burst`: set to imjournal RateLimit.Burst. Default to 20000.
       - `rsyslog_imjournal_ratelimit_interval`: set to imjournal RateLimit.Interval. Default to 600.
       - `rsyslog_imjournal_persist_state_interval`: set to imjournal PersistStateInterval. Default to 10.

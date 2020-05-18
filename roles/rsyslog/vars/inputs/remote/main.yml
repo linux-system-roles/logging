@@ -1,13 +1,8 @@
 ---
-# Basic logs configuration set
-# ----------------------------
-
-rsyslog_pki: true
-
-# rsyslog_capabilities is an array which takes 'network', 'remote-files', 'tls'
-# 'network' enables input and output over network.
-# 'remote-files' allows input from remote hosts are separately stored from the local logs.
-# 'tls' specifies the input and output could be processed over tls.
-#       Note: unles rsyslog_send_over_tls_only is set to true, insecure network connection
-#       is also allowed.
-rsyslog_capabilities: []
+# Remote logs configuration vars
+# ------------------------------
+#
+# __rsyslog_remote_packages
+#
+# List of default rpm packages to install.
+__rsyslog_remote_packages: []

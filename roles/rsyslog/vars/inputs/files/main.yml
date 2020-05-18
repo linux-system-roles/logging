@@ -2,13 +2,6 @@
 # Imfile configuration setting
 # ----------------------------
 
-# rsyslog_capabilities is an array which takes 'network', 'remote-files', 'tls'
-# 'network' enables input and output over network.
-# 'remote-files' allows input from remote hosts are separately stored from the local logs.
-# 'tls' specifies the input and output could be processed over tls.
-#       Note: unles rsyslog_send_over_tls_only is set to true, insecure network connection
-#       is also allowed.
-rsyslog_capabilities: []
 __rsyslog_files_input_packages: []
 
 rsyslog_input_log_path: "/var/log/containers/*.log"

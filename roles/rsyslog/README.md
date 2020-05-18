@@ -240,12 +240,11 @@ Variables in vars.yml
 ======================
 
 - `logging_enabled` : When 'true', rsyslog role will deploy specified configuration file set. Default to 'true'.
-- `rsyslog_capabilities` : List of capabilities to configure.  [ 'tls', 'gnutls', 'kernel-message', 'mark' ] are predefined.
-   To make the network communication safe, enable `rsyslog_pki` and add `tls` to `rsyslog_capabilities`. (TBD)
-   To log all kernel messages to the console, add `kernel-message` to `rsyslog_capabilities`.
-   To add `-- MARK --` message every hour, add `mark` to `rsyslog_capabilities`.
-- `rsyslog_pki` : When 'true', pki related variables are configured, which are `rsyslog_pki_path`, `rsyslog_pki_realm`, `rsyslog_pki_ca`, `rsyslog_pki_crt`, `rsyslog_pki_key`.  In addition, if 'tls' is included in `rsyslog_capabilities`, it enables to forward logs over TLS.  Default to 'false'.
-- `rsyslog_send_over_tls_only` : When 'true', insecure connection is not allowed.  I.e., it requires `tls` in `rsyslog_capabilities`.  Default to 'false'.
+- `logging_enctyption`: Specifying an encryption. One of `none`, `ptcp`, `tls`, `gtls`, `gnutls`, and `openssl`. Default to `ptcp`.
+                        Note: `none`=`ptcp`, `tls`=`gtls`=`gnutls`.
+                        When logging_encryption is _not_ `ptcp`, rsyslog_pki_path`, `rsyslog_pki_realm`, `rsyslog_pki_ca`, `rsyslog_pki_crt`, `rsyslog_pki_key` are configured.
+- `logging_mark`: Mark message periodically by immark, if set to `true`. Default to `false`.
+- `logging_mark_interval`: Interval for `logging_mark` in seconds.
 
 Common sub-variables
 --------------------
@@ -314,6 +313,8 @@ Remote_files output format
 
 Basics inputs sub-variables
 ------------------------------
+- `kernel_message`: load `imklog`.
+- `use_imuxsock`: use `imuxsock` instead of `imjournal`.
 - `rsyslog_imjournal_ratelimit_burst`: set to imjournal RateLimit.Burst. Default to 20000.
 - `rsyslog_imjournal_ratelimit_interval`: set to imjournal RateLimit.Interval. Default to 600.
 - `rsyslog_imjournal_persist_state_interval`: set to imjournal PersistStateInterval. Default to 10.
