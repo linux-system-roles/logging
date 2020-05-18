@@ -158,18 +158,6 @@
       tags:
         - skip_ansible_lint
 
-    - name: Run remove input sub-tasks
-      include_tasks:
-        file: "{{ tasks }}"
-      vars:
-        tasks: "inputs/{{ input_item.type }}/cleanup.yml"
-      loop: "{{ logging_inputs | flatten(1) }}"
-      loop_control:
-        loop_var: input_item
-      when:
-        - input_item | d([])
-        - input_item.state | d('present') == 'absent'
-
     - name: Include output sub-vars
       include_vars:
         file: "{{ varfile }}"

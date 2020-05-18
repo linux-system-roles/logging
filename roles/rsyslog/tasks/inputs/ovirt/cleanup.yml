@@ -1,8 +1,0 @@
----
-# Deploy configuration files
-- name: Remove oVirt configuration files from /etc/rsyslog.d
-  vars:
-    __rsyslog_rules: "{{ __rsyslog_ovirt_rules }}"
-  include_role:
-    name: "{{ role_path | dirname | dirname | dirname }}"
-    tasks_from: cleanup.yml

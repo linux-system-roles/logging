@@ -1,7 +1,0 @@
----
-# Deploy configuration files
-- name: Remove files input configuration files from /etc/rsyslog.d
-  vars:
-    __rsyslog_rules: "{{ __rsyslog_files_input_rules }}"
-  include_tasks:
-    file: files_cleanup.yml
