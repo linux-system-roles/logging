@@ -25,6 +25,16 @@
         - '{{ rsyslog_output_elasticsearch }}'
       when: item.key_src | d()
 
+    - name: Check certs - use_cert is true, but triplets are not given
+      fail:
+        msg: "Error: you specified use_cert: true; you must specify all 3 of ca_cert, cert, key, or all 3 of ca_cert_src, cert_src, key_src, or set use_cert: false in the elasticsearch output named {{ item.name }}"
+      with_items:
+        - '{{ rsyslog_output_elasticsearch }}'
+      when:
+        - item.use_cert | d(true)
+        - not ((item.ca_cert | d() and item.cert | d() and item.key | d()) or
+               (item.ca_cert_src | d() and item.cert_src | d() and item.key_src | d()))
+
     - name: Update ca_cert path to /etc/rsyslog.d directory in Rsyslog
       set_fact:
         __rsyslog_elasticsearch_temp: >-
@@ -37,6 +47,16 @@
       with_items:
         - '{{ rsyslog_output_elasticsearch }}'
       when: item.ca_cert_src | d() or item.cert_src | d() or item.key_src | d()
+
+    - name: Check certs - key/certs data are provided, but use_cert is false
+      fail:
+        msg: "Error: you specified use_cert: false and also specified one or more cert/key files in the elasticsearch output named {{ item.name }}"
+      with_items:
+        - '{{ rsyslog_output_elasticsearch }}'
+      when:
+        - not (item.use_cert | d(true))
+        - item.ca_cert | d() or item.cert | d() or item.key | d()
+        - item.ca_cert_src | d() or item.cert_src | d() or item.key_src | d()
 
     - name: Set updated rsyslog_output_elasticsearch
       set_fact:
