@@ -1,4 +1,4 @@
-- name: Ensure that the role runs with parameters from imfile to two elasticsearch outputs
+- name: Elasticsearch config - local certs are copied to the target host with the specified path.
   hosts: all
   become: true
   vars:
@@ -8,6 +8,9 @@
     __test_ca_cert: /tmp/es-ca.crt
     __test_cert: /tmp/es-cert.pem
     __test_key: /tmp/es-key.pem
+    __test_ca_cert_target: /tmp/es-ca-target.crt
+    __test_cert_target: /tmp/es-cert-target.pem
+    __test_key_target: /tmp/es-key-target.pem
 
   tasks:
     - name: generate test files
@@ -34,6 +37,9 @@
             ca_cert_src: "{{ __test_ca_cert }}"
             cert_src: "{{ __test_cert }}"
             key_src: "{{ __test_key }}"
+            ca_cert: "{{ __test_ca_cert_target }}"
+            cert: "{{ __test_cert_target }}"
+            key: "{{ __test_key_target }}"
         logging_inputs:
           - name: files_input
             type: files
@@ -66,20 +72,20 @@
 
     - name: Check if the copied ca cert file exists
       stat:
-        path: "/etc/rsyslog.d/{{ __test_ca_cert | basename }}"
+        path: "{{ __test_ca_cert_target }}"
 
     - name: Check if the copied cert file exists
       stat:
-        path: "/etc/rsyslog.d/{{ __test_cert | basename }}"
+        path: "{{ __test_cert_target }}"
 
     - name: Check if the copied key file exists
       stat:
-        path: "/etc/rsyslog.d/{{ __test_key | basename }}"
+        path: "{{ __test_key_target }}"
 
     - name: Check key/certs in {{ __test_outputfiles_conf }}
-      command: /bin/grep "tls\.{{ item.key }}=.\/etc\/rsyslog\.d\/{{ item.value | basename }}." {{ __test_outputfiles_conf }}
+      command: /bin/grep "tls\.{{ item.key }}=\"{{ item.value }}\"" {{ __test_outputfiles_conf }}
       with_dict:
-        - cacert: "{{ __test_ca_cert }}"
-        - mycert: "{{ __test_cert }}"
-        - myprivkey: "{{ __test_key }}"
+        - cacert: "{{ __test_ca_cert_target }}"
+        - mycert: "{{ __test_cert_target }}"
+        - myprivkey: "{{ __test_key_target }}"
       changed_when: false
