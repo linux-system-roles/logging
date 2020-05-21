@@ -64,16 +64,14 @@ logging
 │       │       └── remote_files
 │       │           └── main.yml
 │       ├── templates
-│       │   ├── etc
-│       │   │   ├── rsyslog.conf.j2
-│       │   │   └── rsyslog.d
-│       │   │       └── rules.conf.j2
 │       │   ├── input_template.j2
 │       │   ├── ovirt_input_files.j2
 │       │   ├── output_elasticsearch.j2
 │       │   ├── output_files.j2
 │       │   ├── output_forwards.j2
-│       │   └── output_remote_files.j2
+│       │   ├── output_remote_files.j2
+│       │   ├── rsyslog.conf.j2
+│       │   └── rules.conf.j2
 │       └── vars
 │           ├── inputs
 │           │   ├── basics

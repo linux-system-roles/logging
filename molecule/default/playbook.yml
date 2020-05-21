@@ -1,7 +1,5 @@
 ---
 - name: Converge
   hosts: all
-  vars:
-    rsyslog_default: true
   roles:
     - role: logging

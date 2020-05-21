@@ -74,15 +74,16 @@
 
     - name: Generate main rsyslog configuration
       template:
-        src: 'etc/rsyslog.conf.j2'
+        src: 'rsyslog.conf.j2'
         dest: '/etc/rsyslog.conf'
       when:
         - __rsyslog_enabled | bool
+        - logging_inputs | d([])
       notify: restart rsyslogd
 
     - name: Generate common rsyslog configuration files in rsyslog.d
       template:
-        src: 'etc/rsyslog.d/rules.conf.j2'
+        src: 'rules.conf.j2'
         dest: |-
           {{ rsyslog_config_dir }}/{{ item.filename | d((item.weight if item.weight | d()
           else rsyslog_weight_map[item.type | d("rules")]) + "-" + (item.name | d("rules")) +
