@@ -41,7 +41,7 @@
 
     - name: Check rsyslog.conf size
       assert:
-        that: rsyslog_conf_line_count.stdout.0 | int <= 7
+        that: rsyslog_conf_stat.stat.size < 1000
 
     - name: Check file counts in rsyslog.d
       assert:
@@ -58,14 +58,6 @@
       package:
         name: lsof
         state: present
-
-    - name: Check rsyslog.conf size
-      assert:
-        that: rsyslog_conf_line_count.stdout.0 | int <= 7
-
-    - name: Check file counts in rsyslog.d
-      assert:
-        that: rsyslog_d_file_count.matched >= 9
 
     - name: lsof outputs for rsyslogd
       shell: |

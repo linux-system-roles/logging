@@ -52,7 +52,6 @@ Currently, the logging role supports four types of logs collections ([inputs](ht
 The following example defines 3 type of inputs input_nameA, B, C and 2 types of outputs output_name0 and 1. The log messages from input_nameA and B are sent to the output_name0; the log messages from inputC are sent to output_name1.
 ```
 logging_enabled: true
-rsyslog_default: false
 logging_outputs:
   -name: <output_name0>
    type: <output_type0>
@@ -186,7 +185,6 @@ If more detailed outputs to be configured instead of using the default paths, th
 **5. Deploying basic LSR/Logging config files in /etc/rsyslog.d, which forwards the local system logs to the remote rsyslog.
 ```
 logging_enabled: true
-rsyslog_default: false
 logging_purge_confs: true
 logging_outputs:
   - name: output-forwards0
@@ -246,8 +244,7 @@ Variables in vars.yml
    To make the network communication safe, enable `rsyslog_pki` and add `tls` to `rsyslog_capabilities`. (TBD)
    To log all kernel messages to the console, add `kernel-message` to `rsyslog_capabilities`.
    To add `-- MARK --` message every hour, add `mark` to `rsyslog_capabilities`.
-- `rsyslog_default`: If set as `true`, rsyslog.conf will be configured with default configurations and rules.
-- `rsyslog_pki` : When 'true', pki related variables are configured, which are `rsyslog_pki_path`, `rsyslog_pki_realm`, `rsyslog_pki_ca`, `rsyslog_pki_crt`, `rsyslog_pki_key`.  In addition, if 'tls' is included in `rsyslog_capabilities`, it enables to forward logs over TLS.  Default to 'false'. (TBD)
+- `rsyslog_pki` : When 'true', pki related variables are configured, which are `rsyslog_pki_path`, `rsyslog_pki_realm`, `rsyslog_pki_ca`, `rsyslog_pki_crt`, `rsyslog_pki_key`.  In addition, if 'tls' is included in `rsyslog_capabilities`, it enables to forward logs over TLS.  Default to 'false'.
 - `rsyslog_send_over_tls_only` : When 'true', insecure connection is not allowed.  I.e., it requires `tls` in `rsyslog_capabilities`.  Default to 'false'.
 
 Common sub-variables
@@ -351,7 +348,7 @@ It contains the framework and data for the configuration files to be deployed.
 
 The basic framework is based on debops.rsyslog and adjusted to the RHEL/Fedora specification.
 
-- templates have 2 template files, rsyslog.conf.j2 and rules.conf.j2.  The former is used to generate /etc/rsyslog.conf and the latter is for the other configuration files including mmnormalize rulebase and formatter which will be placed in ```{{ rsyslog_config_dir }}``` (default to /etc/rsyslog.d) and its subdirectories.
+- templates have 2 types of template files, one is rules.conf.j2 which is a generic template to produce every configuration file. The others, output_elasticsearch.j2, output_forwards.j2, output_files.j2, input_template.j2, ovirt_input_template.j2, etc. are for each input and output configuration file.
 
 - tasks/main.yml contains the series of tasks to deploy specified set of configuration files.
 

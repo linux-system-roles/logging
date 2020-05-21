@@ -2,18 +2,22 @@
   hosts: all
   become: true
   vars:
-    rsyslog_default: true
+    __rsyslog_version: "N/A"
 
   tasks:
-    - name: default run (deploy rsyslog.conf)
+    - name: default run
       include_role:
         name: linux-system-roles.logging
 
     - include: set_rsyslog_variables.yml
 
+    - name: Check rsyslog version
+      assert:
+        that: __rsyslog_version != "N/A" and __rsyslog_version != "0.0.0"
+
     - name: Check rsyslog.conf size
       assert:
-        that: rsyslog_conf_line_count.stdout.0 | int > 7
+        that: rsyslog_conf_stat.stat.size > 2000
 
     - name: Check file counts in rsyslog.d
       assert:
@@ -25,14 +29,3 @@
       command: systemctl status rsyslog
       register: systemctl_result
       failed_when: "'error' in systemctl_result.stdout or systemctl_result.rc != 0"
-
-    - name: Get rsyslog_version_str
-      command: /bin/grep "^# rsyslog version is " /etc/rsyslog.conf
-      register: rsyslog_version_str
-      changed_when: false
-
-    - name: Check rsyslog_version
-      assert:
-        that: rsyslog_version | d() and rsyslog_version != "0.0.0"
-      vars:
-        rsyslog_version: "{{ rsyslog_version_str.stdout | regex_search('[0-9]*\\.[0-9]*\\.[0-9]*') }}"

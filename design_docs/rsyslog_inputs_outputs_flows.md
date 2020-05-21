@@ -1,6 +1,6 @@
 # Rsyslog - Flow Controls between Inputs and Outputs
 
-## Background
+## History - Before the flow control and rsyslog_default removal
 
 The logging role defines `rsyslog_default` variable to deploy the original, all-in-one rsyslog configuration file rsyslog.conf.
 It configures to get inputs from `imjournal` and output to the local files in /var/log.
@@ -13,12 +13,20 @@ This proposal will discuss about these items:
 - how to replace the `rsyslog_default` variable with the logging role inputs/outputs configuration.
 - how to support more generic way to connect inputs and outputs.
 
-Please note that this github commit starting this doc implements the first cut of the proposal including:
-- inputs - basics input role (`imjournal`, `imuxsock`, `imudp`, `imptcp`) and files input role (`imfile`) [0], and
-- outputs - files output role (`omfile`), forwards output role (`omfwd`) and elasticsearch role (`omelasticsearch`).
-Leftover tasks, other roles to be changed and eliminating `rsyslog_default`, are discussed in [To Do's](#to-dos).
+## Post Flow Control Implementation
 
-[0] - ovirt, viaq, and viaq-k8s need to update to support the flow controls.
+The primary playbook variables are made from 3 dicts - logging_inputs, logging_outputs, and logging_flows.
+
+logging_inputs supports 3 types [0].
+- basics input (`imjournal`, `imuxsock`)
+- files input (`imfile`) [0]
+- ovirt handling ovirt inputs
+logging_outputs supports 3 types.
+- files output (`omfile`)
+- forwards output (`omfwd`)
+- elasticsearch (`omelasticsearch`).
+
+[0] - viaq, and viaq-k8s need more work to support the flow controls.
 
 ## How the flow control works
 
@@ -222,15 +230,6 @@ logging_flows:
 ```
 There are some exceptions.
 - The files output is configured, by default. That is, even if there is no logging_outputs is given, the `files` output config file is deployed. The filters and the actions in the configuration file (30-output-files.conf) are equivalent to the ones in the original rsyslog.conf.
-
-Using the exception rules, this snippet of the inventory variables will configure equivalent to the original rsyslog.conf. Note: rsyslog_default is going to be eliminated next.
-```
-logging_enabled: true
-rsyslog_default: false
-logging_inputs:
-  - name: basic_input
-    type: basics
-```
 
 ## To Do's
 ### Input viaq + viaq-k8s

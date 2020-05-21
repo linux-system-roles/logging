@@ -2,16 +2,9 @@
 
 ## templates
 
-### rsyslog.conf
-
-The primary configuration file rsyslog.conf is managed by the rsyslog_default parameter.
-If it is set to `true`, the default rsyslog.conf from the rsyslog rpm package is copied to /etc.
-If it is set to `false`, just the rsyslog.conf file only contains `$IncludeConfig /config/path/*.conf`
-and all the configurations are done in the sub-configuration files in rsyslog.d.
-
 ### Sub-configuration files in rsyslog.d
 
-The [rules.conf.j2](../roles/rsyslog/templates/etc/rsyslog.d/rules.conf.j2) is a template to generate
+The [rules.conf.j2](../roles/rsyslog/templates/rules.conf.j2) is a template to generate
 sub-configuration files based on the rules defined in the file.  Rsyslog configurations are implemented
 as a combination of small pieces.
 

@@ -4,7 +4,7 @@
 
 In the logging role context, oVirt is a special input type which handles inputs from the remote RHV systems and the files input (imfile) on the target host. The log messages are formatted in the ovirt input and forwarded to the elasticsearch. Plus, in the stable-0.1 version, it depended on the default rsyslog.conf which was deployed by setting the rsyslog_default variable to true. 
 
-The goal of the task "RHELPLAN-42379 - Logging - Support oVirt input" is providing the same logging experience using the logging_inputs, logging_outputs, and logging_flows configuration. Then, the rsyslog_default flag (with etc/rsyslog.conf.j2 template) and the send-target-only config file will be safely dropped.
+The goal of the task "RHELPLAN-42379 - Logging - Support oVirt input" is providing the same logging experience using the logging_inputs, logging_outputs, and logging_flows configuration. Then, the rsyslog_default flag (with etc/rsyslog.conf.j2 template) and the send-target-only config file are safely dropped.
 
 ## Implementation Changes
 
@@ -200,5 +200,5 @@ ruleset(name="elasticsearch_output_ops") {
 
 ### Cleaning up
 
-- The variable rsyslog_default and roles/rsyslog/template/etc/rsyslog.conf.j2 are going to be eliminated.
+- The variable rsyslog_default and roles/rsyslog/template/etc/rsyslog.conf.j2 are eliminated.
 - 40-send-targets-only.conf is no longer generated.

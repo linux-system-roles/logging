@@ -7,12 +7,6 @@
 # true if the target host is a container and use rsyslog in the image.
 rsyslog_in_image: false
 
-# rsyslog_default
-#
-# Diploy default ``rsyslog`` configuration file /etc/rsyslog.conf if it is set to true.
-# Otherwise, rsyslog.conf just includes configuration files in /etc/rsyslog.d.
-rsyslog_default: false
-
 # rsyslog_config_dir
 #
 # Configuration directory
@@ -183,9 +177,7 @@ __rsyslog_conf_global_options:
     options: |-
       global(
         defaultNetstreamDriver="{{ rsyslog_default_netstream_driver }}"
-      {% if not rsyslog_default | bool %}
         workDirectory="{{ rsyslog_work_dir }}"
-      {% endif %}
       {% if rsyslog_pki | bool and "tls" in rsyslog_capabilities %}
         defaultNetstreamDriverCAFile="{{ rsyslog_pki_path + '/' + rsyslog_pki_realm + '/' + rsyslog_pki_ca }}"
       {%   if rsyslog_default_driver_authmode != "anon" or "network" in rsyslog_capabilities %}

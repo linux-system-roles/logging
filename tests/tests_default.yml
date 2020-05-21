@@ -1,8 +1,14 @@
 - name: Ensure that the role runs with default parameters
   hosts: all
   become: true
+  vars:
+    __rsyslog_version: "N/A"
 
   tasks:
     - name: default run (NOOP)
       include_role:
         name: linux-system-roles.logging
+
+    - name: Check rsyslog version
+      assert:
+        that: __rsyslog_version != "N/A" and __rsyslog_version != "0.0.0"
