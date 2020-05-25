@@ -24,14 +24,14 @@ module(load="imptcp")
 # Read messages sent over TCP with TLS
 module(
   load="imtcp"
-  streamDriver.name="{{ rsyslog_default_netstream_driver }}"
+  streamDriver.name="{{ __rsyslog_default_netstream_driver }}"
   streamDriver.mode="1"
   streamDriver.authMode="{{ rsyslog_default_driver_authmode }}"
 {%   if rsyslog_default_driver_authmode != "anon" %}
-{%     if rsyslog_permitted_peers is string %}
-    permittedPeer="{{ rsyslog_permitted_peers }}"
+{%     if logging_permitted_peers is string %}
+    permittedPeer="{{ logging_permitted_peers }}"
 {%     else %}
-    permittedPeer=["{{ rsyslog_permitted_peers | join('","') }}"]
+    permittedPeer=["{{ logging_permitted_peers | join('","') }}"]
 {% endif %}
 {%   endif %}
 )

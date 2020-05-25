@@ -10,7 +10,7 @@
 - name: Install/Update required packages
   package:
     name: "{{ __rsyslog_base_packages }} +
-           {{ __rsyslog_tls_packages if rsyslog_default_netstream_driver != 'ptcp' else [] }} +
+           {{ __rsyslog_tls_packages if __rsyslog_default_netstream_driver != 'ptcp' else [] }} +
            {{ rsyslog_extra_packages | flatten }}"
     state: latest
   when:
@@ -92,6 +92,17 @@
         - logging_inputs | d([])
       notify: restart rsyslogd
 
+    - name: Generate global rule to add to __rsyslog_common_rules
+      vars:
+        __rsyslog_global_rule:
+          - filename: '00-global.conf'
+            comment: 'Global options'
+            options: "{{ lookup('template', 'global.j2') }}"
+      set_fact:
+        __rsyslog_common_rules: "{{ __rsyslog_global_rule + __rsyslog_common_rules }}"
+      when:
+        - __rsyslog_enabled | bool
+
     - name: Generate common rsyslog configuration files in rsyslog.d
       template:
         src: 'rules.conf.j2'
@@ -140,6 +151,20 @@
         mode: '{{ item.mode | d("0644") }}'
       loop: '{{ rsyslog_custom_config_files | flatten }}'
       when: __rsyslog_enabled | bool
+      notify: restart rsyslogd
+
+    - name: Copy local key/cert files to the target if needed
+      vars:
+        __pki_dir: '{{ __rsyslog_default_pki_key_dir if item.type == "key" else __rsyslog_default_pki_cert_dir }}'
+        __pki_file: '{{ item.src | basename }}'
+      copy:
+        src: '{{ item.src }}'
+        dest: '{{ item.dest if item.dest is defined else (__rsyslog_default_pki_path + __pki_dir + __pki_file) }}'
+        mode: '{{ "0400" if item.type == "key" else "0600" }}'
+      loop: '{{ logging_pki_files }}'
+      when:
+        - __rsyslog_enabled | bool
+        - item.src | d("")
       notify: restart rsyslogd
 
     - name: Include input sub-vars

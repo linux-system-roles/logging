@@ -22,6 +22,31 @@ __rsyslog_default_port: '514'
 # The incoming TCP TLS port used for remote logging.
 __rsyslog_default_tls_port: '6514'
 
+# __rsyslog_default_pki_path
+#
+# standard tls path
+__rsyslog_default_pki_path: "/etc/pki/tls/"
+
+# __rsyslog_default_pki_key_dir
+#
+__rsyslog_default_pki_key_dir: "private/"
+
+# __rsyslog_default_pki_cert_dir
+#
+__rsyslog_default_pki_cert_dir: "certs/"
+
+# __rsyslog_default_pki_ca_cert_name
+#
+__rsyslog_default_pki_ca_cert_name: "ca.crt"
+
+# __rsyslog_default_pki_key_name
+#
+__rsyslog_default_pki_key_name: "key.pem"
+
+# __rsyslog_default_pki_cert_name
+#
+__rsyslog_default_pki_cert_name: "cert.pem"
+
 # Rsyslog configuration rules
 # ---------------------------
 
@@ -51,3 +76,12 @@ rsyslog_weight_map:
   'rulesets': '50'
   'input': '90'
   'inputs': '90'
+
+# X.509 certificates related variables
+# Lookup rsyslog netwrok stream driver
+__rsyslog_pki_map:
+  none: ptcp
+  ptcp: ptcp
+  tls: gtls
+  gtls: gtls
+  gnutls: gtls
