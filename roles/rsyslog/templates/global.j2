@@ -1,0 +1,27 @@
+{% set ns = namespace() %}
+{% set ns.ca_cert_path = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + __rsyslog_default_pki_ca_cert_name %}
+{% set ns.cert_path = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + __rsyslog_default_pki_cert_name %}
+{% set ns.key_path = __rsyslog_default_pki_path + __rsyslog_default_pki_key_dir + __rsyslog_default_pki_key_name %}
+{% for file in logging_pki_files %}
+{%   if file.type == 'ca_cert' %}
+{%     set ns.ca_cert_path = file.dest | d(__rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + file.src | basename) %}
+{%   elif file.type == 'cert' %}
+{%     set ns.cert_path = file.dest | d(__rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + file.src | basename) %}
+{%   elif file.type == 'key' %}
+{%     set ns.key_path = file.dest | d(__rsyslog_default_pki_path + __rsyslog_default_pki_key_dir + file.src | basename) %}
+{%   endif %}
+{% endfor %}
+global(
+  defaultNetstreamDriver="{{ __rsyslog_default_netstream_driver }}"
+  workDirectory="{{ rsyslog_work_dir }}"
+{% if __rsyslog_default_netstream_driver != "ptcp" %}
+  defaultNetstreamDriverCAFile="{{ ns.ca_cert_path }}"
+{%   if logging_pki_authmode != "anon" %}
+  defaultNetstreamDriverCertFile="{{ ns.cert_path }}"
+  defaultNetstreamDriverKeyFile="{{ ns.key_path }}"
+{%   endif %}
+{% endif %}
+{% if rsyslog_max_message_size is defined %}
+  maxMessageSize="{{ logging_max_message_size }}"
+{% endif %}
+)

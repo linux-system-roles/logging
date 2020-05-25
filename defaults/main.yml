@@ -21,13 +21,50 @@ logging_purge_confs: false
 logging_system_log_dir: /var/log
 
 # Specifying rsyslog encryption library
-# one of the implementations is allowed none, ptcp, tls, gtls, gnutls, openssl
-# Note: none->ptcp, tls,gtls,gnutls->gtls, openssl->openssl
-# Default to ptcp
-logging_encryption: ptcp
+# one of the implementations is allowed none, ptcp, tls, gtls, gnutls
+# Note: none->ptcp, tls,gtls,gnutls->gtls
+# Default to ptcp (== no tls)
+logging_pki: ptcp
 
 # Mark message periodically by immark, if set to true.
 logging_mark: false
 
 # Interval for logging_mark in seconds.
 logging_mark_interval: 3600
+
+# When the provider is rsyslog, default 8192 - allows to specify maximum supported message size
+# both for sending and receiving. Must be greater than 1024.
+logging_max_message_size: 8192
+
+# list of pki files dict
+# logging_pki_files:
+#   - type: ca_cert | cert | key
+#     src:  location of the file on the local host; if given, the file is deployed to dest value path.
+#     dest: path to be deployed on the target host; if given, the path is set to the config file.
+#           Default to /etc/pki/tls/certs/ca.crt for ca_cert
+#                      /etc/pki/tls/certs/cert.pem for cert
+#                      /etc/pki/tls/private/key.pem for key
+logging_pki_files: []
+
+# logging_pki_authmode
+#
+# Specify the default network driver authetication mode.
+# `x509/name` or `anon` are available:
+logging_pki_authmode: "x509/name"
+
+# logging_domain
+#
+# The default DNS domain used to accept remote incoming logs from remote hosts.
+logging_domain: '{{ ansible_domain if ansible_domain else ansible_hostname }}'
+
+# logging_permitted_peers
+#
+# List of hostnames, IP addresses or wildcard DNS domains which will be allowed
+# by the `logging` server to connect and send logs over TLS.
+logging_permitted_peers: ['*.{{ logging_domain }}']
+
+# logging_send_permitted_peers
+#
+# List of hostnames, IP addresses or wildcard DNS domains which will be verified
+# by the `logging` client and will allow to send logs to the remote server over TLS.
+logging_send_permitted_peers: '{{ logging_permitted_peers }}'

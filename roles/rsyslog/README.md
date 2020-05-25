@@ -240,11 +240,28 @@ Variables in vars.yml
 ======================
 
 - `logging_enabled` : When 'true', rsyslog role will deploy specified configuration file set. Default to 'true'.
-- `logging_encryption`: Specifying an encryption. One of `none`, `ptcp`, `tls`, `gtls`, `gnutls`, and `openssl`. Default to `ptcp`.
-                        Note: `none`=`ptcp`, `tls`=`gtls`=`gnutls`.
-                        When logging_encryption is _not_ `ptcp`, rsyslog_pki_path`, `rsyslog_pki_realm`, `rsyslog_pki_ca`, `rsyslog_pki_crt`, `rsyslog_pki_key` are configured.
 - `logging_mark`: Mark message periodically by immark, if set to `true`. Default to `false`.
 - `logging_mark_interval`: Interval for `logging_mark` in seconds. Default to 3600.
+- `logging_pki`: Specifying an encryption. One of `none`, `ptcp`, `tls`, `gtls`, and `gnutls`. Default to `ptcp`.
+                 Note: `none`=`ptcp`, `tls`=`gtls`=`gnutls`.
+                 When logging_pki is _not_ `ptcp`; rsyslog_pki_path`, `rsyslog_pki_realm`, `rsyslog_pki_ca`,
+                 `rsyslog_pki_crt`, `rsyslog_pki_key` will be configured.
+- `logging_pki_files`: list of pki files dict
+  ```
+   logging_pki_files:
+     - type: ca_cert | cert | key
+       src:  location of the file on the local host;
+             if given, the file is deployed to dest value path.
+       dest: path to be deployed on the target host;
+             if given, the path is set to the config file.
+             Default to /etc/pki/tls/certs/ca.crt for ca_cert
+                        /etc/pki/tls/certs/cert.pem for cert
+                        /etc/pki/tls/private/key.pem for key
+  ```
+- `logging_pki_authmode`: Specify the default network driver authentication mode. `x509/name` or `anon` are available: Default to "x509/name".
+- `logging_domain`: The default DNS domain used to accept remote incoming logs from remote hosts. Default to {{ ansible_domain if ansible_domain else ansible_hostname }}
+- `logging_permitted_peers`: List of hostnames, IP addresses or wildcard DNS domains which will be allowed by the `logging` server to connect and send logs over TLS.  Default to ['*.{{ logging_domain }}']
+- `logging_send_permitted_peers`: List of hostnames, IP addresses or wildcard DNS domains which will be verified by the `logging` client and will allow to send logs to the remote server over TLS. Default to '{{ logging_permitted_peers }}'.
 
 Common sub-variables
 --------------------

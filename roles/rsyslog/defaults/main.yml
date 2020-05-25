@@ -46,91 +46,28 @@ rsyslog_custom_config_files: []
 # By setting false, it'd change 2020-03-27T14:16:47.139796+00:00)
 rsyslog_basics_use_traditional_timestamp_format: true
 
-# Encrypted communication
+# communication over tls
 # ------------------------
 
-# X.509 certificates related variables
-
-# rsyslog_pki_path
-#
-# Path to the directory with PKI realms.
-rsyslog_pki_path: "/etc/pki"
-
-# rsyslog_pki_realm
-#
-# Name of the PKi realm to use with ``rsyslogd``.
-rsyslog_pki_realm: "domain"
-
-# rsyslog_pki_ca
-#
-# Name of the root CA certificate used by the ``rsyslog`` role.
-rsyslog_pki_ca: "CA.crt"
-
-# rsyslog_pki_crt
-#
-# Name of the client certificate file used by the ``rsyslog`` role.
-rsyslog_pki_crt: "default.crt"
-
-# rsyslog_pki_key
-#
-# Name of the private key file used by the ``rsyslog`` role.
-rsyslog_pki_key: "default.key"
-
-# Lookup rsyslog network stream driver
-__rsyslog_encryption_map:
-  none: ptcp
-  ptcp: ptcp
-  tls: gtls
-  gtls: gtls
-  gnutls: gtls
-  openssl: openssl
-
-# rsyslog_default_netstream_driver
-#
-# Specify the default netstream driver used by the ``imtcp`` module.
-rsyslog_default_netstream_driver: '{{ __rsyslog_encryption_map[logging_encryption] | d("ptcp") }}'
-
-# rsyslog_default_driver_authmode
-#
-# Specify the default network driver authetication mode. Actualy only
-# `x509/name` or `anon` are available:
-rsyslog_default_driver_authmode: "x509/name"
+__rsyslog_default_netstream_driver: '{{ __rsyslog_pki_map[logging_pki] | d("ptcp") }}'
 
 # rsyslog_send_over_tls
 #
 # This configuration is added to the forward options when ``tls`` capability is
 # enabled. It's used to configure TLS options.
 rsyslog_send_over_tls: |-
-  $ActionSendStreamDriver {{ rsyslog_default_netstream_driver }}
-  $ActionSendStreamDriverAuthMode {{ rsyslog_default_driver_authmode }}
-  {% if rsyslog_default_driver_authmode != "anon" %}
-  {%   if rsyslog_send_permitted_peers is string %}
-  $ActionSendStreamDriverPermittedPeer {{ rsyslog_send_permitted_peers }}
+  $ActionSendStreamDriver {{ __rsyslog_default_netstream_driver }}
+  $ActionSendStreamDriverAuthMode {{ logging_pki_authmode }}
+  {% if logging_pki_authmode != "anon" %}
+  {%   if logging_send_permitted_peers is string %}
+  $ActionSendStreamDriverPermittedPeer {{ logging_send_permitted_peers }}
   {%   else %}
-  {%     for peer in rsyslog_send_permitted_peers %}
+  {%     for peer in logging_send_permitted_peers %}
   $ActionSendStreamDriverPermittedPeer {{ peer }}
   {%     endfor %}
   {%   endif %}
   {% endif %}
   $ActionSendStreamDriverMode 1
-
-# rsyslog_domain
-#
-# The default DNS domain used to accept remote incoming logs from remote hosts.
-rsyslog_domain: '{{ ansible_domain if ansible_domain else ansible_hostname }}'
-
-# rsyslog_permitted_peers
-#
-# List of hostnames, IP addresses or wildcard DNS domains which will be allowed
-# by the ``rsyslogd`` server to connect and send logs over TLS.
-rsyslog_permitted_peers: ['*.{{ rsyslog_domain }}']
-
-# rsyslog_send_permitted_peers
-#
-# List of hostnames, IP addresses or wildcard DNS domains which will be
-# verified by the ``rsyslogd`` client and will allow to send logs to the remote
-# server over TLS.
-rsyslog_send_permitted_peers: '{{ rsyslog_permitted_peers }}'
 
 # Files and Forwards outputs
 # --------------------------
@@ -145,38 +82,8 @@ rsyslog_output_forwards: []
 # configuration enabled in the role.
 __rsyslog_common_rules:
 
-  - '{{ __rsyslog_conf_global_options }}'
   - '{{ __rsyslog_conf_local_modules }}'
   - '{{ __rsyslog_conf_common_defaults }}'
-
-
-# Default configuration options
-# -----------------------------
-
-# __rsyslog_conf_global_options
-#
-# Some of the global ``rsyslogd`` configuration options. See
-# http://www.rsyslog.com/doc/v8-stable/rainerscript/global.html for more
-# details.
-__rsyslog_conf_global_options:
-
-  - filename: '00-global.conf'
-    comment: 'Global options'
-    options: |-
-      global(
-        defaultNetstreamDriver="{{ rsyslog_default_netstream_driver }}"
-        workDirectory="{{ rsyslog_work_dir }}"
-      {% if rsyslog_default_netstream_driver != "ptcp" %}
-        defaultNetstreamDriverCAFile="{{ rsyslog_pki_path + '/' + rsyslog_pki_realm + '/' + rsyslog_pki_ca }}"
-      {%   if rsyslog_default_driver_authmode != "anon" %}
-        defaultNetstreamDriverCertFile="{{ rsyslog_pki_path + '/' + rsyslog_pki_realm + '/' + rsyslog_pki_crt }}"
-        defaultNetstreamDriverKeyFile="{{ rsyslog_pki_path + '/' + rsyslog_pki_realm + '/' + rsyslog_pki_key }}"
-      {%   endif %}
-      {% endif %}
-      {% if rsyslog_max_message_size is defined %}
-        maxMessageSize="{{ rsyslog_max_message_size }}"
-      {% endif %}
-      )
 
 # __rsyslog_conf_local_modules
 #
