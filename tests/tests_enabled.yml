@@ -9,7 +9,7 @@
       include_role:
         name: linux-system-roles.logging
 
-    - include: set_rsyslog_variables.yml
+    - include_tasks: set_rsyslog_variables.yml
 
     - name: Check rsyslog version
       assert:
