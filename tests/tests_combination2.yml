@@ -68,7 +68,7 @@
       include_role:
         name: linux-system-roles.logging
 
-    - include: set_rsyslog_variables.yml
+    - include_tasks: set_rsyslog_variables.yml
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
