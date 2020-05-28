@@ -2,7 +2,6 @@
   hosts: all
   become: true
   vars:
-    __rsyslog_version: "N/A"
     __test_forward_conf_s_f: /etc/rsyslog.d/30-output-forwards-forwards-severity_and_facility.conf
     __test_forward_conf_f: /etc/rsyslog.d/30-output-forwards-forwards-facility_only.conf
     __test_forward_conf_s: /etc/rsyslog.d/30-output-forwards-forwards-severity_only.conf
@@ -77,10 +76,6 @@
     # thus we have to force to invoke handlers
     - name: Force all notified handlers to run at this point, not waiting for normal sync points
       meta: flush_handlers
-
-    - name: Check rsyslog version
-      assert:
-        that: __rsyslog_version != "N/A" and __rsyslog_version != "0.0.0"
 
     - name: Check rsyslog.conf size
       assert:

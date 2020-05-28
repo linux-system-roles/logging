@@ -1,8 +1,6 @@
 - name: Ensure that the role runs with logging_enabled=true
   hosts: all
   become: true
-  vars:
-    __rsyslog_version: "N/A"
 
   tasks:
     - name: default run
@@ -10,10 +8,6 @@
         name: linux-system-roles.logging
 
     - include_tasks: set_rsyslog_variables.yml
-
-    - name: Check rsyslog version
-      assert:
-        that: __rsyslog_version != "N/A" and __rsyslog_version != "0.0.0"
 
     - name: Check rsyslog.conf size
       assert:

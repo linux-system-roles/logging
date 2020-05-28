@@ -2,7 +2,6 @@
   hosts: all
   become: true
   vars:
-    __rsyslog_version: "N/A"
     __test_files_conf: /etc/rsyslog.d/30-output-files-files_test0.conf
     __test_forwards_conf: /etc/rsyslog.d/30-output-forwards-forwards_severity_and_facility.conf
 
@@ -52,10 +51,6 @@
     # thus we have to force to invoke handlers
     - name: Force all notified handlers to run at this point, not waiting for normal sync points
       meta: flush_handlers
-
-    - name: Check rsyslog version
-      assert:
-        that: __rsyslog_version != "N/A" and __rsyslog_version != "0.0.0"
 
     - name: Check rsyslog.conf size
       assert:

@@ -2,7 +2,6 @@
   hosts: all
   become: true
   vars:
-    __rsyslog_version: "N/A"
     __test_ovirt_collectd_conf: /etc/rsyslog.d/90-input-ovirt-ovirt_collectd_input.conf
     __test_ovirt_engine_conf: /etc/rsyslog.d/90-input-ovirt-ovirt_engine_input.conf
     __test_ovirt_vdsm_conf: /etc/rsyslog.d/90-input-ovirt-ovirt_vdsm_input.conf
@@ -90,10 +89,6 @@
     # thus we have to force to invoke handlers
     - name: Force all notified handlers to run at this point, not waiting for normal sync points
       meta: flush_handlers
-
-    - name: Check rsyslog version
-      assert:
-        that: __rsyslog_version != "N/A" and __rsyslog_version != "0.0.0"
 
     - name: Check rsyslog.conf size
       assert:
