@@ -15,6 +15,7 @@
         type: input
         sections:
           - options: "{{ lookup('template', 'ovirt_input_template.j2') }}"
+        state: "{{ ovirt_item.state | d('present') }}"
   include_tasks:
     file: deploy.yml
   loop: '{{ logging_inputs }}'

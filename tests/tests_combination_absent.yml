@@ -1,0 +1,174 @@
+- name: Running logging role twice; in the second run, some logging_outputs are absent or eliminated.
+  hosts: all
+  become: true
+  vars:
+    __rsyslog_version: "N/A"
+    __test_tag: files_input
+    __test_inputfiles_conf: /etc/rsyslog.d/90-input-files-{{ __test_tag }}.conf
+    __test_inputfiles_dir: /var/log/inputdirectory
+    __test_basics_conf: 90-input-basics-basic_input.conf
+
+  tasks:
+    - name: Generate an input log dir {{ __test_inputfiles_dir }}
+      file:
+        path: "{{ __test_inputfiles_dir }}"
+        state: directory
+        mode: 0700
+
+    - name: deploy config to output into local files
+      vars:
+        logging_outputs:
+          - name: files_test0
+            type: files
+            severity: info
+            exclude:
+              - authpriv.none
+              - auth.none
+              - cron.none
+              - mail.none
+            path: /var/log/messages
+          - name: files_test1
+            type: files
+            facility: authpriv,auth
+            path: /var/log/secure
+          - name: forwards_severity_and_facility
+            type: forwards
+            facility: local1
+            severity: info
+            protocol: tcp
+            target: host.domain
+            port: 1514
+          - name: forwards_facility_only
+            type: forwards
+            facility: local2
+            protocol: tcp
+            target: host.domain
+            port: 2514
+        logging_inputs:
+          - name: basic_input
+            type: basics
+            rsyslog_imjournal_ratelimit_burst: 33333
+          - name: "{{ __test_tag }}"
+            type: files
+            rsyslog_input_log_path: "{{ __test_inputfiles_dir }}/*.log"
+        logging_flows:
+          - name: flow_0
+            inputs: [basic_input]
+            outputs: [files_test0, files_test1, forwards_severity_and_facility, forwards_facility_only]
+          - name: flow_1
+            inputs: ["{{ __test_tag }}"]
+            outputs: [files_test0, files_test1]
+      include_role:
+        name: linux-system-roles.logging
+
+    - include_tasks: set_rsyslog_variables.yml
+
+    # notify restart rsyslogd is executed at the end of this test task.
+    # thus we have to force to invoke handlers
+    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+      meta: flush_handlers
+
+    - name: Check rsyslog version
+      assert:
+        that: __rsyslog_version != "N/A" and __rsyslog_version != "0.0.0"
+
+    - name: Check rsyslog.conf size
+      assert:
+        that: rsyslog_conf_stat.stat.size < 1000
+
+    - name: Check file counts in rsyslog.d
+      assert:
+        that: rsyslog_d_file_count.matched >= 11
+
+    - name: generate test config file
+      copy:
+        dest: "/etc/rsyslog.d/{{ __test_basics_conf }}"
+        content: |-
+          # GENERATED BASICS CONFIG FILE
+          module(load="imuxsock"    # provides support for local system logging (e.g. via logger command)
+                 SysSock.Use="off") # Turn off message reception via local log socket.
+          module(load="imjournal"
+                 StateFile="/var/lib/rsyslog/imjournal.state"
+                 RateLimit.Burst="20000"
+                 RateLimit.Interval="600"
+                 PersistStateInterval="10")
+          if
+            ($inputname == "imjournal")
+            then {
+              call files_test0
+          }
+
+    # Checking 'error' in stdout from systemctl status is for detecting the case in which rsyslog is running,
+    # but some functionality is disabled due to some error, e.g., error: 'tls.cacert' file couldn't be accessed.
+    - name: Check rsyslog errors
+      command: systemctl status rsyslog
+      register: systemctl_result
+      failed_when: "'error' in systemctl_result.stdout or systemctl_result.rc != 0"
+
+    - name: deploy reduced config to output into local files
+      vars:
+        logging_outputs:
+          - name: files_test0
+            type: files
+            severity: info
+            exclude:
+              - authpriv.none
+              - auth.none
+              - cron.none
+              - mail.none
+            path: /var/log/messages
+          - name: files_test1
+            type: files
+            facility: authpriv,auth
+            path: /var/log/secure
+            state: absent
+          - name: forwards_severity_and_facility
+            type: forwards
+            facility: local1
+            severity: info
+            protocol: tcp
+            target: host.domain
+            port: 1514
+            state: absent
+          - name: forwards_facility_only
+            type: forwards
+            facility: local2
+            protocol: tcp
+            target: host.domain
+            port: 2514
+            state: absent
+        logging_inputs:
+          - name: basic_input
+            type: basics
+            rsyslog_imjournal_ratelimit_burst: 33333
+          - name: "{{ __test_tag }}"
+            type: files
+            rsyslog_input_log_path: "{{ __test_inputfiles_dir }}/*.log"
+            state: absent
+        logging_flows:
+          - name: flow_0
+            inputs: [basic_input]
+            outputs: [files_test0]
+      include_role:
+        name: linux-system-roles.logging
+
+    - include_tasks: set_rsyslog_variables.yml
+
+    # notify restart rsyslogd is executed at the end of this test task.
+    # thus we have to force to invoke handlers
+    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+      meta: flush_handlers
+
+    - name: Check file counts in rsyslog.d are less than no-absent case
+      assert:
+        that: rsyslog_d_file_count.matched < 11
+
+    - name: Check {{ __test_basics_conf }} was updated
+      command: '/bin/grep "# GENERATED BASICS CONFIG FILE" /etc/rsyslog.d/{{ __test_basics_conf }}'
+      register: result
+      failed_when: result.rc == 0
+
+    - name: Check rsyslog errors
+      command: systemctl status rsyslog
+      register: systemctl_result
+      failed_when: "'error' in systemctl_result.stdout or systemctl_result.rc != 0"

@@ -5,6 +5,7 @@
     __rsyslog_rules:
       - name: "output-files-{{ remote_files_item.name }}"
         type: "output"
+        state: "{{ remote_files_item.state | d('present') }}"
         sections:
           - options: "{{ lookup('template', 'output_remote_files.j2') }}"
   include_tasks:

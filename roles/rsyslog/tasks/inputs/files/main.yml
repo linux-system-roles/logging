@@ -15,6 +15,7 @@
     __rsyslog_rules:
       - name: "input-files-{{ files_item.name }}"
         type: input
+        state: "{{ files_item.state | d('present') }}"
         sections:
           - options: |-
               input(type="imfile" file="{{ files_item.rsyslog_input_log_path | d(rsyslog_input_log_path) }}" tag="{{ files_item.name }}")
