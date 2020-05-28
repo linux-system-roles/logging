@@ -25,7 +25,7 @@ if
 {%         elif input.type == "remote" %}
   ($inputname == "{{ input.name }}" )
 {%         elif input.type == __rsyslog_input_type %}
-  ($syslogtag == "{{ input.name }}" or (strlen($.syslogtag) > 0 and ($.syslogtag == "{{ input.name }}")))
+  ($syslogtag == "{{ input.name }}")
 {%         endif %}
 {%       endif %}
 {%     endfor %}
