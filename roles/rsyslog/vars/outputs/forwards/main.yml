@@ -16,7 +16,7 @@ __rsyslog_conf_forwards_output_tls_rules:
 
   - name: 'output-forwards-tls'
     type: 'output'
-    state: '{{ "present" if __rsyslog_encryption_map[logging_encryption] | d("ptcp") != "ptcp"
+    state: '{{ "present" if rsyslog_default_netstream_driver != "ptcp"
                else "absent" }}'
     sections:
       - comment: 'Forward logs over TLS by default'

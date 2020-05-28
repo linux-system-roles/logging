@@ -76,18 +76,18 @@ rsyslog_pki_crt: "default.crt"
 # Name of the private key file used by the ``rsyslog`` role.
 rsyslog_pki_key: "default.key"
 
-# Lookup rsyslog netwrok stream driver
+# Lookup rsyslog network stream driver
 __rsyslog_encryption_map:
-  'none': 'ptcp'
-  'ptcp': 'ptcp'
-  'tls': 'gtls'
-  'gtls': 'gtls'
-  'gnutls': 'gtls'
-  'openssl': 'openssl'
+  none: ptcp
+  ptcp: ptcp
+  tls: gtls
+  gtls: gtls
+  gnutls: gtls
+  openssl: openssl
 
 # rsyslog_default_netstream_driver
 #
-# Specify the default netstrap driver used by the ``imtcp`` module.
+# Specify the default netstream driver used by the ``imtcp`` module.
 rsyslog_default_netstream_driver: '{{ __rsyslog_encryption_map[logging_encryption] | d("ptcp") }}'
 
 # rsyslog_default_driver_authmode
@@ -166,7 +166,7 @@ __rsyslog_conf_global_options:
       global(
         defaultNetstreamDriver="{{ rsyslog_default_netstream_driver }}"
         workDirectory="{{ rsyslog_work_dir }}"
-      {% if __rsyslog_encryption_map[logging_encryption] | d("ptcp") != "ptcp" %}
+      {% if rsyslog_default_netstream_driver != "ptcp" %}
         defaultNetstreamDriverCAFile="{{ rsyslog_pki_path + '/' + rsyslog_pki_realm + '/' + rsyslog_pki_ca }}"
       {%   if rsyslog_default_driver_authmode != "anon" %}
         defaultNetstreamDriverCertFile="{{ rsyslog_pki_path + '/' + rsyslog_pki_realm + '/' + rsyslog_pki_crt }}"
