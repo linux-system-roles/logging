@@ -240,11 +240,11 @@ Variables in vars.yml
 ======================
 
 - `logging_enabled` : When 'true', rsyslog role will deploy specified configuration file set. Default to 'true'.
-- `logging_enctyption`: Specifying an encryption. One of `none`, `ptcp`, `tls`, `gtls`, `gnutls`, and `openssl`. Default to `ptcp`.
+- `logging_encryption`: Specifying an encryption. One of `none`, `ptcp`, `tls`, `gtls`, `gnutls`, and `openssl`. Default to `ptcp`.
                         Note: `none`=`ptcp`, `tls`=`gtls`=`gnutls`.
                         When logging_encryption is _not_ `ptcp`, rsyslog_pki_path`, `rsyslog_pki_realm`, `rsyslog_pki_ca`, `rsyslog_pki_crt`, `rsyslog_pki_key` are configured.
 - `logging_mark`: Mark message periodically by immark, if set to `true`. Default to `false`.
-- `logging_mark_interval`: Interval for `logging_mark` in seconds.
+- `logging_mark_interval`: Interval for `logging_mark` in seconds. Default to 3600.
 
 Common sub-variables
 --------------------

@@ -1,7 +1,7 @@
 - name: Install/Update required packages
   package:
     name: "{{ __rsyslog_base_packages }} +
-           {{ __rsyslog_tls_packages if __rsyslog_encryption_map[logging_encryption] | d('ptcp') != 'ptcp' else [] }} +
+           {{ __rsyslog_tls_packages if rsyslog_default_netstream_driver != 'ptcp' else [] }} +
            {{ rsyslog_extra_packages | flatten }}"
     state: latest
   when:
