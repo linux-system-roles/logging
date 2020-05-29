@@ -78,7 +78,7 @@ rsyslog_weight_map:
   'inputs': '90'
 
 # X.509 certificates related variables
-# Lookup rsyslog netwrok stream driver
+# Lookup rsyslog network stream driver
 __rsyslog_pki_map:
   none: ptcp
   ptcp: ptcp
