@@ -58,7 +58,7 @@ __rsyslog_default_netstream_driver: '{{ __rsyslog_pki_map[logging_pki] | d("ptcp
 rsyslog_send_over_tls: |-
   $ActionSendStreamDriver {{ __rsyslog_default_netstream_driver }}
   $ActionSendStreamDriverAuthMode {{ logging_pki_authmode }}
-  {% if logging_pki_authmode != "anon" %}
+  {% if logging_pki_authmode == "x509/name" %}
   {%   if logging_send_permitted_peers is string %}
   $ActionSendStreamDriverPermittedPeer {{ logging_send_permitted_peers }}
   {%   else %}
