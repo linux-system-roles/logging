@@ -60,7 +60,7 @@
     - name: Check rsyslog errors
       command: systemctl status rsyslog
       register: systemctl_result
-      failed_when: "'error' in systemctl_result.stdout or systemctl_result.rc != 0"
+      failed_when: "'error' in systemctl_result.stdout or 'a RainerScript command' in systemctl_result.stdout or systemctl_result.rc != 0"
 
     - name: Get the files config stat
       stat:
