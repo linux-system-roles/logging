@@ -16,7 +16,7 @@
       - name: "input-basics-{{ basics_item.name }}"
         type: input
         sections:
-          - options: "{{ lookup('template', 'input_basics.j2') }}"
+          - options: "{{ lookup('template', __rsyslog_input_basics) }}"
   include_tasks:
     file: deploy.yml
   loop: '{{ logging_inputs }}'

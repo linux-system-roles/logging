@@ -21,7 +21,7 @@ if
 {%         endif %}
 {%         set input = indict[inputname] %}
 {%         if input.type == "basics" %}
-  ($inputname == "imjournal")
+  ($inputname == "imjournal" or $inputname == "imuxsock")
 {%         elif input.type == "remote" %}
   ($inputname == "{{ input.name }}" )
 {%         elif input.type == __rsyslog_input_type %}

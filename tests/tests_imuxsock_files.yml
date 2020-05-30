@@ -1,23 +1,16 @@
-- name: Ensure that the role runs with parameters to output into local files in a specified path
+- name: Ensure that the role runs with parameters with the simplest configuration using imuxsock instead of imjournal
   hosts: all
   become: true
   vars:
-    __test_files_conf: /etc/rsyslog.d/30-output-files-files-output.conf
-    logging_system_log_dir: '/var/log/rsyslog'
+    __test_files_conf: /etc/rsyslog.d/30-output-files-default_files.conf
 
   tasks:
     - name: deploy config to output into local files
       vars:
-        logging_outputs:
-          - name: files-output
-            type: files
         logging_inputs:
-          - name: basic-input
+          - name: basic_input
             type: basics
-        logging_flows:
-          - name: flows0
-            inputs: [basic-input]
-            outputs: [files-output]
+            use_imuxsock: true
       include_role:
         name: linux-system-roles.logging
 
@@ -48,21 +41,12 @@
         path: "{{ __test_files_conf }}"
       register: stat_output_files_system
 
-    - name: Get the forwarding config stat
-      stat:
-        path: "{{ __test_files_conf }}"
-      register: stat_output_files_system
-
     - name: Check if the files config exists
       assert:
         that: stat_output_files_system.stat.exists
 
-    - name: Run logger to generate a test log message
-      command: /bin/logger -i -p local6.info -t testTag0 testMessage0000
-      changed_when: false
-
     - name: Grep output to messages line
-      command: /bin/grep '{{ logging_system_log_dir }}/messages' {{ __test_files_conf }}
+      command: /bin/grep "\/var\/log\/messages" {{ __test_files_conf }}
       register: files_conf_messages
       changed_when: false
 
@@ -70,11 +54,15 @@
       assert:
         that: files_conf_messages.stdout is match(" *\*.info;mail.none;authpriv.none;cron.none.*messages")
 
-    - name: Check the test log message in {{ logging_system_log_dir }}/messages
-      command: /bin/grep testMessage0000 {{ logging_system_log_dir }}/messages
+    - name: Run logger to generate a test log message
+      command: /bin/logger -i -p local6.info -t testTag0 testMessage0000
+      changed_when: false
+
+    - name: Check the test log message in /var/log/messages
+      command: /bin/grep testMessage0000 /var/log/messages
       register: testMessage0000
       changed_when: false
 
-    - name: Check if the test message is in {{ logging_system_log_dir }}/messages
+    - name: Check if the test message is in /var/log/messages
       assert:
         that: testMessage0000.stdout | length > 0
