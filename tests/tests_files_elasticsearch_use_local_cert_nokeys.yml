@@ -6,31 +6,31 @@
 
   tasks:
     - block:
-      - name: deploy config to send to elasticsearch
-        vars:
-          logging_outputs:
-            - name: elasticsearch_output
-              type: elasticsearch
-              server_host: logging-es
-              server_port: 9200
-              index_prefix: project.
-              input_type: ovirt
-              retryfailures: off
-              use_cert: true
-          logging_inputs:
-            - name: files_input
-              type: files
-              rsyslog_input_log_path: "{{ __test_inputfiles_dir }}/*.log"
-          logging_flows:
-            - name: flow_0
-              inputs: [files_input]
-              outputs: [elasticsearch_output, elasticsearch_output_ops]
-        include_role:
-          name: linux-system-roles.logging
+        - name: deploy config to send to elasticsearch
+          vars:
+            logging_outputs:
+              - name: elasticsearch_output
+                type: elasticsearch
+                server_host: logging-es
+                server_port: 9200
+                index_prefix: project.
+                input_type: ovirt
+                retryfailures: off
+                use_cert: true
+            logging_inputs:
+              - name: files_input
+                type: files
+                rsyslog_input_log_path: "{{ __test_inputfiles_dir }}/*.log"
+            logging_flows:
+              - name: flow_0
+                inputs: [files_input]
+                outputs: [elasticsearch_output, elasticsearch_output_ops]
+          include_role:
+            name: linux-system-roles.logging
 
-      - name: unreachable task
-        fail:
-          msg: UNREACH
+        - name: unreachable task
+          fail:
+            msg: UNREACH
 
       rescue:
         - debug:
