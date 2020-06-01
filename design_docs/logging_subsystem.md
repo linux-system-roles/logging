@@ -8,16 +8,9 @@ It is designed to satisfy following requirements.
 - The existing scenario, especially an input ovirt + output elasticsearch should not be affected by the updates.
 
 ```
-logging
+logging/
 ├── defaults
 │   └── main.yml
-├── design_docs
-│   ├── Changelogs.md
-│   ├── logging_subsystem.md
-│   ├── README.md
-│   ├── rsyslog_input_output_roles.md
-│   ├── rsyslog_inputs_outputs_flows.md
-│   └── rsyslog_templates.md
 ├── meta
 │   └── main.yml
 ├── molecule
@@ -29,14 +22,12 @@ logging
 │       ├── tests
 │       │   └── test_default.py
 │       └── yaml-lint.yml
-├── README.md
 ├── roles
 │   └── rsyslog
 │       ├── defaults
 │       │   └── main.yml
 │       ├── handlers
 │       │   └── main.yml
-│       ├── README.md
 │       ├── tasks
 │       │   ├── deploy.yml
 │       │   ├── inputs
@@ -64,12 +55,15 @@ logging
 │       │       └── remote_files
 │       │           └── main.yml
 │       ├── templates
+│       │   ├── input_basics.j2
+│       │   ├── input_remote.j2
+│       │   ├── input_remote_module.j2
 │       │   ├── input_template.j2
-│       │   ├── ovirt_input_files.j2
 │       │   ├── output_elasticsearch.j2
 │       │   ├── output_files.j2
 │       │   ├── output_forwards.j2
 │       │   ├── output_remote_files.j2
+│       │   ├── ovirt_input_template.j2
 │       │   ├── rsyslog.conf.j2
 │       │   └── rules.conf.j2
 │       └── vars
@@ -80,12 +74,8 @@ logging
 │           │   │   └── main.yml
 │           │   ├── ovirt
 │           │   │   └── main.yml
-│           │   ├── remote
-│           │   │   └── main.yml
-│           │   ├── viaq
-│           │   │   └── main.yml
-│           │   └── viaq-k8s
-│           │       └── main.yml
+│           │   └── remote
+│           │       └── main.yml
 │           ├── main.yml
 │           └── outputs
 │               ├── elasticsearch

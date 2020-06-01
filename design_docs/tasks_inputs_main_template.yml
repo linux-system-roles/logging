@@ -1,0 +1,23 @@
+---
+- name: Install/Update newinput input packages and generate configuration newinput in /etc/rsyslog.d
+  vars:
+    __rsyslog_packages: "{{ __rsyslog_newinput_input_packages }}"
+    __rsyslog_rules: "{{ __rsyslog_newinput_input_rules }}"
+  include_tasks:
+    file: deploy.yml
+
+- name: Create newinput input configuration files in /etc/rsyslog.d
+  vars:
+    __rsyslog_input_name: "{{ item.name }}"
+    __rsyslog_input_type: "{{ item.type }}"
+    __rsyslog_packages: []
+    __rsyslog_rules:
+      - name: "input-newinput-{{ item.name }}"
+        type: input
+        state: "{{ item.state | d('present') }}"
+        sections:
+          - options: "{{ lookup('template', 'input_newinput.j2') }}"
+  include_tasks:
+    file: deploy.yml
+  loop: '{{ logging_inputs }}'
+  when: item.type | d() == 'newinput'

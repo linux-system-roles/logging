@@ -11,10 +11,7 @@ __rsyslog_files_input_packages: []
 __rsyslog_files_input_rules:
   - '{{ __rsyslog_conf_imfile_modules }}'
 
-# Debops example configuration options
-# --------------------------------------------
-
-# __rsyslog_conf_local_modules
+# __rsyslog_conf_imfile_modules
 #
 # List of ``rsyslogd`` modules that enable logs from the local system to be
 # received and parsed by the ``rsyslogd`` daemon.

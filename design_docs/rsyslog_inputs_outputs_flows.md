@@ -67,34 +67,33 @@ The next `imjournal` (basics) example shows log messages read from journald by t
 **`imjournal` example**
 Log messages from journald are read by `imjournal`.  Then, they are passed to the files output by calling `files_output0` and `files_output1` ruleset.
 ```
-=> 10-input-basics-modules.conf <==
-# Ansible managed
-
-#
-# System log messages
-#
-# Log messages sent to local UNIX socket
+=> 90-input-basics-basic_input.conf <==
 module(load="imuxsock"    # provides support for local system logging (e.g. via logger command)
        SysSock.Use="off") # Turn off message reception via local log socket.
-# Read from journald
 module(load="imjournal"
        StateFile="/var/lib/rsyslog/imjournal.state"
        RateLimit.Burst="20000"
        RateLimit.Interval="600"
        PersistStateInterval="10")
-
-==> 11-input-basics-basic_input.conf <==
-# Ansible managed
-
 if
-  ($inputname == "imjournal")
+  ($inputname == "imjournal" or $inputname == "imuxsock")
   then {
-    call files_output0
+    call files_test0
 }
 if
-  ($inputname == "imjournal")
+  ($inputname == "imjournal" or $inputname == "imuxsock")
   then {
-    call files_output1
+    call files_test1
+}
+if
+  ($inputname == "imjournal" or $inputname == "imuxsock")
+  then {
+    call forwards_severity_and_facility
+}
+if
+  ($inputname == "imjournal" or $inputname == "imuxsock")
+  then {
+    call forwards_facility_only
 }
 ```
 
@@ -102,18 +101,16 @@ if
 The next `imfile` example shows log messages read from /var/log/inputdirectory/*.log by the `imfile` plugin are tagged with the input name `files_input0` then passed to the output ruleset specified by `files_output0` and `files_output1`.
 ```
 ==> 90-input-files-files_input0.conf <==
-# Ansible managed
-
-input(type="imfile" file="/var/log/inputdirectory/*.log" tag="files_input0")
+input(type="imfile" file="/var/log/inputdirectory/*.log" tag="files_input")
 if
-  ($syslogtag == "files_input0")
+  ($syslogtag == "files_input")
   then {
-    call files_output0
+    call files_test0
 }
 if
-  ($syslogtag == "files_input0")
+  ($syslogtag == "files_input")
   then {
-    call files_output1
+    call files_test1
 }
 ```
 
@@ -123,6 +120,11 @@ the inputs from `imfile` (files) are forwarded to the remote host in addition to
 
 **New style**
 ```
+logging_inputs:
+  - name: basic-input
+    type: basics
+  - name: file-input
+    type: files
 logging_outputs:
   - name: forward-output
     type: forwards
@@ -130,11 +132,6 @@ logging_outputs:
     target: remote_host_name.remote_domain_name
     port: 514
   - name: file-output
-    type: files
-logging_inputs:
-  - name: basic-input
-    type: basics
-  - name: file-input
     type: files
 logging_flows:
   - name: flow0
@@ -202,10 +199,11 @@ logging_outputs:
         journal_ratelimit_burst: 300000
 ```
 
-### logging_outputs, logging_inputs and rsyslog_use_OUTPUT_ruleset
+### logging_outputs, logging_inputs and logging_flows
 This is a typical example of the configuration.
 In logging_outputs, the to-be-configured output roles are listed.
 In logging_inputs, the to-be-configure input roles are listed.
+In logging_flows, define which inputs are related to which outputs.
 ```
 logging_outputs:
   - name: forward-output

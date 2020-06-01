@@ -1,14 +1,14 @@
 Design Doc Contents
 ===================
 
-[logging subsystem structure](logging_subsystem.md)
+## [Logging subsystem structure](logging_subsystem.md)
 
-### rsyslog
+## rsyslog
 
-[templates](rsyslog_templates.md)
+### [Flow Controls between Inputs and Outputs](rsyslog_inputs_outputs_flows.md)
 
-[input and output flows](rsyslog_inputs_outputs_flows.md)
+### [oVirt_support](rsyslog_ovirt_support.md)
 
-[ovirt_support](rsyslog_ovirt_support.md)
+### [How To Add A New Logging Input/Output](rsyslog_adding_new_input_output.md)
 
-[Changelogs](Changelogs.md)
+### [Changelogs](Changelogs.md)
