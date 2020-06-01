@@ -53,12 +53,12 @@ __rsyslog_default_pki_cert_name: "cert.pem"
 # rsyslog_weight_map
 #
 # This is a dictionary map of different configuration "types" corresponding to
-# numbers used to sort configuration files in `{{ rsyslog_config_dir }}` directory
+# numbers used to sort configuration files in `{{ logging_config_dir }}` directory
 # (configuration order is important). You can specify a type in the
 # configuration by using the ``item.type`` parameter.
 #
 # If you change the default weight map values, you will most likely need to
-# remove all files from `{{ rsyslog_config_dir }}` to reset the configuration.
+# remove all files from `{{ logging_config_dir }}` to reset the configuration.
 rsyslog_weight_map:
   'global': '05'
   'globals': '05'

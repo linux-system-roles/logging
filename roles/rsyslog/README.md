@@ -266,7 +266,7 @@ Variables in vars.yml
 Common sub-variables
 --------------------
 - `rsyslog_backup_dir`: By default, the Rsyslog backs up the pre-existing configuration files in a temp dir as tar-gz format - /tmp/rsyslog.d-XXXXXX/backup.tgz.  By setting a path to `rsyslog_backup_dir`, the path is used as the backup directory.  Note that the directory should exist and have the permission to create the backup file both in the file mode and the selinux.
-- `rsyslog_config_dir`: Directory to store configuration files.  Default to '/etc/rsyslog.d'.
+- `logging_config_dir`: Directory to store configuration files.  Default to '/etc/rsyslog.d'.
 - `rsyslog_custom_config_files`: List of custom configuration files are deployed to /etc/rsyslog.d.  The format is an array which element is the full path to each custom configuration file.  Default to none.
 - `rsyslog_in_image`: Specifies if the target host is a container and use rsyslog in the image. Default to false.
 - `rsyslog_work_dir`: Working directory.  Default to '/var/lib/rsyslog'.
@@ -288,11 +288,11 @@ Elasticsearch, Files, Remote_files, and Forwards outputs sub-variables
      cert:          Path to cert for Elasticsearch.  Default to '/etc/rsyslog.d/es-cert.pem'
      key:           Path to key for Elasticsearch.  Default to "/etc/rsyslog.d/es-key.pem"
      ca_cert_src:   Path to the CA cert file on the local host to copy to the target host.
-	                If ca_cert is specified, copied to the location. Otherwise, to rsyslog_config_dir.
+	                If ca_cert is specified, copied to the location. Otherwise, to logging_config_dir.
      cert_src:      Path to the cert file on the local host to copy to the target host.
-	                If cert is specified, copied to the location. Otherwise, to rsyslog_config_dir.
+	                If cert is specified, copied to the location. Otherwise, to logging_config_dir.
      key_src:       Path to the key file on the local host to copy to the target host.
-	                If key is specified, copied to the location. Otherwise, to rsyslog_config_dir.
+	                If key is specified, copied to the location. Otherwise, to logging_config_dir.
    ```
 - `files`: array of dictionary to specify the facility and severity filter and the full path to store logs satisfying the filter.  It takes the sub-variables - `name`, `facility`, `severity`, `exclude`, and `path`.  Unless the name and the path are given, the element is skipped.
 Files output format
@@ -332,13 +332,13 @@ Basics inputs sub-variables
 ------------------------------
 - `kernel_message`: load `imklog`.
 - `use_imuxsock`: use `imuxsock` instead of `imjournal`.
-- `rsyslog_imjournal_ratelimit_burst`: set to imjournal RateLimit.Burst. Default to 20000.
-- `rsyslog_imjournal_ratelimit_interval`: set to imjournal RateLimit.Interval. Default to 600.
-- `rsyslog_imjournal_persist_state_interval`: set to imjournal PersistStateInterval. Default to 10.
+- `journal_ratelimit_burst`: set to imjournal RateLimit.Burst. Default to 20000.
+- `journal_ratelimit_interval`: set to imjournal RateLimit.Interval. Default to 600.
+- `journal_persist_state_interval`: set to imjournal PersistStateInterval. Default to 10.
 
 Files inputs sub-variables
 ------------------------------
-- `rsyslog_input_log_path`: File name to be read by the imfile plugin. The value should be full path. Wildcard '*' is allowed in the path.  Default to `/var/log/containers/*.log`
+- `input_log_path`: File name to be read by the imfile plugin. The value should be full path. Wildcard '*' is allowed in the path.  Default to `/var/log/containers/*.log`
 
 Remote inputs sub-variables
 - `udp_port`: if the port number is given, rsyslog is configured to listen at the udp port number. Default to 514.
@@ -375,7 +375,7 @@ __rsyslog_conf_yourname:
 
   - name: some_name
     type: choose one of 'global' 'module' 'modules' 'template' 'templates' 'output' 'service' 'rule' 'rules' 'ruleset' 'input'
-    path: path this configuration file to be placed if it's not {{ rsyslog_config_dir }}.
+    path: path this configuration file to be placed if it's not {{ logging_config_dir }}.
     nocomment: 'true' if you want to avoid "# Ansible managed" to be added at the top of the file.
     sections:
 
@@ -386,20 +386,20 @@ __rsyslog_conf_yourname:
 ```
 Type is for adding prefix to the file name to manage the order of the configuration loaded.  In the viaq case, only .conf files set type 'modules', 'output', and 'template' are set.  By setting 'modules', for instance, prefix "10-" is added to the "name".  I.e., if the name is "mmk8s" and type is "modules", the file name "10-mmk8s.conf" is constructed.  'template' is mapped to '20-'; 'output' is mapped to '30-'.  The digits ensure the configuration files are loaded in the correct order.  The type and prefix mapping is defined in rsyslog_weight_map in ./roles/rsyslog/defaults/main.yml.
 
-If the deploy destination is other than {{ rsyslog_config_dir }}, the path is to be set to path.
+If the deploy destination is other than {{ logging_config_dir }}, the path is to be set to path.
 
 By default, the generated configuration file starts with a comment "# Ansible managed".  It could break some type of configurations.  For instance, "version=2" must be the first line in a rulebase file.  To avoid having "# Ansible managed", set true to nocomment.
 
 Some full path configuration may be referred from other configuration file, e.g., 20-viaq_formatting.conf refers parse_json.rulebase as follows.
 ```
-action(type="mmnormalize" ruleBase="{{ rsyslog_config_dir }}/parse_json.rulebase" variable="$!MESSAGE")
+action(type="mmnormalize" ruleBase="{{ logging_config_dir }}/parse_json.rulebase" variable="$!MESSAGE")
 ```
 In this case, prefix is not needed.  Thus, by setting exact filename, the named configuration file "parse_json.rulebase" is generated.
 ```
   - name: parse_json
     filename: parse_json.rulebase
     nocomment: true
-    path: '{{ rsyslog_config_dir }}'
+    path: '{{ logging_config_dir }}'
     sections:
 
       - options: |-

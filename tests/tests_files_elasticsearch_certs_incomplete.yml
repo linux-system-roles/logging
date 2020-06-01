@@ -39,7 +39,7 @@
             logging_inputs:
               - name: files_input
                 type: files
-                rsyslog_input_log_path: "{{ __test_inputfiles_dir }}/*.log"
+                input_log_path: "{{ __test_inputfiles_dir }}/*.log"
             logging_flows:
               - name: flow_0
                 inputs: [files_input]

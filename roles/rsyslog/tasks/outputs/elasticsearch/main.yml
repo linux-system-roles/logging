@@ -4,7 +4,7 @@
     - name: Copy local Elasticsearch ca_certs to /etc/rsyslog.d directory in Rsyslog
       copy:
         src: '{{ item.ca_cert_src }}'
-        dest: '{{ item.ca_cert | d(rsyslog_config_dir) }}'
+        dest: '{{ item.ca_cert | d(logging_config_dir) }}'
       with_items:
         - '{{ rsyslog_output_elasticsearch }}'
       when: item.ca_cert_src | d()
@@ -12,7 +12,7 @@
     - name: Copy local Elasticsearch certs to /etc/rsyslog.d directory in Rsyslog
       copy:
         src: '{{ item.cert_src }}'
-        dest: '{{ item.cert | d(rsyslog_config_dir) }}'
+        dest: '{{ item.cert | d(logging_config_dir) }}'
       with_items:
         - '{{ rsyslog_output_elasticsearch }}'
       when: item.cert_src | d()
@@ -20,7 +20,7 @@
     - name: Copy local Elasticsearch keys to /etc/rsyslog.d directory in Rsyslog
       copy:
         src: '{{ item.key_src }}'
-        dest: '{{ item.key | d(rsyslog_config_dir) }}'
+        dest: '{{ item.key | d(logging_config_dir) }}'
       with_items:
         - '{{ rsyslog_output_elasticsearch }}'
       when: item.key_src | d()
@@ -40,9 +40,9 @@
         __rsyslog_elasticsearch_temp: >-
           {{ __rsyslog_elasticsearch_temp | d([]) }} +
           {{ [ item |
-               combine( { 'ca_cert': item.ca_cert | d(rsyslog_config_dir + '/' + item.ca_cert_src | basename),
-                          'cert': item.cert | d(rsyslog_config_dir + '/' + item.cert_src | basename),
-                          'key': item.key | d(rsyslog_config_dir + '/' + item.key_src | basename) } )
+               combine( { 'ca_cert': item.ca_cert | d(logging_config_dir + '/' + item.ca_cert_src | basename),
+                          'cert': item.cert | d(logging_config_dir + '/' + item.cert_src | basename),
+                          'key': item.key | d(logging_config_dir + '/' + item.key_src | basename) } )
           ] }}
       with_items:
         - '{{ rsyslog_output_elasticsearch }}'

@@ -189,17 +189,17 @@ logging_outputs:
     logging_inputs:
       - name: basic-input0
         type: basics
-        rsyslog_imjournal_persist_state_interval: 1000
-        rsyslog_imjournal_ratelimit_interval: 10
-        rsyslog_imjournal_ratelimit_burst: 100000
+        journal_persist_state_interval: 1000
+        journal_ratelimit_interval: 10
+        journal_ratelimit_burst: 100000
   - name: file-output
     type: files
     logging_inputs:
       - name: basic-input1
         type: basics
-        rsyslog_imjournal_persist_state_interval: 3000
-        rsyslog_imjournal_ratelimit_interval: 30
-        rsyslog_imjournal_ratelimit_burst: 300000
+        journal_persist_state_interval: 3000
+        journal_ratelimit_interval: 30
+        journal_ratelimit_burst: 300000
 ```
 
 ### logging_outputs, logging_inputs and rsyslog_use_OUTPUT_ruleset
