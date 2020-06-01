@@ -28,10 +28,10 @@
         logging_inputs:
           - name: files_input0
             type: files
-            rsyslog_input_log_path: "{{ __test_inputfiles_dir0 }}/*.log"
+            input_log_path: "{{ __test_inputfiles_dir0 }}/*.log"
           - name: files_input1
             type: files
-            rsyslog_input_log_path: "{{ __test_inputfiles_dir1 }}/*.log"
+            input_log_path: "{{ __test_inputfiles_dir1 }}/*.log"
         logging_flows:
           - name: flow_0
             inputs: [files_input0, files_input1]

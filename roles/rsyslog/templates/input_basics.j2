@@ -10,8 +10,8 @@ module(load="imuxsock"    # provides support for local system logging (e.g. via 
        SysSock.Use="off") # Turn off message reception via local log socket.
 module(load="imjournal"
        StateFile="{{ rsyslog_work_dir }}/imjournal.state"
-       RateLimit.Burst="{{ input.rsyslog_imjournal_ratelimit_burst | d(20000) }}"
-       RateLimit.Interval="{{ input.rsyslog_imjournal_ratelimit_interval | d(600) }}"
-       PersistStateInterval="{{ input.rsyslog_imjournal_persist_state_interval | d(10) }}")
+       RateLimit.Burst="{{ input.journal_ratelimit_burst | d(20000) }}"
+       RateLimit.Interval="{{ input.journal_ratelimit_interval | d(600) }}"
+       PersistStateInterval="{{ input.journal_persist_state_interval | d(10) }}")
 {% endif %}
 {{ lookup('template', 'input_template.j2') }}

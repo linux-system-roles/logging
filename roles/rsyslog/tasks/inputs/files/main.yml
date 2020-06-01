@@ -18,7 +18,7 @@
         state: "{{ item.state | d('present') }}"
         sections:
           - options: |-
-              input(type="imfile" file="{{ item.rsyslog_input_log_path | d(rsyslog_input_log_path) }}" tag="{{ item.name }}")
+              input(type="imfile" file="{{ item.input_log_path | d(rsyslog_input_log_path) }}" tag="{{ item.name }}")
               {{ lookup('template', 'input_template.j2') }}
   include_tasks:
     file: deploy.yml

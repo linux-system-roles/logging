@@ -242,9 +242,9 @@ Variables in vars.yml
       - `ca_cert`: Path to CA cert for Elasticsearch.  Default to '/etc/rsyslog.d/es-ca.crt'
       - `cert`: Path to cert for Elasticsearch.  Default to '/etc/rsyslog.d/es-cert.pem'
       - `key`: Path to key for Elasticsearch.  Default to "/etc/rsyslog.d/es-key.pem"
-      - `ca_cert_src`: Path to the CA cert file on the local host to copy to the target host. If `ca_cert` is specified, copied to the location. Otherwise, to rsyslog_config_dir.
-      - `cert_src`: Path to the cert file on the local host to copy to the target host. If `cert` is specified, copied to the location. Otherwise, to rsyslog_config_dir.
-      - `key_src`: Path to the key file on the local host to copy to the target host. If `key` is specified, copied to the location. Otherwise, to rsyslog_config_dir.
+      - `ca_cert_src`: Path to the CA cert file on the local host to copy to the target host. If `ca_cert` is specified, copied to the location. Otherwise, to logging_config_dir.
+      - `cert_src`: Path to the cert file on the local host to copy to the target host. If `cert` is specified, copied to the location. Otherwise, to logging_config_dir.
+      - `key_src`: Path to the key file on the local host to copy to the target host. If `key` is specified, copied to the location. Otherwise, to logging_config_dir.
    -  ** `type: files`**
       - `facility`: facility; default to `*`
       - `severity`: severity; default to `*`
@@ -278,11 +278,11 @@ Variables in vars.yml
    -  ** `type: basics`**
       - `kernel_message`: load `imklog`. Default to `false`.
       - `use_imuxsock`: use `imuxsock` instead of `imjournal`. Default to `false`.
-      - `rsyslog_imjournal_ratelimit_burst`: set to imjournal RateLimit.Burst. Default to 20000.
-      - `rsyslog_imjournal_ratelimit_interval`: set to imjournal RateLimit.Interval. Default to 600.
-      - `rsyslog_imjournal_persist_state_interval`: set to imjournal PersistStateInterval. Default to 10.
+      - `journal_ratelimit_burst`: set to imjournal RateLimit.Burst. Default to 20000.
+      - `journal_ratelimit_interval`: set to imjournal RateLimit.Interval. Default to 600.
+      - `journal_persist_state_interval`: set to imjournal PersistStateInterval. Default to 10.
    -  ** `type: files`**
-      - `rsyslog_input_log_path`: File name to be read by the imfile plugin. The value should be full path. Wildcard '*' is allowed in the path.  Default to `/var/log/containers/*.log`.
+      - `input_log_path`: File name to be read by the imfile plugin. The value should be full path. Wildcard '*' is allowed in the path.  Default to `/var/log/containers/*.log`.
    -  ** `type: remote_files`**
       - `udp_port`: if the port number is given, rsyslog is configured to listen at the udp port number. Default to 514.
       - `tcp_port`: if the port number is given, rsyslog is configured to listen at the tcp port number. Default to 514.

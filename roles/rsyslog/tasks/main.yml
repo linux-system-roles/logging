@@ -46,7 +46,7 @@
     - name: Create the config directory if it does not exist
       file:
         state: directory
-        path: '{{ rsyslog_config_dir }}'
+        path: '{{ logging_config_dir }}'
 
     # Creating a work directory
     - name: Create a work directory
@@ -68,9 +68,9 @@
 
     # Back up the pre-existing rsyslog config files in the backup dir,
     # then removing the files/dirs in rsyslog.d.
-    - name: Archive the contents of {{ rsyslog_config_dir }} to the backup dir
+    - name: Archive the contents of {{ logging_config_dir }} to the backup dir
       archive:
-        path: ["{{ rsyslog_config_dir }}", /etc/rsyslog.conf]
+        path: ["{{ logging_config_dir }}", /etc/rsyslog.conf]
         dest: "{{ rsyslog_backup_dir }}/backup.tgz"
         remove: '{{ true if __rsyslog_purge_original_conf | bool else false }}'
       changed_when: false
@@ -107,7 +107,7 @@
       template:
         src: 'rules.conf.j2'
         dest: |-
-          {{ rsyslog_config_dir }}/{{ inner_item.filename | d((inner_item.weight if inner_item.weight | d()
+          {{ logging_config_dir }}/{{ inner_item.filename | d((inner_item.weight if inner_item.weight | d()
           else rsyslog_weight_map[inner_item.type | d("rules")]) + "-" + (inner_item.name | d("rules")) +
           "." + (inner_item.suffix | d("conf"))) }}
         owner: '{{ inner_item.owner | d("root") }}'
@@ -127,7 +127,7 @@
     - name: Remove common config files in rsyslog.d
       file:
         path: |-
-          {{ rsyslog_config_dir }}/{{ inner_item.filename | d((inner_item.weight if inner_item.weight | d() else
+          {{ logging_config_dir }}/{{ inner_item.filename | d((inner_item.weight if inner_item.weight | d() else
           rsyslog_weight_map[inner_item.type | d("rules")]) + "-" + (inner_item.name | d("rules")) + "." +
           (inner_item.suffix | d("conf"))) }}
         state: absent
@@ -149,7 +149,7 @@
     - name: Copy custom config files if they are specified in rsyslog_custom_config_files variable array.
       copy:
         src: '{{ item }}'
-        dest: '{{ rsyslog_config_dir }}'
+        dest: '{{ logging_config_dir }}'
         owner: '{{ item.owner | d("root") }}'
         group: '{{ item.group | d("root") }}'
         mode: '{{ item.mode | d("0644") }}'

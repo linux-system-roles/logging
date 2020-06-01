@@ -7,11 +7,6 @@
 # true if the target host is a container and use rsyslog in the image.
 rsyslog_in_image: false
 
-# rsyslog_config_dir
-#
-# Configuration directory
-rsyslog_config_dir: '/etc/rsyslog.d'
-
 # rsyslog_work_dir
 #
 # Rsyslog work directory
