@@ -1,4 +1,4 @@
-ruleset(name="{{ es_item.name }}") {
+ruleset(name="{{ item.name }}") {
     if (strlen($.omes) > 0) and (strlen($.omes!status) > 0) then {
         # retry case
         if ($.omes!status == 200) or ($.omes!status == 201) or (($.omes!status == 409) and ($.omes!writeoperation == "create")) then {
@@ -29,37 +29,37 @@ ruleset(name="{{ es_item.name }}") {
     } else {
         set $.index_name = exec_template("prefix_index_template");
     }
-    if ($.input_type == "{{ es_item.input_type | d('ovirt') }}") and ($.index_prefix startswith "{{ es_item.index_prefix }}") then {
+    if ($.input_type == "{{ item.input_type | d('ovirt') }}") and ($.index_prefix startswith "{{ item.index_prefix }}") then {
         action(
             type="omelasticsearch"
-            name="{{ es_item.name | default('viaq-elasticsearch') }}"
-            server="{{ es_item.server_host | d('logging-es') }}"
-            serverport="{{ es_item.server_port | d(9200) | int }}"
-            template="{{ es_item.template | d("es_template") }}"
-            searchIndex="{{ es_item.searchIndex | d("index_template") }}"
-            dynSearchIndex="{{ es_item.dynSearchIndex | d("on") }}"
-            searchType="{{ es_item.searchType | d("com.redhat.viaq.common") }}"
-            bulkmode="{{ es_item.bulkmode | d("on") }}"
-            writeoperation="{{ es_item.writeoperation | d("create") }}"
-            bulkid="{{ es_item.bulkid | d("id_template") }}"
-            dynbulkid="{{ es_item.dynbulkid | d('on') }}"
-            allowUnsignedCerts="{{ es_item.allowUnsignedCerts | d("off") }}"
-{% if not es_item.retryfailures | d(true) %}
-{%   if es_item.retryruleset | d() | length > 0 %}
+            name="{{ item.name | default('viaq-elasticsearch') }}"
+            server="{{ item.server_host | d('logging-es') }}"
+            serverport="{{ item.server_port | d(9200) | int }}"
+            template="{{ item.template | d("es_template") }}"
+            searchIndex="{{ item.searchIndex | d("index_template") }}"
+            dynSearchIndex="{{ item.dynSearchIndex | d("on") }}"
+            searchType="{{ item.searchType | d("com.redhat.viaq.common") }}"
+            bulkmode="{{ item.bulkmode | d("on") }}"
+            writeoperation="{{ item.writeoperation | d("create") }}"
+            bulkid="{{ item.bulkid | d("id_template") }}"
+            dynbulkid="{{ item.dynbulkid | d('on') }}"
+            allowUnsignedCerts="{{ item.allowUnsignedCerts | d("off") }}"
+{% if not item.retryfailures | d(true) %}
+{%   if item.retryruleset | d() | length > 0 %}
             retryfailures="on"
-            retryruleset="{{ es_item.retryruleset }}"
+            retryruleset="{{ item.retryruleset }}"
 {%   else %}
             retryfailures="on"
-            retryruleset="{{ es_item.name }}"
+            retryruleset="{{ item.name }}"
 {%   endif %}
 {% else %}
             retryfailures="off"
 {% endif %}
-            usehttps="{{ es_item.usehttps | default("on") }}"
-{% if es_item.use_cert | default(true) %}
-            tls.cacert="{{ es_item.ca_cert | default('/etc/rsyslog.d/es-ca.crt') }}"
-            tls.mycert="{{ es_item.cert | default('/etc/rsyslog.d/es-cert.pem') }}"
-            tls.myprivkey="{{ es_item.key | default('/etc/rsyslog.d/es-key.pem') }}"
+            usehttps="{{ item.usehttps | default("on") }}"
+{% if item.use_cert | default(true) %}
+            tls.cacert="{{ item.ca_cert | default('/etc/rsyslog.d/es-ca.crt') }}"
+            tls.mycert="{{ item.cert | default('/etc/rsyslog.d/es-cert.pem') }}"
+            tls.myprivkey="{{ item.key | default('/etc/rsyslog.d/es-key.pem') }}"
 {% endif %}
         )
     }

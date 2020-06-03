@@ -1,24 +1,24 @@
-{% if remote_files_item.remote_log_path | d() or remote_files_item.remote_sub_path | d() %}
-{%   if remote_files_item.remote_log_path | d() %}
-{%     set __remote_log_path = remote_files_item.remote_log_path %}
+{% if item.remote_log_path | d() or item.remote_sub_path | d() %}
+{%   if item.remote_log_path | d() %}
+{%     set __remote_log_path = item.remote_log_path %}
 {%   else %}
-{%     set __remote_log_path = __rsyslog_system_log_dir ~ remote_files_item.remote_sub_path %}
+{%     set __remote_log_path = __rsyslog_system_log_dir ~ item.remote_sub_path %}
 {%   endif %}
-{%   if remote_files_item.comment | d() %}
-# {{ remote_files_item.comment }}
+{%   if item.comment | d() %}
+# {{ item.comment }}
 {%   endif %}
 template(
-  name="{{ remote_files_item.name }}_template"
+  name="{{ item.name }}_template"
   type="string"
   string="{{ __remote_log_path }}"
 )
-ruleset(name="{{ remote_files_item.name }}") {
+ruleset(name="{{ item.name }}") {
     # Store remote logs in separate logfiles
-{%   if forwards_item.exclude | d([]) %}
-    {{ remote_files_item.facility | d('*') }}.{{ remote_files_item.severity | d('*') }};{{ remote_files_item.exclude | join(';') }} action(name="{{ remote_files_item.name }}" type="omfile" DynaFile="{{ remote_files_item.name }}_template")
-{% else %}
-    {{ remote_files_item.facility | d('*') }}.{{ remote_files_item.severity | d('*') }} action(name="{{ remote_files_item.name }}" type="omfile" DynaFile="{{ remote_files_item.name }}_template")
-{% endif %}
+{%   if item.exclude | d([]) %}
+    {{ item.facility | d('*') }}.{{ item.severity | d('*') }};{{ item.exclude | join(';') }} action(name="{{ item.name }}" type="omfile" DynaFile="{{ item.name }}_template")
+{%   else %}
+    {{ item.facility | d('*') }}.{{ item.severity | d('*') }} action(name="{{ item.name }}" type="omfile" DynaFile="{{ item.name }}_template")
+{%   endif %}
 }
 {% else %}
 {%   set __remote_log_path = __rsyslog_system_log_dir ~ '/remote' %}
@@ -50,7 +50,7 @@ template(
   string="{{ __remote_log_path }}/mail/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
 )
 
-ruleset(name="{{ remote_files_item.name }}") {
+ruleset(name="{{ item.name }}") {
     # Store remote logs in separate logfiles
     authpriv.*   action(name="remote_authpriv_host_log" type="omfile" DynaFile="RemoteHostAuthLog")
     *.info;mail.none;authpriv.none;cron.none action(name="remote_message" type="omfile" DynaFile="RemoteMessage")

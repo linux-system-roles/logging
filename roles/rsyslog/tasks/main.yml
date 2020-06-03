@@ -107,35 +107,39 @@
       template:
         src: 'rules.conf.j2'
         dest: |-
-          {{ rsyslog_config_dir }}/{{ item.filename | d((item.weight if item.weight | d()
-          else rsyslog_weight_map[item.type | d("rules")]) + "-" + (item.name | d("rules")) +
-          "." + (item.suffix | d("conf"))) }}
-        owner: '{{ item.owner | d("root") }}'
-        group: '{{ item.group | d("root") }}'
-        mode: '{{ item.mode | d("0644") }}'
+          {{ rsyslog_config_dir }}/{{ inner_item.filename | d((inner_item.weight if inner_item.weight | d()
+          else rsyslog_weight_map[inner_item.type | d("rules")]) + "-" + (inner_item.name | d("rules")) +
+          "." + (inner_item.suffix | d("conf"))) }}
+        owner: '{{ inner_item.owner | d("root") }}'
+        group: '{{ inner_item.group | d("root") }}'
+        mode: '{{ inner_item.mode | d("0644") }}'
       loop: '{{ __rsyslog_common_rules | flatten }}'
+      loop_control:
+        loop_var: inner_item
       when:
         - __rsyslog_enabled | bool
         - logging_inputs | d([])
-        - item.filename | d() or item.name | d()
-        - item.state is undefined or item.state != 'absent'
-        - item.options | d() or item.sections | d()
+        - inner_item.filename | d() or inner_item.name | d()
+        - inner_item.state is undefined or inner_item.state != 'absent'
+        - inner_item.options | d() or inner_item.sections | d()
       notify: restart rsyslogd
 
     - name: Remove common config files in rsyslog.d
       file:
         path: |-
-          {{ rsyslog_config_dir }}/{{ item.filename | d((item.weight if item.weight | d() else
-          rsyslog_weight_map[item.type | d("rules")]) + "-" + (item.name | d("rules")) + "." +
-          (item.suffix | d("conf"))) }}
+          {{ rsyslog_config_dir }}/{{ inner_item.filename | d((inner_item.weight if inner_item.weight | d() else
+          rsyslog_weight_map[inner_item.type | d("rules")]) + "-" + (inner_item.name | d("rules")) + "." +
+          (inner_item.suffix | d("conf"))) }}
         state: absent
       loop: '{{ __rsyslog_common_rules | flatten }}'
+      loop_control:
+        loop_var: inner_item
       when:
         - not __rsyslog_enabled | bool
         - logging_inputs | d([])
-        - item.filename | d() or item.name | d()
-        - item.options | d() or item.sections | d()
-        - item.state is defined and item.state == 'absent'
+        - inner_item.filename | d() or inner_item.name | d()
+        - inner_item.options | d() or inner_item.sections | d()
+        - inner_item.state is defined and inner_item.state == 'absent'
       notify: restart rsyslogd
 
     # How to set rsyslog_custom_config_files:

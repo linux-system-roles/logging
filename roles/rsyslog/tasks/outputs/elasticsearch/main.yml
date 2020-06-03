@@ -78,14 +78,12 @@
   vars:
     __rsyslog_packages: []
     __rsyslog_rules:
-      - name: "output-elasticsearch-{{ es_item.name }}"
+      - name: "output-elasticsearch-{{ item.name }}"
         type: "output"
         weight: "31"
-        state: "{{ es_item.state | d('present') }}"
+        state: "{{ item.state | d('present') }}"
         sections:
           - options: "{{ lookup('template', 'output_elasticsearch.j2') }}"
   include_tasks:
     file: deploy.yml
   loop: '{{ rsyslog_output_elasticsearch }}'
-  loop_control:
-    loop_var: es_item

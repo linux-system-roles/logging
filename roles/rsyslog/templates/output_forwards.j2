@@ -1,7 +1,7 @@
-ruleset(name="{{ forwards_item.name }}") {
-{%   if forwards_item.exclude | d([]) %}
-    {{ forwards_item.facility | d('*') }}.{{ forwards_item.severity | d('*') }};{{ forwards_item.exclude | join(';') }} action(name="{{ forwards_item.name }}" type="omfwd" Target="{{ forwards_item.target }}" Port="{{ forwards_item.port | d(514) }}" Protocol="{{ forwards_item.protocol | d('tcp') }}")
+ruleset(name="{{ item.name }}") {
+{%   if item.exclude | d([]) %}
+    {{ item.facility | d('*') }}.{{ item.severity | d('*') }};{{ item.exclude | join(';') }} action(name="{{ item.name }}" type="omfwd" Target="{{ item.target }}" Port="{{ item.port | d(514) }}" Protocol="{{ item.protocol | d('tcp') }}")
 {% else %}
-    {{ forwards_item.facility | d('*') }}.{{ forwards_item.severity | d('*') }} action(name="{{ forwards_item.name }}" type="omfwd" Target="{{ forwards_item.target }}" Port="{{ forwards_item.port | d(514) }}" Protocol="{{ forwards_item.protocol | d('tcp') }}")
+    {{ item.facility | d('*') }}.{{ item.severity | d('*') }} action(name="{{ item.name }}" type="omfwd" Target="{{ item.target }}" Port="{{ item.port | d(514) }}" Protocol="{{ item.protocol | d('tcp') }}")
 {% endif %}
 }

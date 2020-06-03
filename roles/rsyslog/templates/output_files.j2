@@ -1,13 +1,13 @@
-{% if files_item.path is defined %}
-ruleset(name="{{ files_item.name }}") {
-{%   if files_item.exclude | d([]) %}
-    {{ files_item.facility | d('*') }}.{{ files_item.severity | d('*') }};{{ files_item.exclude | join(';') }} {{ files_item.path }}
+{% if item.path is defined %}
+ruleset(name="{{ item.name }}") {
+{%   if item.exclude | d([]) %}
+    {{ item.facility | d('*') }}.{{ item.severity | d('*') }};{{ item.exclude | join(';') }} {{ item.path }}
 {%   else %}
-    {{ files_item.facility | d('*') }}.{{ files_item.severity | d('*') }} {{ files_item.path }}
+    {{ item.facility | d('*') }}.{{ item.severity | d('*') }} {{ item.path }}
 {%   endif %}
 }
 {% else %}
-ruleset(name="{{ files_item.name }}") {
+ruleset(name="{{ item.name }}") {
     # Log all kernel messages to the console.
     # Logging much else clutters up the screen.
     kern.*                                                 /dev/console
