@@ -242,9 +242,9 @@ Variables in vars.yml
       - `ca_cert`: Path to CA cert for Elasticsearch.  Default to '/etc/rsyslog.d/es-ca.crt'
       - `cert`: Path to cert for Elasticsearch.  Default to '/etc/rsyslog.d/es-cert.pem'
       - `key`: Path to key for Elasticsearch.  Default to "/etc/rsyslog.d/es-key.pem"
-      - `ca_cert_src`: Path to the CA cert file on the local host to copy to the target host. If `ca_cert` is specified, copied to the location. Otherwise, to logging_config_dir.
-      - `cert_src`: Path to the cert file on the local host to copy to the target host. If `cert` is specified, copied to the location. Otherwise, to logging_config_dir.
-      - `key_src`: Path to the key file on the local host to copy to the target host. If `key` is specified, copied to the location. Otherwise, to logging_config_dir.
+      - `ca_cert_src`: Path to the CA cert file on the local host to copy to the target host. If `ca_cert` is specified, copied to the location. Otherwise, to /etc/rsyslog.d.
+      - `cert_src`: Path to the cert file on the local host to copy to the target host. If `cert` is specified, copied to the location. Otherwise, to /etc/rsyslog.d.
+      - `key_src`: Path to the key file on the local host to copy to the target host. If `key` is specified, copied to the location. Otherwise, to /etc/rsyslog.d.
    -  ** `type: files`**
       - `facility`: facility; default to `*`
       - `severity`: severity; default to `*`
