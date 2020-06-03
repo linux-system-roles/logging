@@ -1,4 +1,4 @@
-{% if not item.nocomment | d(false) %}
+{% if not inner_item.nocomment | d(false) %}
 # {{ ansible_managed }}
 {% endif %}
 {% macro print_config(element) %}
@@ -25,11 +25,11 @@
 {%     endfor %}
 {%   endif %}
 {% endmacro %}
-{% if item.sections | d() %}
-{%   for section in item.sections %}
+{% if inner_item.sections | d() %}
+{%   for section in inner_item.sections %}
 {{ print_config(section) -}}
 {%   endfor %}
 {% else %}
-{{ print_config(item) -}}
+{{ print_config(inner_item) -}}
 {% endif %}
 

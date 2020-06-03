@@ -9,21 +9,20 @@
 
 - name: Create basics input configuration files in /etc/rsyslog.d
   vars:
-    __rsyslog_input_name: "{{ basics_item.name }}"
-    __rsyslog_input_type: "{{ basics_item.type }}"
+    __rsyslog_input_name: "{{ item.name }}"
+    __rsyslog_input_type: "{{ item.type }}"
     __rsyslog_packages: []
     __rsyslog_rules:
-      - name: "input-basics-{{ basics_item.name }}"
+      - name: "input-basics-{{ item.name }}"
         type: input
-        state: "{{ basics_item.state | d('present') }}"
+        state: "{{ item.state | d('present') }}"
         sections:
           - options: "{{ lookup('template', __rsyslog_input_basics) }}"
   include_tasks:
     file: deploy.yml
   loop: '{{ logging_inputs }}'
   loop_control:
-    loop_var: basics_item
     extended: yes
   when:
-    - basics_item.type | d() == 'basics'
+    - item.type | d() == 'basics'
     - ansible_loop.first

@@ -11,30 +11,26 @@
   vars:
     __rsyslog_packages: []
     __rsyslog_rules:
-      - name: "input-ovirt-{{ ovirt_item.name }}"
+      - name: "input-ovirt-{{ item.name }}"
         type: input
         sections:
           - options: "{{ lookup('template', 'input_ovirt.j2') }}"
-        state: "{{ ovirt_item.state | d('present') }}"
+        state: "{{ item.state | d('present') }}"
   include_tasks:
     file: deploy.yml
   loop: '{{ logging_inputs }}'
-  loop_control:
-    loop_var: ovirt_item
   when:
-    - ovirt_item.type | d('') == 'ovirt'
-    - ovirt_item.subtype | d('') in ['collectd','engine','vdsm']
+    - item.type | d('') == 'ovirt'
+    - item.subtype | d('') in ['collectd','engine','vdsm']
 
 - name: Allow rsyslog to listen on collectd port
   seport:
-    ports: "{{ ovirt_item.rsyslog_read_collectd_port | d(44514) }}"
+    ports: "{{ item.rsyslog_read_collectd_port | d(44514) }}"
     proto: tcp
     setype: syslogd_port_t
     state: present
   loop: '{{ logging_inputs }}'
-  loop_control:
-    loop_var: ovirt_item
   when:
-    - ovirt_item.type | d() == 'ovirt'
+    - item.type | d() == 'ovirt'
     - ansible_selinux.mode in ["enforcing", "permissive"]
   notify: restart rsyslogd

@@ -1,11 +1,11 @@
-{% set __rsyslog_ovirt_subtype = ovirt_item.subtype | d() %}
-{% set __ovirt_env_name = ovirt_item.ovirt_env_name | d('engine') %}
-{% set __ovirt_env_uuid = ovirt_item.ovirt_env_uuid | d() %}
+{% set __rsyslog_ovirt_subtype = item.subtype | d() %}
+{% set __ovirt_env_name = item.ovirt_env_name | d('engine') %}
+{% set __ovirt_env_uuid = item.ovirt_env_uuid | d() %}
 {% if __rsyslog_ovirt_subtype == "collectd" %}
-{%   set __rsyslog_collectd_port = ovirt_item.ovirt_collectd_port | d(44514) %}
-{%   set __rsyslog_elasticsearch_index_prefix = ovirt_item.ovirt_elasticsearch_index_prefix | d('project.ovirt-metrics') %}
-input (name="{{ ovirt_item.name }}" type="imtcp" port="{{ __rsyslog_collectd_port }}")
-if $inputname == "{{ ovirt_item.name }}" then {
+{%   set __rsyslog_collectd_port = item.ovirt_collectd_port | d(44514) %}
+{%   set __rsyslog_elasticsearch_index_prefix = item.ovirt_elasticsearch_index_prefix | d('project.ovirt-metrics') %}
+input (name="{{ item.name }}" type="imtcp" port="{{ __rsyslog_collectd_port }}")
+if $inputname == "{{ item.name }}" then {
     set $!original_raw_message = $msg;
     action(name="collectd_mmjsonparse" type="mmjsonparse" cookie="") # parse entire message as json
     set $!@timestamp = exec_template('cnvt_to_viaq_timestamp');
@@ -23,27 +23,27 @@ if $inputname == "{{ ovirt_item.name }}" then {
     set $.input_type = "ovirt";
 }
 {% else %}
-{%   set __rsyslog_elasticsearch_index_prefix = ovirt_item.ovirt_elasticsearch_index_prefix | d('project.ovirt-logs') %}
-{%   set __ovirt_vds_cluster_name = ovirt_item.ovirt_vds_cluster_name | d('') %}
-{%   set __ovirt_engine_fqdn = ovirt_item.ovirt_engine_fqdn | d('') %}
+{%   set __rsyslog_elasticsearch_index_prefix = item.ovirt_elasticsearch_index_prefix | d('project.ovirt-logs') %}
+{%   set __ovirt_vds_cluster_name = item.ovirt_vds_cluster_name | d('') %}
+{%   set __ovirt_engine_fqdn = item.ovirt_engine_fqdn | d('') %}
 {%   if __rsyslog_ovirt_subtype == "engine" %}
-{%     set __ovirt_input_file = ovirt_item.ovirt_input_file | d('/var/log/ovirt-engine/engine.log') %}
-input(type="imfile" file="{{ __ovirt_input_file }}" tag="{{ ovirt_item.name }}"
+{%     set __ovirt_input_file = item.ovirt_input_file | d('/var/log/ovirt-engine/engine.log') %}
+input(type="imfile" file="{{ __ovirt_input_file }}" tag="{{ item.name }}"
       reopenOnTruncate="on" startmsg.regex="^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}")
-if $syslogtag == "{{ ovirt_item.name }}" then {
+if $syslogtag == "{{ item.name }}" then {
   action(name="ovirt-engine_mmnormalize" type="mmnormalize"
          rulebase="{{ rsyslog_config_dir }}/ovirt_engine.rulebase" path="$.ovirt")
 }
 {%   elif __rsyslog_ovirt_subtype == "vdsm" %}
-{%     set __ovirt_input_file = ovirt_item.ovirt_input_file | d('/var/log/vdsm/vdsm.log') %}
-input(type="imfile" file="{{ __ovirt_input_file }}" tag="{{ ovirt_item.name }}"
+{%     set __ovirt_input_file = item.ovirt_input_file | d('/var/log/vdsm/vdsm.log') %}
+input(type="imfile" file="{{ __ovirt_input_file }}" tag="{{ item.name }}"
       reopenOnTruncate="on" startmsg.regex="^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}")
-if $syslogtag == "{{ ovirt_item.name }}" then {
+if $syslogtag == "{{ item.name }}" then {
   action(name="ovirt-vdsm_mmnormalize" type="mmnormalize"
          rulebase="{{ rsyslog_config_dir }}/ovirt_vdsm.rulebase" path="$.ovirt")
 }
 {%   endif %}
-if $syslogtag == "{{ ovirt_item.name }}" then {
+if $syslogtag == "{{ item.name }}" then {
 {%   if __ovirt_env_uuid is defined %}
   set $.index_prefix = "{{ __rsyslog_elasticsearch_index_prefix }}" & "-" & "{{ __ovirt_env_name }}" & "." & "{{ __ovirt_env_uuid }}" & ".";
 {%   else %}
@@ -71,9 +71,9 @@ if $syslogtag == "{{ ovirt_item.name }}" then {
 {% endif %}
 {% set outdict = {} %}
 {% for flow in logging_flows %}
-{%   if flow.inputs | intersect([ ovirt_item.name ]) %}
+{%   if flow.inputs | intersect([ item.name ]) %}
 {%     for oname in flow.outputs %}
-{%       set _ = outdict.__setitem__(oname, outdict.get(oname,[])|union([ ovirt_item.name ])) %}
+{%       set _ = outdict.__setitem__(oname, outdict.get(oname,[])|union([ item.name ])) %}
 {%     endfor %}
 {%   endif %}
 {% endfor %}
@@ -81,14 +81,14 @@ if $syslogtag == "{{ ovirt_item.name }}" then {
 {%   if outdict[output.name] | d(false) %}
 if
 {%     for inputname in outdict[output.name] %}
-{%       if inputname == ovirt_item.name %}
+{%       if inputname == item.name %}
 {%         if not loop.first %}
   or
 {%         endif %}
 {%         if __rsyslog_ovirt_subtype == "collectd" %}
-  ($inputname == "{{ ovirt_item.name }}")
+  ($inputname == "{{ item.name }}")
 {%         elif __rsyslog_ovirt_subtype == "engine" or __rsyslog_ovirt_subtype == "vdsm" %}
-  ($syslogtag == "{{ ovirt_item.name }}")
+  ($syslogtag == "{{ item.name }}")
 {%         endif %}
 {%       endif %}
 {%     endfor %}

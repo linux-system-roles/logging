@@ -13,19 +13,17 @@
 
 - name: Create basics input configuration files in /etc/rsyslog.d
   vars:
-    __rsyslog_input_name: "{{ remote_item.name }}"
-    __rsyslog_input_type: "{{ remote_item.type }}"
+    __rsyslog_input_name: "{{ item.name }}"
+    __rsyslog_input_type: "{{ item.type }}"
     __rsyslog_packages: []
     __rsyslog_rules:
-      - name: "input-remote-{{ remote_item.name }}"
+      - name: "input-remote-{{ item.name }}"
         type: input
         weight: "11"
-        state: "{{ remote_item.state | d('present') }}"
+        state: "{{ item.state | d('present') }}"
         sections:
           - options: "{{ lookup('template', 'input_remote.j2') }}"
   include_tasks:
     file: deploy.yml
   loop: '{{ logging_inputs }}'
-  loop_control:
-    loop_var: remote_item
-  when: remote_item.type | d() == 'remote'
+  when: item.type | d() == 'remote'
