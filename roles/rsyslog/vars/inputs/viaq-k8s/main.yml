@@ -60,12 +60,12 @@ __rsyslog_conf_viaq_mmk8s_input:
                   if $msg startswith "{" then {
                       action(name="viaq-k8s_mmjsonparse" type="mmjsonparse" cookie="") # parse entire message as json
                   } else {
-                      action(name="viaq-k8s_mmnormalize" type="mmnormalize" rulebase="{{ logging_config_dir }}/crio.rulebase")
+                      action(name="viaq-k8s_mmnormalize" type="mmnormalize" rulebase="{{ __rsyslog_config_dir }}/crio.rulebase")
                   }
               }
               action(name="viaq-k8s_mmkubernetes" type="mmkubernetes"
-                 filenamerulebase="{{ logging_config_dir }}/k8s_filename.rulebase"
-                 containerrulebase="{{ logging_config_dir }}/k8s_container_name.rulebase"
+                 filenamerulebase="{{ __rsyslog_config_dir }}/k8s_filename.rulebase"
+                 containerrulebase="{{ __rsyslog_config_dir }}/k8s_container_name.rulebase"
                  tls.cacert="{{ logging_mmk8s_ca_cert }}"
                  tokenfile="{{ logging_mmk8s_token }}" annotation_match=["."])
           }

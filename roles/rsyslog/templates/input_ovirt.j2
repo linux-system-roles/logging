@@ -32,7 +32,7 @@ input(type="imfile" file="{{ __ovirt_input_file }}" tag="{{ item.name }}"
       reopenOnTruncate="on" startmsg.regex="^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}")
 if $syslogtag == "{{ item.name }}" then {
   action(name="ovirt-engine_mmnormalize" type="mmnormalize"
-         rulebase="{{ logging_config_dir }}/ovirt_engine.rulebase" path="$.ovirt")
+         rulebase="{{ __rsyslog_config_dir }}/ovirt_engine.rulebase" path="$.ovirt")
 }
 {%   elif __rsyslog_ovirt_subtype == "vdsm" %}
 {%     set __ovirt_input_file = item.ovirt_input_file | d('/var/log/vdsm/vdsm.log') %}
@@ -40,7 +40,7 @@ input(type="imfile" file="{{ __ovirt_input_file }}" tag="{{ item.name }}"
       reopenOnTruncate="on" startmsg.regex="^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}")
 if $syslogtag == "{{ item.name }}" then {
   action(name="ovirt-vdsm_mmnormalize" type="mmnormalize"
-         rulebase="{{ logging_config_dir }}/ovirt_vdsm.rulebase" path="$.ovirt")
+         rulebase="{{ __rsyslog_config_dir }}/ovirt_vdsm.rulebase" path="$.ovirt")
 }
 {%   endif %}
 if $syslogtag == "{{ item.name }}" then {

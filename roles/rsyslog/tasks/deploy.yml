@@ -11,7 +11,7 @@
   template:
     src: 'rules.conf.j2'
     dest: >-
-      {{ inner_item.path | d(logging_config_dir) }}/{{ inner_item.filename | d((inner_item.weight
+      {{ inner_item.path | d(__rsyslog_config_dir) }}/{{ inner_item.filename | d((inner_item.weight
       if inner_item.weight | d() else rsyslog_weight_map[inner_item.type | d("rules")]) +
       "-" + (inner_item.name | d("rules")) + "." + (inner_item.suffix | d("conf"))) }}
     owner: '{{ inner_item.owner | d("root") }}'
@@ -29,7 +29,7 @@
 - name: Remove role config files from subdir
   file:
     path: >-
-      {{ inner_item.path | d(rsyslog_config_dir) }}/{{ inner_item.filename | d((inner_item.weight
+      {{ inner_item.path | d(__rsyslog_config_dir) }}/{{ inner_item.filename | d((inner_item.weight
       if inner_item.weight | d() else rsyslog_weight_map[inner_item.type | d("rules")]) +
       "-" + (inner_item.name | d("rules")) + "." + (inner_item.suffix | d("conf"))) }}
     state: absent

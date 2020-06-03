@@ -17,9 +17,6 @@ logging_flows: []
 # If logging_purge_confs is set to true, existing config files will be purged.
 logging_purge_confs: false
 
-# Variable to specify the directory to put the config files.
-logging_config_dir: /etc/rsyslog.d
-
 # Variable to specify the directory to put the local output files to store logs.
 logging_system_log_dir: /var/log
 

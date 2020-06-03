@@ -48,8 +48,8 @@ __rsyslog_conf_viaq_formatting:
 
       - options: |-
           # formatting
-          lookup_table(name="prio_to_level" file="{{ logging_config_dir }}/prio_to_level.json")
-          lookup_table(name="normalize_level" file="{{ logging_config_dir }}/normalize_level.json")
+          lookup_table(name="prio_to_level" file="{{ __rsyslog_config_dir }}/prio_to_level.json")
+          lookup_table(name="normalize_level" file="{{ __rsyslog_config_dir }}/normalize_level.json")
 
           template(name="cnvt_to_viaq_timestamp" type="list") {
               property(name="TIMESTAMP" dateFormat="rfc3339")
@@ -62,7 +62,7 @@ __rsyslog_conf_viaq_formatting:
           # "message" in the outgoing record
           if strlen($!MESSAGE) > 0 then {
               set $!pipeline_metadata!collector!original_raw_message = $!MESSAGE;
-              action(name="viaq_MESSAGE_mmnormalize" type="mmnormalize" ruleBase="{{ logging_config_dir }}/parse_json.rulebase" variable="$!MESSAGE")
+              action(name="viaq_MESSAGE_mmnormalize" type="mmnormalize" ruleBase="{{ __rsyslog_config_dir }}/parse_json.rulebase" variable="$!MESSAGE")
               # ensure that $!message is set and $!MESSAGE is unset
               # if rsyslog is case sensitive, then $!MESSAGE == $!message
               if $!MESSAGE == $!message then {
@@ -81,7 +81,7 @@ __rsyslog_conf_viaq_formatting:
           } else {
               if strlen($!log) > 0 then {
                   set $!pipeline_metadata!collector!original_raw_message = $!log;
-                  action(name="viaq_log_mmnormalize" type="mmnormalize" ruleBase="{{ logging_config_dir }}/parse_json.rulebase" variable="$!log")
+                  action(name="viaq_log_mmnormalize" type="mmnormalize" ruleBase="{{ __rsyslog_config_dir }}/parse_json.rulebase" variable="$!log")
                   if strlen($!message) == 0 then {
                       set $!message = $!log;
                   }
