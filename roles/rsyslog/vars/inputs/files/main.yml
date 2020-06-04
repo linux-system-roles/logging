@@ -4,8 +4,6 @@
 
 __rsyslog_files_input_packages: []
 
-rsyslog_input_log_path: "/var/log/containers/*.log"
-
 # __rsyslog_files_input_rules
 #
 # List of YAML dictionaries, each dictionary should contain ``rsyslogd`` configuration
