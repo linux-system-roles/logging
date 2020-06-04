@@ -6,6 +6,7 @@
     __test_inputfiles_dir1: /var/log/inputdirectory1
     __test_inputfiles_conf0: /etc/rsyslog.d/90-input-files-files_input0.conf
     __test_inputfiles_conf1: /etc/rsyslog.d/90-input-files-files_input1.conf
+    __test_inputfiles_conf2: /etc/rsyslog.d/90-input-files-files_input2.conf
     __test_outputfiles_conf: /etc/rsyslog.d/30-output-files-files_output0.conf
 
   tasks:
@@ -32,6 +33,8 @@
           - name: files_input1
             type: files
             input_log_path: "{{ __test_inputfiles_dir1 }}/*.log"
+          - name: files_input2
+            type: files
         logging_flows:
           - name: flow_0
             inputs: [files_input0, files_input1]
@@ -69,6 +72,15 @@
     - name: Check if the output files config exists
       assert:
         that: stat_output_files_system.stat.exists
+
+    - name: Get the input files config stat
+      stat:
+        path: "{{ __test_inputfiles_conf2 }}"
+      register: stat_input_file_conf2
+
+    - name: Check if the input files config does not exist
+      assert:
+        that: not stat_input_file_conf2.stat.exists
 
     - name: Grep output to messages line
       command: /bin/grep ".var.log.messages" {{ __test_outputfiles_conf }}
