@@ -1,3 +1,24 @@
+# Error case for Elasticsearch config - although cert paths are specified, use_cert is false
+#
+# Elasticsearch output has this policy:
+#   use_cert: If true, key/certificates are used to access Elasticsearch.
+#             Triplets {`ca_cert`, `cert`, key`} and/or {`ca_cert_src`,
+#             `cert_src`, `key_src`} should be configured. Default to true.
+# In this test case, both triplets are properly set, but use_cert is set to false,
+# which indicates configuration error.
+#
+# [Configuration]
+# files input (imfile) ->  elasticsearch output (omelasticsearch)
+# logging_outputs:
+#   - name: elasticsearch_output
+#     use_cert: false
+#     8< snip >8
+#
+# [Test scenario]
+# 0. Run logging role.
+# 1. Capture the error and check the error message.
+# 2. Make sure the logging role failed and no further play was observed.
+#
 - name: Error case for Elasticsearch config - although cert paths are specified, use_cert is false
   hosts: all
   become: true
@@ -6,9 +27,10 @@
     __test_ca_cert: /tmp/es-ca.crt
     __test_cert: /tmp/es-cert.pem
     __test_key: /tmp/es-key.pem
+    __expected_error: "Error: you specified use_cert: false and also specified one or more cert/key files in the elasticsearch output named elasticsearch_output"
 
   tasks:
-    - name: generate test files
+    - name: Generate fake key/certs files.
       copy:
         dest: "{{ item }}"
         content:
@@ -57,4 +79,4 @@
             msg: "Caught an expected error - {{ ansible_failed_result.results }}"
         - name: assert...
           assert:
-            that: "'{{ ansible_failed_result.results.0.msg }}' is match('Error: you specified use_cert: false and also specified one or more cert/key files in the elasticsearch output named elasticsearch_output')"
+            that: "'{{ ansible_failed_result.results.0.msg }}' is match('{{ __expected_error }}')"

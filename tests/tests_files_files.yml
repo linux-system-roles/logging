@@ -1,4 +1,27 @@
-- name: Ensure that the role runs with parameters from two imfile inputs to two files outputs
+# Ensure that the role runs with parameters from two files inputs to two files outputs
+#
+# [Configuration]
+# 2 files input (imfile) -> 2 files output (omfile)
+# Note: one files input (files_input2) missing input_log_path to be skipped.
+#
+# [Test scenario]
+# 0. Run logging role.
+# 1. Check rsyslog.conf file size.
+#    If logging role is executed, the file size is about 100 bytes.
+#    If not executed, the default rsyslog.conf size is larger than 3000 bytes.
+#    Thus, assert the size is less than 1000.
+# 2. Check file count in /etc/rsyslog.d.
+#    If logging role is executed, 8 config files are generated.
+#    Other package could add rsyslog config files such as 21-cloudinit.conf to
+#    /etc/rsyslog.d and the number varies per RHEL version.
+#    Thus, assert the the count is greater than or equal to 8.
+# 3. Check systemctl status of rsyslog as well as error or specific message in the output.
+# 4. Check a files output config file exists which verifies the generated filename is correct.
+# 5. Check a files_input2 input config file does not exist since it does not have input_log_path in the config.
+# 6. Check 2 input config files exist.
+# 7. Check 2 input config files contains the configured input_log_path.
+#
+- name: Ensure that the role runs with parameters from two files inputs to two files outputs
   hosts: all
   become: true
   vars:
@@ -8,6 +31,7 @@
     __test_inputfiles_conf1: /etc/rsyslog.d/90-input-files-files_input1.conf
     __test_inputfiles_conf2: /etc/rsyslog.d/90-input-files-files_input2.conf
     __test_outputfiles_conf: /etc/rsyslog.d/30-output-files-files_output0.conf
+    __default_system_log: /var/log/messages
 
   tasks:
     - name: deploy config to output into local files
@@ -21,7 +45,7 @@
               - auth.none
               - cron.none
               - mail.none
-            path: /var/log/messages
+            path: "{{ __default_system_log }}"
           - name: files_output1
             type: files
             facility: authpriv,auth
@@ -55,70 +79,47 @@
 
     - name: Check file counts in rsyslog.d
       assert:
-        that: rsyslog_d_file_count.matched >= 7
+        that: rsyslog_d_file_count.matched >= 8
 
     # Checking 'error' in stdout from systemctl status is for detecting the case in which rsyslog is running,
     # but some functionality is disabled due to some error, e.g., error: 'tls.cacert' file couldn't be accessed.
     - name: Check rsyslog errors
       command: systemctl status rsyslog
-      register: systemctl_result
-      failed_when: "'error' in systemctl_result.stdout or 'a RainerScript command' in systemctl_result.stdout or systemctl_result.rc != 0"
-
-    - name: Get the output files config stat
-      stat:
-        path: "{{ __test_outputfiles_conf }}"
-      register: stat_output_files_system
+      register: __result
+      failed_when: "'error' in __result.stdout or 'a RainerScript command' in __result.stdout or __result is failed"
 
     - name: Check if the output files config exists
-      assert:
-        that: stat_output_files_system.stat.exists
-
-    - name: Get the input files config stat
       stat:
-        path: "{{ __test_inputfiles_conf2 }}"
-      register: stat_input_file_conf2
+        path: "{{ __test_outputfiles_conf }}"
+      register: __result
+      failed_when: not __result.stat.exists
 
     - name: Check if the input files config does not exist
-      assert:
-        that: not stat_input_file_conf2.stat.exists
+      stat:
+        path: "{{ __test_inputfiles_conf2 }}"
+      register: __result
+      failed_when: __result.stat.exists
 
     - name: Grep output to messages line
-      command: /bin/grep ".var.log.messages" {{ __test_outputfiles_conf }}
-      register: files_conf_messages
+      command: /bin/grep "{{ __default_system_log }}" {{ __test_outputfiles_conf }}
       changed_when: false
-
-    - name: Get the files config stat 0
-      stat:
-        path: "{{ __test_inputfiles_conf0 }}"
-      register: stat_input_files_conf0
 
     - name: Check if the input files config exists 0
-      assert:
-        that: stat_input_files_conf0.stat.exists
-
-    - name: Get the files config stat 1
       stat:
-        path: "{{ __test_inputfiles_conf1 }}"
-      register: stat_input_files_conf1
+        path: "{{ __test_inputfiles_conf0 }}"
+      register: __result
+      failed_when: not __result.stat.exists
 
     - name: Check if the input files config exists 1
-      assert:
-        that: stat_input_files_conf1.stat.exists
-
-    - name: Grep input file 0
-      command: /bin/grep 'inputdirectory0' {{ __test_inputfiles_conf0 }}
-      register: files_conf_input_file0
-      changed_when: false
+      stat:
+        path: "{{ __test_inputfiles_conf1 }}"
+      register: __result
+      failed_when: not __result.stat.exists
 
     - name: Check the filter 0
-      assert:
-        that: files_conf_input_file0.stdout is match(" *input\(type=\"imfile\" file=\"\/var\/log\/inputdirectory0\/\*\.log\" tag=\"files_input0\"\)")
-
-    - name: Grep input file 1
-      command: /bin/grep 'inputdirectory1' {{ __test_inputfiles_conf1 }}
-      register: files_conf_input_file1
+      command: /bin/grep 'input(type="imfile" file="\/var\/log\/inputdirectory0\/\*\.log" tag="files_input0")' '{{ __test_inputfiles_conf0 }}'
       changed_when: false
 
     - name: Check the filter 1
-      assert:
-        that: files_conf_input_file1.stdout is match(" *input\(type=\"imfile\" file=\"\/var\/log\/inputdirectory1\/\*\.log\" tag=\"files_input1\"\)")
+      command: /bin/grep 'input(type="imfile" file="\/var\/log\/inputdirectory1\/\*\.log" tag="files_input1")' '{{ __test_inputfiles_conf1 }}'
+      changed_when: false

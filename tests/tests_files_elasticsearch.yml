@@ -1,3 +1,24 @@
+# Test that the role runs with parameters from imfile to two elasticsearch outputs without certs
+#
+# [Configuration]
+# files input (imfile) ->  2 elasticsearch outputs (omelasticsearch)
+#
+# [Test scenario]
+# 0. Run logging role uploading the fake key/certs files.
+# 1. Check rsyslog.conf file size.
+#    If logging role is executed, the file size is about 100 bytes.
+#    If not executed, the default rsyslog.conf size is larger than 3000 bytes.
+#    Thus, assert the size is less than 1000.
+# 3. Check file count in /etc/rsyslog.d.
+#    If logging role is executed, 9 config files are generated.
+#    Other package could add rsyslog config files such as 21-cloudinit.conf to
+#    /etc/rsyslog.d and the number varies per RHEL version.
+#    Thus, assert the the count is greater than or equal to 9.
+# 5. Check if the Elasticsearch output config file 31-output-elasticsearch-elasticsearch_output_ops.conf exists
+#    and the config file has 'ruleset(name="elasticsearch_output_ops")'.
+# 5. Check if the files input config file 90-input-files-files_input.conf exists
+#    and the config file has 'call elasticsearch_output_ops' statement.
+#
 - name: Ensure that the role runs with parameters from imfile to two elasticsearch outputs without certs
   hosts: all
   become: true
@@ -52,21 +73,16 @@
       assert:
         that: rsyslog_d_file_count.matched >= 9
 
-    - name: Get the output files config stat
+    - name: Check if the output files config exists
       stat:
         path: "{{ __test_outputfiles_conf }}"
-      register: stat_output_files_system
-
-    - name: Check if the output files config exists
-      assert:
-        that: stat_output_files_system.stat.exists
+      register: __result
+      failed_when: not __result.stat.exists
 
     - name: Check ops ruleset exists in {{ __test_outputfiles_conf }}
-      command: /bin/grep "ruleset.name=.elasticsearch_output_ops" {{ __test_outputfiles_conf }}
-      register: es_ops_ruleset
+      command: /bin/grep 'ruleset(name="elasticsearch_output_ops")' {{ __test_outputfiles_conf }}
       changed_when: false
 
     - name: Check call point for ops ruleset exists in {{ __test_inputfiles_conf }}
       command: /bin/grep "call elasticsearch_output_ops" {{ __test_inputfiles_conf }}
-      register: es_call_ops_ruleset
       changed_when: false

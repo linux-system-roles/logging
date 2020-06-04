@@ -1,3 +1,31 @@
+# Combination test - test for 2 types of inputs x 2 types of outputs combination
+#
+# [Configuration]
+# basics input (imjournal) -> 2 files output (omfile), 2 forwards output (omfwd)
+# files input (imfile) -> 2 files output (omfile)
+#
+# [Test scenario]
+# 0. Run logging role.
+# 1. Check rsyslog.conf file size.
+#    If logging role is executed, the file size is about 100 bytes.
+#    If not executed, the default rsyslog.conf size is larger than 3000 bytes.
+#    Thus, assert the size is less than 1000.
+# 2. Check file count in /etc/rsyslog.d.
+#    If logging role is executed, 10 config files are generated.
+#    Other package could add rsyslog config files such as 21-cloudinit.conf to
+#    /etc/rsyslog.d and the number varies per RHEL version.
+#    Thus, assert the the count is greater than or equal to 10.
+# 3. Check systemctl status of rsyslog as well as error or specific message in the output.
+# 4. Check a files output config file exists which verifies the generated filename is correct.
+# 4.1 Check if the files output config file contains the expected filter and the output file as configured.
+# 4.2 Run logger command and check the log is in the local output file.
+# 5. Check a forwards output config file exists which verifies the generated filename is correct.
+# 5.1 Check if the forwards output config file contains the expected filter and the action as configured.
+# 6. Check a files input config file exists which verifies the generated filename is correct.
+# 6.1 Check if the files input config file contains the expected input call setting the tag to the input name.
+# 6.2 Add a fake log message to {{ __test_inputfiles_dir }}/test.log and check the fake test log message in
+#     /var/log/messages
+#
 - name: Ensure that the role runs with complicated flows - M x N combinations
   hosts: all
   become: true
@@ -7,6 +35,7 @@
     __test_tag: files_input
     __test_inputfiles_conf: /etc/rsyslog.d/90-input-files-{{ __test_tag }}.conf
     __test_inputfiles_dir: /var/log/inputdirectory
+    __default_system_log: /var/log/messages
 
   tasks:
     - name: Generate an input log dir {{ __test_inputfiles_dir }}
@@ -26,7 +55,7 @@
               - auth.none
               - cron.none
               - mail.none
-            path: /var/log/messages
+            path: "{{ __default_system_log }}"
           - name: files_test1
             type: files
             facility: authpriv,auth
@@ -74,81 +103,52 @@
 
     - name: Check file counts in rsyslog.d
       assert:
-        that: rsyslog_d_file_count.matched >= 9
+        that: rsyslog_d_file_count.matched >= 10
 
     # Checking 'error' in stdout from systemctl status is for detecting the case in which rsyslog is running,
     # but some functionality is disabled due to some error, e.g., error: 'tls.cacert' file couldn't be accessed.
     - name: Check rsyslog errors
       command: systemctl status rsyslog
-      register: systemctl_result
-      failed_when: "'error' in systemctl_result.stdout or 'a RainerScript command' in systemctl_result.stdout or systemctl_result.rc != 0"
-
-    - name: Get the files config stat
-      stat:
-        path: "{{ __test_files_conf }}"
-      register: stat_output_files_system
+      register: __result
+      failed_when: "'error' in __result.stdout or 'a RainerScript command' in __result.stdout or __result is failed"
 
     - name: Check if the files config exists
-      assert:
-        that: stat_output_files_system.stat.exists
+      stat:
+        path: "{{ __test_files_conf }}"
+      register: __result
+      failed_when: not __result.stat.exists
 
-    - name: Grep output to messages line
-      command: /bin/grep ".var.log.messages" {{ __test_files_conf }}
-      register: files_conf_messages
+    - name: Check the filter and action in the files output config
+      command: /bin/grep '\*.info;authpriv.none;auth.none;cron.none;mail.none.*{{ __default_system_log }}' '{{ __test_files_conf }}'
       changed_when: false
-
-    - name: Check the filter
-      assert:
-        that: files_conf_messages.stdout is match(" *\*.info;*authpriv.none;auth.none;cron.none;mail.none.*.var.log.messages")
 
     - name: Run logger to generate a test log message
       command: /bin/logger -i -p local6.info -t testTag0 testMessage0000
       changed_when: false
 
-    - name: Check the test log message in /var/log/messages
-      command: /bin/grep testMessage0000 /var/log/messages
-      register: testMessage0000
+    - name: Check the test log message in {{ __default_system_log }}
+      command: /bin/grep testMessage0000 '{{ __default_system_log }}'
       changed_when: false
 
-    - name: Check if the test message is in /var/log/messages
-      assert:
-        that: testMessage0000.stdout | length > 0
-
-    - name: Get the forwarding config stat
+    - name: Check the forwarding config stat
       stat:
         path: "{{ __test_forwards_conf_s_f }}"
-      register: stat_output_forwards_system
-
-    - name: Check if the forwarding config exists
-      assert:
-        that: stat_output_forwards_system.stat.exists
-
-    - name: Grep severity_and_facility
-      command: /bin/grep "\<action.*forwards_severity_and_facility\>" {{ __test_forwards_conf_s_f }}
-      register: severity_and_facility
-      changed_when: false
+      register: __result
+      failed_when: not __result.stat.exists
 
     - name: Check severity_and_facility
-      assert:
-        that: severity_and_facility.stdout is match(" *local1\.info action.name=.forwards_severity_and_facility.* type=.omfwd. Target=.host.domain. Port=.1514. Protocol=.tcp.*")
-
-    - name: Get the files config stat
-      stat:
-        path: "{{ __test_inputfiles_conf }}"
-      register: stat_input_files_conf
-
-    - name: Check if the input files config exists
-      assert:
-        that: stat_input_files_conf.stat.exists
-
-    - name: Grep input file
-      command: /bin/grep 'inputdirectory' {{ __test_inputfiles_conf }}
-      register: files_conf_input_file
+      command: /bin/grep 'local1.info action(name="forwards_severity_and_facility" type="omfwd" Target="host.domain" Port="1514" Protocol="tcp")' '{{ __test_forwards_conf_s_f }}'
       changed_when: false
 
-    - name: Check the filter
-      assert:
-        that: files_conf_input_file.stdout is match(" *input\(type=\"imfile\" file=\"\/var\/log\/inputdirectory\/\*\.log\" tag=\"{{ __test_tag }}\"")
+    - name: Check if the input files config exists
+      stat:
+        path: "{{ __test_inputfiles_conf }}"
+      register: __result
+      failed_when: not __result.stat.exists
+
+    - name: Check the input call with tag={{ __test_tag }}
+      command: /bin/grep ' *input(type="imfile" file="\/var\/log\/inputdirectory\/\*.log" tag="{{ __test_tag }}"' '{{ __test_inputfiles_conf }}'
+      changed_when: false
 
     - name: Create a test log file in {{ __test_inputfiles_dir }}
       copy:
@@ -162,11 +162,6 @@
         line: "<167>Mar 20 01:00:00 11.22.33.44 tag msgnum:00000000:26:abcdefghijklmnopqrstuvwxyz"
       changed_when: false
 
-    - name: Check the fake test log message in /var/log/messages
-      command: /bin/grep "{{ __test_tag }} .*abcdefghijklmnopqrstuvwxyz" /var/log/messages
-      register: abc
+    - name: Check the fake test log message in {{ __default_system_log }}
+      command: /bin/grep '{{ __test_tag }} .*abcdefghijklmnopqrstuvwxyz' '{{ __default_system_log }}'
       changed_when: false
-
-    - name: Check if the fake test message is in /var/log/messages
-      assert:
-        that: abc.stdout | length > 0
