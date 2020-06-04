@@ -1,3 +1,26 @@
+# logging_system_log_dir test - test switching the local log output file location
+#
+# [Configuration]
+# basics input (imjournal) -> default files output (omfile)
+#                             default means using the default rsyslog conf in roles/rsyslog/template/output_files.j2.
+# logging_system_log_dir: '/var/log/rsyslog'
+#
+# [Test scenario]
+# 0. Run logging role.
+# 1. Check rsyslog.conf file size.
+#    If logging role is executed, the file size is about 100 bytes.
+#    If not executed, the default rsyslog.conf size is larger than 3000 bytes.
+#    Thus, assert the size is less than 1000.
+# 2. Check file count in /etc/rsyslog.d.
+#    If logging role is executed, 5 config files are generated.
+#    Other package could add rsyslog config files such as 21-cloudinit.conf to
+#    /etc/rsyslog.d and the number varies per RHEL version.
+#    Thus, assert the the count is greater than or equal to 5.
+# 3. Check systemctl status of rsyslog as well as error or specific message in the output.
+# 4. To verify the generated filename is correct, check the config file of files output exists.
+# 4.1 Check the config file contains the expected filter and the output file as configured.
+# 4.2 Run logger command and check the log is in the local output file {{ logging_system_log_dir }}.
+#
 - name: Ensure that the role runs with parameters to output into local files in a specified path
   hosts: all
   become: true
@@ -34,47 +57,29 @@
 
     - name: Check file counts in rsyslog.d
       assert:
-        that: rsyslog_d_file_count.matched >= 6
+        that: rsyslog_d_file_count.matched >= 5
 
     # Checking 'error' in stdout from systemctl status is for detecting the case in which rsyslog is running,
     # but some functionality is disabled due to some error, e.g., error: 'tls.cacert' file couldn't be accessed.
     - name: Check rsyslog errors
       command: systemctl status rsyslog
-      register: systemctl_result
-      failed_when: "'error' in systemctl_result.stdout or 'a RainerScript command' in systemctl_result.stdout or systemctl_result.rc != 0"
-
-    - name: Get the files config stat
-      stat:
-        path: "{{ __test_files_conf }}"
-      register: stat_output_files_system
-
-    - name: Get the forwarding config stat
-      stat:
-        path: "{{ __test_files_conf }}"
-      register: stat_output_files_system
+      register: __result
+      failed_when: "'error' in __result.stdout or 'a RainerScript command' in __result.stdout or __result is failed"
 
     - name: Check if the files config exists
-      assert:
-        that: stat_output_files_system.stat.exists
+      stat:
+        path: "{{ __test_files_conf }}"
+      register: __result
+      failed_when: not __result.stat.exists
 
     - name: Run logger to generate a test log message
       command: /bin/logger -i -p local6.info -t testTag0 testMessage0000
       changed_when: false
 
-    - name: Grep output to messages line
-      command: /bin/grep '{{ logging_system_log_dir }}/messages' {{ __test_files_conf }}
-      register: files_conf_messages
+    - name: Check the files output config that the path is {{ logging_system_log_dir }}/messages
+      command: /bin/grep '\*.info;mail.none;authpriv.none;cron.none.*{{ logging_system_log_dir }}/messages' {{ __test_files_conf }}
       changed_when: false
-
-    - name: Check the filter
-      assert:
-        that: files_conf_messages.stdout is match(" *\*.info;mail.none;authpriv.none;cron.none.*messages")
 
     - name: Check the test log message in {{ logging_system_log_dir }}/messages
       command: /bin/grep testMessage0000 {{ logging_system_log_dir }}/messages
-      register: testMessage0000
       changed_when: false
-
-    - name: Check if the test message is in {{ logging_system_log_dir }}/messages
-      assert:
-        that: testMessage0000.stdout | length > 0

@@ -1,8 +1,15 @@
-- name: Ensure that the role runs with logging_enabled=true
+# Ensure internal var __rsyslog_version is set correctly
+#
+# [Test scenario]
+# 0. Run logging role.
+#    In the execution, __rsyslog_version is set to the rsyslog version.
+# 1. Check variable __rsyslog_version value is is no longer the initial value "0.0.0".
+#
+- name: Ensure internal var __rsyslog_version is set correctly
   hosts: all
   become: true
   vars:
-    __rsyslog_version: "N/A"
+    __rsyslog_version: "0.0.0"
 
   tasks:
     - name: default run
@@ -11,4 +18,4 @@
 
     - name: Check rsyslog version
       assert:
-        that: __rsyslog_version != "N/A" and __rsyslog_version != "0.0.0"
+        that: __rsyslog_version != "0.0.0"

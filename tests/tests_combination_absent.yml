@@ -1,12 +1,38 @@
+# Absent state test - Running combination configured logging role twice;
+# in the second run, some logging_outputs state are set to absent so that the items are removed.
+#
+# [Configuration]
+# basics input (imjournal) -> 2 files output (omfile), 2 forwards output (omfwd)
+# files input (imfile) -> 2 files output (omfile)
+#
+# [Test scenario]
+# 0. Run logging role.
+# 1. Check rsyslog.conf file size.
+#    If logging role is executed, the file size is about 100 bytes.
+#    If not executed, the default rsyslog.conf size is larger than 3000 bytes.
+#    Thus, assert the size is less than 1000.
+# 2. Check file count in /etc/rsyslog.d.
+#    If logging role is executed, 10 config files are generated.
+#    Other package could add rsyslog config files such as 21-cloudinit.conf to
+#    /etc/rsyslog.d and the number varies per RHEL version.
+#    Thus, assert the the count is greater than or equal to 10.
+# 3. Generate a test config file to check if the config file is overridden in the second run.
+# 4. Run logging role again with setting "state: absent" to some items.
+# 5. Check file count in /etc/rsyslog.d.
+#    If the second logging role run is successful, 6 config files are generated.
+#    Thus, assert the the count is less than or equal to 8.
+# 6. Check the generated test config file in 3 was updated correctly.
+# 7. Check systemctl status of rsyslog as well as error or specific message in the output.
+#
 - name: Running logging role twice; in the second run, some logging_outputs are absent or eliminated.
   hosts: all
   become: true
   vars:
-    __rsyslog_version: "N/A"
     __test_tag: files_input
     __test_inputfiles_conf: /etc/rsyslog.d/90-input-files-{{ __test_tag }}.conf
     __test_inputfiles_dir: /var/log/inputdirectory
     __test_basics_conf: 90-input-basics-basic_input.conf
+    __default_system_log: /var/log/messages
 
   tasks:
     - name: Generate an input log dir {{ __test_inputfiles_dir }}
@@ -26,7 +52,7 @@
               - auth.none
               - cron.none
               - mail.none
-            path: /var/log/messages
+            path: "{{ __default_system_log }}"
           - name: files_test1
             type: files
             facility: authpriv,auth
@@ -68,19 +94,15 @@
     - name: Force all notified handlers to run at this point, not waiting for normal sync points
       meta: flush_handlers
 
-    - name: Check rsyslog version
-      assert:
-        that: __rsyslog_version != "N/A" and __rsyslog_version != "0.0.0"
-
     - name: Check rsyslog.conf size
       assert:
         that: rsyslog_conf_stat.stat.size < 1000
 
     - name: Check file counts in rsyslog.d
       assert:
-        that: rsyslog_d_file_count.matched >= 11
+        that: rsyslog_d_file_count.matched >= 10
 
-    - name: generate test config file
+    - name: Generate test config file to be overridden
       copy:
         dest: "/etc/rsyslog.d/{{ __test_basics_conf }}"
         content: |-
@@ -98,13 +120,6 @@
               call files_test0
           }
 
-    # Checking 'error' in stdout from systemctl status is for detecting the case in which rsyslog is running,
-    # but some functionality is disabled due to some error, e.g., error: 'tls.cacert' file couldn't be accessed.
-    - name: Check rsyslog errors
-      command: systemctl status rsyslog
-      register: systemctl_result
-      failed_when: "'error' in systemctl_result.stdout or systemctl_result.rc != 0"
-
     - name: deploy reduced config to output into local files
       vars:
         logging_outputs:
@@ -116,7 +131,7 @@
               - auth.none
               - cron.none
               - mail.none
-            path: /var/log/messages
+            path: "{{ __default_system_log }}"
           - name: files_test1
             type: files
             facility: authpriv,auth
@@ -161,14 +176,15 @@
 
     - name: Check file counts in rsyslog.d are less than no-absent case
       assert:
-        that: rsyslog_d_file_count.matched < 11
+        that: rsyslog_d_file_count.matched <= 8
 
     - name: Check {{ __test_basics_conf }} was updated
       command: '/bin/grep "# GENERATED BASICS CONFIG FILE" /etc/rsyslog.d/{{ __test_basics_conf }}'
-      register: result
-      failed_when: result.rc == 0
+      register: __result
+      changed_when: false
+      failed_when: "__result is not failed"
 
     - name: Check rsyslog errors
       command: systemctl status rsyslog
-      register: systemctl_result
-      failed_when: "'error' in systemctl_result.stdout or systemctl_result.rc != 0"
+      register: __result
+      failed_when: "'error' in __result.stdout or __result is failed"

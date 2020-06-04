@@ -1,3 +1,23 @@
+# Test configuration inputs from the remote rsyslog to the configured local files outputs.
+#
+# [Configuration]
+# remote inputs (imudp, imtcp) -> 2 remote_files outputs (omfile)
+# logging_purge_confs: true
+#
+# [Test scenario]
+# 0. Run logging role.
+# 1. Check rsyslog.conf file size.
+#    If logging role is executed, the file size is about 100 bytes.
+#    If not executed, the default rsyslog.conf size is larger than 3000 bytes.
+#    Thus, assert the size is less than 1000.
+# 2. Check file count in /etc/rsyslog.d.
+#    If logging role is executed, 9 config files are generated.
+#    By setting logging_purge_confs, pre-existing config files are deleted.
+#    Thus, assert the the count is equal to 9.
+# 3. Install lsof
+# 3.1 Using lsof, check port 514 is open for TCP
+# 3.2 Using lsof, check port 514 is open for UDP
+#
 - name: Ensure that the role runs from inputs from the remote rsyslog to the local files outputs.
   hosts: all
   become: true
@@ -45,14 +65,14 @@
 
     - name: Check file counts in rsyslog.d
       assert:
-        that: rsyslog_d_file_count.matched >= 7
+        that: rsyslog_d_file_count.matched == 9
 
     # Checking 'error' in stdout from systemctl status is for detecting the case in which rsyslog is running,
     # but some functionality is disabled due to some error, e.g., error: 'tls.cacert' file couldn't be accessed.
     - name: Check rsyslog errors
       command: systemctl status rsyslog
-      register: systemctl_result
-      failed_when: "'error' in systemctl_result.stdout or 'a RainerScript command' in systemctl_result.stdout or systemctl_result.rc != 0"
+      register: __result
+      failed_when: "'error' in __result.stdout or 'a RainerScript command' in __result.stdout or __result is failed"
 
     - name: Install lsof
       package:
@@ -63,11 +83,11 @@
       shell: |
         set -o pipefail
         lsof -i -nP | grep rsyslogd
-      register: lsof_output0
+      register: __result
       changed_when: false
 
     - debug:
-        msg: "lsof returned {{ lsof_output0.stdout }}"
+        msg: "lsof returned {{ __result.stdout }}"
 
     - name: Check port 514 is open for TCP
       shell: |

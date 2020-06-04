@@ -1,3 +1,28 @@
+# Error case for Elasticsearch config - cert and ca_cert_src are missing
+#
+# Elasticsearch output has this policy:
+#   use_cert: If true, key/certificates are used to access Elasticsearch.
+#             Triplets {`ca_cert`, `cert`, key`} and/or {`ca_cert_src`,
+#             `cert_src`, `key_src`} should be configured. Default to true.
+# In this test case, use_cert is not set, i.e., true, and only {ca_cert, key}
+# and {cert_src, key_src} are set in the elasticsearch dictionary.
+# Logging role is supposed to issue {{ __expected_error }}.
+#
+# [Configuration]
+# files input (imfile) ->  elasticsearch output (omelasticsearch)
+# logging_outputs:
+#   - name: elasticsearch_output
+#     ca_cert: /etc/rsyslog.d/ca_cert.crt
+#     key: /etc/rsyslog.d/key.pem
+#     cert_src: "{{ __test_cert }}"
+#     key_src: "{{ __test_key }}"
+#     8< snip >8
+#
+# [Test scenario]
+# 0. Run logging role.
+# 1. Capture the error and check the error message.
+# 2. Make sure the logging role failed and no further play was observed.
+#
 - name: Error case for Elasticsearch config - cert and ca_cert_src are missing
   hosts: all
   become: true
@@ -8,9 +33,10 @@
     __test_ca_cert: /tmp/es-ca.crt
     __test_cert: /tmp/es-cert.pem
     __test_key: /tmp/es-key.pem
+    __expected_error: "Error: you specified use_cert: true; you must specify all 3 of ca_cert, cert, key, or all 3 of ca_cert_src, cert_src, key_src, or set use_cert: false in the elasticsearch output named elasticsearch_output"
 
   tasks:
-    - name: generate test files
+    - name: Generate fake key/certs files.
       copy:
         dest: "{{ item }}"
         content:
@@ -56,4 +82,4 @@
             msg: "Caught an expected error - {{ ansible_failed_result.results }}"
         - name: assert...
           assert:
-            that: "'{{ ansible_failed_result.results.0.msg }}' is match('Error: you specified use_cert: true; you must specify all 3 of ca_cert, cert, key, or all 3 of ca_cert_src, cert_src, key_src, or set use_cert: false in the elasticsearch output named elasticsearch_output')"
+            that: "'{{ ansible_failed_result.results.0.msg }}' is match('{{ __expected_error }}')"
