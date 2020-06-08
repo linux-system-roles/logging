@@ -14,16 +14,19 @@
 {% endfor %}
 {% if ns2.use_udp %}
 # Read messages sent over plain TCP
-module(load="imudp")
+module(load="imudp" threads="{{ logging_udp_threads }}"
+       TimeRequery="{{ logging_udp_system_time_requery }}"
+       BatchSize="{{ logging_udp_batch_size }}")
 {% endif %}
 {% if ns1.use_tcp %}
 # Read messages sent over UDP
-module(load="imptcp")
+module(load="imptcp" threads="{{ logging_tcp_threads }}")
 {% endif %}
 {% if ns0.use_tls %}
 # Read messages sent over TCP with TLS
 module(
   load="imtcp"
+  threads="{{ logging_tcp_threads }}"
   streamDriver.name="{{ __rsyslog_default_netstream_driver }}"
   streamDriver.mode="1"
   streamDriver.authMode="{{ rsyslog_default_driver_authmode }}"

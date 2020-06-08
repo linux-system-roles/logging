@@ -187,16 +187,16 @@ logging_outputs:
       - name: basic-input0
         type: basics
         journal_persist_state_interval: 1000
-        journal_ratelimit_interval: 10
-        journal_ratelimit_burst: 100000
+        ratelimit_interval: 10
+        ratelimit_burst: 100000
   - name: file-output
     type: files
     logging_inputs:
       - name: basic-input1
         type: basics
-        journal_persist_state_interval: 3000
-        journal_ratelimit_interval: 30
-        journal_ratelimit_burst: 300000
+        persist_state_interval: 3000
+        ratelimit_interval: 30
+        ratelimit_burst: 300000
 ```
 
 ### logging_outputs, logging_inputs and logging_flows

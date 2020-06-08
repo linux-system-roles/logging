@@ -73,7 +73,7 @@
         logging_inputs:
           - name: basic_input
             type: basics
-            rsyslog_imjournal_ratelimit_burst: 33333
+            ratelimit_burst: 33333
           - name: "{{ __test_tag }}"
             type: files
             input_log_path: "{{ __test_inputfiles_dir }}/*.log"
@@ -155,7 +155,7 @@
         logging_inputs:
           - name: basic_input
             type: basics
-            rsyslog_imjournal_ratelimit_burst: 33333
+            ratelimit_burst: 33333
           - name: "{{ __test_tag }}"
             type: files
             input_log_path: "{{ __test_inputfiles_dir }}/*.log"

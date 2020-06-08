@@ -12,12 +12,15 @@ template(
   type="string"
   string="{{ __remote_log_path }}"
 )
-ruleset(name="{{ item.name }}") {
+ruleset(name="{{ item.name }}"
+        queue.type="{{ logging_server_queue_type }}"
+        queue.size="{{ logging_server_queue_size }}"
+        queue.workerThreads="{{ logging_server_threads }}") {
     # Store remote logs in separate logfiles
 {%   if item.exclude | d([]) %}
-    {{ item.facility | d('*') }}.{{ item.severity | d('*') }};{{ item.exclude | join(';') }} action(name="{{ item.name }}" type="omfile" DynaFile="{{ item.name }}_template")
+    {{ item.facility | d('*') }}.{{ item.severity | d('*') }};{{ item.exclude | join(';') }} action(name="{{ item.name }}" type="omfile" DynaFile="{{ item.name }}_template" DynaFileCacheSize="{{ item.client_count | d(10) }}" ioBufferSize="{{ item.io_buffer_size | d('65536') }}" asyncWriting="{{ 'on' if item.async_writing | d('off') | bool else 'off' }}")
 {%   else %}
-    {{ item.facility | d('*') }}.{{ item.severity | d('*') }} action(name="{{ item.name }}" type="omfile" DynaFile="{{ item.name }}_template")
+    {{ item.facility | d('*') }}.{{ item.severity | d('*') }} action(name="{{ item.name }}" type="omfile" DynaFile="{{ item.name }}_template" DynaFileCacheSize="{{ item.client_count | d(10) }}" ioBufferSize="{{ item.io_buffer_size | d('65536') }}" asyncWriting="{{ 'on' if item.async_writing | d('off') | bool else 'off' }}")
 {%   endif %}
 }
 {% else %}
