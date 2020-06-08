@@ -90,13 +90,13 @@ logging_flows:
   available keys
   - `kernel_message`: Load `imklog` if set to `true`. Default to `false`.
   - `use_imuxsock`: Use `imuxsock` instead of `imjournal`. Default to `false`.
-  - `journal_ratelimit_burst`: The value is set to imjournal RateLimit.Burst. Default to 20000.
-  - `journal_ratelimit_interval`: The value is set to imjournal RateLimit.Interval. Default to 600.
-  - `journal_persist_state_interval`: The value is set to imjournal PersistStateInterval. Default to 10.
+  - `ratelimit_burst`: Maximum number of messages that can be emitted within ratelimit_interval. Default to 20000 if use_imuxsock is false. Default to 200 if use_imuxsock is true.
+  - `ratelimit_interval`: Interval to evaluate rateilmit_burst. Default to 600 seconds if use_imuxsock is false. Default to 0 if use_imuxsock is true. 0 indicates ratelimiting is turned off.
+  - `persist_state_interval`: Journal state is persisted every value messages. Default to 10. Effective only when use_imuxsock is false.
 
 - `files` type - `files` input supports reading logs from the local files.<br>
   available keys 
-  - `input_log_path`: File name to be read by the imfile plugin. The value should be full path. Wildcard '*' is allowed in the path.  Default to `/var/log/containers/*.log`.
+  - `input_log_path`: File name to be read by the imfile plugin. The value should be full path. Wildcard '\*' is allowed in the path.  Default to `/var/log/containers/*.log`.
 
 - `ovirt` type - `ovirt` input supports oVirt specific inputs.<br>
    For the details, visit [oVirt Support](../../design_docs/rsyslog_ovirt_support.md).
@@ -156,15 +156,18 @@ logging_flows:
   - `target`: Target host (fqdn). Mandatory.
   - `port`: Port; default to 514.
 
--  available keys for `remote_files` type
+- `remote_files` type - `remote_files` output stores logs to the local files per remote host and program name originated the logs.<br>
+  available keys
   - `facility`: Facility; default to `*`.
   - `severity`: Severity; default to `*`.
   - `exclude`: Exclude list; default to none.
+  - `async_writing`: If set to `on`, the files are written asynchronously. Default to `off`.
+  - `client_count`: Count of client logging system supported this rsyslog server. Default to 10.
+  - `io_buffer_size`: Buffer size used to write output data. Default to 65536 bytes.
   - `remote_log_path`: Full path to store the filtered logs.
-                       To support the per host output log files, we recommend to have the path like this:
-                       /path/to/output/dir/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log
+                       This is an example to support the per host output log files
+                       `/path/to/output/dir/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log`
   - `remote_sub_path`: Relative path to logging_system_log_dir to store the filtered logs.
-                       E.g., subdir/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log
 
   if both `remote_log_path` and `remote_sub_path` are _not_ specified, the remote_file output configured with the following settings.
   ```
@@ -221,14 +224,25 @@ These variables are set in the same level of the `logging_inputs`, `logging_outp
                      /etc/pki/tls/certs/cert.pem for cert
                      /etc/pki/tls/private/key.pem for key
 ``` 
+Security parameters
 - `logging_pki_authmode`: Specify the default network driver authentication mode. `x509/name` or `anon` are available: Default to "x509/name".
 - `logging_domain`: The default DNS domain used to accept remote incoming logs from remote hosts. Default to {{ ansible_domain if ansible_domain else ansible_hostname }}
-- `logging_permitted_peers`: List of hostnames, IP addresses or wildcard DNS domains which will be allowed by the `logging` server to connect and send logs over TLS.  Default to ['*.{{ logging_domain }}']
+- `logging_permitted_peers`: List of hostnames, IP addresses or wildcard DNS domains which will be allowed by the `logging` server to connect and send logs over TLS.  Default to ['\*.{{ logging_domain }}']
 - `logging_send_permitted_peers`: List of hostnames, IP addresses or wildcard DNS domains which will be verified by the `logging` client and will allow to send logs to the remote server over TLS. Default to '{{ logging_permitted_peers }}'.
+
+Server Performance optimization
+- `logging_tcp_threads`: Input thread count listening on the tcp port. Default to 1.
+- `logging_udp_threads`: Input thread count listening on the udp port. Default to 1.
+- `logging_udp_system_time_requery`: Every `value` OS system calls, get the system time. Recommend not to set above 10. Default to 2 times.
+- `logging_udp_batch_size`: Maximum number of udp messages per OS system call. Recommend not to set above 128. Default to 32.
+- `logging_server_queue_type`: Type of queue. `FixedArray` is available. Default to `LinkedList`.
+- `logging_server_queue_size`: Maximum number of messages in the queue. Default to 50000.
+- `logging_server_threads`: Number of worker threads. Default to `logging_tcp_threads` + `logging_udp_threads`.
+
 - `logging_mark`: Mark message periodically by immark, if set to `true`. Default to `false`.
 - `logging_mark_interval`: Interval for `logging_mark` in seconds. Default to 3600.
-- `logging_purge_original_conf`: `true` or `false`. If set to `true`, 
-		logging_system_log_dir: /var/log
+- `logging_purge_original_conf`: `true` or `false`. If set to `true`, files in /etc/rsyslog.d are purged.
+- `logging_system_log_dir`: Directory where the local log output files are placed. Default to /var/log.
 
 ### Update and Delete
 
@@ -440,7 +454,7 @@ logging_flows:
     outputs: [remote_files_output]
 ```
 
-2. Deploying `remote input` reading logs from remote rsyslog and `remote_files output` to write the logs to the configured local files with the tls setup. Assuming the ca_cert, cert and key files are prepared. The files are deployed to the default location `/etc/pki/tls/certs/`, `/etc/pki/tls/certs/`, and `/etc/pki/tls/private`, respectively.
+2. Deploying `remote input` reading logs from remote rsyslog and `remote_files output` to write the logs to the configured local files with the tls setup supporting 20 clients. Assuming the ca_cert, cert and key files are prepared. The files are deployed to the default location `/etc/pki/tls/certs/`, `/etc/pki/tls/certs/`, and `/etc/pki/tls/private`, respectively.
 ```
 logging_pki: tls
 logging_pki_files:
@@ -458,6 +472,9 @@ logging_outputs:
   - name: remote_files_output0
     type: remote_files
     remote_log_path: /var/log/remote/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log
+    async_writing: on
+    client_count: 20
+    io_buffer_size: 8192
   - name: remote_files_output1
     type: remote_files
     remote_sub_path: others/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log

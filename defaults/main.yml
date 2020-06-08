@@ -20,6 +20,24 @@ logging_purge_confs: false
 # Variable to specify the directory to put the local output files to store logs.
 logging_system_log_dir: /var/log
 
+# Performance optimization parameters for the server.
+# Input thread count listening on the udp port.
+logging_udp_threads: 1
+
+# Input thread count listening on the tcp port.
+logging_tcp_threads: 1
+
+# Every value times, get the system time. Effective for udp.
+logging_udp_system_time_requery: 2
+
+# Specifies the maximum number of udp messages.
+logging_udp_batch_size: 32
+
+# Queue configuration for the files outputs for the server
+logging_server_queue_type: LinkedList
+logging_server_queue_size: 50000
+logging_server_threads: "{{ logging_udp_threads | int + logging_tcp_threads | int }}"
+
 # Specifying rsyslog encryption library
 # one of the implementations is allowed none, ptcp, tls, gtls, gnutls
 # Note: none->ptcp, tls,gtls,gnutls->gtls
@@ -48,7 +66,7 @@ logging_pki_files: []
 
 # logging_pki_authmode
 #
-# Specify the default network driver authetication mode.
+# Specify the default network driver authentication mode.
 # `x509/name` or `anon` are available:
 logging_pki_authmode: "x509/name"
 

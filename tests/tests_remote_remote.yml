@@ -26,6 +26,9 @@
     - name: deploy config receiving from the remote hosts and writing them to the local files
       vars:
         logging_purge_confs: true
+        logging_tcp_threads: 2
+        logging_udp_threads: 2
+        logging_server_queue_type: FixedArray
         logging_outputs:
           - name: remote_files_output0
             type: remote_files
@@ -34,6 +37,9 @@
             severity: info
             exclude:
               - authpriv.none
+            client_count: 20
+            io_buffer_size: 8192
+            async_writing: on
           - name: remote_files_output1
             type: remote_files
             remote_sub_path: others/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log
