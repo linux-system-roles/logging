@@ -1,7 +1,10 @@
 ---
+# SPDX-License-Identifier: GPLv3
+
 # Imfile configuration setting
 # ----------------------------
-
+#
+# List of rpm packages to install.
 __rsyslog_files_input_packages: []
 
 # __rsyslog_files_input_rules

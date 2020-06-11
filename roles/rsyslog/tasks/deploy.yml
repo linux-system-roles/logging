@@ -1,4 +1,6 @@
 ---
+# SPDX-License-Identifier: GPLv3
+
 - name: Install/Update required packages
   package:
     name: "{{ __rsyslog_packages }}"

@@ -1,12 +1,11 @@
-# Local file output rpm packages
+---
+# SPDX-License-Identifier: GPLv3
 
-# __rsyslog_files_output_packages
-#
+# Local file output configuration setting
+# ---------------------------------------
+
 # List of rpm packages for Files output.
 __rsyslog_files_output_packages: []
-
-# Files output configuration
-# ---------------------------------
 
 # Files Rsyslog output configuration rules
 # ---------------------------------

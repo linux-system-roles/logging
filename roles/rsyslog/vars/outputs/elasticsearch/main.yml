@@ -1,7 +1,9 @@
 ---
-# Elasticsearch configuration
-# ---------------------
-#
+# SPDX-License-Identifier: GPLv3
+
+# Elasticsearch output configuration setting
+# ------------------------------------------
+
 # __rsyslog_elasticsearch_package
 #
 # List of rpm packages for Elasticsearch output.

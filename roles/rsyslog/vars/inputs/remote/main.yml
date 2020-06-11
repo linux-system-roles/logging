@@ -1,8 +1,8 @@
 ---
-# Remote logs configuration vars
-# ------------------------------
-#
-# __rsyslog_remote_packages
-#
-# List of default rpm packages to install.
+# SPDX-License-Identifier: GPLv3
+
+# Remote input configuration setting
+# ----------------------------------
+
+# List of rpm packages to install.
 __rsyslog_remote_packages: []

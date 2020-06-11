@@ -1,6 +1,8 @@
-# Local file output rpm packages
+---
+# SPDX-License-Identifier: GPLv3
 
-# __rsyslog_files_output_packages
-#
+# Local output files from remote input configuration setting
+# ----------------------------------------------------------
+
 # List of rpm packages for Files output.
 __rsyslog_remote_files_output_packages: []
