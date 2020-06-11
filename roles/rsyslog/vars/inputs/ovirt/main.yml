@@ -1,19 +1,12 @@
 ---
-# oVirt rpm packages
-# adding rsyslog_logging_packages
-# ------------------
+# SPDX-License-Identifier: GPLv3
 
-# rsyslog_logging_packages
-#
-# List of rpm packages for Common Logging.
+# oVirt input configuration setting
+# ---------------------------------
+
+# List of rpm packages to install.
 __rsyslog_ovirt_packages: ['rsyslog-mmnormalize', 'rsyslog-mmjsonparse', 'libfastjson', 'liblognorm', 'libestr']
 __rsyslog_ovirt_prereq_packages: []
-
-# oVirt configuration
-# ---------------------
-
-# Available configuration set
-# ----------------------------
 
 # oVirt Rsyslog configuration rules
 # ---------------------------

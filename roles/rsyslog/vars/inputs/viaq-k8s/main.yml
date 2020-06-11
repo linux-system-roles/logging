@@ -1,6 +1,8 @@
 ---
-# Viaq configuration
-# ---------------------
+# SPDX-License-Identifier: GPLv3
+
+# Viaq input configuration setting
+# --------------------------------
 #
 # __rsyslog_viaq_k8s_packages
 #

@@ -1,8 +1,8 @@
 ---
-# Basic logs configuration set
-# ----------------------------
+# SPDX-License-Identifier: GPLv3
+
+# Basic input configuration setting
+# ---------------------------------
 #
-# __rsyslog_basics_packages
-#
-# List of default rpm packages to install.
+# List of rpm packages to install.
 __rsyslog_basics_packages: []

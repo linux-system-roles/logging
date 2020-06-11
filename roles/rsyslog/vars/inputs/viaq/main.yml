@@ -1,7 +1,9 @@
 ---
-# Viaq configuration
-# ---------------------
-#
+# SPDX-License-Identifier: GPLv3
+
+# Viaq input configuration setting
+# --------------------------------
+
 # __rsyslog_viaq_prereq_packages
 #
 # List of prerequired rpm packages for viaq
