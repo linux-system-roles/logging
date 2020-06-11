@@ -30,6 +30,10 @@ In the nature of logging, there are multiple ways to read logs and multiple ways
 
 To satisfy such requirements, logging role introduced 3 primary variables `logging_inputs`, `logging_outputs`, and `logging_flows`. The inputs are represented in the list of `logging_inputs` dictionary, the outputs are in the list of `logging_outputs` dictionary, and the relationship between them are defined as a list of `logging_flows` dictionary. The details are described in [Logging Configuration](#logging-configuration).
 
+## Requirements
+
+This role is supported on RHEL/CentOS-7, RHEL/CentOS-8 and Fedora distributions.
+
 ## Definitions
 
   - `logging_inputs` - List of logging inputs dictionary to specify input types.
@@ -45,8 +49,6 @@ To satisfy such requirements, logging role introduced 3 primary variables `loggi
   - `logging_flows` - List of logging flows dictionary to define relationships between logging inputs and outputs.
   - [`Rsyslog`](https://www.rsyslog.com/) - The logging role default log provider used for log processing.
   - [`Elasticsearch`](https://www.elastic.co/) - Elasticsearch is a distributed, search and analytic engine for all types of data. One of the supported outputs in the logging role.
-  - `Message Queue` (kafka, amqp) - Not yet implemented
-  - [`Viaq`](https://docs.okd.io/latest/install_config/aggregate_logging.html)- Common Logging based on OpenShift Aggregated Logging (OCP/Origin). - Not yet implemented
 
 ## Logging Configuration
 
@@ -57,24 +59,30 @@ Logging role allows to have variables `logging_inputs`, `logging_outputs`, and `
 Currently, the logging role supports four types of logging [inputs](tasks/inputs/): `basics`, `files`, `ovirt`, and `remote`.  And four types of [outputs](tasks/outputs/): `elasticsearch`, `files`, `forwards`, and `remote_files`.  To deploy configuration files with these inputs and outputs, specify the inputs as `logging_inputs` and the outputs as `logging_outputs`. To define the flows from inputs to outputs, use `logging_flows`.  The `logging_flows` has three keys `name`, `inputs`, and `outputs`, where `inputs` is a list of `logging_inputs name` values and `outputs` is a list of `logging_outputs name` values.
 
 This is a schematic logging configuration to show log messages from input_nameA are passed to output_name0 and output_name1; log messages from input_nameB are passed only to output_name1.
-```
-logging_inputs:
-  - name: input_nameA
-    type: input_typeA
-  - name: input_nameB
-    type: input_typeB
-logging_outputs:
-  - name: output_name0
-    type: output_type0
-  - name: output_name1
-    type: output_type1
-logging_flows:
-  - name: flow_nameX
-    inputs: [input_nameA]
-    outputs: [output_name0, output_name1]
-  - name: flow_nameY
-    inputs: [input_nameB]
-    outputs: [output_name1]
+```yaml
+---
+- name: a schematic logging configuration
+  hosts: all
+  roles:
+    - linux-system-roles.logging
+  vars:
+    logging_inputs:
+      - name: input_nameA
+        type: input_typeA
+      - name: input_nameB
+        type: input_typeB
+    logging_outputs:
+      - name: output_name0
+        type: output_type0
+      - name: output_name1
+        type: output_type1
+    logging_flows:
+      - name: flow_nameX
+        inputs: [input_nameA]
+        outputs: [output_name0, output_name1]
+      - name: flow_nameY
+        inputs: [input_nameB]
+        outputs: [output_name1]
 ```
 ### Variables
 
@@ -87,25 +95,25 @@ logging_flows:
   - `state`: State of the configuration file. `present` or `absent`. Default to `present`.
 
 - `basics` type - `basics` input supports reading logs from systemd journal or systemd unix socket.<br>
-  available keys
+  **available options**
   - `kernel_message`: Load `imklog` if set to `true`. Default to `false`.
   - `use_imuxsock`: Use `imuxsock` instead of `imjournal`. Default to `false`.
-  - `ratelimit_burst`: Maximum number of messages that can be emitted within ratelimit_interval. Default to 20000 if use_imuxsock is false. Default to 200 if use_imuxsock is true.
-  - `ratelimit_interval`: Interval to evaluate rateilmit_burst. Default to 600 seconds if use_imuxsock is false. Default to 0 if use_imuxsock is true. 0 indicates ratelimiting is turned off.
-  - `persist_state_interval`: Journal state is persisted every value messages. Default to 10. Effective only when use_imuxsock is false.
+  - `ratelimit_burst`: Maximum number of messages that can be emitted within ratelimit_interval. Default to `20000` if use_imuxsock is false. Default to `200` if use_imuxsock is true.
+  - `ratelimit_interval`: Interval to evaluate ratelimit_burst. Default to `600` seconds if use_imuxsock is false. Default to `0` if use_imuxsock is true. 0 indicates ratelimiting is turned off.
+  - `persist_state_interval`: Journal state is persisted every value messages. Default to `10`. Effective only when use_imuxsock is false.
 
 - `files` type - `files` input supports reading logs from the local files.<br>
-  available keys 
+  **available options**
   - `input_log_path`: File name to be read by the imfile plugin. The value should be full path. Wildcard '\*' is allowed in the path.  Default to `/var/log/containers/*.log`.
 
 - `ovirt` type - `ovirt` input supports oVirt specific inputs.<br>
    For the details, visit [oVirt Support](../../design_docs/rsyslog_ovirt_support.md).
 
 - `remote` type - `remote` input supports receiving logs from the remote logging system over the network. This input type makes rsyslog a server.<br>
-  available keys
-  - `udp_port`: UDP port number to listen. Default to 514.
-  - `tcp_port`: TCP port number to listen. Default to 514.
-  - `tcp_tls_port`: TLS TCP number to listen. Default to 6515. To use tcp_tls_port, `logging_pki` and `logging_pki_files` need to be configured. They are described in [Other variables](#other-variables).
+  **available options**
+  - `udp_port`: UDP port number to listen. Default to `514`.
+  - `tcp_port`: TCP port number to listen. Default to `514`.
+  - `tcp_tls_port`: TLS TCP number to listen. Default to `6515`. To use tcp_tls_port, `logging_pki` and `logging_pki_files` need to be configured. They are described in [Other variables](#other-variables).
 
 #### Logging_outputs options
 
@@ -116,21 +124,22 @@ logging_flows:
   - `state`: State of the configuration file. `present` or `absent`. Default to `present`.
 
 - `elasticsearch` type - `elasticsearch` output supports sending logs to Elasticsearch. Assuming Elasticsearch is already configured and running.<br>
-  available keys
-  - `server_host`: Host name Elasticsearch is running on. Mandatory.
-  - `server_port`: Port number Elasticsearch is listening to. Default to 9200.
-  - `index_prefix`: Elasticsearch index prefix the particular log will be indexed to. Mandatory.
+  **available options**
+  - `server_host`: Host name Elasticsearch is running on. **Required**.
+  - `server_port`: Port number Elasticsearch is listening to. Default to `9200`.
+  - `index_prefix`: Elasticsearch index prefix the particular log will be indexed to. **Required**.
   - `input_type`: Specifying the input type. Currently only type `ovirt` is supported. Default to `ovirt`.
   - `retryfailures`: Specifying whether retries or not in case of failure. `on` or `off`.  Default to `on`.
-  - `use_cert`: If true, key/certificates are used to access Elasticsearch. Triplets {`ca_cert`, `cert`, key`} and/or {`ca_cert_src`, `cert_src`, `key_src`} should be configured. Default to true.
-  - `ca_cert`: Path to CA cert for Elasticsearch.  Default to '/etc/rsyslog.d/es-ca.crt' - `cert`: Path to cert to connect to Elasticsearch.  Default to '/etc/rsyslog.d/es-cert.pem'.
-  - `key`: Path to key to connect to Elasticsearch.  Default to "/etc/rsyslog.d/es-key.pem".
+  - `use_cert`: If true, key/certificates are used to access Elasticsearch. Triplets {`ca_cert`, `cert`, `key`} and/or {`ca_cert_src`, `cert_src`, `key_src`} should be configured. Default to `true`.
+  - `ca_cert`: Path to CA cert for Elasticsearch.  Default to `/etc/rsyslog.d/es-ca.crt`
+  - `cert`: Path to cert to connect to Elasticsearch.  Default to `/etc/rsyslog.d/es-cert.pem`.
+  - `key`: Path to key to connect to Elasticsearch.  Default to `/etc/rsyslog.d/es-key.pem`.
   - `ca_cert_src`: Local CA cert file path which is copied to the target host. If `ca_cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
   - `cert_src`: Local cert file path which is copied to the target host. If `cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
   - `key_src`: Local key file path which is copied to the target host. If `key` is specified, it is copied to the location. Otherwise, to logging_config_dir.
 
 - `files` type - `files` output supports storing logs in the local files usually in /var/log.<br>
-  available keys
+  **available options**
   - `facility`: Facility; default to `*`.
   - `severity`: Severity; default to `*`.
   - `exclude`: Exclude list; default to none.
@@ -149,21 +158,21 @@ logging_flows:
   ```
 
 - `forwards` type - `forwards` output sends logs to the remote logging system over the network. This is for the client rsyslog.<br>
-  available keys
+  **available options**
   - `facility`: Facility; default to `*`.
   - `severity`: Severity; default to `*`.
   - `protocol`: Protocol; `tcp` or `udp`; default to `tcp`.
-  - `target`: Target host (fqdn). Mandatory.
+  - `target`: Target host (fqdn). **Required**.
   - `port`: Port; default to 514.
 
 - `remote_files` type - `remote_files` output stores logs to the local files per remote host and program name originated the logs.<br>
-  available keys
+  **available options**
   - `facility`: Facility; default to `*`.
   - `severity`: Severity; default to `*`.
   - `exclude`: Exclude list; default to none.
   - `async_writing`: If set to `on`, the files are written asynchronously. Default to `off`.
-  - `client_count`: Count of client logging system supported this rsyslog server. Default to 10.
-  - `io_buffer_size`: Buffer size used to write output data. Default to 65536 bytes.
+  - `client_count`: Count of client logging system supported this rsyslog server. Default to `10`.
+  - `io_buffer_size`: Buffer size used to write output data. Default to `65536` bytes.
   - `remote_log_path`: Full path to store the filtered logs.
                        This is an example to support the per host output log files
                        `/path/to/output/dir/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log`
@@ -225,24 +234,24 @@ These variables are set in the same level of the `logging_inputs`, `logging_outp
                      /etc/pki/tls/private/key.pem for key
 ``` 
 Security parameters
-- `logging_pki_authmode`: Specify the default network driver authentication mode. `x509/name` or `anon` are available: Default to "x509/name".
-- `logging_domain`: The default DNS domain used to accept remote incoming logs from remote hosts. Default to {{ ansible_domain if ansible_domain else ansible_hostname }}
+- `logging_pki_authmode`: Specify the default network driver authentication mode. `x509/name` or `anon` are available: Default to `x509/name`.
+- `logging_domain`: The default DNS domain used to accept remote incoming logs from remote hosts. Default to "{{ ansible_domain if ansible_domain else ansible_hostname }}"
 - `logging_permitted_peers`: List of hostnames, IP addresses or wildcard DNS domains which will be allowed by the `logging` server to connect and send logs over TLS.  Default to ['\*.{{ logging_domain }}']
-- `logging_send_permitted_peers`: List of hostnames, IP addresses or wildcard DNS domains which will be verified by the `logging` client and will allow to send logs to the remote server over TLS. Default to '{{ logging_permitted_peers }}'.
+- `logging_send_permitted_peers`: List of hostnames, IP addresses or wildcard DNS domains which will be verified by the `logging` client and will allow to send logs to the remote server over TLS. Default to "{{ logging_permitted_peers }}".
 
 Server Performance optimization
-- `logging_tcp_threads`: Input thread count listening on the tcp port. Default to 1.
-- `logging_udp_threads`: Input thread count listening on the udp port. Default to 1.
-- `logging_udp_system_time_requery`: Every `value` OS system calls, get the system time. Recommend not to set above 10. Default to 2 times.
-- `logging_udp_batch_size`: Maximum number of udp messages per OS system call. Recommend not to set above 128. Default to 32.
+- `logging_tcp_threads`: Input thread count listening on the tcp port. Default to `1`.
+- `logging_udp_threads`: Input thread count listening on the udp port. Default to `1`.
+- `logging_udp_system_time_requery`: Every `value` OS system calls, get the system time. Recommend not to set above 10. Default to `2` times.
+- `logging_udp_batch_size`: Maximum number of udp messages per OS system call. Recommend not to set above 128. Default to `32`.
 - `logging_server_queue_type`: Type of queue. `FixedArray` is available. Default to `LinkedList`.
-- `logging_server_queue_size`: Maximum number of messages in the queue. Default to 50000.
+- `logging_server_queue_size`: Maximum number of messages in the queue. Default to `50000`.
 - `logging_server_threads`: Number of worker threads. Default to `logging_tcp_threads` + `logging_udp_threads`.
 
 - `logging_mark`: Mark message periodically by immark, if set to `true`. Default to `false`.
-- `logging_mark_interval`: Interval for `logging_mark` in seconds. Default to 3600.
+- `logging_mark_interval`: Interval for `logging_mark` in seconds. Default to `3600`.
 - `logging_purge_original_conf`: `true` or `false`. If set to `true`, files in /etc/rsyslog.d are purged.
-- `logging_system_log_dir`: Directory where the local log output files are placed. Default to /var/log.
+- `logging_system_log_dir`: Directory where the local log output files are placed. Default to `/var/log`.
 
 ### Update and Delete
 
@@ -271,217 +280,276 @@ logging_flows:
 ### Standalone configuration
 
 1. Deploying `basics input` reading logs from systemd journal and implicit `files output` to write to the local files.
+```yaml
+---
+- name: Deploying basics input and implicit files output
+  hosts: all
+  roles:
+    - linux-system-roles.logging
+  vars:
+    logging_inputs:
+      - name: system_input
+        type: basics
 ```
-logging_inputs:
-  - name: system_input
-    type: basics
-```
-This is identical to the following setup.
-```
-logging_inputs:
-  - name: system_input
-    type: basics
-logging_outputs:
-  - name: files_output
-    type: files
-logging_flows:
-  - name: flow0
-    inputs: [system_input]
-    outputs: [files_output]
+The following playbook generates the same logging configuration files.
+```yaml
+---
+- name: Deploying basics input and files output
+  hosts: all
+  roles:
+    - linux-system-roles.logging
+  vars:
+    logging_inputs:
+      - name: system_input
+        type: basics
+    logging_outputs:
+      - name: files_output
+        type: files
+    logging_flows:
+      - name: flow0
+        inputs: [system_input]
+        outputs: [files_output]
 ```
 
 2. Deploying `basics input` reading logs from systemd unix socket and `files output` to write to the local files.
-```
-logging_inputs:
-  - name: system_input
-    type: basics
-    use_imuxsock: true
-logging_outputs:
-  - name: files_output
-    type: files
-logging_flows:
-  - name: flow0
-    inputs: [system_input]
-    outputs: [files_output]
-```
-
-3. Deploying `basics input` reading logs from systemd journal and `files output` to write to the configured local files.
-
-```
-logging_inputs:
-  - name: system_input
-    type: basics
-logging_outputs:
-  - name: files_output0
-    type: files
-    severity: info
-    exclude:
-      - authpriv.none
-      - auth.none
-      - cron.none
-      - mail.none
-    path: /var/log/messages
-  - name: files_output1
-    type: files
-    facility: authpriv,auth
-    path: /var/log/secure
-logging_flows:
-  - name: flow0
-    inputs: [system_input]
-    outputs: [files_output0, files_output1]
+```yaml
+---
+- name: Deploying basics input using systemd unix socket and files output
+  hosts: all
+  roles:
+    - linux-system-roles.logging
+  vars:
+    logging_inputs:
+      - name: system_input
+        type: basics
+        use_imuxsock: true
+    logging_outputs:
+      - name: files_output
+        type: files
+    logging_flows:
+      - name: flow0
+        inputs: [system_input]
+        outputs: [files_output]
 ```
 
-4. Deploying `files input` reading logs from local files and `files output` to write to the configured local files.
+3. Deploying `basics input` reading logs from systemd journal and `files output` to write to the individually configured local files.
+```yaml
+---
+- name: Deploying basic input and configured files output
+  hosts: all
+  roles:
+    - linux-system-roles.logging
+  vars:
+    logging_inputs:
+      - name: system_input
+        type: basics
+    logging_outputs:
+      - name: files_output0
+        type: files
+        severity: info
+        exclude:
+          - authpriv.none
+          - auth.none
+          - cron.none
+          - mail.none
+        path: /var/log/messages
+      - name: files_output1
+        type: files
+        facility: authpriv,auth
+        path: /var/log/secure
+    logging_flows:
+      - name: flow0
+        inputs: [system_input]
+        outputs: [files_output0, files_output1]
 ```
-        logging_inputs:
-          - name: files_input0
-            type: files
-            input_log_path: /var/log/containerA/*.log
-          - name: files_input1
-            type: files
-            input_log_path: /var/log/containerB/*.log
-        logging_outputs:
-          - name: files_output0
-            type: files
-            severity: info
-            exclude:
-              - authpriv.none
-              - auth.none
-              - cron.none
-              - mail.none
-            path: /var/log/messages
-          - name: files_output1
-            type: files
-            facility: authpriv,auth
-            path: /var/log/secure
-        logging_flows:
-          - name: flow0
-            inputs: [files_input0, files_input1]
-            outputs: [files_output0, files_output1]
+
+4. Deploying `files input` reading logs from local files and `files output` to write to the individually configured local files.
+```yaml
+---
+- name: Deploying files input and configured files output
+  hosts: all
+  roles:
+    - linux-system-roles.logging
+  vars:
+    logging_inputs:
+      - name: files_input0
+        type: files
+        input_log_path: /var/log/containerA/*.log
+      - name: files_input1
+        type: files
+        input_log_path: /var/log/containerB/*.log
+    logging_outputs:
+      - name: files_output0
+        type: files
+        severity: info
+        exclude:
+          - authpriv.none
+          - auth.none
+          - cron.none
+          - mail.none
+        path: /var/log/messages
+      - name: files_output1
+        type: files
+        facility: authpriv,auth
+        path: /var/log/secure
+    logging_flows:
+      - name: flow0
+        inputs: [files_input0, files_input1]
+        outputs: [files_output0, files_output1]
 ```
 
 5. Deploying `files input` reading logs from a local file and `elasticsearch output` to store the logs. Assuming the ca_cert, cert and key to connect to Elasticsearch are prepared.
-```
-        logging_inputs:
-          - name: files_input
-            type: files
-            input_log_path: /var/log/containers/*.log
-        logging_outputs:
-          - name: elasticsearch_output
-            type: elasticsearch
-            server_host: your_target_host
-            server_port: 9200
-            index_prefix: project.
-            input_type: ovirt
-            ca_cert_src: /local/path/to/ca_cert
-            cert_src: /local/path/to/cert
-            key_src: /local/path/to/key
-        logging_flows:
-          - name: flow0
-            inputs: [files_input]
-            outputs: [elasticsearch_output]
+```yaml
+---
+- name: Deploying basic input and elasticsearch output
+  hosts: all
+  roles:
+    - linux-system-roles.logging
+  vars:
+    logging_inputs:
+      - name: files_input
+        type: files
+        input_log_path: /var/log/containers/*.log
+    logging_outputs:
+      - name: elasticsearch_output
+        type: elasticsearch
+        server_host: your_target_host
+        server_port: 9200
+        index_prefix: project.
+        input_type: ovirt
+        ca_cert_src: /local/path/to/ca_cert
+        cert_src: /local/path/to/cert
+        key_src: /local/path/to/key
+    logging_flows:
+      - name: flow0
+        inputs: [files_input]
+        outputs: [elasticsearch_output]
 ```
 
 ### Client configuration
 
 1. Deploying `basics input` reading logs from systemd journal and `forwards output` to forward the logs to the remote rsyslog.
-```
-logging_inputs:
-  - name: basic_input
-    type: basics
-logging_outputs:
-  - name: forward_output0
-    type: forwards
-    severity: info
-    protocol: udp
-    target: your_target_hostname
-    port: 514
-  - name: forward_output1
-    type: forwards
-    facility: mail
-    protocol: tcp
-    target: your_target_hostname
-    port: 514
-logging_flows:
-  - name: flows0
-    inputs: [basic_input]
-    outputs: [forward_output0, forward_output1]
+```yaml
+---
+- name: Deploying basics input and forwards output
+  hosts: clients
+  roles:
+    - linux-system-roles.logging
+  vars:
+    logging_inputs:
+      - name: basic_input
+        type: basics
+    logging_outputs:
+      - name: forward_output0
+        type: forwards
+        severity: info
+        protocol: udp
+        target: your_target_hostname
+        port: 514
+      - name: forward_output1
+        type: forwards
+        facility: mail
+        protocol: tcp
+        target: your_target_hostname
+        port: 514
+    logging_flows:
+      - name: flows0
+        inputs: [basic_input]
+        outputs: [forward_output0, forward_output1]
 ```
 
 2. Deploying `files input` reading logs from a local file and `forwards output` to forward the logs to the remote rsyslog over tls. Assuming the ca_cert, cert and key files are prepared. The files are deployed to the default location `/etc/pki/tls/certs/`, `/etc/pki/tls/certs/`, and `/etc/pki/tls/private`, respectively.
-```
-logging_pki: tls
-logging_pki_files:
-  - type: ca_cert
-    src: /local/path/to/ca_cert
-  - type: cert
-    src: /local/path/to/cert
-  - type: key
-    src: /local/path/to/key
-logging_inputs:
-  - name: files_input
-    type: files
-    input_log_path: /var/log/containers/*.log
-logging_outputs:
-  - name: forwards_output
-    type: forwards
-    protocol: tcp
-    target: your_target_host
-    port: 6514
-logging_flows:
-  - name: flows0
-    inputs: [basic_input]
-    outputs: [forwards-severity_and_facility]
+```yaml
+---
+- name: Deploying files input and forwards output with certs
+  hosts: clients
+  roles:
+    - linux-system-roles.logging
+  vars:
+    logging_pki: tls
+    logging_pki_files:
+      - type: ca_cert
+        src: /local/path/to/ca_cert
+      - type: cert
+        src: /local/path/to/cert
+      - type: key
+        src: /local/path/to/key
+    logging_inputs:
+      - name: files_input
+        type: files
+        input_log_path: /var/log/containers/*.log
+    logging_outputs:
+      - name: forwards_output
+        type: forwards
+        protocol: tcp
+        target: your_target_host
+        port: 6514
+    logging_flows:
+      - name: flows0
+        inputs: [basic_input]
+        outputs: [forwards-severity_and_facility]
 ```
 
 ### Server configuration
 
 1. Deploying `remote input` reading logs from remote rsyslog and `remote_files output` to write the logs to the local files under the directory named by the remote host name.
-```
-logging_inputs:
-  - name: remote_udp_input
-    type: remote
-    udp_port: 514
-  - name: remote_tcp_input
-    type: remote
-    tcp_port: 514
-logging_outputs:
-  - name: remote_files_output
-    type: remote_files
-logging_flows:
-  - name: flow_0
-    inputs: [remote_udp_input, remote_tcp_input]
-    outputs: [remote_files_output]
+```yaml
+---
+- name: Deploying remote input and remote_files output
+  hosts: server
+  roles:
+    - linux-system-roles.logging
+  vars:
+    logging_inputs:
+      - name: remote_udp_input
+        type: remote
+        udp_port: 514
+      - name: remote_tcp_input
+        type: remote
+        tcp_port: 514
+    logging_outputs:
+      - name: remote_files_output
+        type: remote_files
+    logging_flows:
+      - name: flow_0
+        inputs: [remote_udp_input, remote_tcp_input]
+        outputs: [remote_files_output]
 ```
 
 2. Deploying `remote input` reading logs from remote rsyslog and `remote_files output` to write the logs to the configured local files with the tls setup supporting 20 clients. Assuming the ca_cert, cert and key files are prepared. The files are deployed to the default location `/etc/pki/tls/certs/`, `/etc/pki/tls/certs/`, and `/etc/pki/tls/private`, respectively.
-```
-logging_pki: tls
-logging_pki_files:
-  - type: ca_cert
-    src: /local/path/to/ca_cert
-  - type: cert
-    src: /local/path/to/cert
-  - type: key
-    src: /local/path/to/key
-logging_inputs:
-  - name: remote_tcp_input
-    type: remote
-    tcp_tls_port: 6514
-logging_outputs:
-  - name: remote_files_output0
-    type: remote_files
-    remote_log_path: /var/log/remote/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log
-    async_writing: on
-    client_count: 20
-    io_buffer_size: 8192
-  - name: remote_files_output1
-    type: remote_files
-    remote_sub_path: others/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log
-logging_flows:
-  - name: flow_0
-    inputs: [remote_udp_input, remote_tcp_input]
-    outputs: [remote_files_output0, remote_files_output1]
+```yaml
+---
+- name: Deploying remote input and remote_files output with certs
+  hosts: server
+  roles:
+    - linux-system-roles.logging
+  vars:
+    logging_pki: tls
+    logging_pki_files:
+      - type: ca_cert
+        src: /local/path/to/ca_cert
+      - type: cert
+        src: /local/path/to/cert
+      - type: key
+        src: /local/path/to/key
+    logging_inputs:
+      - name: remote_tcp_input
+        type: remote
+        tcp_tls_port: 6514
+    logging_outputs:
+      - name: remote_files_output0
+        type: remote_files
+        remote_log_path: /var/log/remote/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log
+        async_writing: on
+        client_count: 20
+        io_buffer_size: 8192
+      - name: remote_files_output1
+        type: remote_files
+        remote_sub_path: others/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log
+    logging_flows:
+      - name: flow_0
+        inputs: [remote_udp_input, remote_tcp_input]
+        outputs: [remote_files_output0, remote_files_output1]
 ```
 
 ## Providers
