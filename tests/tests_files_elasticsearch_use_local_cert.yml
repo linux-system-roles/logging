@@ -63,7 +63,7 @@
             server_port: 9200
             index_prefix: project.
             input_type: ovirt
-            retryfailures: off
+            retryfailures: false
             ca_cert_src: "{{ __test_ca_cert }}"
             cert_src: "{{ __test_cert }}"
             key_src: "{{ __test_key }}"

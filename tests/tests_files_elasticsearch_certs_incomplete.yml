@@ -57,7 +57,7 @@
                 server_port: 9200
                 index_prefix: project.
                 input_type: ovirt
-                retryfailures: off
+                retryfailures: false
                 ca_cert: /etc/rsyslog.d/ca_cert.crt
                 key: /etc/rsyslog.d/key.pem
                 cert_src: "{{ __test_cert }}"
