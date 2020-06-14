@@ -21,7 +21,7 @@ logging_outputs:
     server_port: 9200
     index_prefix: project.
     input_type: ovirt
-    retryfailures: off
+    retryfailures: false
     ca_cert: "/etc/rsyslog.d/es-ca.crt"
     cert: "/etc/rsyslog.d/es-cert.pem"
     key: "/etc/rsyslog.d/es-key.pem"
@@ -103,7 +103,7 @@ logging_outputs:
     server_port: 9200
     index_prefix: project.
     input_type: ovirt
-    retryfailures: off
+    retryfailures: false
     ca_cert: "/etc/rsyslog.d/es-ca.crt"
     cert: "/etc/rsyslog.d/es-cert.pem"
     key: "/etc/rsyslog.d/es-key.pem"

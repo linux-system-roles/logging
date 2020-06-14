@@ -129,7 +129,7 @@ This is a schematic logging configuration to show log messages from input_nameA 
   - `server_port`: Port number Elasticsearch is listening to. Default to `9200`.
   - `index_prefix`: Elasticsearch index prefix the particular log will be indexed to. **Required**.
   - `input_type`: Specifying the input type. Currently only type `ovirt` is supported. Default to `ovirt`.
-  - `retryfailures`: Specifying whether retries or not in case of failure. `on` or `off`.  Default to `on`.
+  - `retryfailures`: Specifying whether retries or not in case of failure. Allowed value is `true` or `false`.  Default to `true`.
   - `use_cert`: If true, key/certificates are used to access Elasticsearch. Triplets {`ca_cert`, `cert`, `key`} and/or {`ca_cert_src`, `cert_src`, `key_src`} should be configured. Default to `true`.
   - `ca_cert`: Path to CA cert for Elasticsearch.  Default to `/etc/rsyslog.d/es-ca.crt`
   - `cert`: Path to cert to connect to Elasticsearch.  Default to `/etc/rsyslog.d/es-cert.pem`.
@@ -170,7 +170,7 @@ This is a schematic logging configuration to show log messages from input_nameA 
   - `facility`: Facility; default to `*`.
   - `severity`: Severity; default to `*`.
   - `exclude`: Exclude list; default to none.
-  - `async_writing`: If set to `on`, the files are written asynchronously. Default to `off`.
+  - `async_writing`: If set to `true`, the files are written asynchronously. Allowed value is `true` or `false`. Default to `false`.
   - `client_count`: Count of client logging system supported this rsyslog server. Default to `10`.
   - `io_buffer_size`: Buffer size used to write output data. Default to `65536` bytes.
   - `remote_log_path`: Full path to store the filtered logs.

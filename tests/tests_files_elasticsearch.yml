@@ -37,7 +37,7 @@
             server_port: 9200
             index_prefix: project.
             input_type: ovirt
-            retryfailures: off
+            retryfailures: false
             use_cert: false
           - name: elasticsearch_output_ops
             type: elasticsearch
@@ -45,7 +45,7 @@
             server_port: 9200
             index_prefix: .operations.
             input_type: viaq
-            retryfailures: off
+            retryfailures: false
             use_cert: false
         logging_inputs:
           - name: files_input

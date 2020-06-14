@@ -38,7 +38,7 @@
                 server_port: 9200
                 index_prefix: project.
                 input_type: ovirt
-                retryfailures: off
+                retryfailures: false
                 use_cert: true
             logging_inputs:
               - name: files_input
