@@ -540,7 +540,7 @@ The following playbook generates the same logging configuration files.
       - name: remote_files_output0
         type: remote_files
         remote_log_path: /var/log/remote/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log
-        async_writing: on
+        async_writing: true
         client_count: 20
         io_buffer_size: 8192
       - name: remote_files_output1
