@@ -39,7 +39,7 @@
               - authpriv.none
             client_count: 20
             io_buffer_size: 8192
-            async_writing: on
+            async_writing: true
           - name: remote_files_output1
             type: remote_files
             remote_sub_path: others/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log
