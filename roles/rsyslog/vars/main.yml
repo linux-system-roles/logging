@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: GPLv3
+# SPDX-License-Identifier: GPL-3.0-only
 # __rsyslog_base_packages
 #
 # List of default rpm packages to install.
