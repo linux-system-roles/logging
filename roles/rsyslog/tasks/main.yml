@@ -1,5 +1,5 @@
 ---
-# SPDX-License-Identifier: GPLv3
+# SPDX-License-Identifier: GPL-3.0-only
 
 - name: Set version specific variables
   include_vars: "{{ item }}"
