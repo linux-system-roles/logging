@@ -4,7 +4,7 @@
     __rsyslog_packages: "{{ __rsyslog_newinput_input_packages }}"
     __rsyslog_rules: "{{ __rsyslog_newinput_input_rules }}"
   include_tasks:
-    file: deploy.yml
+    file: "{{ role_path }}/tasks/deploy.yml"
 
 - name: Create newinput input configuration files in /etc/rsyslog.d
   vars:
@@ -18,6 +18,6 @@
         sections:
           - options: "{{ lookup('template', 'input_newinput.j2') }}"
   include_tasks:
-    file: deploy.yml
+    file: "{{ role_path }}/tasks/deploy.yml"
   loop: '{{ logging_inputs }}'
   when: item.type | d() == 'newinput'

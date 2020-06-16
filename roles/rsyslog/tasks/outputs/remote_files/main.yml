@@ -9,5 +9,5 @@
         sections:
           - options: "{{ lookup('template', 'output_remote_files.j2') }}"
   include_tasks:
-    file: deploy.yml
+    file: "{{ role_path }}/tasks/deploy.yml"
   loop: '{{ rsyslog_output_remote_files }}'

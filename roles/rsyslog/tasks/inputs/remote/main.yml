@@ -9,7 +9,7 @@
         sections:
           - options: "{{ lookup('template', 'input_remote_module.j2') }}"
   include_tasks:
-    file: deploy.yml
+    file: "{{ role_path }}/tasks/deploy.yml"
 
 - name: Create basics input configuration files in /etc/rsyslog.d
   vars:
@@ -24,6 +24,6 @@
         sections:
           - options: "{{ lookup('template', 'input_remote.j2') }}"
   include_tasks:
-    file: deploy.yml
+    file: "{{ role_path }}/tasks/deploy.yml"
   loop: '{{ logging_inputs }}'
   when: item.type | d() == 'remote'

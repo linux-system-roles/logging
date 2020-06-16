@@ -5,7 +5,7 @@
     __rsyslog_packages: "{{ __rsyslog_files_input_packages }}"
     __rsyslog_rules: "{{ __rsyslog_files_input_rules }}"
   include_tasks:
-    file: deploy.yml
+    file: "{{ role_path }}/tasks/deploy.yml"
 
 - name: Create files input configuration files in /etc/rsyslog.d
   vars:
@@ -21,7 +21,7 @@
               input(type="imfile" file="{{ item.input_log_path }}" tag="{{ item.name }}")
               {{ lookup('template', 'input_template.j2') }}
   include_tasks:
-    file: deploy.yml
+    file: "{{ role_path }}/tasks/deploy.yml"
   loop: '{{ logging_inputs }}'
   when:
     - item.type | d() == 'files'

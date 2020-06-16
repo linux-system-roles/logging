@@ -5,7 +5,7 @@
     __rsyslog_packages: "{{ __rsyslog_basics_packages }}"
     __rsyslog_rules: []
   include_tasks:
-    file: deploy.yml
+    file: "{{ role_path }}/tasks/deploy.yml"
 
 - name: Create basics input configuration files in /etc/rsyslog.d
   vars:
@@ -19,7 +19,7 @@
         sections:
           - options: "{{ lookup('template', __rsyslog_input_basics) }}"
   include_tasks:
-    file: deploy.yml
+    file: "{{ role_path }}/tasks/deploy.yml"
   loop: '{{ logging_inputs }}'
   loop_control:
     extended: yes
