@@ -72,7 +72,7 @@
     __rsyslog_packages: "{{ __rsyslog_elasticsearch_packages }}"
     __rsyslog_rules: "{{ __rsyslog_elasticsearch_rules }}"
   include_tasks:
-    file: deploy.yml
+    file: "{{ role_path }}/tasks/deploy.yml"
 
 - name: Create elasticsearch output configuration files in /etc/rsyslog.d
   vars:
@@ -85,5 +85,5 @@
         sections:
           - options: "{{ lookup('template', 'output_elasticsearch.j2') }}"
   include_tasks:
-    file: deploy.yml
+    file: "{{ role_path }}/tasks/deploy.yml"
   loop: '{{ rsyslog_output_elasticsearch }}'

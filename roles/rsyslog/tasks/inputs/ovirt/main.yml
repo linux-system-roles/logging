@@ -5,7 +5,7 @@
     __rsyslog_packages: "{{ __rsyslog_ovirt_prereq_packages + __rsyslog_ovirt_packages }}"
     __rsyslog_rules: "{{ __rsyslog_ovirt_rules }}"
   include_tasks:
-    file: deploy.yml
+    file: "{{ role_path }}/tasks/deploy.yml"
 
 - name: Create oVirt input configuration files in /etc/rsyslog.d
   vars:
@@ -17,7 +17,7 @@
           - options: "{{ lookup('template', 'input_ovirt.j2') }}"
         state: "{{ item.state | d('present') }}"
   include_tasks:
-    file: deploy.yml
+    file: "{{ role_path }}/tasks/deploy.yml"
   loop: '{{ logging_inputs }}'
   when:
     - item.type | d('') == 'ovirt'

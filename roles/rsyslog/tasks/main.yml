@@ -4,11 +4,14 @@
 - name: Set version specific variables
   include_vars: "{{ item }}"
   with_first_found:
-    - "{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
-    - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
-    - "{{ ansible_distribution }}.yml"
-    - "{{ ansible_os_family }}.yml"
-    - default.yml
+    - files:
+        - "{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
+        - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+        - "{{ ansible_distribution }}.yml"
+        - "{{ ansible_os_family }}.yml"
+        - default.yml
+      paths:
+        - "{{ role_path }}/vars"
 
 - name: Install/Update required packages
   package:
@@ -176,7 +179,7 @@
 
     - name: Include input sub-vars
       include_vars:
-        file: "{{ varfile }}"
+        file: "{{ role_path }}/vars/{{ varfile }}"
       vars:
         varfile: "inputs/{{ input_item.type }}/main.yml"
       loop: "{{ logging_inputs | flatten(1) }}"
@@ -192,7 +195,7 @@
       include_tasks:
         file: "{{ tasks }}"
       vars:
-        tasks: "inputs/{{ input_item.type }}/main.yml"
+        tasks: "{{ role_path }}/tasks/inputs/{{ input_item.type }}/main.yml"
       loop: "{{ logging_inputs | flatten(1) }}"
       loop_control:
         loop_var: input_item
@@ -204,7 +207,7 @@
 
     - name: Include output sub-vars
       include_vars:
-        file: "{{ varfile }}"
+        file: "{{ role_path }}/vars/{{ varfile }}"
       vars:
         varfile: "outputs/{{ output_item.type }}/main.yml"
       loop: "{{ rsyslog_outputs | flatten(1) }}"
@@ -220,7 +223,7 @@
       include_tasks:
         file: "{{ tasks }}"
       vars:
-        tasks: "outputs/{{ output_item.type }}/main.yml"
+        tasks: "{{ role_path }}/tasks/outputs/{{ output_item.type }}/main.yml"
       loop: "{{ rsyslog_outputs | flatten(1) }}"
       loop_control:
         loop_var: output_item
