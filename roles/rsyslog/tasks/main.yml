@@ -1,17 +1,15 @@
 ---
 # SPDX-License-Identifier: GPL-3.0-only
 
-- name: Set version specific variables
+- name: Set platform/version specific variables
   include_vars: "{{ item }}"
-  with_first_found:
-    - files:
-        - "{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
-        - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
-        - "{{ ansible_distribution }}.yml"
-        - "{{ ansible_os_family }}.yml"
-        - default.yml
-      paths:
-        - "{{ role_path }}/vars"
+  loop:
+    - "{{ role_path }}/vars/default.yml"
+    - "{{ role_path }}/vars/{{ ansible_facts['os_family'] }}.yml"
+    - "{{ role_path }}/vars/{{ ansible_facts['distribution'] }}.yml"
+    - "{{ role_path }}/vars/{{ ansible_facts['distribution'] }}_{{ ansible_facts['distribution_major_version'] }}.yml"
+    - "{{ role_path }}/vars/{{ ansible_facts['distribution'] }}_{{ ansible_facts['distribution_version'] }}.yml"
+  when: item is file
 
 - name: Install/Update required packages
   package:
