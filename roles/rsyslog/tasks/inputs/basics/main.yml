@@ -9,8 +9,6 @@
 
 - name: Create basics input configuration files in /etc/rsyslog.d
   vars:
-    __rsyslog_input_name: "{{ item.name }}"
-    __rsyslog_input_type: "{{ item.type }}"
     __rsyslog_packages: []
     __rsyslog_rules:
       - name: "input-basics-{{ item.name }}"

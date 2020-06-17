@@ -6,6 +6,7 @@
     name: "{{ __rsyslog_packages }}"
     state: latest
   when:
+    - __rsyslog_packages | length > 0
     - not rsyslog_in_image | bool
   notify: restart rsyslogd
 
