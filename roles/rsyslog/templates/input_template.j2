@@ -1,13 +1,9 @@
-{% set rsyslog_flows = logging_flows | d([ {"name": "default_flow", "inputs": [ __rsyslog_input_name ], "outputs": ["default_files"]} ], true) %}
-{% set indict = {} %}
-{% for input in logging_inputs %}
-{%   set _ = indict.__setitem__(input.name, input) %}
-{% endfor %}
+{% set rsyslog_flows = logging_flows | d([ {"name": "default_flow", "inputs": [ item.name ], "outputs": ["default_files"]} ], true) %}
 {% set outdict = {} %}
 {% for flow in rsyslog_flows %}
-{%   if flow.inputs | intersect([ __rsyslog_input_name ]) %}
+{%   if flow.inputs | intersect([ item.name ]) %}
 {%     for oname in flow.outputs %}
-{%       set _ = outdict.__setitem__(oname, outdict.get(oname,[])|union([ __rsyslog_input_name ])) %}
+{%       set _ = outdict.__setitem__(oname, outdict.get(oname,[])|union([ item.name ])) %}
 {%     endfor %}
 {%   endif %}
 {% endfor %}
@@ -15,17 +11,16 @@
 {%   if outdict[output.name] | d(false) %}
 if
 {%     for inputname in outdict[output.name] %}
-{%       if inputname == __rsyslog_input_name %}
+{%       if inputname == item.name %}
 {%         if not loop.first %}
   or
 {%         endif %}
-{%         set input = indict[inputname] %}
-{%         if input.type == "basics" %}
+{%         if item.type == "basics" %}
   ($inputname == "imjournal" or $inputname == "imuxsock")
-{%         elif input.type == "remote" %}
-  ($inputname == "{{ input.name }}" )
-{%         elif input.type == __rsyslog_input_type %}
-  ($syslogtag == "{{ input.name }}")
+{%         elif item.type == "remote" %}
+  ($inputname == "{{ item.name }}" )
+{%         else %}
+  ($syslogtag == "{{ item.name }}")
 {%         endif %}
 {%       endif %}
 {%     endfor %}
