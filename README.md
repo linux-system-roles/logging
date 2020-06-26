@@ -132,13 +132,13 @@ This is a schematic logging configuration to show log messages from input_nameA 
   - `index_prefix`: Elasticsearch index prefix the particular log will be indexed to. **Required**.
   - `input_type`: Specifying the input type. Currently only type `ovirt` is supported. Default to `ovirt`.
   - `retryfailures`: Specifying whether retries or not in case of failure. Allowed value is `true` or `false`.  Default to `true`.
-  - `use_cert`: If true, key/certificates are used to access Elasticsearch. Triplets {`ca_cert`, `cert`, `key`} and/or {`ca_cert_src`, `cert_src`, `key_src`} should be configured. Default to `true`.
+  - `use_cert`: If true, key/certificates are used to access Elasticsearch. Triplets {`ca_cert`, `cert`, `private_key`} and/or {`ca_cert_src`, `cert_src`, `private_key_src`} should be configured. Default to `true`.
   - `ca_cert`: Path to CA cert for Elasticsearch.  Default to `/etc/rsyslog.d/es-ca.crt`
   - `cert`: Path to cert to connect to Elasticsearch.  Default to `/etc/rsyslog.d/es-cert.pem`.
-  - `key`: Path to key to connect to Elasticsearch.  Default to `/etc/rsyslog.d/es-key.pem`.
+  - `private_key`: Path to key to connect to Elasticsearch.  Default to `/etc/rsyslog.d/es-key.pem`.
   - `ca_cert_src`: Local CA cert file path which is copied to the target host. If `ca_cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
   - `cert_src`: Local cert file path which is copied to the target host. If `cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
-  - `key_src`: Local key file path which is copied to the target host. If `key` is specified, it is copied to the location. Otherwise, to logging_config_dir.
+  - `private_key_src`: Local key file path which is copied to the target host. If `private_key` is specified, it is copied to the location. Otherwise, to logging_config_dir.
 
 - `files` type - `files` output supports storing logs in the local files usually in /var/log.<br>
   **available options**
@@ -440,7 +440,7 @@ The following playbook generates the same logging configuration files.
         input_type: ovirt
         ca_cert_src: /local/path/to/ca_cert
         cert_src: /local/path/to/cert
-        key_src: /local/path/to/key
+        private_key_src: /local/path/to/key
     logging_flows:
       - name: flow0
         inputs: [files_input]

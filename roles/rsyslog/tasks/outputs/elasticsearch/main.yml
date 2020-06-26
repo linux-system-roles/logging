@@ -19,21 +19,21 @@
 
     - name: Copy local Elasticsearch keys to /etc/rsyslog.d directory in Rsyslog
       copy:
-        src: '{{ item.key_src }}'
-        dest: '{{ item.key | d(__rsyslog_config_dir) }}'
+        src: '{{ item.private_key_src }}'
+        dest: '{{ item.private_key | d(__rsyslog_config_dir) }}'
       with_items:
         - '{{ rsyslog_output_elasticsearch }}'
-      when: item.key_src | d()
+      when: item.private_key_src | d()
 
     - name: Check certs - use_cert is true, but triplets are not given
       fail:
-        msg: "Error: you specified use_cert: true; you must specify all 3 of ca_cert, cert, key, or all 3 of ca_cert_src, cert_src, key_src, or set use_cert: false in the elasticsearch output named {{ item.name }}"
+        msg: "Error: you specified use_cert: true; you must specify all 3 of ca_cert, cert, private_key, or all 3 of ca_cert_src, cert_src, private_key_src, or set use_cert: false in the elasticsearch output named {{ item.name }}"
       with_items:
         - '{{ rsyslog_output_elasticsearch }}'
       when:
         - item.use_cert | d(true)
-        - not ((item.ca_cert | d() and item.cert | d() and item.key | d()) or
-               (item.ca_cert_src | d() and item.cert_src | d() and item.key_src | d()))
+        - not ((item.ca_cert | d() and item.cert | d() and item.private_key | d()) or
+               (item.ca_cert_src | d() and item.cert_src | d() and item.private_key_src | d()))
 
     - name: Update ca_cert path to /etc/rsyslog.d directory in Rsyslog
       set_fact:
@@ -42,11 +42,11 @@
           {{ [ item |
                combine( { 'ca_cert': item.ca_cert | d(__rsyslog_config_dir + '/' + item.ca_cert_src | basename),
                           'cert': item.cert | d(__rsyslog_config_dir + '/' + item.cert_src | basename),
-                          'key': item.key | d(__rsyslog_config_dir + '/' + item.key_src | basename) } )
+                          'private_key': item.private_key | d(__rsyslog_config_dir + '/' + item.private_key_src | basename) } )
           ] }}
       with_items:
         - '{{ rsyslog_output_elasticsearch }}'
-      when: item.ca_cert_src | d() or item.cert_src | d() or item.key_src | d()
+      when: item.ca_cert_src | d() or item.cert_src | d() or item.private_key_src | d()
 
     - name: Check certs - key/certs data are provided, but use_cert is false
       fail:
@@ -55,8 +55,8 @@
         - '{{ rsyslog_output_elasticsearch }}'
       when:
         - not (item.use_cert | d(true))
-        - item.ca_cert | d() or item.cert | d() or item.key | d()
-        - item.ca_cert_src | d() or item.cert_src | d() or item.key_src | d()
+        - item.ca_cert | d() or item.cert | d() or item.private_key | d()
+        - item.ca_cert_src | d() or item.cert_src | d() or item.private_key_src | d()
 
     - name: Set updated rsyslog_output_elasticsearch
       set_fact:
