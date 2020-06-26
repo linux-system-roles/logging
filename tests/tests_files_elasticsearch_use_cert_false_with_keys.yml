@@ -2,8 +2,8 @@
 #
 # Elasticsearch output has this policy:
 #   use_cert: If true, key/certificates are used to access Elasticsearch.
-#             Triplets {`ca_cert`, `cert`, key`} and/or {`ca_cert_src`,
-#             `cert_src`, `key_src`} should be configured. Default to true.
+#             Triplets {`ca_cert`, `cert`, private_key`} and/or {`ca_cert_src`,
+#             `cert_src`, `private_key_src`} should be configured. Default to true.
 # In this test case, both triplets are properly set, but use_cert is set to false,
 # which indicates configuration error.
 #
@@ -58,10 +58,10 @@
                 use_cert: false
                 ca_cert: /etc/rsyslog.d/ca_cert.crt
                 cert: /etc/rsyslog.d/cert.pem
-                key: /etc/rsyslog.d/key.pem
+                private_key: /etc/rsyslog.d/key.pem
                 ca_cert_src: "{{ __test_ca_cert }}"
                 cert_src: "{{ __test_cert }}"
-                key_src: "{{ __test_key }}"
+                private_key_src: "{{ __test_key }}"
             logging_inputs:
               - name: files_input
                 type: files

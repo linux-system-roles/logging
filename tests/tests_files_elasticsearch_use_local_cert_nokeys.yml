@@ -2,8 +2,8 @@
 #
 # Elasticsearch output has this policy:
 #   use_cert: If true, key/certificates are used to access Elasticsearch.
-#             Triplets {`ca_cert`, `cert`, key`} and/or {`ca_cert_src`,
-#             `cert_src`, `key_src`} should be configured. Default to true.
+#             Triplets {`ca_cert`, `cert`, private_key`} and/or {`ca_cert_src`,
+#             `cert_src`, `private_key_src`} should be configured. Default to true.
 # In this test case, use_cert is set to true, but no certs triplets are
 # configured in the elasticsearch dictionary.
 # Logging role is supposed to issue {{ __expected_error }}.
@@ -28,7 +28,7 @@
   become: true
   vars:
     __test_inputfiles_dir: /var/log/inputdirectory
-    __expected_error: "Error: you specified use_cert: true; you must specify all 3 of ca_cert, cert, key, or all 3 of ca_cert_src, cert_src, key_src, or set use_cert: false in the elasticsearch output named elasticsearch_output"
+    __expected_error: "Error: you specified use_cert: true; you must specify all 3 of ca_cert, cert, private_key, or all 3 of ca_cert_src, cert_src, private_key_src, or set use_cert: false in the elasticsearch output named elasticsearch_output"
 
   tasks:
     - block:

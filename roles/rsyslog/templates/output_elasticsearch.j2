@@ -59,7 +59,7 @@ ruleset(name="{{ item.name }}") {
 {% if item.use_cert | default(true) %}
             tls.cacert="{{ item.ca_cert | default('/etc/rsyslog.d/es-ca.crt') }}"
             tls.mycert="{{ item.cert | default('/etc/rsyslog.d/es-cert.pem') }}"
-            tls.myprivkey="{{ item.key | default('/etc/rsyslog.d/es-key.pem') }}"
+            tls.myprivkey="{{ item.private_key | default('/etc/rsyslog.d/es-key.pem') }}"
 {% endif %}
         )
     }

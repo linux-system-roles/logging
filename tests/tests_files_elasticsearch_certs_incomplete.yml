@@ -2,10 +2,10 @@
 #
 # Elasticsearch output has this policy:
 #   use_cert: If true, key/certificates are used to access Elasticsearch.
-#             Triplets {`ca_cert`, `cert`, key`} and/or {`ca_cert_src`,
-#             `cert_src`, `key_src`} should be configured. Default to true.
-# In this test case, use_cert is not set, i.e., true, and only {ca_cert, key}
-# and {cert_src, key_src} are set in the elasticsearch dictionary.
+#             Triplets {`ca_cert`, `cert`, private_key`} and/or {`ca_cert_src`,
+#             `cert_src`, `private_key_src`} should be configured. Default to true.
+# In this test case, use_cert is not set, i.e., true, and only {ca_cert, private_key}
+# and {cert_src, private_key_src} are set in the elasticsearch dictionary.
 # Logging role is supposed to issue {{ __expected_error }}.
 #
 # [Configuration]
@@ -13,9 +13,9 @@
 # logging_outputs:
 #   - name: elasticsearch_output
 #     ca_cert: /etc/rsyslog.d/ca_cert.crt
-#     key: /etc/rsyslog.d/key.pem
+#     private_key: /etc/rsyslog.d/key.pem
 #     cert_src: "{{ __test_cert }}"
-#     key_src: "{{ __test_key }}"
+#     private_key_src: "{{ __test_key }}"
 #     8< snip >8
 #
 # [Test scenario]
@@ -36,7 +36,7 @@
     __test_ca_cert: /tmp/es-ca.crt
     __test_cert: /tmp/es-cert.pem
     __test_key: /tmp/es-key.pem
-    __expected_error: "Error: you specified use_cert: true; you must specify all 3 of ca_cert, cert, key, or all 3 of ca_cert_src, cert_src, key_src, or set use_cert: false in the elasticsearch output named elasticsearch_output"
+    __expected_error: "Error: you specified use_cert: true; you must specify all 3 of ca_cert, cert, private_key, or all 3 of ca_cert_src, cert_src, private_key_src, or set use_cert: false in the elasticsearch output named elasticsearch_output"
 
   tasks:
     - name: Generate fake key/certs files.
@@ -62,9 +62,9 @@
                 input_type: ovirt
                 retryfailures: false
                 ca_cert: /etc/rsyslog.d/ca_cert.crt
-                key: /etc/rsyslog.d/key.pem
+                private_key: /etc/rsyslog.d/key.pem
                 cert_src: "{{ __test_cert }}"
-                key_src: "{{ __test_key }}"
+                private_key_src: "{{ __test_key }}"
             logging_inputs:
               - name: files_input
                 type: files
