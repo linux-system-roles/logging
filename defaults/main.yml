@@ -55,13 +55,21 @@ logging_mark_interval: 3600
 logging_max_message_size: 8192
 
 # list of pki files dict
+# either of {ca_cert_src,cert_src,private_key_src} or {ca_cert,cert,private_key}
+# or both sets should be configured if logging_pki is other than ptcp or none.
 # logging_pki_files:
-#   - type: ca_cert | cert | key
-#     src:  location of the file on the local host; if given, the file is deployed to dest value path.
-#     dest: path to be deployed on the target host; if given, the path is set to the config file.
-#           Default to /etc/pki/tls/certs/ca.crt for ca_cert
-#                      /etc/pki/tls/certs/cert.pem for cert
-#                      /etc/pki/tls/private/key.pem for key
+#   - ca_cert_src:     location of the ca_cert on the control host.
+#                      If given, it's copied to the managed host.
+#     cert_src:        location of the cert on the control host.
+#                      If given, it's copied to the managed host.
+#     private_key_src: location of the key on the control host.
+#                      If given, it's copied to the managed host.
+#     ca_cert:     path to be deployed on the managed host; the path is also used in the rsyslog config.
+#                  default to /etc/pki/tls/certs/<ca_cert_src basename>
+#     cert:        ditto
+#                  default to /etc/pki/tls/certs/<cert_src basename>
+#     private_key: ditto
+#                  default to /etc/pki/tls/private/<private_key_src basename>
 logging_pki_files: []
 
 # logging_pki_authmode

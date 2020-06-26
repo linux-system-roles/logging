@@ -37,40 +37,44 @@
         - item.type | d('') == 'custom'
         - logging_enabled | d(true)
 
-    - name: Re-read facts after adding custom fact
-      setup:
-        filter: ansible_local
-      when: logging_debug | d(false)
+    - block:
+        - name: Re-read facts after adding custom fact
+          setup:
+            filter: ansible_local
 
-    - name: Create rsyslog debug dir
-      file:
-        path: "{{ role_path }}/debug"
-        state: directory
-        mode: 0700
-      when: logging_debug | d(false)
+        - name: Create rsyslog debug dir
+          file:
+            path: "{{ role_path }}/debug"
+            state: directory
+            mode: 0700
 
-    - name: Delete debug file
-      file:
-        path: "{{ role_path }}/debug/main.yml"
-        state: absent
-      ignore_errors: true
-      when: logging_debug | d(false)
+        - name: Delete debug file
+          file:
+            path: "{{ role_path }}/debug/main.yml"
+            state: absent
+          ignore_errors: true
 
-    - name: Create rsyslog debug file
-      lineinfile:
-        path: "{{ role_path }}/debug/main.yml"
-        create: yes
-        line: "#ANSIBLE MANAGED VARIABLES FILE"
-      when: logging_debug | d(false)
+        - name: Create rsyslog debug file
+          lineinfile:
+            path: "{{ role_path }}/debug/main.yml"
+            create: yes
+            line: "#ANSIBLE MANAGED VARIABLES FILE"
 
-    - name: Populate rsyslog debug file
-      lineinfile:
-        path: "{{ role_path }}/debug/main.yml"
-        create: yes
-        line: "{{ item.key }}: {{ item.value | d() | to_nice_json(indent=2) }}"
-      with_dict: "{{ hostvars[inventory_hostname] }}"
+        - name: Use a debug var to avoid an empty dict in with_dict
+          set_fact:
+            __logging_debug_hostname: "{{ hostvars[inventory_hostname] }}"
+
+        - name: Populate rsyslog debug file
+          when:
+            - __logging_debug_hostname | length > 0
+            - item.key is match("rsyslog*")
+          lineinfile:
+            path: "{{ role_path }}/debug/main.yml"
+            create: yes
+            line: "{{ item.key }}: {{ item.value | d() | to_nice_json(indent=2) }}"
+          with_dict: "{{ __logging_debug_hostname }}"
+
       when:
-        - item.key is match("rsyslog*")
         - logging_debug | d(false)
 
   when: logging_provider == 'rsyslog'

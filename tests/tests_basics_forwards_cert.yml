@@ -5,17 +5,14 @@
 # logging_purge_confs: true
 # logging_pki: tls
 # logging_pki_files:
-#   - type: ca_cert
-#     src: "{{ __test_ca_cert }}" <-- local ca_cert file path to be copied from
-#     dest: "/etc/pki/tls/certs/{{ __test_ca_cert_name }}" <-- target destination
-#   - type: cert
-#     src: "{{ __test_cert }}" <-- local cert file path to be copied from
-#     <-- Since target destination is given, dest is set to /etc/pki/tls/certs/{{ __test_cert }}
-#   - type: key
-#     src: "{{ __test_key }}" <-- local key file path to be copied from
-#     <-- Since target destination is given, dest is set to /etc/pki/tls/private/{{ __test_key }}
-#     inputs: [basic_input]
-#     outputs: [forwards_severity_and_facility]
+#     ca_cert_src: "{{ __test_ca_cert }}" <-- local ca_cert file path to be copied from
+#     ca_cert: "/etc/pki/tls/certs/{{ __test_ca_cert_name }}" <-- target destination
+#     cert_src: "{{ __test_cert }}" <-- local cert file path to be copied from
+#     <-- Since target destination is not given, dest is set to /etc/pki/tls/certs/{{ __test_cert_name }}
+#     private_key_src: "{{ __test_key }}" <-- local key file path to be copied from
+#     <-- Since target destination is not given, dest is set to /etc/pki/tls/private/{{ __test_key_name }}
+#  inputs: [basic_input]
+#  outputs: [forwards_severity_and_facility]
 #
 # [Test scenario]
 # 0. Generate fake key/certs files.
@@ -62,13 +59,9 @@
         logging_purge_confs: true
         logging_pki: tls
         logging_pki_files:
-          - type: ca_cert
-            src: "{{ __test_ca_cert }}"
-            dest: "/etc/pki/tls/certs/{{ __test_ca_cert_name }}"
-          - type: cert
-            src: "{{ __test_cert }}"
-          - type: key
-            src: "{{ __test_key }}"
+          - ca_cert_src: "{{ __test_ca_cert }}"
+            cert_src: "{{ __test_cert }}"
+            private_key_src: "{{ __test_key }}"
         logging_outputs:
           - name: forwards_severity_and_facility
             type: forwards

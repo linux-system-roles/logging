@@ -11,7 +11,9 @@
       * [Logging_inputs options](#logging_inputs-options)
       * [Logging_outputs options](#logging_outputs-options)
       * [Logging_flows options](#logging_flows-options)
-      * [Other variables](#other-variables)
+      * [Security options](#security-options)
+      * [Server performance optimization options](#server-performance-optimization-options)
+      * [Other options](#other-options)
     * [Update and Delete](#update-and-delete)
   * [Configuration Examples](#configuration-examples)
     * [Standalone configuration](#standalone-configuration)
@@ -113,7 +115,7 @@ This is a schematic logging configuration to show log messages from input_nameA 
   **available options**
   - `udp_port`: UDP port number to listen. Default to `514`.
   - `tcp_port`: TCP port number to listen. Default to `514`.
-  - `tcp_tls_port`: TLS TCP number to listen. Default to `6515`. To use tcp_tls_port, `logging_pki` and `logging_pki_files` need to be configured. They are described in [Other variables](#other-variables).
+  - `tcp_tls_port`: TLS TCP number to listen. Default to `6515`. To use tcp_tls_port, `logging_pki` and `logging_pki_files` need to be configured. They are described in [Security options](#security-options).
 
 #### Logging_outputs options
 
@@ -214,32 +216,46 @@ This is a schematic logging configuration to show log messages from input_nameA 
   - `inputs`: A list of inputs, from which processing log messages starts.
   - `outputs`: A list of outputs. to which the log messages are sent.
 
-#### Other variables
+#### Security options
 
 These variables are set in the same level of the `logging_inputs`, `logging_output`, and `logging_flows`.
 
-- `logging_enabled`: When 'true', logging role will deploy specified configuration file set. Default to 'true'.
-- `logging_pki`: Specifying an encryption. One of `none`, `ptcp`, `tls`, `gtls`, and `gnutls`. Default to `ptcp`.
-                 Note: `none`=`ptcp`, `tls`=`gtls`=`gnutls`.
-                 When `logging_pki` is _not_ `ptcp`, `rsyslog_pki_path`, `rsyslog_pki_realm`, `rsyslog_pki_ca`, `rsyslog_pki_crt`, `rsyslog_pki_key` are configured.
-- `logging_pki_files`: Specifying a list of ca_cert, cert and key dictionary to specify the source of the files if any as well as the destination, which is set in the deployed config file. The configuration is used by the `remote` input and `forward` output.
+- `logging_pki`: Specifying an encryption.
+  One of `none`, `ptcp`, `tls`, `gtls`, and `gnutls`. Default to `ptcp`.
+  Note: `none`=`ptcp`, `tls`=`gtls`=`gnutls`.
+  When `logging_pki` is _not_ `ptcp`, i.e., `tls` or its alias, the logging system is configured to use tls.
+- `logging_pki_authmode`: Specifying the default network driver authentication mode.
+  `x509/name` or `anon` are available. Default to `x509/name`.
+  If set to `anon`, the `cert_src`, `private_key_src`, `cert`, and `private_key` specified in `logging_pki_files`
+  are ignored.
+- `logging_pki_files`: Specifying either of the paths of the ca_cert, cert, and key on the control host or
+  the paths of theirs on the managed host or both of them.
+  The usage of `logging_pki_files` depends upon the value of `logging_pki` and `logging_pki_authmode`.
+  If `logging_pki` is `ptcp`, `logging_pki_files` is ignored. 
+  If `logging_pki` is not `ptcp` and `logging_pki_authmode` is `anon`, only `ca_cert_src` and `ca_cert`
+  parameters are processed.
+  In this case, either `ca_cert_src` or `ca_cert` or both of them are required.
+  Otherwise, all the following parameters are processed.
+  In this case, either 3 src parameters or 3 dest parameters or both sets are required.
 ``` 
-  - type: ca_cert | cert | key
-    src:  location of the file on the local host;
-          if given, the file is deployed to dest value path.
-    dest: path to be deployed on the target host;
-          if given, the path is set to the config file.
-          Default to /etc/pki/tls/certs/ca.crt for ca_cert
-                     /etc/pki/tls/certs/cert.pem for cert
-                     /etc/pki/tls/private/key.pem for key
+  ca_cert_src:     location of the ca_cert on the control host; if given, the file is copied to the managed host.
+  cert_src:        location of the cert on the control host; if given, the file is copied to the managed host.
+  private_key_src: location of the key on the control host; if given, the file is copied to the managed host.
+  ca_cert:     path to be deployed on the managed host; the path is also used in the rsyslog config.
+               default to /etc/pki/tls/certs/<ca_cert_src basename>
+  cert:        ditto
+               default to /etc/pki/tls/certs/<cert_src basename>
+  private_key: ditto
+               default to /etc/pki/tls/private/<private_key_src basename>
 ``` 
-Security parameters
-- `logging_pki_authmode`: Specify the default network driver authentication mode. `x509/name` or `anon` are available: Default to `x509/name`.
 - `logging_domain`: The default DNS domain used to accept remote incoming logs from remote hosts. Default to "{{ ansible_domain if ansible_domain else ansible_hostname }}"
 - `logging_permitted_peers`: List of hostnames, IP addresses or wildcard DNS domains which will be allowed by the `logging` server to connect and send logs over TLS.  Default to ['\*.{{ logging_domain }}']
 - `logging_send_permitted_peers`: List of hostnames, IP addresses or wildcard DNS domains which will be verified by the `logging` client and will allow to send logs to the remote server over TLS. Default to "{{ logging_permitted_peers }}".
 
-Server Performance optimization
+#### Server performance optimization options
+
+These variables are set in the same level of the `logging_inputs`, `logging_output`, and `logging_flows`.
+
 - `logging_tcp_threads`: Input thread count listening on the tcp port. Default to `1`.
 - `logging_udp_threads`: Input thread count listening on the udp port. Default to `1`.
 - `logging_udp_system_time_requery`: Every `value` OS system calls, get the system time. Recommend not to set above 10. Default to `2` times.
@@ -248,6 +264,11 @@ Server Performance optimization
 - `logging_server_queue_size`: Maximum number of messages in the queue. Default to `50000`.
 - `logging_server_threads`: Number of worker threads. Default to `logging_tcp_threads` + `logging_udp_threads`.
 
+#### Other options
+
+These variables are set in the same level of the `logging_inputs`, `logging_output`, and `logging_flows`.
+
+- `logging_enabled`: When 'true', logging role will deploy specified configuration file set. Default to 'true'.
 - `logging_mark`: Mark message periodically by immark, if set to `true`. Default to `false`.
 - `logging_mark_interval`: Interval for `logging_mark` in seconds. Default to `3600`.
 - `logging_purge_original_conf`: `true` or `false`. If set to `true`, files in /etc/rsyslog.d are purged.
@@ -458,7 +479,7 @@ The following playbook generates the same logging configuration files.
         outputs: [forward_output0, forward_output1]
 ```
 
-2. Deploying `files input` reading logs from a local file and `forwards output` to forward the logs to the remote rsyslog over tls. Assuming the ca_cert, cert and key files are prepared. The files are deployed to the default location `/etc/pki/tls/certs/`, `/etc/pki/tls/certs/`, and `/etc/pki/tls/private`, respectively.
+2. Deploying `files input` reading logs from a local file and `forwards output` to forward the logs to the remote rsyslog over tls. Assuming the ca_cert, cert and key files are prepared at the specified paths on the control host. The files are deployed to the default location `/etc/pki/tls/certs/`, `/etc/pki/tls/certs/`, and `/etc/pki/tls/private`, respectively.
 ```yaml
 ---
 - name: Deploying files input and forwards output with certs
@@ -468,12 +489,9 @@ The following playbook generates the same logging configuration files.
   vars:
     logging_pki: tls
     logging_pki_files:
-      - type: ca_cert
-        src: /local/path/to/ca_cert
-      - type: cert
-        src: /local/path/to/cert
-      - type: key
-        src: /local/path/to/key
+      - ca_cert_src: /local/path/to/ca_cert
+        cert_src: /local/path/to/cert
+        private_key_src: /local/path/to/key
     logging_inputs:
       - name: files_input
         type: files
@@ -516,7 +534,7 @@ The following playbook generates the same logging configuration files.
         outputs: [remote_files_output]
 ```
 
-2. Deploying `remote input` reading logs from remote rsyslog and `remote_files output` to write the logs to the configured local files with the tls setup supporting 20 clients. Assuming the ca_cert, cert and key files are prepared. The files are deployed to the default location `/etc/pki/tls/certs/`, `/etc/pki/tls/certs/`, and `/etc/pki/tls/private`, respectively.
+2. Deploying `remote input` reading logs from remote rsyslog and `remote_files output` to write the logs to the configured local files with the tls setup supporting 20 clients. Assuming the ca_cert, cert and key files are prepared at the specified paths on the control host. The files are deployed to the default location `/etc/pki/tls/certs/`, `/etc/pki/tls/certs/`, and `/etc/pki/tls/private`, respectively.
 ```yaml
 ---
 - name: Deploying remote input and remote_files output with certs
@@ -526,12 +544,9 @@ The following playbook generates the same logging configuration files.
   vars:
     logging_pki: tls
     logging_pki_files:
-      - type: ca_cert
-        src: /local/path/to/ca_cert
-      - type: cert
-        src: /local/path/to/cert
-      - type: key
-        src: /local/path/to/key
+      - ca_cert_src: /local/path/to/ca_cert
+        cert_src: /local/path/to/cert
+        private_key_src: /local/path/to/key
     logging_inputs:
       - name: remote_tcp_input
         type: remote

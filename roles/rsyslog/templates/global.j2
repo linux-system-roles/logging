@@ -1,16 +1,17 @@
 {% set ns = namespace() %}
-{% set ns.ca_cert_path = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + __rsyslog_default_pki_ca_cert_name %}
-{% set ns.cert_path = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + __rsyslog_default_pki_cert_name %}
-{% set ns.key_path = __rsyslog_default_pki_path + __rsyslog_default_pki_key_dir + __rsyslog_default_pki_key_name %}
-{% for file in logging_pki_files %}
-{%   if file.type == 'ca_cert' %}
-{%     set ns.ca_cert_path = file.dest | d(__rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + file.src | basename) %}
-{%   elif file.type == 'cert' %}
-{%     set ns.cert_path = file.dest | d(__rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + file.src | basename) %}
-{%   elif file.type == 'key' %}
-{%     set ns.key_path = file.dest | d(__rsyslog_default_pki_path + __rsyslog_default_pki_key_dir + file.src | basename) %}
+{% if __rsyslog_default_netstream_driver != "ptcp" %}
+{%   set __ca_cert_file = logging_pki_files.0.ca_cert_src | d(__rsyslog_default_pki_ca_cert_name) | basename %}
+{%   set ns.ca_cert_path = logging_pki_files.0.ca_cert |
+		                   d(__rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + __ca_cert_file) %}
+{%   if logging_pki_authmode != "anon" %}
+{%     set __cert_file = logging_pki_files.0.cert_src | d(__rsyslog_default_pki_cert_name) | basename %}
+{%     set ns.cert_path = logging_pki_files.0.cert |
+		                  d(__rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + __cert_file) %}
+{%     set __key_file = logging_pki_files.0.private_key_src | d(__rsyslog_default_pki_key_name) | basename %}
+{%     set ns.key_path = logging_pki_files.0.private_key |
+		                 d(__rsyslog_default_pki_path + __rsyslog_default_pki_key_dir + __key_file) %}
 {%   endif %}
-{% endfor %}
+{% endif %}
 global(
   defaultNetstreamDriver="{{ __rsyslog_default_netstream_driver }}"
   workDirectory="{{ rsyslog_work_dir }}"
