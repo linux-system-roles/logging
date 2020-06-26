@@ -149,7 +149,7 @@
     # How to set rsyslog_custom_config_files:
     # rsyslog_custom_config_files: [ '/path/to/custom0.conf', '/path/to/custom1.conf' ]
     # The specified custom config files are copied to /etc/rsyslog.d.
-    # If the array containse non-existing file, the deployment stops there with an error.
+    # If the array contains non-existing file, the deployment stops there with an error.
     - name: Copy custom config files if they are specified in rsyslog_custom_config_files variable array.
       copy:
         src: '{{ item }}'
@@ -161,18 +161,78 @@
       when: __rsyslog_enabled | bool
       notify: restart rsyslogd
 
-    - name: Copy local key/cert files to the target if needed
+    # Check if logging_pki is defined and
+    #          logging_pki_authmode is not anon
+    #          logging_pki_files.{ca_cert_src,cert_src,private_key_src} and/or
+    #          logging_pki_files.{ca_cert,cert,private_key}
+    #          are defined.
+    # Otherwise it fails.
+    - name: Check logging_pki, logging_pki_authmode, and logging_pki_files
+      fail:
+        msg: "Error: you specified logging_pki other than none or ptcp and logging_pki_authmode other than anon; you must specify all 3 of logging_pki_files ca_cert_src, cert_src, private_key_src, and/or all 3 of ca_cert, cert, private_key in the playbook var section."
+      when:
+        - __rsyslog_pki_map[logging_pki] | d("ptcp") != "ptcp"
+        - logging_pki_authmode != "anon"
+        - not ((logging_pki_files.0.ca_cert_src | d() and
+                logging_pki_files.0.cert_src | d() and
+                logging_pki_files.0.private_key_src | d()) or
+               (logging_pki_files.0.ca_cert | d() and
+                logging_pki_files.0.cert | d() and
+                logging_pki_files.0.private_key | d()))
+
+    # Check if logging_pki is defined and
+    #          logging_pki_authmode is anon
+    #          logging_pki_files.ca_cert_src and/or
+    #          logging_pki_files.ca_cert
+    #          are defined.
+    # Otherwise it fails.
+    - name: Check logging_pki, logging_pki_authmode, and logging_pki_files 2
+      fail:
+        msg: "Error: you specified logging_pki other than none or ptcp and logging_pki_authmode anon; you must specify logging_pki_files ca_cert_src and/or ca_cert in the playbook var section."
+      when:
+        - __rsyslog_pki_map[logging_pki] | d("ptcp") != "ptcp"
+        - logging_pki_authmode == "anon"
+        - not (logging_pki_files.0.ca_cert_src | d() or logging_pki_files.0.ca_cert | d())
+
+    - name: Copy local ca_cert file to the target if needed
       vars:
-        __pki_dir: '{{ __rsyslog_default_pki_key_dir if item.type == "key" else __rsyslog_default_pki_cert_dir }}'
-        __pki_file: '{{ item.src | basename }}'
+        __pki_file: '{{ logging_pki_files.0.ca_cert_src | basename }}'
       copy:
-        src: '{{ item.src }}'
-        dest: '{{ item.dest if item.dest is defined else (__rsyslog_default_pki_path + __pki_dir + __pki_file) }}'
-        mode: '{{ "0400" if item.type == "key" else "0600" }}'
-      loop: '{{ logging_pki_files }}'
+        src: '{{ logging_pki_files.0.ca_cert_src }}'
+        dest: '{{ logging_pki_files.0.ca_cert if logging_pki_files.0.ca_cert is defined else (__rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + __pki_file) }}'
+        mode: "0600"
       when:
         - __rsyslog_enabled | bool
-        - item.src | d("")
+        - __rsyslog_pki_map[logging_pki] | d("ptcp") != "ptcp"
+        - logging_pki_files.0.cert_src | d("")
+      notify: restart rsyslogd
+
+    - name: Copy local cert file to the target if needed
+      vars:
+        __pki_file: '{{ logging_pki_files.0.cert_src | basename }}'
+      copy:
+        src: '{{ logging_pki_files.0.cert_src }}'
+        dest: '{{ logging_pki_files.0.cert if logging_pki_files.0.cert is defined else (__rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + __pki_file) }}'
+        mode: "0600"
+      when:
+        - __rsyslog_enabled | bool
+        - __rsyslog_pki_map[logging_pki] | d("ptcp") != "ptcp"
+        - logging_pki_authmode != "anon"
+        - logging_pki_files.0.cert_src | d("")
+      notify: restart rsyslogd
+
+    - name: Copy local key file to the target if needed
+      vars:
+        __pki_file: '{{ logging_pki_files.0.private_key_src | basename }}'
+      copy:
+        src: '{{ logging_pki_files.0.private_key_src }}'
+        dest: '{{ logging_pki_files.0.private_key if logging_pki_files.0.private_key is defined else (__rsyslog_default_pki_path + __rsyslog_default_pki_key_dir + __pki_file) }}'
+        mode: "0400"
+      when:
+        - __rsyslog_enabled | bool
+        - __rsyslog_pki_map[logging_pki] | d("ptcp") != "ptcp"
+        - logging_pki_authmode != "anon"
+        - logging_pki_files.0.private_key_src | d("")
       notify: restart rsyslogd
 
     - name: Include input sub-vars
