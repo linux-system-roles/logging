@@ -1,8 +1,0 @@
----
-# Deploy configuration files
-- name: Install/Update viaq packages and generate configuration files in /etc/rsyslog.d
-  vars:
-    __rsyslog_packages: "{{ __rsyslog_viaq_prereq_packages + __rsyslog_viaq_packages }}"
-    __rsyslog_rules: "{{ __rsyslog_viaq_rules }}"
-  include_tasks:
-    tasks_from: deploy.yml

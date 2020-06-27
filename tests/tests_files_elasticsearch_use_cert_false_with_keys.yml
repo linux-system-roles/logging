@@ -19,6 +19,9 @@
 # 1. Capture the error and check the error message.
 # 2. Make sure the logging role failed and no further play was observed.
 #
+# Note: This is a test for the elasticsearch certs/key.
+# The files input to the elasticsearch output is not supported.
+#
 - name: Error case for Elasticsearch config - although cert paths are specified, use_cert is false
   hosts: all
   become: true

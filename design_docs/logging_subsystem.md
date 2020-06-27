@@ -37,13 +37,9 @@ logging/
 │       │   │   │   └── main.yml
 │       │   │   ├── ovirt
 │       │   │   │   └── main.yml
-│       │   │   ├── remote
-│       │   │   │   ├── cleanup.yml
-│       │   │   │   └── main.yml
-│       │   │   ├── viaq
-│       │   │   │   └── main.yml
-│       │   │   └── viaq-k8s
-│       │   │       └── main.yml
+│       │   │   └── remote
+│       │   │       ├── cleanup.yml
+│       │   │       └── main.yml
 │       │   ├── main.yml
 │       │   └── outputs
 │       │       ├── elasticsearch
@@ -122,7 +118,7 @@ logging_flows: [5]
 [1]: `logging_outputs` are implemented in logging/roles/rsyslog/tasks/outputs/ and logging/roles/rsyslog/vars/outputs/.<br>
 [2]: `output_type` is one of [elasticsearch, files, forwards]; the type matches the directory name in the `outputs` directory.<br>
 [3]: `logging_inputs` are implemented in ./logging/roles/rsyslog/tasks/inputs/ and ./logging/roles/rsyslog/vars/inputs/.<br>
-[4]: `input_type is one of [basics, files, ovirt, viaq, viaq-k8s]; the type matches the directory name in the `inputs` directory.<br>
+[4]: `input_type is one of [basics, files, ovirt]; the type matches the directory name in the `inputs` directory.<br>
 [5]: logging_flows are used in the inputs (inputs/{basics,files,etc.}) to set the `call output_ruleset`.
 [6]: inputs contains the list of unique_input_name(s).
 [7]: outputs contains the list of unique_output_name(s).

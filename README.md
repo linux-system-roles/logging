@@ -42,7 +42,7 @@ This role is supported on RHEL/CentOS-7, RHEL/CentOS-8 and Fedora distributions.
     * `remote` - remote inputs configuring inputs from the other logging system over network.
     * `ovirt` - ovirt inputs configuring inputs from the oVirt system.
   - `logging_outputs` - List of logging outputs dictionary to specify output types.
-    * `elasticsearch` - elasticsearch outputs configuring outputs to elasticsearch.
+    * `elasticsearch` - elasticsearch outputs configuring outputs to elasticsearch. It is available only when the input is `ovirt`.
     * `files` - files outputs configuring outputs to the local files.
     * `forwards` - forwards outputs configuring outputs to the other logging system.
     * `remote_files` - remote files outputs configuring outputs from the other logging system to the local files.
@@ -123,7 +123,7 @@ This is a schematic logging configuration to show log messages from input_nameA 
   - `type`: Type of the output element. Currently, `elasticsearch`, `files`, `forwards`, and `remote_files` are supported. The `type` is used to specify a task type which corresponds to a directory name in roles/rsyslog/{tasks,vars}/outputs/.
   - `state`: State of the configuration file. `present` or `absent`. Default to `present`.
 
-- `elasticsearch` type - `elasticsearch` output supports sending logs to Elasticsearch. Assuming Elasticsearch is already configured and running.<br>
+- `elasticsearch` type - `elasticsearch` output supports sending logs to Elasticsearch. It is available only when the input is `ovirt`. Assuming Elasticsearch is already configured and running.<br>
   **available options**
   - `server_host`: Host name Elasticsearch is running on. **Required**.
   - `server_port`: Port number Elasticsearch is listening to. Default to `9200`.
