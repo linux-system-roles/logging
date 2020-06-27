@@ -17,16 +17,14 @@ This proposal will discuss about these items:
 
 The primary playbook variables are made from 3 dicts - logging_inputs, logging_outputs, and logging_flows.
 
-logging_inputs supports 3 types [0].
+logging_inputs supports 3 types.
 - basics input (`imjournal`, `imuxsock`)
-- files input (`imfile`) [0]
+- files input (`imfile`)
 - ovirt handling ovirt inputs
 logging_outputs supports 3 types.
 - files output (`omfile`)
 - forwards output (`omfwd`)
 - elasticsearch (`omelasticsearch`).
-
-[0] - viaq, and viaq-k8s need more work to support the flow controls.
 
 ## How the flow control works
 

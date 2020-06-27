@@ -1,9 +1,0 @@
----
-# Deploy configuration files
-- name: Install/Update viaq-k8s packages and generate configuration files in /etc/rsyslog.d
-  vars:
-    __rsyslog_packages: "{{ __rsyslog_viaq_k8s_packages }}"
-    __rsyslog_rules: "{{ __rsyslog_viaq_k8s_rules }}"
-  include_role:
-    name: "{{ role_path | dirname | dirname | dirname }}"
-    tasks_from: deploy.yml

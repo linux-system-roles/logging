@@ -34,6 +34,9 @@
 # 5. Check if the Elasticsearch output config file 31-output-elasticsearch-elasticsearch_output.conf exists
 #    and the specified ca cert, cert and key paths are set in the file.
 #
+# Note: This is a test for the elasticsearch certs/key.
+# The files input to the elasticsearch output is not supported.
+#
 - name: Elasticsearch config - local certs are copied to the target host with the specified path.
   hosts: all
   become: true
