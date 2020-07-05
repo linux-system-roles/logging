@@ -150,18 +150,10 @@
       command: /bin/grep ' *input(type="imfile" file="\/var\/log\/inputdirectory\/\*.log" tag="{{ __test_tag }}"' '{{ __test_inputfiles_conf }}'
       changed_when: false
 
-    - name: Create a test log file in {{ __test_inputfiles_dir }}
-      copy:
-        dest: "{{ __test_inputfiles_dir }}/test.log"
-        content: "# log file for rsyslog testing\n"
-      changed_when: false
-
-    - name: Add a fake log message to {{ __test_inputfiles_dir }}/test.log
-      lineinfile:
-        path: "{{ __test_inputfiles_dir }}/test.log"
-        line: "<167>Mar 20 01:00:00 11.22.33.44 tag msgnum:00000000:26:abcdefghijklmnopqrstuvwxyz"
+    - name: Create a test log file with a log message in {{ __test_inputfiles_dir }}
+      shell: echo "<167>Mar 20 01:00:00 11.22.33.44 tag msgnum:00000000:26:abcdefghijklmnopqrstuvwxyz" > "{{ __test_inputfiles_dir }}/test.log"
       changed_when: false
 
     - name: Check the fake test log message in {{ __default_system_log }}
-      command: /bin/grep '{{ __test_tag }} .*abcdefghijklmnopqrstuvwxyz' '{{ __default_system_log }}'
+      command: /bin/grep '{{ __test_tag }} .*abcdefghijklmnopqrstuvwxyz$' '{{ __default_system_log }}'
       changed_when: false
