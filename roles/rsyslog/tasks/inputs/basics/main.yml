@@ -18,9 +18,10 @@
           - options: "{{ lookup('template', __rsyslog_input_basics) }}"
   include_tasks:
     file: "{{ role_path }}/tasks/deploy.yml"
-  loop: '{{ logging_inputs }}'
+  loop: '{{ logging_inputs | sort(attribute="type") }}'
   loop_control:
     extended: yes
   when:
     - item.type | d() == 'basics'
-    - ansible_loop.first
+    - ansible_loop.previtem is not defined or
+      (ansible_loop.previtem is defined and ansible_loop.previtem.type != 'basics')
