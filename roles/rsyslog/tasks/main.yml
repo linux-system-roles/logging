@@ -246,8 +246,6 @@
       when:
         - __rsyslog_enabled | bool
         - input_item | d([])
-      tags:
-        - skip_ansible_lint
 
     - name: Run input sub-tasks
       include_tasks:
@@ -260,8 +258,6 @@
       when:
         - __rsyslog_enabled | bool
         - input_item | d([])
-      tags:
-        - skip_ansible_lint
 
     - name: Include output sub-vars
       include_vars:
@@ -274,8 +270,6 @@
       when:
         - __rsyslog_enabled | bool
         - output_item | d([])
-      tags:
-        - skip_ansible_lint
 
     - name: Run output sub-tasks
       include_tasks:
@@ -288,8 +282,6 @@
       when:
         - __rsyslog_enabled | bool
         - output_item | d([])
-      tags:
-        - skip_ansible_lint
 
     - name: Enable rsyslog service
       service:
