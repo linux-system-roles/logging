@@ -8,3 +8,6 @@
     - name: default run (NOOP)
       include_role:
         name: linux-system-roles.logging
+
+    - name: get list of services to issue a warning
+      shell: "service --status-all"
