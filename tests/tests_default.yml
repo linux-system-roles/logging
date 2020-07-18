@@ -1,5 +1,6 @@
 # Test to ensure the logging role successfully runs with the no given variables.
 # comment 0
+# comment 1
 #
 - name: Ensure that the role runs with default parameters
   hosts: all
