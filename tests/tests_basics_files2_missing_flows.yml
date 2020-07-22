@@ -1,0 +1,74 @@
+# Test the configuration, basics input and 4 configured files output
+#
+# [Configuration]
+# basics input (imjournal) -> 4 files output (omfile)
+# logging_purge_confs: true
+#
+# [Test scenario]
+# 0. Run logging role.
+# 1. Check rsyslog.conf file size.
+#    If logging role is executed, the file size is about 100 bytes.
+#    Thus, assert the size is less than 1000.
+# 2. Check file count in /etc/rsyslog.d.
+#    If logging role is executed, 8 config files are generated.
+#    By setting logging_purge_confs, pre-existing config files are deleted.
+#    Thus, assert the the count is equal to 8.
+# 3. Check systemctl status of rsyslog as well as error or specific message in the output.
+# 4. To verify the generated filename is correct, check the config file of files output exists.
+# 4.1 Check the config file contains the expected filter and the output file as configured.
+# 4.2 Run logger command and check the log is in the local output file {{ __default_system_log }}.
+#
+- name: Ensure that the role runs with parameters from imjournal to four omfile outputs
+  hosts: all
+  become: true
+  vars:
+    __test_files_conf: /etc/rsyslog.d/30-output-files-files_output1.conf
+    __default_system_log: /var/log/messages
+    __expected_error: "Error: ['bogus_basic_input'] includes undefined logging_inputs item."
+
+  tasks:
+    - block:
+        - name: deploy config to output into local files
+          vars:
+            logging_purge_confs: true
+            logging_outputs:
+              - name: files_output0
+                type: files
+                facility: authpriv,auth
+                path: /var/log/secure
+              - name: files_output1
+                type: files
+                severity: info
+                exclude:
+                  - authpriv.none
+                  - auth.none
+                  - cron.none
+                  - mail.none
+                path: "{{ __default_system_log }}"
+              - name: files_output2
+                type: files
+                severity: emerg
+                path: :omusrmsg:*
+              - name: files_output3
+                type: files
+                facility: local7
+                path: /var/log/boot.log
+            logging_inputs:
+              - name: basic_input
+                type: basics
+            logging_flows:
+              - name: flow_0
+                inputs: [bogus_basic_input]
+                outputs: [files_output0, files_output1, files_output2, files_output3]
+          include_role:
+            name: linux-system-roles.logging
+
+        - name: unreachable task
+          fail:
+            msg: UNREACH
+
+      rescue:
+        - debug:
+            msg: Caught an expected error - {{ ansible_failed_result }}
+        - assert:
+            that: ansible_failed_result.results.0.msg == __expected_error
