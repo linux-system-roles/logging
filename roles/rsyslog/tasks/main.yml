@@ -204,7 +204,7 @@
       when:
         - __rsyslog_enabled | bool
         - __rsyslog_pki_map[logging_pki] | d("ptcp") != "ptcp"
-        - logging_pki_files.0.cert_src | d("")
+        - logging_pki_files.0.ca_cert_src | d("")
       notify: restart rsyslogd
 
     - name: Copy local cert file to the target if needed
