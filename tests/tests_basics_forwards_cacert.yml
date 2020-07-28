@@ -19,9 +19,9 @@
 #    If not executed, the default rsyslog.conf size is larger than 3000 bytes.
 #    Thus, assert the size is less than 1000.
 # 3. Check file count in /etc/rsyslog.d.
-#    If logging role is executed, 7 config files are generated.
+#    If logging role is executed, 6 config files are generated.
 #    By setting logging_purge_confs, pre-existing config files are deleted.
-#    Thus, assert the the count is equal to 7.
+#    Thus, assert the the count is equal to 6.
 # 4. Check systemctl status of rsyslog as well as error or specific message in the output.
 # 5. Check the config file of a forwards output, severity_and_facility contains the expected filter and action.
 # 6. Check the fake ca cert is successfully copied.
@@ -50,6 +50,8 @@
         logging_pki_authmode: anon
         logging_pki_files:
           - ca_cert_src: "{{ __test_ca_cert }}"
+        logging_permitted_peers:
+          - '*.example.com'
         logging_outputs:
           - name: forwards_severity_and_facility
             type: forwards
@@ -81,7 +83,7 @@
 
     - name: Check file counts in rsyslog.d
       assert:
-        that: rsyslog_d_file_count.matched == 7
+        that: rsyslog_d_file_count.matched == 6
 
     # Checking 'error' in stdout from systemctl status is for detecting the case in which rsyslog is running,
     # but some functionality is disabled due to some error, e.g., error: 'tls.cacert' file couldn't be accessed.
@@ -90,8 +92,26 @@
       register: __result
       failed_when: "'error' in __result.stdout or __result is failed"
 
+    - name: Generated a file to check severity_and_facility
+      copy:
+        dest: /tmp/__testfile__
+        content: |
+          # Ansible managed
+          ruleset(name="forwards_severity_and_facility") {
+              local1.info action(name="forwards_severity_and_facility"
+                  type="omfwd"
+                  Target="host.domain"
+                  Port="1514"
+                  Protocol="tcp"
+                  StreamDriver="gtls"
+                  StreamDriverMode="1"
+                  StreamDriverAuthMode="anon"
+                  StreamDriverPermittedPeers="['*.example.com']"
+              )
+          }
+
     - name: Check severity_and_facility
-      command: /bin/grep 'local1.info action(name="forwards_severity_and_facility" type="omfwd" Target="host.domain" Port="1514" Protocol="tcp")' '{{ __test_forward_conf_s_f }}'
+      command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_s_f }}'
       changed_when: false
 
     - name: Check the fake ca cert is successfully copied

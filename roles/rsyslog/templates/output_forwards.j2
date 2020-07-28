@@ -1,7 +1,43 @@
 ruleset(name="{{ item.name }}") {
-{%   if item.exclude | d([]) %}
-    {{ item.facility | d('*') }}.{{ item.severity | d('*') }};{{ item.exclude | join(';') }} action(name="{{ item.name }}" type="omfwd" Target="{{ item.target }}" Port="{{ item.port | d(514) }}" Protocol="{{ item.protocol | d('tcp') }}")
+{% if item.exclude | d([]) %}
+{%   if __rsyslog_default_netstream_driver == "ptcp" %}
+    {{ item.facility | d('*') }}.{{ item.severity | d('*') }};{{ item.exclude | join(';') }} action(name="{{ item.name }}"
+        type="omfwd"
+        Target="{{ item.target }}"
+        Port="{{ item.port | d(__rsyslog_default_port) }}"
+        Protocol="{{ item.protocol | d('tcp') }}"
+    )
+{%   else %}
+    {{ item.facility | d('*') }}.{{ item.severity | d('*') }};{{ item.exclude | join(';') }} action(name="{{ item.name }}"
+        type="omfwd"
+        Target="{{ item.target }}"
+        Port="{{ item.port | d(__rsyslog_default_tls_port) }}"
+        Protocol="{{ item.protocol | d('tcp') }}"
+        StreamDriver="{{ __rsyslog_default_netstream_driver }}"
+        StreamDriverMode="1"
+        StreamDriverAuthMode="{{ logging_pki_authmode }}"
+        StreamDriverPermittedPeers="{{ logging_send_permitted_peers }}"
+    )
+{%   endif %}
 {% else %}
-    {{ item.facility | d('*') }}.{{ item.severity | d('*') }} action(name="{{ item.name }}" type="omfwd" Target="{{ item.target }}" Port="{{ item.port | d(514) }}" Protocol="{{ item.protocol | d('tcp') }}")
+{%   if __rsyslog_default_netstream_driver == "ptcp" %}
+    {{ item.facility | d('*') }}.{{ item.severity | d('*') }} action(name="{{ item.name }}"
+        type="omfwd"
+        Target="{{ item.target }}"
+        Port="{{ item.port | d(__rsyslog_default_port) }}"
+        Protocol="{{ item.protocol | d('tcp') }}"
+    )
+{%   else %}
+    {{ item.facility | d('*') }}.{{ item.severity | d('*') }} action(name="{{ item.name }}"
+        type="omfwd"
+        Target="{{ item.target }}"
+        Port="{{ item.port | d(__rsyslog_default_tls_port) }}"
+        Protocol="{{ item.protocol | d('tcp') }}"
+        StreamDriver="{{ __rsyslog_default_netstream_driver }}"
+        StreamDriverMode="1"
+        StreamDriverAuthMode="{{ logging_pki_authmode }}"
+        StreamDriverPermittedPeers="{{ logging_send_permitted_peers }}"
+    )
+{%   endif %}
 {% endif %}
 }

@@ -115,7 +115,6 @@ This is a schematic logging configuration to show log messages from input_nameA 
   **available options**
   - `udp_port`: UDP port number to listen. Default to `514`.
   - `tcp_port`: TCP port number to listen. Default to `514`.
-  - `tcp_tls_port`: TLS TCP number to listen. Default to `6515`. To use tcp_tls_port, `logging_pki` and `logging_pki_files` need to be configured. They are described in [Security options](#security-options).
 
 #### Logging_outputs options
 
@@ -550,7 +549,7 @@ The following playbook generates the same logging configuration files.
     logging_inputs:
       - name: remote_tcp_input
         type: remote
-        tcp_tls_port: 6514
+        tcp_port: 6514
     logging_outputs:
       - name: remote_files_output0
         type: remote_files

@@ -119,32 +119,130 @@
       register: __result
       failed_when: not __result.stat.exists
 
+    - name: Generated a file to check severity_and_facility
+      copy:
+        dest: /tmp/__testfile__
+        content: |
+          # Ansible managed
+          ruleset(name="forwards_severity_and_facility") {
+              local1.info action(name="forwards_severity_and_facility"
+                  type="omfwd"
+                  Target="host.domain"
+                  Port="1514"
+                  Protocol="tcp"
+              )
+          }
+
     - name: Check severity_and_facility
-      command: /bin/grep 'local1.info action(name="forwards_severity_and_facility" type="omfwd" Target="host.domain" Port="1514" Protocol="tcp")' '{{ __test_forward_conf_s_f }}'
+      command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_s_f }}'
       changed_when: false
 
-    - name: Grep facility_only
-      command: /bin/grep 'local2.\* action(name="forwards_facility_only" type="omfwd" Target="host.domain" Port="2514" Protocol="tcp")' '{{ __test_forward_conf_f }}'
+    - name: Generated a file to check facility_only
+      copy:
+        dest: /tmp/__testfile__
+        content: |
+          # Ansible managed
+          ruleset(name="forwards_facility_only") {
+              local2.* action(name="forwards_facility_only"
+                  type="omfwd"
+                  Target="host.domain"
+                  Port="2514"
+                  Protocol="tcp"
+              )
+          }
+
+    - name: Check facility_only
+      command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_f }}'
       changed_when: false
+
+    - name: Generated a file to check severity_only
+      copy:
+        dest: /tmp/__testfile__
+        content: |
+          # Ansible managed
+          ruleset(name="forwards_severity_only") {
+              *.err action(name="forwards_severity_only"
+                  type="omfwd"
+                  Target="host.domain"
+                  Port="3514"
+                  Protocol="tcp"
+              )
+          }
 
     - name: Check severity_only
-      command: /bin/grep '\*.err action(name="forwards_severity_only" type="omfwd" Target="host.domain" Port="3514" Protocol="tcp")' '{{ __test_forward_conf_s }}'
+      command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_s }}'
       changed_when: false
+
+    - name: Generated a file to check no_severity_and_facility
+      copy:
+        dest: /tmp/__testfile__
+        content: |
+          # Ansible managed
+          ruleset(name="forwards_no_severity_and_facility") {
+              *.* action(name="forwards_no_severity_and_facility"
+                  type="omfwd"
+                  Target="host.domain"
+                  Port="4514"
+                  Protocol="tcp"
+              )
+          }
 
     - name: Check no_severity_and_facility
-      command: /bin/grep '\*.\* action(name="forwards_no_severity_and_facility" type="omfwd" Target="host.domain" Port="4514" Protocol="tcp")' '{{ __test_forward_conf_no }}'
+      command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_no }}'
       changed_when: false
+
+    - name: Generated a file to check no_severity_and_facility_protocol
+      copy:
+        dest: /tmp/__testfile__
+        content: |
+          # Ansible managed
+          ruleset(name="forwards_no_severity_and_facility_protocol") {
+              *.* action(name="forwards_no_severity_and_facility_protocol"
+                  type="omfwd"
+                  Target="host.domain"
+                  Port="5514"
+                  Protocol="tcp"
+              )
+          }
 
     - name: Check no_severity_and_facility_protocol
-      command: /bin/grep '\*\.\* action(name="forwards_no_severity_and_facility_protocol" type="omfwd" Target="host.domain" Port="5514" Protocol="tcp")' '{{ __test_forward_conf_no_p }}'
+      command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_no_p }}'
       changed_when: false
+
+    - name: Generated a file to check no_severity_and_facility_udp
+      copy:
+        dest: /tmp/__testfile__
+        content: |
+          # Ansible managed
+          ruleset(name="forwards_no_severity_and_facility_udp") {
+              *.* action(name="forwards_no_severity_and_facility_udp"
+                  type="omfwd"
+                  Target="host.domain"
+                  Port="6514"
+                  Protocol="udp"
+              )
+          }
 
     - name: Check no_severity_and_facility_udp
-      command: /bin/grep '\*\.\* action(name="forwards_no_severity_and_facility_udp" type="omfwd" Target="host.domain" Port="6514" Protocol="udp")' '{{ __test_forward_conf_no_udp }}'
+      command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_no_udp }}'
       changed_when: false
 
+    - name: Generated a file to check no_severity_and_facility_protocol_port
+      copy:
+        dest: /tmp/__testfile__
+        content: |
+          # Ansible managed
+          ruleset(name="forwards_no_severity_and_facility_protocol_port") {
+              *.* action(name="forwards_no_severity_and_facility_protocol_port"
+                  type="omfwd"
+                  Target="host.domain"
+                  Port="514"
+                  Protocol="tcp"
+              )
+          }
+
     - name: Check no_severity_and_facility_protocol_port
-      command: /bin/grep '\*\.\* action(name="forwards_no_severity_and_facility_protocol_port" type="omfwd" Target="host.domain" Port="514" Protocol="tcp")' '{{ __test_forward_conf_no_p_p }}'
+      command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_no_p_p }}'
       changed_when: false
 
     - name: Grep no_severity_and_facility_protocol_port_target

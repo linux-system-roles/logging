@@ -133,15 +133,24 @@
       command: /bin/grep testMessage0000 '{{ __default_system_log }}'
       changed_when: false
 
-    - name: Check the forwarding config stat
-      stat:
-        path: "{{ __test_forwards_conf_s_f }}"
-      register: __result
-      failed_when: not __result.stat.exists
+    - name: Generated a file to check severity_and_facility
+      copy:
+        dest: /tmp/__testfile__
+        content: |
+          # Ansible managed
+          ruleset(name="forwards_severity_and_facility") {
+              local1.info action(name="forwards_severity_and_facility"
+                  type="omfwd"
+                  Target="host.domain"
+                  Port="1514"
+                  Protocol="tcp"
+              )
+          }
 
     - name: Check severity_and_facility
-      command: /bin/grep 'local1.info action(name="forwards_severity_and_facility" type="omfwd" Target="host.domain" Port="1514" Protocol="tcp")' '{{ __test_forwards_conf_s_f }}'
+      command: diff -B /tmp/__testfile__ '{{ __test_forwards_conf_s_f }}'
       changed_when: false
+
 
     - name: Check if the input files config exists
       stat:
