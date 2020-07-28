@@ -1,41 +1,37 @@
-{% set ns0 = namespace(use_tls = false) %}
-{% set ns1 = namespace(use_tcp = false) %}
-{% set ns2 = namespace(use_udp = false) %}
+{% set ns = namespace(use_tcp = false, use_udp = false) %}
 {% for elm in logging_inputs %}
 {%   if elm.type == 'remote' %}
-{%     if elm.tcp_tls_port is defined %}
-{%       set ns0.use_tls = true %}
-{%     elif elm.tcp_port is defined %}
-{%       set ns1.use_tcp = true %}
+{%     if elm.tcp_port is defined %}
+{%       set ns.use_tcp = true %}
 {%     elif elm.udp_port is defined %}
-{%       set ns2.use_udp = true %}
+{%       set ns.use_udp = true %}
 {%     endif %}
 {%   endif %}
 {% endfor %}
-{% if ns2.use_udp %}
-# Read messages sent over plain TCP
+{% if ns.use_udp %}
+# Read messages sent over UDP
 module(load="imudp" threads="{{ logging_udp_threads }}"
        TimeRequery="{{ logging_udp_system_time_requery }}"
        BatchSize="{{ logging_udp_batch_size }}")
 {% endif %}
-{% if ns1.use_tcp %}
-# Read messages sent over UDP
+{% if ns.use_tcp %}
+{%   if __rsyslog_default_netstream_driver == "ptcp" %}
+# Read messages sent over plain TCP
 module(load="imptcp" threads="{{ logging_tcp_threads }}")
-{% endif %}
-{% if ns0.use_tls %}
+{%   else %}
 # Read messages sent over TCP with TLS
-module(
-  load="imtcp"
-  threads="{{ logging_tcp_threads }}"
-  streamDriver.name="{{ __rsyslog_default_netstream_driver }}"
-  streamDriver.mode="1"
-  streamDriver.authMode="{{ rsyslog_default_driver_authmode }}"
-{%   if rsyslog_default_driver_authmode != "anon" %}
-{%     if logging_permitted_peers is string %}
-    permittedPeer="{{ logging_permitted_peers }}"
-{%     else %}
-    permittedPeer=["{{ logging_permitted_peers | join('","') }}"]
-{% endif %}
-{%   endif %}
+module(load="imtcp"
+       threads="{{ logging_tcp_threads }}"
+       StreamDriver.Name="{{ __rsyslog_default_netstream_driver }}"
+       StreamDriver.Mode="1"
+       StreamDriver.AuthMode="{{ logging_pki_authmode }}"
+{%     if logging_pki_authmode != "anon" %}
+{%       if logging_permitted_peers is string %}
+       PermittedPeer="{{ logging_permitted_peers }}"
+{%       else %}
+       PermittedPeer=["{{ logging_permitted_peers | join('","') }}"]
+{%       endif %}
+{%     endif %}
 )
+{%   endif %}
 {% endif %}

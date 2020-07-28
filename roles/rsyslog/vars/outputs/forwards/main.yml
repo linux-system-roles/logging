@@ -6,21 +6,4 @@
 
 # List of rpm packages for Forwards output.
 __rsyslog_forwards_output_packages: []
-
-# Forwards Rsyslog output configuration rules
-# ---------------------------------
-__rsyslog_forwards_output_rules:
-  - '{{ __rsyslog_conf_forwards_output_tls_rules }}'
-
-# __rsyslog_conf_forwards_output_rules:
-#
-# Enable log forwarding to another ``rsyslogd`` instance if `rsyslog_output_forwards` variables are defined.
-__rsyslog_conf_forwards_output_tls_rules:
-
-  - name: 'output-forwards-tls'
-    type: 'output'
-    state: '{{ "present" if __rsyslog_default_netstream_driver != "ptcp"
-               else "absent" }}'
-    sections:
-      - comment: 'Forward logs over TLS by default'
-        options: '{{ rsyslog_send_over_tls }}'
+__rsyslog_forwards_output_rules: []

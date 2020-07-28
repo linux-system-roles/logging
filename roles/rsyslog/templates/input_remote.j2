@@ -2,10 +2,12 @@
 # Log messages from remote hosts over UDP
 input(name="{{ item.name }}" type="imudp" port="{{ item.udp_port | d(__rsyslog_default_port) }}")
 {% elif item.tcp_port | d() %}
+{%   if __rsyslog_default_netstream_driver == "ptcp" %}
 # Log messages from remote hosts over plain TCP
 input(name="{{ item.name }}" type="imptcp" port="{{ item.tcp_port | d(__rsyslog_default_port) }}")
-{% else %}
+{%   else %}
 # Log messages from remote hosts over TLS
-input(name="{{ item.name }}" type="imtcp" port="{{ item.tcp_tls_port | d(__rsyslog_default_tls_port) }}")
+input(name="{{ item.name }}" type="imtcp" port="{{ item.tcp_port | d(__rsyslog_default_tls_port) }}")
+{%   endif %}
 {% endif %}
 {{ lookup('template', 'input_template.j2') }}

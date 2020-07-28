@@ -115,6 +115,20 @@
       register: __result
       failed_when: not __result.stat.exists
 
+    - name: Generated a file to check severity_and_facility
+      copy:
+        dest: /tmp/__testfile__
+        content: |
+          # Ansible managed
+          ruleset(name="forwards_severity_and_facility") {
+              local1.info action(name="forwards_severity_and_facility"
+                  type="omfwd"
+                  Target="host.domain"
+                  Port="1514"
+                  Protocol="tcp"
+              )
+          }
+
     - name: Check severity_and_facility
-      command: /bin/grep 'local1.info action(name="forwards_severity_and_facility" type="omfwd" Target="host.domain" Port="1514" Protocol="tcp")' '{{ __test_forwards_conf }}'
+      command: diff -B /tmp/__testfile__ '{{ __test_forwards_conf }}'
       changed_when: false
