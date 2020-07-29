@@ -72,25 +72,7 @@ logging_max_message_size: 8192
 #                  default to /etc/pki/tls/private/<private_key_src basename>
 logging_pki_files: []
 
-# logging_pki_authmode
-#
-# Specify the default network driver authentication mode.
-# `x509/name` or `anon` are available:
-logging_pki_authmode: "x509/name"
-
 # logging_domain
 #
 # The default DNS domain used to accept remote incoming logs from remote hosts.
 logging_domain: '{{ ansible_domain if ansible_domain else ansible_hostname }}'
-
-# logging_permitted_peers
-#
-# List of hostnames, IP addresses or wildcard DNS domains which will be allowed
-# by the `logging` server to connect and send logs over TLS.
-logging_permitted_peers: ['*.{{ logging_domain }}']
-
-# logging_send_permitted_peers
-#
-# List of hostnames, IP addresses or wildcard DNS domains which will be verified
-# by the `logging` client and will allow to send logs to the remote server over TLS.
-logging_send_permitted_peers: '{{ logging_permitted_peers }}'

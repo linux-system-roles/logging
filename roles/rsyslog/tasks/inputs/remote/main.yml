@@ -4,12 +4,14 @@
   vars:
     __rsyslog_packages: "{{ __rsyslog_remote_packages }}"
     __rsyslog_rules:
-      - name: "input-remote-modules"
+      - name: "input-remote-modules-{{ item.name }}"
         type: modules
         sections:
           - options: "{{ lookup('template', 'input_remote_module.j2') }}"
   include_tasks:
     file: "{{ role_path }}/tasks/deploy.yml"
+  loop: '{{ logging_inputs }}'
+  when: item.type | d() == 'remote'
 
 - name: Create basics input configuration files in /etc/rsyslog.d
   vars:

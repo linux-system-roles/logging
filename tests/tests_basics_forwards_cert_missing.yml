@@ -5,10 +5,8 @@
 # logging_purge_confs: true
 # logging_pki: tls
 # logging_pki_files:
-#     ca_cert_src: "{{ __test_ca_cert }}" <-- local ca_cert file path to be copied from
-#     ca_cert: "/etc/pki/tls/certs/{{ __test_ca_cert_name }}" <-- target destination
 #     private_key_src: "{{ __test_key }}" <-- local key file path to be copied from
-#     Note: cert_src is missing.
+#     Note: ca_cert_src/ca_cert is missing.
 # inputs: [basic_input]
 # outputs: [forwards_severity_and_facility]
 #
@@ -20,30 +18,24 @@
   hosts: all
   become: true
   vars:
-    __test_ca_cert_name: test-ca.crt
     __test_key_name: test-key.pem
-    __test_ca_cert: /tmp/{{ __test_ca_cert_name }}
     __test_key: /tmp/{{ __test_key_name }}
-    __expected_error: "Error: you specified logging_pki other than none or ptcp and logging_pki_authmode other than anon; you must specify all 3 of logging_pki_files ca_cert_src, cert_src, private_key_src, and/or all 3 of ca_cert, cert, private_key in the playbook var section."
+    __expected_error: "Error: you specified logging_pki other than none or ptcp; you must specify logging_pki_files ca_cert_src and/or ca_cert in the playbook var section."
 
   tasks:
     - block:
         - name: Generate fake key/certs files
           copy:
-            dest: "{{ item }}"
+            dest: "{{ __test_key }}"
             content:
-              This is a fake {{ item }}.
+              This is a fake {{ __test_key_name }}.
           delegate_to: localhost
-          loop:
-            - "{{ __test_ca_cert }}"
-            - "{{ __test_key }}"
 
         - name: Deploy rsyslog config on the target host
           vars:
             logging_pki: tls
             logging_pki_files:
-              - ca_cert_src: "{{ __test_ca_cert }}"
-                private_key_src: "{{ __test_key }}"
+              - private_key_src: "{{ __test_key }}"
             logging_outputs:
               - name: forwards_severity_and_facility
                 type: forwards

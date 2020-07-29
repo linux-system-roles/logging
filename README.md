@@ -115,6 +115,8 @@ This is a schematic logging configuration to show log messages from input_nameA 
   **available options**
   - `udp_port`: UDP port number to listen. Default to `514`.
   - `tcp_port`: TCP port number to listen. Default to `514`.
+  - `pki_authmode`: Specifying the default network driver authentication mode. Default to `x509/name`.
+  - `permitted_peers`: List of hostnames, IP addresses or wildcard DNS domains which will be allowed by the `logging` server to connect and send logs over TLS. Default to ['\*.{{ logging_domain }}']
 
 #### Logging_outputs options
 
@@ -165,6 +167,8 @@ This is a schematic logging configuration to show log messages from input_nameA 
   - `protocol`: Protocol; `tcp` or `udp`; default to `tcp`.
   - `target`: Target host (fqdn). **Required**.
   - `port`: Port; default to 514.
+  - `pki_authmode`: Specifying the default network driver authentication mode. Default to `x509/name`.
+  - `permitted_peers`: Hostname, IP addresses or wildcard DNS domain which will be allowed by the `logging` server to connect and send logs over TLS. Default to '\*.{{ logging_domain }}'
 
 - `remote_files` type - `remote_files` output stores logs to the local files per remote host and program name originated the logs.<br>
   **available options**
@@ -223,19 +227,13 @@ These variables are set in the same level of the `logging_inputs`, `logging_outp
   One of `none`, `ptcp`, `tls`, `gtls`, and `gnutls`. Default to `ptcp`.
   Note: `none`=`ptcp`, `tls`=`gtls`=`gnutls`.
   When `logging_pki` is _not_ `ptcp`, i.e., `tls` or its alias, the logging system is configured to use tls.
-- `logging_pki_authmode`: Specifying the default network driver authentication mode.
-  `x509/name` or `anon` are available. Default to `x509/name`.
-  If set to `anon`, the `cert_src`, `private_key_src`, `cert`, and `private_key` specified in `logging_pki_files`
-  are ignored.
 - `logging_pki_files`: Specifying either of the paths of the ca_cert, cert, and key on the control host or
   the paths of theirs on the managed host or both of them.
-  The usage of `logging_pki_files` depends upon the value of `logging_pki` and `logging_pki_authmode`.
+  The usage of `logging_pki_files` depends upon the value of `logging_pki`.
   If `logging_pki` is `ptcp`, `logging_pki_files` is ignored. 
-  If `logging_pki` is not `ptcp` and `logging_pki_authmode` is `anon`, only `ca_cert_src` and `ca_cert`
-  parameters are processed.
-  In this case, either `ca_cert_src` or `ca_cert` or both of them are required.
-  Otherwise, all the following parameters are processed.
-  In this case, either 3 src parameters or 3 dest parameters or both sets are required.
+  If `logging_pki` is not `ptcp`, `ca_cert_src` and/or `ca_cert` is required.
+  If both `cert_src` and `cert` are not given, certificate for the logging system is not configured.
+  If both `private_key_src` and `private_key` are not given, private key for the logging system is not configured.
 ``` 
   ca_cert_src:     location of the ca_cert on the control host; if given, the file is copied to the managed host.
   cert_src:        location of the cert on the control host; if given, the file is copied to the managed host.
@@ -248,8 +246,6 @@ These variables are set in the same level of the `logging_inputs`, `logging_outp
                default to /etc/pki/tls/private/<private_key_src basename>
 ``` 
 - `logging_domain`: The default DNS domain used to accept remote incoming logs from remote hosts. Default to "{{ ansible_domain if ansible_domain else ansible_hostname }}"
-- `logging_permitted_peers`: List of hostnames, IP addresses or wildcard DNS domains which will be allowed by the `logging` server to connect and send logs over TLS.  Default to ['\*.{{ logging_domain }}']
-- `logging_send_permitted_peers`: List of hostnames, IP addresses or wildcard DNS domains which will be verified by the `logging` client and will allow to send logs to the remote server over TLS. Default to "{{ logging_permitted_peers }}".
 
 #### Server performance optimization options
 
@@ -501,6 +497,8 @@ The following playbook generates the same logging configuration files.
         protocol: tcp
         target: your_target_host
         port: 6514
+        pki_authmode: x509/name
+        permitted_peers: '*.example.com'
     logging_flows:
       - name: flows0
         inputs: [basic_input]
@@ -550,6 +548,7 @@ The following playbook generates the same logging configuration files.
       - name: remote_tcp_input
         type: remote
         tcp_port: 6514
+        permitted_peers: ['*.example.com', '*.test.com']
     logging_outputs:
       - name: remote_files_output0
         type: remote_files
