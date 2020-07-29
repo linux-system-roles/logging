@@ -51,6 +51,10 @@ __rsyslog_default_pki_key_name: "key.pem"
 #
 __rsyslog_default_pki_cert_name: "cert.pem"
 
+# The default network driver authentication mode.
+#
+__rsyslog_default_pki_authmode: "x509/name"
+
 # Rsyslog configuration rules
 # ---------------------------
 

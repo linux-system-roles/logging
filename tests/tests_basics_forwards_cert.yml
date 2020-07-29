@@ -62,8 +62,6 @@
           - ca_cert_src: "{{ __test_ca_cert }}"
             cert_src: "{{ __test_cert }}"
             private_key_src: "{{ __test_key }}"
-        logging_permitted_peers:
-          - '*.example.com'
         logging_outputs:
           - name: forwards_severity_and_facility
             type: forwards
@@ -72,6 +70,7 @@
             protocol: tcp
             target: host.domain
             port: 1514
+            permitted_peers: '*.example.com'
         logging_inputs:
           - name: basic_input
             type: basics
@@ -118,7 +117,7 @@
                   StreamDriver="gtls"
                   StreamDriverMode="1"
                   StreamDriverAuthMode="x509/name"
-                  StreamDriverPermittedPeers="['*.example.com']"
+                  StreamDriverPermittedPeers="*.example.com"
               )
           }
 

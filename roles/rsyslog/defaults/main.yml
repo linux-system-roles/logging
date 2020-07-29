@@ -46,24 +46,6 @@ rsyslog_basics_use_traditional_timestamp_format: true
 
 __rsyslog_default_netstream_driver: '{{ __rsyslog_pki_map[logging_pki] | d("ptcp") }}'
 
-# rsyslog_send_over_tls
-#
-# This configuration is added to the forward options when ``tls`` capability is
-# enabled. It's used to configure TLS options.
-rsyslog_send_over_tls: |-
-  $ActionSendStreamDriver {{ __rsyslog_default_netstream_driver }}
-  $ActionSendStreamDriverAuthMode {{ logging_pki_authmode }}
-  {% if logging_pki_authmode == "x509/name" %}
-  {%   if logging_send_permitted_peers is string %}
-  $ActionSendStreamDriverPermittedPeer {{ logging_send_permitted_peers }}
-  {%   else %}
-  {%     for peer in logging_send_permitted_peers %}
-  $ActionSendStreamDriverPermittedPeer {{ peer }}
-  {%     endfor %}
-  {%   endif %}
-  {% endif %}
-  $ActionSendStreamDriverMode 1
-
 # Files and Forwards outputs
 # --------------------------
 

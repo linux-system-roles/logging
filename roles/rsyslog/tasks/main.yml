@@ -162,36 +162,13 @@
       notify: restart rsyslogd
 
     # Check if logging_pki is defined and
-    #          logging_pki_authmode is not anon
-    #          logging_pki_files.{ca_cert_src,cert_src,private_key_src} and/or
-    #          logging_pki_files.{ca_cert,cert,private_key}
-    #          are defined.
+    #          logging_pki_files.{ca_cert_src,ca_cert} is defined
     # Otherwise it fails.
-    - name: Check logging_pki, logging_pki_authmode, and logging_pki_files
+    - name: Check logging_pki and logging_pki_files
       fail:
-        msg: "Error: you specified logging_pki other than none or ptcp and logging_pki_authmode other than anon; you must specify all 3 of logging_pki_files ca_cert_src, cert_src, private_key_src, and/or all 3 of ca_cert, cert, private_key in the playbook var section."
+        msg: "Error: you specified logging_pki other than none or ptcp; you must specify logging_pki_files ca_cert_src and/or ca_cert in the playbook var section."
       when:
         - __rsyslog_pki_map[logging_pki] | d("ptcp") != "ptcp"
-        - logging_pki_authmode != "anon"
-        - not ((logging_pki_files.0.ca_cert_src | d() and
-                logging_pki_files.0.cert_src | d() and
-                logging_pki_files.0.private_key_src | d()) or
-               (logging_pki_files.0.ca_cert | d() and
-                logging_pki_files.0.cert | d() and
-                logging_pki_files.0.private_key | d()))
-
-    # Check if logging_pki is defined and
-    #          logging_pki_authmode is anon
-    #          logging_pki_files.ca_cert_src and/or
-    #          logging_pki_files.ca_cert
-    #          are defined.
-    # Otherwise it fails.
-    - name: Check logging_pki, logging_pki_authmode, and logging_pki_files 2
-      fail:
-        msg: "Error: you specified logging_pki other than none or ptcp and logging_pki_authmode anon; you must specify logging_pki_files ca_cert_src and/or ca_cert in the playbook var section."
-      when:
-        - __rsyslog_pki_map[logging_pki] | d("ptcp") != "ptcp"
-        - logging_pki_authmode == "anon"
         - not (logging_pki_files.0.ca_cert_src | d() or logging_pki_files.0.ca_cert | d())
 
     - name: Copy local ca_cert file to the target if needed
@@ -217,7 +194,6 @@
       when:
         - __rsyslog_enabled | bool
         - __rsyslog_pki_map[logging_pki] | d("ptcp") != "ptcp"
-        - logging_pki_authmode != "anon"
         - logging_pki_files.0.cert_src | d("")
       notify: restart rsyslogd
 
@@ -231,7 +207,6 @@
       when:
         - __rsyslog_enabled | bool
         - __rsyslog_pki_map[logging_pki] | d("ptcp") != "ptcp"
-        - logging_pki_authmode != "anon"
         - logging_pki_files.0.private_key_src | d("")
       notify: restart rsyslogd
 

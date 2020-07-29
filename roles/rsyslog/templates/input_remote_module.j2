@@ -1,20 +1,9 @@
-{% set ns = namespace(use_tcp = false, use_udp = false) %}
-{% for elm in logging_inputs %}
-{%   if elm.type == 'remote' %}
-{%     if elm.tcp_port is defined %}
-{%       set ns.use_tcp = true %}
-{%     elif elm.udp_port is defined %}
-{%       set ns.use_udp = true %}
-{%     endif %}
-{%   endif %}
-{% endfor %}
-{% if ns.use_udp %}
+{% if item.udp_port is defined %}
 # Read messages sent over UDP
 module(load="imudp" threads="{{ logging_udp_threads }}"
        TimeRequery="{{ logging_udp_system_time_requery }}"
        BatchSize="{{ logging_udp_batch_size }}")
-{% endif %}
-{% if ns.use_tcp %}
+{% elif item.tcp_port is defined %}
 {%   if __rsyslog_default_netstream_driver == "ptcp" %}
 # Read messages sent over plain TCP
 module(load="imptcp" threads="{{ logging_tcp_threads }}")
@@ -23,14 +12,10 @@ module(load="imptcp" threads="{{ logging_tcp_threads }}")
 module(load="imtcp"
        StreamDriver.Name="{{ __rsyslog_default_netstream_driver }}"
        StreamDriver.Mode="1"
-       StreamDriver.AuthMode="{{ logging_pki_authmode }}"
-{%     if logging_pki_authmode != "anon" %}
-{%       if logging_permitted_peers is string %}
-       PermittedPeer="{{ logging_permitted_peers }}"
-{%       else %}
-       PermittedPeer=["{{ logging_permitted_peers | join('","') }}"]
+       StreamDriver.AuthMode="{{ item.pki_authmode | d(__rsyslog_default_pki_authmode) }}"
+{%     if item.pki_authmode | d() != 'anon' %}
+       PermittedPeer=["{{ item.permitted_peers | join('","') }}"]
 {%       endif %}
-{%     endif %}
 )
 {%   endif %}
 {% endif %}
