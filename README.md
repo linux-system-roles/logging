@@ -255,7 +255,7 @@ These variables are set in the same level of the `logging_inputs`, `logging_outp
 
 These variables are set in the same level of the `logging_inputs`, `logging_output`, and `logging_flows`.
 
-- `logging_tcp_threads`: Input thread count listening on the tcp port. Default to `1`.
+- `logging_tcp_threads`: Input thread count listening on the plain tcp (ptcp) port. Default to `1`.
 - `logging_udp_threads`: Input thread count listening on the udp port. Default to `1`.
 - `logging_udp_system_time_requery`: Every `value` OS system calls, get the system time. Recommend not to set above 10. Default to `2` times.
 - `logging_udp_batch_size`: Maximum number of udp messages per OS system call. Recommend not to set above 128. Default to `32`.

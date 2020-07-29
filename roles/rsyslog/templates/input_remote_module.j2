@@ -21,7 +21,6 @@ module(load="imptcp" threads="{{ logging_tcp_threads }}")
 {%   else %}
 # Read messages sent over TCP with TLS
 module(load="imtcp"
-       threads="{{ logging_tcp_threads }}"
        StreamDriver.Name="{{ __rsyslog_default_netstream_driver }}"
        StreamDriver.Mode="1"
        StreamDriver.AuthMode="{{ logging_pki_authmode }}"
