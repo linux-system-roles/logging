@@ -70,7 +70,7 @@
             protocol: tcp
             target: host.domain
             port: 1514
-            permitted_peers: '*.example.com'
+            permitted_server: '*.example.com'
         logging_inputs:
           - name: basic_input
             type: basics

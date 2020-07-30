@@ -14,8 +14,12 @@ module(load="imtcp"
        StreamDriver.Mode="1"
        StreamDriver.AuthMode="{{ item.pki_authmode | d(__rsyslog_default_pki_authmode) }}"
 {%     if item.pki_authmode | d() != 'anon' %}
-       PermittedPeer=["{{ item.permitted_peers | join('","') }}"]
+{%       if item.permitted_clients | d() %}
+       PermittedPeer=["{{ item.permitted_clients | join('","') }}"]
+{%       else %}
+       PermittedPeer=["*.{{ logging_domain }}"]
 {%       endif %}
+{%     endif %}
 )
 {%   endif %}
 {% endif %}
