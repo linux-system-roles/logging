@@ -16,7 +16,7 @@ ruleset(name="{{ item.name }}") {
         StreamDriver="{{ __rsyslog_default_netstream_driver }}"
         StreamDriverMode="1"
         StreamDriverAuthMode="{{ item.pki_authmode | d(__rsyslog_default_pki_authmode) }}"
-        StreamDriverPermittedPeers="{{ item.permitted_peers | d(logging_domain) }}"
+        StreamDriverPermittedPeers="{{ item.permitted_server | d('*.' + logging_domain) }}"
     )
 {%   endif %}
 {% else %}
@@ -36,7 +36,7 @@ ruleset(name="{{ item.name }}") {
         StreamDriver="{{ __rsyslog_default_netstream_driver }}"
         StreamDriverMode="1"
         StreamDriverAuthMode="{{ item.pki_authmode | d(__rsyslog_default_pki_authmode) }}"
-        StreamDriverPermittedPeers="{{ item.permitted_peers | d(logging_domain) }}"
+        StreamDriverPermittedPeers="{{ item.permitted_server | d('*.' + logging_domain) }}"
     )
 {%   endif %}
 {% endif %}

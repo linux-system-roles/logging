@@ -116,7 +116,7 @@ This is a schematic logging configuration to show log messages from input_nameA 
   - `udp_port`: UDP port number to listen. Default to `514`.
   - `tcp_port`: TCP port number to listen. Default to `514`.
   - `pki_authmode`: Specifying the default network driver authentication mode. Default to `x509/name`.
-  - `permitted_peers`: List of hostnames, IP addresses or wildcard DNS domains which will be allowed by the `logging` server to connect and send logs over TLS. Default to ['\*.{{ logging_domain }}']
+  - `permitted_clients`: List of hostnames, IP addresses, fingerprints(sha1), and wildcard DNS domains which will be allowed by the `logging` server to connect and send logs over TLS. Default to ['\*.{{ logging_domain }}']
 
 #### Logging_outputs options
 
@@ -168,7 +168,7 @@ This is a schematic logging configuration to show log messages from input_nameA 
   - `target`: Target host (fqdn). **Required**.
   - `port`: Port; default to 514.
   - `pki_authmode`: Specifying the default network driver authentication mode. Default to `x509/name`.
-  - `permitted_peers`: Hostname, IP addresses or wildcard DNS domain which will be allowed by the `logging` server to connect and send logs over TLS. Default to '\*.{{ logging_domain }}'
+  - `permitted_server`: Hostname, IP address, fingerprint(sha1) or wildcard DNS domain of the server which this client will be allowed to connect and send logs over TLS. Default to '*.{{ logging_domain }}'
 
 - `remote_files` type - `remote_files` output stores logs to the local files per remote host and program name originated the logs.<br>
   **available options**
@@ -498,7 +498,7 @@ The following playbook generates the same logging configuration files.
         target: your_target_host
         port: 6514
         pki_authmode: x509/name
-        permitted_peers: '*.example.com'
+        permitted_server: '*.example.com'
     logging_flows:
       - name: flows0
         inputs: [basic_input]
@@ -548,7 +548,7 @@ The following playbook generates the same logging configuration files.
       - name: remote_tcp_input
         type: remote
         tcp_port: 6514
-        permitted_peers: ['*.example.com', '*.test.com']
+        permitted_clients: ['*.example.com', '*.test.com']
     logging_outputs:
       - name: remote_files_output0
         type: remote_files
