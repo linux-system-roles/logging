@@ -1,13 +1,41 @@
-{% if item.udp_port | d() %}
+{% if item.udp_ports | d([]) %}
 # Log messages from remote hosts over UDP
-input(name="{{ item.name }}" type="imudp" port="{{ item.udp_port | d(__rsyslog_default_port) }}")
-{% elif item.tcp_port | d() %}
-{%   if __rsyslog_default_netstream_driver == "ptcp" %}
+{%   set __logging_loop_index = loop.index %}
+input(name="{{ item.name }}" type="imudp" port=["{{ item.udp_ports | join('","') }}"])
+{{ lookup('template', 'input_template.j2') }}
+{% endif %}
+{% set rsyslog_flows = logging_flows | d([ {"name": "default_flow", "inputs": [ item.name ], "outputs": ["default_files"]} ], true) %}
+{% set outdict = {} %}
+{% for flow in rsyslog_flows %}
+{%   if flow.inputs | intersect([ item.name ]) %}
+{%     for oname in flow.outputs %}
+{%       set _ = outdict.__setitem__(oname, outdict.get(oname,[])|union([ item.name ])) %}
+{%     endfor %}
+{%   endif %}
+{% endfor %}
+{% for tport in item.tcp_ports | d([]) %}
+{%   set __logging_loop_index = loop.index %}
+{%   if __rsyslog_default_netstream_driver == "ptcp" or item.pki | d() != 'tls' %}
 # Log messages from remote hosts over plain TCP
-input(name="{{ item.name }}" type="imptcp" port="{{ item.tcp_port | d(__rsyslog_default_port) }}")
+input(name="{{ item.name }}_{{ __logging_loop_index }}" type="imptcp" port="{{ tport }}")
 {%   else %}
 # Log messages from remote hosts over TLS
-input(name="{{ item.name }}" type="imtcp" port="{{ item.tcp_port | d(__rsyslog_default_tls_port) }}")
+input(name="{{ item.name }}_{{ __logging_loop_index }}" type="imtcp" port="{{ tport }}")
 {%   endif %}
-{% endif %}
-{{ lookup('template', 'input_template.j2') }}
+{%   for output in rsyslog_outputs %}
+{%     if outdict[output.name] | d(false) %}
+if
+{%       for inputname in outdict[output.name] %}
+{%         if inputname == item.name %}
+{%           if not loop.first %}
+  or
+{%           endif %}
+  ($inputname == "{{ item.name }}_{{ __logging_loop_index }}" )
+{%         endif %}
+{%       endfor %}
+  then {
+    call {{ output.name }}
+}
+{%     endif %}
+{%   endfor %}
+{% endfor %}

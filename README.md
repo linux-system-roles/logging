@@ -113,10 +113,27 @@ This is a schematic logging configuration to show log messages from input_nameA 
 
 - `remote` type - `remote` input supports receiving logs from the remote logging system over the network. This input type makes rsyslog a server.<br>
   **available options**
-  - `udp_port`: UDP port number to listen. Default to `514`.
-  - `tcp_port`: TCP port number to listen. Default to `514`.
-  - `pki_authmode`: Specifying the default network driver authentication mode. Default to `x509/name`.
+  - `udp_ports`: List of UDP port numbers to listen. Default to `514`.
+  - `tcp_ports`: List of TCP port numbers to listen. Default to `514`.
+  - `pki`: Set to `tls` to use the `tls` enabled connection. Default to None.
+  - `pki_authmode`: Specifying the default network driver authentication mode. `x509/name`, `x509/fingerprint`, `anon` is accepted. Default to `x509/name`.
   - `permitted_clients`: List of hostnames, IP addresses, fingerprints(sha1), and wildcard DNS domains which will be allowed by the `logging` server to connect and send logs over TLS. Default to ['\*.{{ logging_domain }}']
+
+  There are 3 type of items in the remote type - udp, plain tcp and tls tcp. The udp type contains `udp_ports`; the plain tcp type contains `tcp_ports` but no `pki: tls`; the tls tcp type contains tcp_ports as well as `pki: tls`. Please note that it is not allowed for them to be conflicted. I.e., if there are 2 udp type items, it fails to deploy.
+  ```
+  - name: remote_udp
+    type: remote
+    udp_ports: [514, ...]
+  - name: remote_ptcp
+    type: remote
+    tcp_ports: [514, ...]
+  - name: remote_tcp
+    type: remote
+    tcp_ports: [6514, ...]
+    pki: tls
+    pki_authmode: x509/name
+    permitted_clients: ['*.example.com']
+  ```
 
 #### Logging_outputs options
 
@@ -167,7 +184,8 @@ This is a schematic logging configuration to show log messages from input_nameA 
   - `protocol`: Protocol; `tcp` or `udp`; default to `tcp`.
   - `target`: Target host (fqdn). **Required**.
   - `port`: Port; default to 514.
-  - `pki_authmode`: Specifying the default network driver authentication mode. Default to `x509/name`.
+  - `pki`: Set to `tls` to use the `tls` enabled connection. Default to None.
+  - `pki_authmode`: Specifying the default network driver authentication mode. `x509/name`, `x509/fingerprint`, `anon` is accepted. Default to `x509/name`.
   - `permitted_server`: Hostname, IP address, fingerprint(sha1) or wildcard DNS domain of the server which this client will be allowed to connect and send logs over TLS. Default to '*.{{ logging_domain }}'
 
 - `remote_files` type - `remote_files` output stores logs to the local files per remote host and program name originated the logs.<br>
@@ -518,10 +536,10 @@ The following playbook generates the same logging configuration files.
     logging_inputs:
       - name: remote_udp_input
         type: remote
-        udp_port: 514
+        udp_ports: [514, 1514]
       - name: remote_tcp_input
         type: remote
-        tcp_port: 514
+        tcp_ports: [514, 1514]
     logging_outputs:
       - name: remote_files_output
         type: remote_files
@@ -547,7 +565,7 @@ The following playbook generates the same logging configuration files.
     logging_inputs:
       - name: remote_tcp_input
         type: remote
-        tcp_port: 6514
+        tcp_ports: [6514, 7514]
         permitted_clients: ['*.example.com', '*.test.com']
     logging_outputs:
       - name: remote_files_output0

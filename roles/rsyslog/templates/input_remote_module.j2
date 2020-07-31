@@ -1,10 +1,10 @@
-{% if item.udp_port is defined %}
+{% if item.udp_ports is defined %}
 # Read messages sent over UDP
 module(load="imudp" threads="{{ logging_udp_threads }}"
        TimeRequery="{{ logging_udp_system_time_requery }}"
        BatchSize="{{ logging_udp_batch_size }}")
-{% elif item.tcp_port is defined %}
-{%   if __rsyslog_default_netstream_driver == "ptcp" %}
+{% elif item.tcp_ports is defined %}
+{%   if item.pki | d() != 'tls' %}
 # Read messages sent over plain TCP
 module(load="imptcp" threads="{{ logging_tcp_threads }}")
 {%   else %}
