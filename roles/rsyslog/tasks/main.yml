@@ -240,7 +240,7 @@
         file: "{{ role_path }}/vars/{{ varfile }}"
       vars:
         varfile: "inputs/{{ input_item.type }}/main.yml"
-      loop: "{{ logging_inputs | flatten(1) }}"
+      loop: "{{ logging_inputs }}"
       loop_control:
         loop_var: input_item
       when:
@@ -252,7 +252,7 @@
         file: "{{ tasks }}"
       vars:
         tasks: "{{ role_path }}/tasks/inputs/{{ input_item.type }}/main.yml"
-      loop: "{{ logging_inputs | flatten(1) }}"
+      loop: "{{ logging_inputs }}"
       loop_control:
         loop_var: input_item
       when:
@@ -264,7 +264,7 @@
         file: "{{ role_path }}/vars/{{ varfile }}"
       vars:
         varfile: "outputs/{{ output_item.type }}/main.yml"
-      loop: "{{ rsyslog_outputs | flatten(1) }}"
+      loop: "{{ rsyslog_outputs }}"
       loop_control:
         loop_var: output_item
       when:
@@ -276,7 +276,7 @@
         file: "{{ tasks }}"
       vars:
         tasks: "{{ role_path }}/tasks/outputs/{{ output_item.type }}/main.yml"
-      loop: "{{ rsyslog_outputs | flatten(1) }}"
+      loop: "{{ rsyslog_outputs }}"
       loop_control:
         loop_var: output_item
       when:

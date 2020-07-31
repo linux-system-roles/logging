@@ -41,12 +41,12 @@
         - name: Check logging_inputs item in logging_flows.inputs
           fail:
             msg: "Error: {{ item.inputs }} includes undefined logging_inputs item."
-          loop: "{{ logging_flows | flatten(1) }}"
+          loop: "{{ logging_flows }}"
           when:
             - logging_enabled | d(true)
             - item.inputs | intersect(__logging_input_names) | length != item.inputs | length
       vars:
-        __logging_input_names: "{{ logging_inputs | flatten(1) | map(attribute='name') | list }}"
+        __logging_input_names: "{{ logging_inputs | map(attribute='name') | list }}"
 
     - block:
         - name: Re-read facts after adding custom fact
