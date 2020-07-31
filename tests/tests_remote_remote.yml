@@ -15,8 +15,8 @@
 #    By setting logging_purge_confs, pre-existing config files are deleted.
 #    Thus, assert the the count is equal to 10.
 # 3. Install lsof
-# 3.1 Using lsof, check port 514 is open for TCP
-# 3.2 Using lsof, check port 514 is open for UDP
+# 3.1 Using lsof, check port 514 and 40001 are open for TCP
+# 3.2 Using lsof, check port 514 and 40002 are open for UDP
 #
 - name: Ensure that the role runs from inputs from the remote rsyslog to the local files outputs.
   hosts: all
@@ -45,12 +45,12 @@
             remote_sub_path: others/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log
             facility: authpriv
         logging_inputs:
-          - name: remote_udp_input
-            type: remote
-            udp_port: 514
           - name: remote_tcp_input
             type: remote
-            tcp_port: 514
+            tcp_ports: [514, 40001]
+          - name: remote_udp_input
+            type: remote
+            udp_ports: [514, 40002]
         logging_flows:
           - name: flow_0
             inputs: [remote_udp_input, remote_tcp_input]
@@ -95,14 +95,16 @@
     - debug:
         msg: "lsof returned {{ __result.stdout }}"
 
-    - name: Check port 514 is open for TCP
+    - name: Check port 514 and 40001 is open for TCP
       shell: |
         set -o pipefail
-        lsof -i -nP | grep rsyslogd | grep TCP | grep 514
+        lsof -i -nP | grep rsyslogd | grep TCP | grep {{ item }}
+      loop: [514, 40001]
       changed_when: false
 
-    - name: Check port 514 is open for UDP
+    - name: Check port 514 and 40002 is open for UDP
       shell: |
         set -o pipefail
-        lsof -i -nP | grep rsyslogd | grep UDP | grep 514
+        lsof -i -nP | grep rsyslogd | grep UDP | grep {{ item }}
+      loop: [514, 40002]
       changed_when: false

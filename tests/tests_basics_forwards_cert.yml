@@ -70,6 +70,7 @@
             protocol: tcp
             target: host.domain
             port: 1514
+            pki: tls
             permitted_server: '*.example.com'
         logging_inputs:
           - name: basic_input

@@ -56,6 +56,7 @@
             protocol: tcp
             target: host.domain
             port: 1514
+            pki: tls
             pki_authmode: anon
             permitted_server: '*.example.com'
         logging_inputs:

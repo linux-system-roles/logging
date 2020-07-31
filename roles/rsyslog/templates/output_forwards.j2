@@ -1,6 +1,6 @@
 ruleset(name="{{ item.name }}") {
 {% if item.exclude | d([]) %}
-{%   if __rsyslog_default_netstream_driver == "ptcp" %}
+{%   if __rsyslog_default_netstream_driver == "ptcp" or item.pki | d() != "tls" %}
     {{ item.facility | d('*') }}.{{ item.severity | d('*') }};{{ item.exclude | join(';') }} action(name="{{ item.name }}"
         type="omfwd"
         Target="{{ item.target }}"
@@ -20,7 +20,7 @@ ruleset(name="{{ item.name }}") {
     )
 {%   endif %}
 {% else %}
-{%   if __rsyslog_default_netstream_driver == "ptcp" %}
+{%   if __rsyslog_default_netstream_driver == "ptcp" or item.pki | d() != "tls" %}
     {{ item.facility | d('*') }}.{{ item.severity | d('*') }} action(name="{{ item.name }}"
         type="omfwd"
         Target="{{ item.target }}"
