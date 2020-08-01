@@ -1,5 +1,11 @@
 ## Changelogs
 
+### RHELPLAN-50082 / Bug 1861318 - [logging role] cannot setup machine with tls
+https://github.com/linux-system-roles/logging/pull/159
+- Eliminating logging_pki variable.
+  Instead of the top level variable logging_pki, use pki key in the individual
+  forwards output item and remote input item to switch the tls handling.
+
 ### RHELPLAN-43536 - Support tls for the remote input and forwards output
 https://github.com/linux-system-roles/logging/pull/126
 - New variables for configuring tls are introduced

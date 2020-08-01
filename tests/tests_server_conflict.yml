@@ -34,7 +34,6 @@
 
         - name: Deploy rsyslog config on the target host
           vars:
-            logging_pki: tls
             logging_pki_files:
               - ca_cert_src: "{{ __test_ca_cert }}"
                 cert_src: "{{ __test_cert }}"

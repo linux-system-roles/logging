@@ -55,6 +55,11 @@ __rsyslog_default_pki_cert_name: "cert.pem"
 #
 __rsyslog_default_pki_authmode: "x509/name"
 
+# communication over tls
+#
+
+__rsyslog_tls_netstream_driver: "gtls"
+
 # Rsyslog configuration rules
 # ---------------------------
 
@@ -84,12 +89,3 @@ rsyslog_weight_map:
   'rulesets': '50'
   'input': '90'
   'inputs': '90'
-
-# X.509 certificates related variables
-# Lookup rsyslog network stream driver
-__rsyslog_pki_map:
-  none: ptcp
-  ptcp: ptcp
-  tls: gtls
-  gtls: gtls
-  gnutls: gtls

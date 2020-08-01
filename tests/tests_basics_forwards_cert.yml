@@ -3,7 +3,6 @@
 # [Configuration]
 # basics input (imjournal) -> forwards output (omfile)
 # logging_purge_confs: true
-# logging_pki: tls
 # logging_pki_files:
 #     ca_cert_src: "{{ __test_ca_cert }}" <-- local ca_cert file path to be copied from
 #     ca_cert: "/etc/pki/tls/certs/{{ __test_ca_cert_name }}" <-- target destination
@@ -57,7 +56,6 @@
     - name: Deploy rsyslog config on the target host
       vars:
         logging_purge_confs: true
-        logging_pki: tls
         logging_pki_files:
           - ca_cert_src: "{{ __test_ca_cert }}"
             cert_src: "{{ __test_cert }}"

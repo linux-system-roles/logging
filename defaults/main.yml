@@ -38,12 +38,6 @@ logging_server_queue_type: LinkedList
 logging_server_queue_size: 50000
 logging_server_threads: "{{ logging_udp_threads | int + logging_tcp_threads | int }}"
 
-# Specifying rsyslog encryption library
-# one of the implementations is allowed none, ptcp, tls, gtls, gnutls
-# Note: none->ptcp, tls,gtls,gnutls->gtls
-# Default to ptcp (== no tls)
-logging_pki: ptcp
-
 # Mark message periodically by immark, if set to true.
 logging_mark: false
 
@@ -56,7 +50,7 @@ logging_max_message_size: 8192
 
 # list of pki files dict
 # either of {ca_cert_src,cert_src,private_key_src} or {ca_cert,cert,private_key}
-# or both sets should be configured if logging_pki is other than ptcp or none.
+# or both sets should be configured.
 # logging_pki_files:
 #   - ca_cert_src:     location of the ca_cert on the control host.
 #                      If given, it's copied to the managed host.
