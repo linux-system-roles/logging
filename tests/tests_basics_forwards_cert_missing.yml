@@ -3,7 +3,6 @@
 # [Configuration]
 # basics input (imjournal) -> forwards output (omfile)
 # logging_purge_confs: true
-# logging_pki: tls
 # logging_pki_files:
 #     private_key_src: "{{ __test_key }}" <-- local key file path to be copied from
 #     Note: ca_cert_src/ca_cert is missing.
@@ -20,7 +19,7 @@
   vars:
     __test_key_name: test-key.pem
     __test_key: /tmp/{{ __test_key_name }}
-    __expected_error: "Error: you specified logging_pki other than none or ptcp; you must specify logging_pki_files ca_cert_src and/or ca_cert in the playbook var section."
+    __expected_error: "Error: tls is enabled in forwards_severity_and_facility; you must specify logging_pki_files ca_cert_src and/or ca_cert in the playbook var section."
 
   tasks:
     - block:
@@ -33,7 +32,6 @@
 
         - name: Deploy rsyslog config on the target host
           vars:
-            logging_pki: tls
             logging_pki_files:
               - private_key_src: "{{ __test_key }}"
             logging_outputs:
@@ -43,6 +41,7 @@
                 severity: info
                 protocol: tcp
                 target: host.domain
+                pki: tls
                 port: 1514
             logging_inputs:
               - name: basic_input
@@ -60,10 +59,10 @@
 
       rescue:
         - debug:
-            msg: "Caught an expected error - {{ ansible_failed_result.msg }}"
+            msg: "Caught an expected error - {{ ansible_failed_result }}"
         - name: assert...
           assert:
-            that: "'{{ ansible_failed_result.msg }}' is match('{{ __expected_error }}')"
+            that: "'{{ ansible_failed_result.results.0.msg }}' is match('{{ __expected_error }}')"
 
     - name: default run for cleanup
       vars:

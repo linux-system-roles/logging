@@ -10,7 +10,7 @@ module(load="imptcp" threads="{{ logging_tcp_threads }}")
 {%   else %}
 # Read messages sent over TCP with TLS
 module(load="imtcp"
-       StreamDriver.Name="{{ __rsyslog_default_netstream_driver }}"
+       StreamDriver.Name="{{ __rsyslog_tls_netstream_driver }}"
        StreamDriver.Mode="1"
        StreamDriver.AuthMode="{{ item.pki_authmode | d(__rsyslog_default_pki_authmode) }}"
 {%     if item.pki_authmode | d() != 'anon' %}

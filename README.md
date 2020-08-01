@@ -241,17 +241,11 @@ This is a schematic logging configuration to show log messages from input_nameA 
 
 These variables are set in the same level of the `logging_inputs`, `logging_output`, and `logging_flows`.
 
-- `logging_pki`: Specifying an encryption.
-  One of `none`, `ptcp`, `tls`, `gtls`, and `gnutls`. Default to `ptcp`.
-  Note: `none`=`ptcp`, `tls`=`gtls`=`gnutls`.
-  When `logging_pki` is _not_ `ptcp`, i.e., `tls` or its alias, the logging system is configured to use tls.
 - `logging_pki_files`: Specifying either of the paths of the ca_cert, cert, and key on the control host or
   the paths of theirs on the managed host or both of them.
-  The usage of `logging_pki_files` depends upon the value of `logging_pki`.
-  If `logging_pki` is `ptcp`, `logging_pki_files` is ignored. 
-  If `logging_pki` is not `ptcp`, `ca_cert_src` and/or `ca_cert` is required.
-  If both `cert_src` and `cert` are not given, certificate for the logging system is not configured.
-  If both `private_key_src` and `private_key` are not given, private key for the logging system is not configured.
+  When TLS connection is configured, `ca_cert_src` and/or `ca_cert` is required.
+  To configure the certificate of the logging system, `cert_src` and/or `cert` is required.
+  To configure the private key of the logging system, `private_key_src` and/or `private_key` is required.
 ``` 
   ca_cert_src:     location of the ca_cert on the control host; if given, the file is copied to the managed host.
   cert_src:        location of the cert on the control host; if given, the file is copied to the managed host.
@@ -500,7 +494,6 @@ The following playbook generates the same logging configuration files.
   roles:
     - linux-system-roles.logging
   vars:
-    logging_pki: tls
     logging_pki_files:
       - ca_cert_src: /local/path/to/ca_cert
         cert_src: /local/path/to/cert
@@ -514,7 +507,7 @@ The following playbook generates the same logging configuration files.
         type: forwards
         protocol: tcp
         target: your_target_host
-        port: 6514
+        port: your_target_port
         pki_authmode: x509/name
         permitted_server: '*.example.com'
     logging_flows:
@@ -557,7 +550,6 @@ The following playbook generates the same logging configuration files.
   roles:
     - linux-system-roles.logging
   vars:
-    logging_pki: tls
     logging_pki_files:
       - ca_cert_src: /local/path/to/ca_cert
         cert_src: /local/path/to/cert
