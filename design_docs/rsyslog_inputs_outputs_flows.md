@@ -126,9 +126,8 @@ logging_inputs:
 logging_outputs:
   - name: forward-output
     type: forwards
-    protocol: tcp
     target: remote_host_name.remote_domain_name
-    port: 514
+    tcp_port: 514
   - name: file-output
     type: files
 logging_flows:
@@ -150,9 +149,8 @@ logging_outputs:
     type: forwards
     rsyslog_forwards_actions:
       - name: to-remote
-        protocol: tcp
         target: remote_host_name.remote_domain_name
-        port: 514
+        tcp_port: 514
     logging_inputs:
       - name: basic-input
         type: basics
@@ -178,9 +176,8 @@ logging_outputs:
     type: forwards
     rsyslog_forwards_actions:
       - name: to-remote
-        protocol: tcp
         target: remote_host_name.remote_domain_name
-        port: 514
+        tcp_port: 514
     logging_inputs:
       - name: basic-input0
         type: basics
@@ -206,9 +203,8 @@ In logging_flows, define which inputs are related to which outputs.
 logging_outputs:
   - name: forward-output
     type: forwards
-    protocol: tcp
     target: remote_host_name.remote_domain_name
-    port: 514
+    tcp_port: 514
   - name: file-output
     type: files
 logging_inputs:

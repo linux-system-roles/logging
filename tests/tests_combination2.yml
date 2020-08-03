@@ -70,15 +70,13 @@
             type: forwards
             facility: local1
             severity: info
-            protocol: tcp
             target: host.domain
-            port: 1514
+            tcp_port: 1514
           - name: forwards_facility_only
             type: forwards
             facility: local2
-            protocol: tcp
             target: host.domain
-            port: 2514
+            tcp_port: 2514
         logging_inputs:
           - name: basic_input
             type: basics
