@@ -181,9 +181,9 @@ This is a schematic logging configuration to show log messages from input_nameA 
   **available options**
   - `facility`: Facility; default to `*`.
   - `severity`: Severity; default to `*`.
-  - `protocol`: Protocol; `tcp` or `udp`; default to `tcp`.
   - `target`: Target host (fqdn). **Required**.
-  - `port`: Port; default to 514.
+  - `udp_port`: UDP port number. Default to `514`.
+  - `tcp_port`: TCP port number. Default to `514`.
   - `pki`: Set to `tls` to use the `tls` enabled connection. Default to None.
   - `pki_authmode`: Specifying the default network driver authentication mode. `x509/name`, `x509/fingerprint`, `anon` is accepted. Default to `x509/name`.
   - `permitted_server`: Hostname, IP address, fingerprint(sha1) or wildcard DNS domain of the server which this client will be allowed to connect and send logs over TLS. Default to '*.{{ logging_domain }}'
@@ -471,15 +471,13 @@ The following playbook generates the same logging configuration files.
       - name: forward_output0
         type: forwards
         severity: info
-        protocol: udp
         target: your_target_hostname
-        port: 514
+        udp_port: 514
       - name: forward_output1
         type: forwards
         facility: mail
-        protocol: tcp
         target: your_target_hostname
-        port: 514
+        tcp_port: 514
     logging_flows:
       - name: flows0
         inputs: [basic_input]
@@ -505,9 +503,8 @@ The following playbook generates the same logging configuration files.
     logging_outputs:
       - name: forwards_output
         type: forwards
-        protocol: tcp
         target: your_target_host
-        port: your_target_port
+        tcp_port: your_target_port
         pki_authmode: x509/name
         permitted_server: '*.example.com'
     logging_flows:

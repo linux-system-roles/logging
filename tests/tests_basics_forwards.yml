@@ -13,9 +13,9 @@
 #    If not executed, the default rsyslog.conf size is larger than 3000 bytes.
 #    Thus, assert the size is less than 1000.
 # 2. Check file count in /etc/rsyslog.d.
-#    If logging role is executed, 12 config files are generated.
+#    If logging role is executed, 11 config files are generated.
 #    By setting logging_purge_confs, pre-existing config files are deleted.
-#    Thus, assert the the count is equal to 12.
+#    Thus, assert the the count is equal to 11.
 # 3. Check systemctl status of rsyslog as well as error or specific message in the output.
 # 4. Check 7 forwards output config files so that they contain the configured action.
 # 5. Check 2 invalid forwards output config did not generate a config file.
@@ -28,7 +28,6 @@
     __test_forward_conf_f: /etc/rsyslog.d/30-output-forwards-forwards_facility_only.conf
     __test_forward_conf_s: /etc/rsyslog.d/30-output-forwards-forwards_severity_only.conf
     __test_forward_conf_no: /etc/rsyslog.d/30-output-forwards-forwards_no_severity_and_facility.conf
-    __test_forward_conf_no_p: /etc/rsyslog.d/30-output-forwards-forwards_no_severity_and_facility_protocol.conf
     __test_forward_conf_no_udp: /etc/rsyslog.d/30-output-forwards-forwards_no_severity_and_facility_udp.conf
     __test_forward_conf_no_p_p: /etc/rsyslog.d/30-output-forwards-forwards_no_severity_and_facility_protocol_port.conf
 
@@ -41,35 +40,26 @@
             type: forwards
             facility: local1
             severity: info
-            protocol: tcp
             target: host.domain
-            port: 1514
+            tcp_port: 1514
           - name: forwards_facility_only
             type: forwards
             facility: local2
-            protocol: tcp
             target: host.domain
-            port: 2514
+            tcp_port: 2514
           - name: forwards_severity_only
             type: forwards
             severity: err
-            protocol: tcp
             target: host.domain
-            port: 3514
+            tcp_port: 3514
           - name: forwards_no_severity_and_facility
             type: forwards
-            protocol: tcp
             target: host.domain
-            port: 4514
-          - name: forwards_no_severity_and_facility_protocol
-            type: forwards
-            target: host.domain
-            port: 5514
+            tcp_port: 4514
           - name: forwards_no_severity_and_facility_udp
             type: forwards
-            protocol: udp
             target: host.domain
-            port: 6514
+            udp_port: 6514
           - name: forwards_no_severity_and_facility_protocol_port
             type: forwards
             target: host.domain
@@ -85,7 +75,7 @@
             inputs: [ basic_input ]
             outputs: [forwards_severity_and_facility, forwards_facility_only,
                       forwards_severity_only, forwards_no_severity_and_facility,
-                      forwards_no_severity_and_facility_protocol, forwards_no_severity_and_facility_udp,
+                      forwards_no_severity_and_facility_udp,
                       forwards_no_severity_and_facility_protocol_port,
                       forwards_no_severity_and_facility_protocol_port_target]
       include_role:
@@ -104,7 +94,7 @@
 
     - name: Check file counts in rsyslog.d
       assert:
-        that: rsyslog_d_file_count.matched == 12
+        that: rsyslog_d_file_count.matched == 11
 
     # Checking 'error' in stdout from systemctl status is for detecting the case in which rsyslog is running,
     # but some functionality is disabled due to some error, e.g., error: 'tls.cacert' file couldn't be accessed.
@@ -191,24 +181,6 @@
       command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_no }}'
       changed_when: false
 
-    - name: Generated a file to check no_severity_and_facility_protocol
-      copy:
-        dest: /tmp/__testfile__
-        content: |
-          # Ansible managed
-          ruleset(name="forwards_no_severity_and_facility_protocol") {
-              *.* action(name="forwards_no_severity_and_facility_protocol"
-                  type="omfwd"
-                  Target="host.domain"
-                  Port="5514"
-                  Protocol="tcp"
-              )
-          }
-
-    - name: Check no_severity_and_facility_protocol
-      command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_no_p }}'
-      changed_when: false
-
     - name: Generated a file to check no_severity_and_facility_udp
       copy:
         dest: /tmp/__testfile__
@@ -236,8 +208,6 @@
               *.* action(name="forwards_no_severity_and_facility_protocol_port"
                   type="omfwd"
                   Target="host.domain"
-                  Port="514"
-                  Protocol="tcp"
               )
           }
 

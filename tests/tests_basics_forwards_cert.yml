@@ -65,9 +65,8 @@
             type: forwards
             facility: local1
             severity: info
-            protocol: tcp
             target: host.domain
-            port: 1514
+            tcp_port: 1514
             pki: tls
             permitted_server: '*.example.com'
         logging_inputs:
@@ -111,12 +110,12 @@
               local1.info action(name="forwards_severity_and_facility"
                   type="omfwd"
                   Target="host.domain"
-                  Port="1514"
-                  Protocol="tcp"
                   StreamDriver="gtls"
                   StreamDriverMode="1"
                   StreamDriverAuthMode="x509/name"
                   StreamDriverPermittedPeers="*.example.com"
+                  Port="1514"
+                  Protocol="tcp"
               )
           }
 

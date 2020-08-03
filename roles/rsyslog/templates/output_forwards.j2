@@ -1,43 +1,32 @@
+{% if item.tcp_port | d() %}
+{%   set __forwards_port = item.tcp_port %}
+{%   set __forwards_protocol = 'tcp' %}
+{% elif item.udp_port | d() %}
+{%   set __forwards_port = item.udp_port %}
+{%   set __forwards_protocol = 'udp' %}
+{% else %}
+{%   set __forwards_port = '' %}
+{%   set __forwards_protocol = '' %}
+{% endif %}
 ruleset(name="{{ item.name }}") {
 {% if item.exclude | d([]) %}
-{%   if item.pki | d() != "tls" %}
     {{ item.facility | d('*') }}.{{ item.severity | d('*') }};{{ item.exclude | join(';') }} action(name="{{ item.name }}"
-        type="omfwd"
-        Target="{{ item.target }}"
-        Port="{{ item.port | d(__rsyslog_default_port) }}"
-        Protocol="{{ item.protocol | d('tcp') }}"
-    )
-{%   else %}
-    {{ item.facility | d('*') }}.{{ item.severity | d('*') }};{{ item.exclude | join(';') }} action(name="{{ item.name }}"
-        type="omfwd"
-        Target="{{ item.target }}"
-        Port="{{ item.port | d(__rsyslog_default_tls_port) }}"
-        Protocol="{{ item.protocol | d('tcp') }}"
-        StreamDriver="{{ __rsyslog_tls_netstream_driver }}"
-        StreamDriverMode="1"
-        StreamDriverAuthMode="{{ item.pki_authmode | d(__rsyslog_default_pki_authmode) }}"
-        StreamDriverPermittedPeers="{{ item.permitted_server | d('*.' + logging_domain) }}"
-    )
-{%   endif %}
 {% else %}
-{%   if item.pki | d() != "tls" %}
     {{ item.facility | d('*') }}.{{ item.severity | d('*') }} action(name="{{ item.name }}"
+{% endif %}
         type="omfwd"
         Target="{{ item.target }}"
-        Port="{{ item.port | d(__rsyslog_default_port) }}"
-        Protocol="{{ item.protocol | d('tcp') }}"
-    )
-{%   else %}
-    {{ item.facility | d('*') }}.{{ item.severity | d('*') }} action(name="{{ item.name }}"
-        type="omfwd"
-        Target="{{ item.target }}"
-        Port="{{ item.port | d(__rsyslog_default_tls_port) }}"
-        Protocol="{{ item.protocol | d('tcp') }}"
+{% if item.pki | d() == "tls" %}
         StreamDriver="{{ __rsyslog_tls_netstream_driver }}"
         StreamDriverMode="1"
         StreamDriverAuthMode="{{ item.pki_authmode | d(__rsyslog_default_pki_authmode) }}"
         StreamDriverPermittedPeers="{{ item.permitted_server | d('*.' + logging_domain) }}"
-    )
-{%   endif %}
 {% endif %}
+{% if __forwards_port != '' %}
+        Port="{{ __forwards_port }}"
+{% endif %}
+{% if __forwards_protocol != '' %}
+        Protocol="{{ __forwards_protocol }}"
+{% endif %}
+    )
 }
