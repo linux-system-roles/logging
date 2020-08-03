@@ -7,8 +7,15 @@ $ModLoad imuxsock # provides support for local system logging (e.g. via logger c
 $OmitLocalLogging off
 {% else %}
 $ModLoad imjournal # provides access to the systemd journal
+# File to store the position in the journal
+$IMJournalStateFile imjournal.state
+$imjournalRatelimitBurst {{ item.ratelimit_burst | d(20000) }}
+$imjournalRatelimitInterval {{ item.ratelimit_interval | d(600) }}
+$imjournalPersistStateInterval {{ item.journal_persist_state_interval | d(10) }}
+
 # Turn off message reception via local log socket;
 # local messages are retrieved through imjournal now.
 $OmitLocalLogging on
+
 {% endif %}
 {{ lookup('template', 'input_template.j2') }}
