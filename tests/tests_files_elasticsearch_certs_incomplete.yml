@@ -36,7 +36,9 @@
     __test_ca_cert: /tmp/es-ca.crt
     __test_cert: /tmp/es-cert.pem
     __test_key: /tmp/es-key.pem
-    __expected_error: "Error: you specified use_cert: true; you must specify all 3 of ca_cert, cert, private_key, or all 3 of ca_cert_src, cert_src, private_key_src, or set use_cert: false in the elasticsearch output named elasticsearch_output"
+    __expected_error: "Error: you specified use_cert: true; you must specify all 3 of \
+      ca_cert, cert, private_key, or all 3 of ca_cert_src, cert_src, private_key_src, or \
+      set use_cert: false in the elasticsearch output named elasticsearch_output"
 
   tasks:
     - name: Generate fake key/certs files.

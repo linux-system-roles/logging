@@ -28,7 +28,9 @@
   become: true
   vars:
     __test_inputfiles_dir: /var/log/inputdirectory
-    __expected_error: "Error: you specified use_cert: true; you must specify all 3 of ca_cert, cert, private_key, or all 3 of ca_cert_src, cert_src, private_key_src, or set use_cert: false in the elasticsearch output named elasticsearch_output"
+    __expected_error: "Error: you specified use_cert: true; you must specify all 3 of \
+      ca_cert, cert, private_key, or all 3 of ca_cert_src, cert_src, private_key_src, or \
+      set use_cert: false in the elasticsearch output named elasticsearch_output"
 
   tasks:
     - block:

@@ -19,7 +19,9 @@
   vars:
     __test_key_name: test-key.pem
     __test_key: /tmp/{{ __test_key_name }}
-    __expected_error: "Error: tls is enabled in forwards_severity_and_facility; you must specify logging_pki_files ca_cert_src and/or ca_cert in the playbook var section."
+    __expected_error: "Error: tls is enabled in forwards_severity_and_facility; \
+      you must specify logging_pki_files ca_cert_src and/or ca_cert in the playbook \
+      var section."
 
   tasks:
     - block:

@@ -176,7 +176,10 @@
             __pki_file: '{{ logging_pki_files.0.ca_cert_src | basename }}'
           copy:
             src: '{{ logging_pki_files.0.ca_cert_src }}'
-            dest: '{{ logging_pki_files.0.ca_cert if logging_pki_files.0.ca_cert is defined else (__rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + __pki_file) }}'
+            dest: '{{ logging_pki_files.0.ca_cert
+                      if logging_pki_files.0.ca_cert is defined
+                      else
+                      __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + __pki_file }}'
             mode: "0600"
           when:
             - __logging_forwards_tls | length > 0 or __logging_remote_tls | length > 0
@@ -188,7 +191,10 @@
             __pki_file: '{{ logging_pki_files.0.cert_src | basename }}'
           copy:
             src: '{{ logging_pki_files.0.cert_src }}'
-            dest: '{{ logging_pki_files.0.cert if logging_pki_files.0.cert is defined else (__rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + __pki_file) }}'
+            dest: '{{ logging_pki_files.0.cert
+                      if logging_pki_files.0.cert is defined
+                      else
+                      __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + __pki_file }}'
             mode: "0600"
           when:
             - __logging_forwards_tls | length > 0 or __logging_remote_tls | length > 0
@@ -200,7 +206,10 @@
             __pki_file: '{{ logging_pki_files.0.private_key_src | basename }}'
           copy:
             src: '{{ logging_pki_files.0.private_key_src }}'
-            dest: '{{ logging_pki_files.0.private_key if logging_pki_files.0.private_key is defined else (__rsyslog_default_pki_path + __rsyslog_default_pki_key_dir + __pki_file) }}'
+            dest: '{{ logging_pki_files.0.private_key
+                      if logging_pki_files.0.private_key is defined
+                      else
+                      __rsyslog_default_pki_path + __rsyslog_default_pki_key_dir + __pki_file }}'
             mode: "0400"
           when:
             - __logging_forwards_tls | length > 0 or __logging_remote_tls | length > 0

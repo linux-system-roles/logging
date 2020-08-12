@@ -19,8 +19,6 @@ provisioner:
   log: true
   lint:
     name: ansible-lint
-    options:
-      x: ["204"]
   playbooks:
     converge: ../../tests/tests_default.yml
 scenario:

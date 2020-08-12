@@ -4,7 +4,11 @@
 
     - name: Set rsyslog_output_elasticsearch for the omelasticsearch output
       set_fact:
-        rsyslog_output_elasticsearch: "{{ logging_outputs | selectattr('name', 'defined') | selectattr('type', 'defined') | selectattr('type', '==', 'elasticsearch') | list }}"
+        rsyslog_output_elasticsearch: "{{ logging_outputs |
+                                          selectattr('name', 'defined') |
+                                          selectattr('type', 'defined') |
+                                          selectattr('type', '==', 'elasticsearch') |
+                                          list }}"
 
     - name: Set rsyslog_output_files for the omfile outputs
       set_fact:
@@ -19,15 +23,27 @@
 
     - name: Set rsyslog_output_forwards for the omfwd output
       set_fact:
-        rsyslog_output_forwards: "{{ logging_outputs | selectattr('name', 'defined') | selectattr('type', 'defined') | selectattr('target', 'defined') | selectattr('type', '==', 'forwards') | list }}"
+        rsyslog_output_forwards: "{{ logging_outputs |
+                                     selectattr('name', 'defined') |
+                                     selectattr('type', 'defined') |
+                                     selectattr('target', 'defined') |
+                                     selectattr('type', '==', 'forwards') |
+                                     list }}"
 
     - name: Set rsyslog_output_remote_files for the omfwd output for the remote input
       set_fact:
-        rsyslog_output_remote_files: "{{ logging_outputs | selectattr('name', 'defined') | selectattr('type', 'defined') | selectattr('type', '==', 'remote_files') | list }}"
+        rsyslog_output_remote_files: "{{ logging_outputs |
+                                         selectattr('name', 'defined') |
+                                         selectattr('type', 'defined') |
+                                         selectattr('type', '==', 'remote_files') |
+                                         list }}"
 
     - name: Set rsyslog_outputs
       set_fact:
-        rsyslog_outputs: '{{ rsyslog_output_elasticsearch | d([]) }} + {{ rsyslog_output_files | d([]) }} + {{ rsyslog_output_forwards | d([]) }} + {{ rsyslog_output_remote_files | d([]) }}'
+        rsyslog_outputs: '{{ rsyslog_output_elasticsearch | d([]) }} +
+                          {{ rsyslog_output_files | d([]) }} +
+                          {{ rsyslog_output_forwards | d([]) }} +
+                          {{ rsyslog_output_remote_files | d([]) }}'
 
     - name: Set custom_config_files fact
       set_fact:

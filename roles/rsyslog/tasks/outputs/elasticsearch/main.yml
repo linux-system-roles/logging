@@ -27,7 +27,10 @@
 
     - name: Check certs - use_cert is true, but triplets are not given
       fail:
-        msg: "Error: you specified use_cert: true; you must specify all 3 of ca_cert, cert, private_key, or all 3 of ca_cert_src, cert_src, private_key_src, or set use_cert: false in the elasticsearch output named {{ item.name }}"
+        msg: "Error: you specified use_cert: true; you must specify all 3 of \
+          ca_cert, cert, private_key, or all 3 of ca_cert_src, cert_src, \
+          private_key_src, or set use_cert: false in the elasticsearch output \
+          named {{ item.name }}"
       with_items:
         - '{{ rsyslog_output_elasticsearch }}'
       when:
@@ -50,7 +53,8 @@
 
     - name: Check certs - key/certs data are provided, but use_cert is false
       fail:
-        msg: "Error: you specified use_cert: false and also specified one or more cert/key files in the elasticsearch output named {{ item.name }}"
+        msg: "Error: you specified use_cert: false and also specified one or \
+          more cert/key files in the elasticsearch output named {{ item.name }}"
       with_items:
         - '{{ rsyslog_output_elasticsearch }}'
       when:
