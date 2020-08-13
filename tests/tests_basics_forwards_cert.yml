@@ -67,7 +67,7 @@
             severity: info
             target: host.domain
             tcp_port: 1514
-            pki: tls
+            tls: true
             permitted_server: '*.example.com'
         logging_inputs:
           - name: basic_input

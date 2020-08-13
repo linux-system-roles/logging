@@ -209,12 +209,12 @@
 
       vars:
         __logging_forwards_tls: "{{ logging_outputs | selectattr('type', '==', 'forwards') |
-                                  selectattr('pki', 'defined') |
-                                  selectattr('pki', '==', 'tls') | list }}"
+                                  selectattr('tls', 'defined') |
+                                  selectattr('tls', 'true') | list }}"
         __logging_remote_tls: "{{ logging_inputs | selectattr('type', '==', 'remote') |
                                   selectattr('tcp_ports', 'defined') |
-                                  selectattr('pki', 'defined') |
-                                  selectattr('pki', '==', 'tls') | list }}"
+                                  selectattr('tls', 'defined') |
+                                  selectattr('tls', 'true') | list }}"
 
       when:
         - __rsyslog_enabled | bool

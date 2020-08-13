@@ -115,11 +115,13 @@ This is a schematic logging configuration to show log messages from input_nameA 
   **available options**
   - `udp_ports`: List of UDP port numbers to listen. Default to `514`.
   - `tcp_ports`: List of TCP port numbers to listen. Default to `514`.
-  - `pki`: Set to `tls` to use the `tls` enabled connection. Default to None.
+  - `tls`: Set to `true` to encrypt the connection using the default TLS implementation used by the provider. Default to `false`.
   - `pki_authmode`: Specifying the default network driver authentication mode. `x509/name`, `x509/fingerprint`, `anon` is accepted. Default to `x509/name`.
   - `permitted_clients`: List of hostnames, IP addresses, fingerprints(sha1), and wildcard DNS domains which will be allowed by the `logging` server to connect and send logs over TLS. Default to `['*.{{ logging_domain }}']`
 
-  There are 3 type of items in the remote type - udp, plain tcp and tls tcp. The udp type contains `udp_ports`; the plain tcp type contains `tcp_ports` but no `pki: tls`; the tls tcp type contains tcp_ports as well as `pki: tls`. Please note that it is not allowed for them to be conflicted. I.e., if there are 2 udp type items, it fails to deploy.
+  There are 3 type of items in the remote type - udp, plain tcp and tls tcp. The udp type contains `udp_ports`; the plain tcp type contains `tcp_ports` but no `tls: true`; the tls tcp type contains tcp_ports as well as `tls: true`. Please note that it is not allowed for them to be conflicted. I.e., if there are 2 udp type items, it fails to deploy.
+
+  Sample valid configuration
   ```
   - name: remote_udp
     type: remote
@@ -130,7 +132,7 @@ This is a schematic logging configuration to show log messages from input_nameA 
   - name: remote_tcp
     type: remote
     tcp_ports: [6514, ...]
-    pki: tls
+    tls: true
     pki_authmode: x509/name
     permitted_clients: ['*.example.com']
   ```
@@ -184,7 +186,7 @@ This is a schematic logging configuration to show log messages from input_nameA 
   - `target`: Target host (fqdn). **Required**.
   - `udp_port`: UDP port number. Default to `514`.
   - `tcp_port`: TCP port number. Default to `514`.
-  - `pki`: Set to `tls` to use the `tls` enabled connection. Default to None.
+  - `tls`: Set to `true` to encrypt the connection using the default TLS implementation used by the provider. Default to `false`.
   - `pki_authmode`: Specifying the default network driver authentication mode. `x509/name`, `x509/fingerprint`, `anon` is accepted. Default to `x509/name`.
   - `permitted_server`: Hostname, IP address, fingerprint(sha1) or wildcard DNS domain of the server which this client will be allowed to connect and send logs over TLS. Default to `*.{{ logging_domain }}`
 

@@ -44,7 +44,7 @@
               - name: remote_tcp_0
                 type: remote
                 tcp_ports: [6514, 40000, 40001]
-                pki: tls
+                tls: true
                 pki_authmode: x509/name
                 permitted_clients:
                   - '*.client.com'
@@ -52,7 +52,7 @@
               - name: remote_tcp_1
                 type: remote
                 tcp_ports: [514, 40010, 40011]
-                pki: tls
+                tls: true
               - name: remote_udp
                 type: remote
                 udp_ports: [514, 40020]

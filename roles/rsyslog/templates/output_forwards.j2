@@ -16,7 +16,7 @@ ruleset(name="{{ item.name }}") {
 {% endif %}
         type="omfwd"
         Target="{{ item.target }}"
-{% if item.pki | d() == "tls" %}
+{% if item.tls | d(false) | bool %}
         StreamDriver="{{ __rsyslog_tls_netstream_driver }}"
         StreamDriverMode="1"
         StreamDriverAuthMode="{{ item.pki_authmode | d(__rsyslog_default_pki_authmode) }}"

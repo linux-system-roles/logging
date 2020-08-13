@@ -15,7 +15,7 @@ input(name="{{ item.name }}" type="imudp" port=["{{ item.udp_ports | join('","')
 {% endfor %}
 {% for tport in item.tcp_ports | d([]) %}
 {%   set __logging_loop_index = loop.index %}
-{%   if item.pki | d() != 'tls' %}
+{%   if not item.tls | d(false) | bool %}
 # Log messages from remote hosts over plain TCP
 input(name="{{ item.name }}_{{ __logging_loop_index }}" type="imptcp" port="{{ tport }}")
 {%   else %}
