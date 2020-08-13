@@ -4,19 +4,23 @@
     - name: Ensure Remote inputs contain no conflict connection type
       fail:
         msg: "Error: {{ item.0.name }} and {{ item.1.name }} conflict."
-      loop: "{{ [__logging_remote_udp, __logging_remote_tcp, __logging_remote_tls] }}"
+      loop: "{{ [__logging_remote_udp, __logging_remote_ptcp, __logging_remote_tlstcp] }}"
       when:
         - item | length > 1
   vars:
-    __logging_remote_udp: "{{ logging_inputs | selectattr('type', '==', 'remote') |
+    __logging_remote: "{{ logging_inputs | selectattr('type', '==', 'remote') | list }}"
+    __logging_remote_udp: "{{ __logging_remote |
                               selectattr('udp_ports', 'defined') | list }}"
-    __logging_remote_tcp: "{{ logging_inputs | selectattr('type', '==', 'remote') |
-                              selectattr('tcp_ports', 'defined') |
-                              selectattr('pki', 'undefined') | list }}"
-    __logging_remote_tls: "{{ logging_inputs | selectattr('type', '==', 'remote') |
-                              selectattr('tcp_ports', 'defined') |
-                              selectattr('pki', 'defined') |
-                              selectattr('pki', '==', 'tls') | list }}"
+    __logging_remote_tcp: "{{ __logging_remote |
+                              selectattr('tcp_ports', 'defined') | list }}"
+    __logging_remote_tls: "{{ __logging_remote_tcp |
+                              selectattr('tls', 'defined') | list }}"
+    __logging_remote_ptcp: "{{ __logging_remote_tcp |
+                               selectattr('tls', 'undefined') | list }} +
+                            {{ __logging_remote_tls |
+                               selectattr('tls', 'false') | list }}"
+    __logging_remote_tlstcp: "{{ __logging_remote_tls |
+                                 selectattr('tls', 'true') | list }}"
 
 - name: Install/Update remote input packages and generate configuration files in /etc/rsyslog.d
   vars:

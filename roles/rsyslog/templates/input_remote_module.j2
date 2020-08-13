@@ -4,7 +4,7 @@ module(load="imudp" threads="{{ logging_udp_threads }}"
        TimeRequery="{{ logging_udp_system_time_requery }}"
        BatchSize="{{ logging_udp_batch_size }}")
 {% elif item.tcp_ports is defined %}
-{%   if item.pki | d() != 'tls' %}
+{%   if not item.tls | d(false) | bool %}
 # Read messages sent over plain TCP
 module(load="imptcp" threads="{{ logging_tcp_threads }}")
 {%   else %}

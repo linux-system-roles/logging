@@ -53,7 +53,7 @@
             severity: info
             target: host.domain
             tcp_port: 1514
-            pki: tls
+            tls: true
             pki_authmode: anon
             permitted_server: '*.example.com'
         logging_inputs:
