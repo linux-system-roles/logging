@@ -1,9 +1,13 @@
-{% if item.udp_ports is defined %}
+{# If both udp_ports and tcp_ports appear in the item, \
+   udp_ports are used in the rsyslog config and tcp_ports are dropped. \
+   If both udp_ports and tcp_ports are not configured, \
+   it is default to 'tcp_ports: [514]'. #}
+{% if item.udp_ports | d([]) %}
 # Read messages sent over UDP
 module(load="imudp" threads="{{ logging_udp_threads }}"
        TimeRequery="{{ logging_udp_system_time_requery }}"
        BatchSize="{{ logging_udp_batch_size }}")
-{% elif item.tcp_ports is defined %}
+{% else %}
 {%   if not item.tls | d(false) | bool %}
 # Read messages sent over plain TCP
 module(load="imptcp" threads="{{ logging_tcp_threads }}")
@@ -12,7 +16,8 @@ module(load="imptcp" threads="{{ logging_tcp_threads }}")
 module(load="imtcp"
        StreamDriver.Name="{{ __rsyslog_tls_netstream_driver }}"
        StreamDriver.Mode="1"
-       StreamDriver.AuthMode="{{ item.pki_authmode | d(__rsyslog_default_pki_authmode) }}"
+       StreamDriver.AuthMode="{{ item.pki_authmode |
+	                             d(__rsyslog_default_pki_authmode) }}"
 {%     if item.pki_authmode | d() != 'anon' %}
 {%       if item.permitted_clients | d() %}
        PermittedPeer=["{{ item.permitted_clients | join('","') }}"]
