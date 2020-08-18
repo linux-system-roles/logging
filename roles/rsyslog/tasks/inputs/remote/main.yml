@@ -18,9 +18,9 @@
     __logging_remote_ptcp: "{{ __logging_remote_tcp |
                                selectattr('tls', 'undefined') | list }} +
                             {{ __logging_remote_tls |
-                               selectattr('tls', 'false') | list }}"
+                               selectattr('tls', '==', false) | list }}"
     __logging_remote_tlstcp: "{{ __logging_remote_tls |
-                                 selectattr('tls', 'true') | list }}"
+                                 selectattr('tls', '==', true) | list }}"
 
 - name: Install/Update remote input packages and generate configuration files in /etc/rsyslog.d
   vars:
