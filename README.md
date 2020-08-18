@@ -113,15 +113,15 @@ This is a schematic logging configuration to show log messages from input_nameA 
 
 - `remote` type - `remote` input supports receiving logs from the remote logging system over the network. This input type makes rsyslog a server.<br>
   **available options**
-  - `udp_ports`: List of UDP port numbers to listen. Default to `514`.
-  - `tcp_ports`: List of TCP port numbers to listen. Default to `514`.
+  - `udp_ports`: List of UDP port numbers to listen. If set, the `remote` input listens on the UDP ports. No defaults. If both `udp_ports` and `tcp_ports` are set in a `remote` input item, `udp_ports` is used and `tcp_ports` is dropped.
+  - `tcp_ports`: List of TCP port numbers to listen. If set, the `remote` input listens on the TCP ports. Default to `[514]`. If both `udp_ports` and `tcp_ports` are set in a `remote` input item, `udp_ports` is used and `tcp_ports` is dropped. If both `udp_ports` and `tcp_ports` are not set in a `remote` input item, `tcp_ports: [514]` is added to the item.
   - `tls`: Set to `true` to encrypt the connection using the default TLS implementation used by the provider. Default to `false`.
   - `pki_authmode`: Specifying the default network driver authentication mode. `x509/name`, `x509/fingerprint`, `anon` is accepted. Default to `x509/name`.
   - `permitted_clients`: List of hostnames, IP addresses, fingerprints(sha1), and wildcard DNS domains which will be allowed by the `logging` server to connect and send logs over TLS. Default to `['*.{{ logging_domain }}']`
 
-  There are 3 type of items in the remote type - udp, plain tcp and tls tcp. The udp type contains `udp_ports`; the plain tcp type contains `tcp_ports` but no `tls: true`; the tls tcp type contains tcp_ports as well as `tls: true`. Please note that it is not allowed for them to be conflicted. I.e., if there are 2 udp type items, it fails to deploy.
+  There are 3 types of items in the remote type - udp, plain tcp and tls tcp. The udp type configured using `udp_ports`; the plain tcp type is configured using `tcp_ports` without `tls` or with `tls: false`; the tls tcp type is configured using `tcp_ports` with `tls: true` at the same time. Please note there might be only one instance of each of the three types. E.g., if there are 2 `udp` type items, it fails to deploy.
 
-  Sample valid configuration
+  Valid configuration example
   ```
   - name: remote_udp
     type: remote
@@ -135,6 +135,23 @@ This is a schematic logging configuration to show log messages from input_nameA 
     tls: true
     pki_authmode: x509/name
     permitted_clients: ['*.example.com']
+  ```
+  Invalid configuration example 1; duplicated udp
+  ```
+  - name: remote_udp0
+    type: remote
+    udp_ports: [514]
+  - name: remote_udp1
+    type: remote
+    udp_ports: [1514]
+  ```
+  Invalid configuration example 2; duplicated tcp
+  ```
+  - name: remote_implicit_tcp
+    type: remote
+  - name: remote_tcp
+    type: remote
+    tcp_ports: [1514]
   ```
 
 #### Logging_outputs options
