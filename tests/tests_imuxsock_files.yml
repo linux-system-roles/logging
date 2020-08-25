@@ -76,4 +76,8 @@
 
     - name: Check the test log message in {{ __default_system_log }}
       command: /bin/grep testMessage0000 "{{ __default_system_log }}"
+      register: __result
+      until: __result is success
+      retries: 5
+      delay: 1
       changed_when: false

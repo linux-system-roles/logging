@@ -78,6 +78,10 @@
 
     - name: Check the files output config that the path is {{ logging_system_log_dir }}/messages
       command: /bin/grep '\*.info;mail.none;authpriv.none;cron.none.*{{ logging_system_log_dir }}/messages' {{ __test_files_conf }}
+      register: __result
+      until: __result is success
+      retries: 5
+      delay: 1
       changed_when: false
 
     - name: Check the test log message in {{ logging_system_log_dir }}/messages
