@@ -1,0 +1,31 @@
+---
+# SPDX-License-Identifier: GPL-3.0-only
+
+# Relp input configuration setting
+# ------------------------------------------
+
+# __rsyslog_input_relp_package
+#
+# List of rpm packages for Relp input.
+__rsyslog_input_relp_packages: ['rsyslog-relp', 'librelp']
+
+# Relp Rsyslog configuration rules
+# ---------------------------
+
+__rsyslog_input_relp_rules:
+
+  - '{{ __rsyslog_conf_input_relp_modules }}'
+
+# Default relp configuration options
+# ---------------------------------
+
+__rsyslog_conf_input_relp_modules:
+
+  - name: 'input-relp-module'
+    type: 'modules'
+
+    sections:
+
+      - options: |-
+          # Send logs over relp
+          module(load="imrelp")

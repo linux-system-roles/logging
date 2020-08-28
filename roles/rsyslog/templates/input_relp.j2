@@ -1,0 +1,59 @@
+input(name="{{ item.name }}"
+      type="imrelp"
+      port="{{ item.port | d(20514) | int }}"
+      maxDataSize="{{ item.max_data_size | d(logging_max_message_size) | int }}"
+{% if item.tls | default(true) %}
+{%   if item.ca_cert is defined %}
+{%     set __cacert = item.ca_cert %}
+{%   elif item.ca_cert_src is defined %}
+{%     set __cacert = __rsyslog_config_dir + '/' + item.ca_cert_src | basename %}
+{%   else %}
+{%     set __cacert = __rsyslog_config_dir + '/relp-ca.crt' %}
+{%   endif %}
+{%   if item.cert is defined %}
+{%     set __mycert = item.cert %}
+{%   elif item.cert_src is defined %}
+{%     set __mycert = __rsyslog_config_dir + '/' + item.cert_src | basename %}
+{%   else %}
+{%     set __mycert = __rsyslog_config_dir + '/relp-cert.pem' %}
+{%   endif %}
+{%   if item.private_key is defined %}
+{%     set __myprivkey = item.private_key %}
+{%   elif item.private_key_src is defined %}
+{%     set __myprivkey = __rsyslog_config_dir + '/' + item.private_key_src | basename %}
+{%   else %}
+{%     set __myprivkey = __rsyslog_config_dir + '/relp-key.pem' %}
+{%   endif %}
+      tls="on"
+      tls.cacert="{{ __cacert }}"
+      tls.mycert="{{ __mycert }}"
+      tls.myprivkey="{{ __myprivkey }}"
+      tls.authmode="{{ item.pki_authmode | d('name') }}"
+      tls.permittedpeer=["{{ item.permitted_clients | join('","') | d('*.' + logging_domain) }}"]
+{% endif %}
+)
+{% set rsyslog_flows = logging_flows | d([ {"name": "default_flow", "inputs": [ item.name ], "outputs": ["default_files"]} ], true) %}
+{% set outdict = {} %}
+{% for flow in rsyslog_flows %}
+{%   if flow.inputs | intersect([ item.name ]) %}
+{%     for oname in flow.outputs %}
+{%       set _ = outdict.__setitem__(oname, outdict.get(oname,[])|union([ item.name ])) %}
+{%     endfor %}
+{%   endif %}
+{% endfor %}
+{% for output in rsyslog_outputs %}
+{%   if outdict[output.name] | d(false) %}
+if
+{%     for inputname in outdict[output.name] %}
+{%       if inputname == item.name %}
+{%         if not loop.first %}
+  or
+{%         endif %}
+  ($inputname == "{{ item.name }}_{{ loop.index }}" )
+{%       endif %}
+{%     endfor %}
+  then {
+    call {{ output.name }}
+}
+{%   endif %}
+{% endfor %}

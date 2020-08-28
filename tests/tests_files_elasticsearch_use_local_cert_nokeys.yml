@@ -1,10 +1,10 @@
-# Error case for Elasticsearch config - although use_cert is true, no cert data are given.
+# Error case for Elasticsearch config - although tls is true, no cert data are given.
 #
 # Elasticsearch output has this policy:
-#   use_cert: If true, key/certificates are used to access Elasticsearch.
-#             Triplets {`ca_cert`, `cert`, private_key`} and/or {`ca_cert_src`,
-#             `cert_src`, `private_key_src`} should be configured. Default to true.
-# In this test case, use_cert is set to true, but no certs triplets are
+#   tls: If true, key/certificates are used to access Elasticsearch.
+#        Triplets {`ca_cert`, `cert`, private_key`} and/or {`ca_cert_src`,
+#        `cert_src`, `private_key_src`} should be configured. Default to true.
+# In this test case, tls is set to true, but no certs triplets are
 # configured in the elasticsearch dictionary.
 # Logging role is supposed to issue {{ __expected_error }}.
 #
@@ -12,7 +12,7 @@
 # files input (imfile) ->  elasticsearch output (omelasticsearch)
 # logging_outputs:
 #   - name: elasticsearch_output
-#     use_cert: true
+#     tls: true
 #     8< snip >8
 #
 # [Test scenario]
@@ -23,12 +23,12 @@
 # Note: This is a test for the elasticsearch certs/key.
 # The files input to the elasticsearch output is not supported.
 #
-- name: Error case for Elasticsearch config - although use_cert is true, no cert data are given.
+- name: Error case for Elasticsearch config - although tls is true, no cert data are given.
   hosts: all
   become: true
   vars:
     __test_inputfiles_dir: /var/log/inputdirectory
-    __expected_error: "Error: you specified use_cert: true; you must specify all 3 of ca_cert, cert, private_key, or all 3 of ca_cert_src, cert_src, private_key_src, or set use_cert: false in the elasticsearch output named elasticsearch_output"
+    __expected_error: "Error: you specified tls: true; you must specify all 3 of ca_cert, cert, private_key, or all 3 of ca_cert_src, cert_src, private_key_src, or set tls: false in the configuration named elasticsearch_output"
 
   tasks:
     - block:
@@ -42,7 +42,7 @@
                 index_prefix: project.
                 input_type: ovirt
                 retryfailures: false
-                use_cert: true
+                tls: true
             logging_inputs:
               - name: files_input
                 type: files

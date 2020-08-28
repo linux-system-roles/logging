@@ -1,10 +1,10 @@
 # Error case for Elasticsearch config - cert and ca_cert_src are missing
 #
 # Elasticsearch output has this policy:
-#   use_cert: If true, key/certificates are used to access Elasticsearch.
-#             Triplets {`ca_cert`, `cert`, private_key`} and/or {`ca_cert_src`,
-#             `cert_src`, `private_key_src`} should be configured. Default to true.
-# In this test case, use_cert is not set, i.e., true, and only {ca_cert, private_key}
+#   tls: If true, key/certificates are used to access Elasticsearch.
+#        Triplets {`ca_cert`, `cert`, private_key`} and/or {`ca_cert_src`,
+#        `cert_src`, `private_key_src`} should be configured. Default to true.
+# In this test case, tls is not set, i.e., true, and only {ca_cert, private_key}
 # and {cert_src, private_key_src} are set in the elasticsearch dictionary.
 # Logging role is supposed to issue {{ __expected_error }}.
 #
@@ -36,7 +36,7 @@
     __test_ca_cert: /tmp/es-ca.crt
     __test_cert: /tmp/es-cert.pem
     __test_key: /tmp/es-key.pem
-    __expected_error: "Error: you specified use_cert: true; you must specify all 3 of ca_cert, cert, private_key, or all 3 of ca_cert_src, cert_src, private_key_src, or set use_cert: false in the elasticsearch output named elasticsearch_output"
+    __expected_error: "Error: you specified tls: true; you must specify all 3 of ca_cert, cert, private_key, or all 3 of ca_cert_src, cert_src, private_key_src, or set tls: false in the configuration named elasticsearch_output"
 
   tasks:
     - name: Generate fake key/certs files.

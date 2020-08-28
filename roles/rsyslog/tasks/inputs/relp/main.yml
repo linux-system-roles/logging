@@ -1,0 +1,28 @@
+---
+- name: Set and check certs and key for relp input
+  include_tasks:
+    file: "{{ role_path }}/tasks/set_certs.yml"
+  vars:
+    __rsyslog_cert_subject: "{{ rsyslog_input_relp }}"
+
+# Deploy configuration files
+- name: Install/Update relp logging packages and generate configuration files in /etc/rsyslog.d
+  vars:
+    __rsyslog_packages: "{{ __rsyslog_input_relp_packages }}"
+    __rsyslog_rules: "{{ __rsyslog_input_relp_rules }}"
+  include_tasks:
+    file: "{{ role_path }}/tasks/deploy.yml"
+
+- name: Create relp input configuration files in /etc/rsyslog.d
+  vars:
+    __rsyslog_packages: []
+    __rsyslog_rules:
+      - name: "input-relp-{{ item.name }}"
+        type: input
+        weight: "11"
+        state: "{{ item.state | d('present') }}"
+        sections:
+          - options: "{{ lookup('template', 'input_relp.j2') }}"
+  include_tasks:
+    file: "{{ role_path }}/tasks/deploy.yml"
+  loop: "{{ rsyslog_input_relp }}"
