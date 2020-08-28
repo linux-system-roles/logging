@@ -1,70 +1,9 @@
 ---
-- block:
-    # This block collect certificates from local location and copies them to /etc/rsyslog.d directory
-    - name: Copy local Elasticsearch ca_certs to /etc/rsyslog.d directory in Rsyslog
-      copy:
-        src: '{{ item.ca_cert_src }}'
-        dest: '{{ item.ca_cert | d(__rsyslog_config_dir) }}'
-      with_items:
-        - '{{ rsyslog_output_elasticsearch }}'
-      when: item.ca_cert_src | d()
-
-    - name: Copy local Elasticsearch certs to /etc/rsyslog.d directory in Rsyslog
-      copy:
-        src: '{{ item.cert_src }}'
-        dest: '{{ item.cert | d(__rsyslog_config_dir) }}'
-      with_items:
-        - '{{ rsyslog_output_elasticsearch }}'
-      when: item.cert_src | d()
-
-    - name: Copy local Elasticsearch keys to /etc/rsyslog.d directory in Rsyslog
-      copy:
-        src: '{{ item.private_key_src }}'
-        dest: '{{ item.private_key | d(__rsyslog_config_dir) }}'
-      with_items:
-        - '{{ rsyslog_output_elasticsearch }}'
-      when: item.private_key_src | d()
-
-    - name: Check certs - use_cert is true, but triplets are not given
-      fail:
-        msg: "Error: you specified use_cert: true; you must specify all 3 of ca_cert, cert, private_key, or all 3 of ca_cert_src, cert_src, private_key_src, or set use_cert: false in the elasticsearch output named {{ item.name }}"
-      with_items:
-        - '{{ rsyslog_output_elasticsearch }}'
-      when:
-        - item.use_cert | d(true)
-        - not ((item.ca_cert | d() and item.cert | d() and item.private_key | d()) or
-               (item.ca_cert_src | d() and item.cert_src | d() and item.private_key_src | d()))
-
-    - name: Update ca_cert path to /etc/rsyslog.d directory in Rsyslog
-      set_fact:
-        __rsyslog_elasticsearch_temp: >-
-          {{ __rsyslog_elasticsearch_temp | d([]) }} +
-          {{ [ item |
-               combine( { 'ca_cert': item.ca_cert | d(__rsyslog_config_dir + '/' + item.ca_cert_src | basename),
-                          'cert': item.cert | d(__rsyslog_config_dir + '/' + item.cert_src | basename),
-                          'private_key': item.private_key | d(__rsyslog_config_dir + '/' + item.private_key_src | basename) } )
-          ] }}
-      with_items:
-        - '{{ rsyslog_output_elasticsearch }}'
-      when: item.ca_cert_src | d() or item.cert_src | d() or item.private_key_src | d()
-
-    - name: Check certs - key/certs data are provided, but use_cert is false
-      fail:
-        msg: "Error: you specified use_cert: false and also specified one or more cert/key files in the elasticsearch output named {{ item.name }}"
-      with_items:
-        - '{{ rsyslog_output_elasticsearch }}'
-      when:
-        - not (item.use_cert | d(true))
-        - item.ca_cert | d() or item.cert | d() or item.private_key | d()
-        - item.ca_cert_src | d() or item.cert_src | d() or item.private_key_src | d()
-
-    - name: Set updated rsyslog_output_elasticsearch
-      set_fact:
-        rsyslog_output_elasticsearch: "{{ __rsyslog_elasticsearch_temp }}"
-      when: __rsyslog_elasticsearch_temp | d([])
-
-  when:
-    - rsyslog_output_elasticsearch | d([])
+- name: Set and check certs and key for elasticsearch
+  include_tasks:
+    file: "{{ role_path }}/tasks/set_certs.yml"
+  vars:
+    __rsyslog_cert_subject: "{{ rsyslog_output_elasticsearch }}"
 
 # Deploy configuration files
 - name: Install/Update elasticsearch logging packages and generate configuration files in /etc/rsyslog.d

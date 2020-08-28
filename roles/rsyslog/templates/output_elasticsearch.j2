@@ -32,7 +32,7 @@ ruleset(name="{{ item.name }}") {
     if ($.input_type == "{{ item.input_type | d('ovirt') }}") and ($.index_prefix startswith "{{ item.index_prefix }}") then {
         action(
             type="omelasticsearch"
-            name="{{ item.name | default('viaq-elasticsearch') }}"
+            name="{{ item.name }}"
             server="{{ item.server_host | d('logging-es') }}"
             serverport="{{ item.server_port | d(9200) | int }}"
             template="{{ item.template | d("es_template") }}"
@@ -56,10 +56,33 @@ ruleset(name="{{ item.name }}") {
             retryfailures="off"
 {% endif %}
             usehttps="{{ item.usehttps | default("on") }}"
-{% if item.use_cert | default(true) %}
-            tls.cacert="{{ item.ca_cert | default('/etc/rsyslog.d/es-ca.crt') }}"
-            tls.mycert="{{ item.cert | default('/etc/rsyslog.d/es-cert.pem') }}"
-            tls.myprivkey="{{ item.private_key | default('/etc/rsyslog.d/es-key.pem') }}"
+
+
+{% if (item.tls is defined) | ternary(item.tls, item.use_cert | d(true)) %}
+{%   if item.ca_cert is defined %}
+{%     set __cacert = item.ca_cert %}
+{%   elif item.ca_cert_src is defined %}
+{%     set __cacert = __rsyslog_config_dir + '/' + item.ca_cert_src | basename %}
+{%   else %}
+{%     set __cacert = __rsyslog_config_dir + '/es-ca.crt' %}
+{%   endif %}
+{%   if item.cert is defined %}
+{%     set __mycert = item.cert %}
+{%   elif item.cert_src is defined %}
+{%     set __mycert = __rsyslog_config_dir + '/' + item.cert_src | basename %}
+{%   else %}
+{%     set __mycert = __rsyslog_config_dir + '/es-cert.pem' %}
+{%   endif %}
+{%   if item.private_key is defined %}
+{%     set __myprivkey = item.private_key %}
+{%   elif item.private_key_src is defined %}
+{%     set __myprivkey = __rsyslog_config_dir + '/' + item.private_key_src | basename %}
+{%   else %}
+{%     set __myprivkey = __rsyslog_config_dir + '/es-key.pem' %}
+{%   endif %}
+            tls.cacert="{{ __cacert }}"
+            tls.mycert="{{ __mycert }}"
+            tls.myprivkey="{{ __myprivkey }}"
 {% endif %}
         )
     }

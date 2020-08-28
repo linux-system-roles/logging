@@ -1,0 +1,83 @@
+# Test the client configuration using tls relp
+#
+# [Configuration]
+# remote inputs configuration using tls relp
+#
+# [Test scenario]
+# 0. Run logging role.
+# 1. Check the rsyslog.conf size and the file count in /etc/rsyslog.d.
+#
+# Note: since there is no relp server to connect to for the test clients,
+# the rsyslogd actually fails with Error: omrelp: could not connect to remote server,
+# librelp error 10014 [v8.1911.0-6.el8 try https://www.rsyslog.com/e/2291 ].
+---
+- name: Test the server configuration containing tls tcp, plain tcp and udp connection
+  hosts: all
+  vars:
+    __test_ca_key_name: test-ca-key.pem
+    __test_ca_csr: test-ca.csr
+    __test_ca_cert_name: test-ca.crt
+    __test_key_name: test-key.pem
+    __test_csr_name: test-cert.csr
+    __test_cert_name: test-cert.pem
+    __test_ca_key: "/etc/pki/tls/private/{{ __test_ca_key_name }}"
+    __test_ca_cert_csr: "/etc/rsyslog.d/{{ __test_ca_csr }}"
+    __test_ca_cert: "/etc/pki/tls/certs/{{ __test_ca_cert_name }}"
+    __test_key: "/etc/pki/tls/private/{{ __test_key_name }}"
+    __test_cert_csr: "/etc/rsyslog.d/{{ __test_csr_name }}"
+    __test_cert: "/etc/pki/tls/certs/{{ __test_cert_name }}"
+
+  tasks:
+    - include_tasks: tasks/create_tests_certs.yml
+
+    - name: Deploy rsyslog config on the target host
+      vars:
+        logging_inputs:
+          - name: system_input
+            type: basics
+        logging_outputs:
+          - name: relp_client0
+            type: relp
+            server_host: localhost
+            port: 6514
+            tls: true
+            ca_cert: "{{ __test_ca_cert }}"
+            cert: "{{ __test_cert }}"
+            private_key: "{{ __test_key }}"
+            pki_authmode: name
+            permitted_servers:
+              - '*.server.com'
+              - '*.example.com'
+          - name: relp_client1
+            type: relp
+            server_host: localhost
+            port: 20514
+            tls: true
+            ca_cert: "/etc/rsyslog.d/{{ __test_ca_cert_name }}"
+            cert: "/etc/rsyslog.d/{{ __test_cert_name }}"
+            private_key: "/etc/rsyslog.d/{{ __test_key_name }}"
+            pki_authmode: name
+            permitted_servers:
+              - '*.server.com'
+              - '*.example.com'
+        logging_flows:
+          - name: flows
+            inputs: [system_input]
+            outputs: [relp_client0, relp_client1]
+      include_role:
+        name: linux-system-roles.logging
+
+    - include_tasks: set_rsyslog_variables.yml
+
+    # notify restart rsyslogd is executed at the end of this test task.
+    # thus we have to force to invoke handlers
+    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+      meta: flush_handlers
+
+    - name: Check rsyslog.conf size
+      assert:
+        that: rsyslog_conf_stat.stat.size < 1000
+
+    - name: Check file counts in rsyslog.d
+      assert:
+        that: rsyslog_d_file_count.matched >= 9

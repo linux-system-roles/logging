@@ -1,0 +1,31 @@
+---
+# SPDX-License-Identifier: GPL-3.0-only
+
+# Relp output configuration setting
+# ------------------------------------------
+
+# __rsyslog_output_relp_package
+#
+# List of rpm packages for Relp output.
+__rsyslog_output_relp_packages: ['rsyslog-relp', 'librelp']
+
+# Relp Rsyslog configuration rules
+# ---------------------------
+
+__rsyslog_output_relp_rules:
+
+  - '{{ __rsyslog_conf_output_relp_modules }}'
+
+# Default relp configuration options
+# ---------------------------------
+
+__rsyslog_conf_output_relp_modules:
+
+  - name: 'output-relp-module'
+    type: 'modules'
+
+    sections:
+
+      - options: |-
+          # Send logs over relp
+          module(load="omrelp")

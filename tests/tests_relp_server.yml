@@ -1,7 +1,7 @@
-# Test the server configuration containing tls tcp, plain tcp and udp connection
+# Test the server configuration using tls relp
 #
 # [Configuration]
-# remote inputs configuration containing tls tcp, plain tcp and udp connection
+# remote inputs configuration using tls relp
 #
 # [Test scenario]
 # 0. Run logging role.
@@ -30,33 +30,37 @@
 
     - name: Deploy rsyslog config on the target host
       vars:
-        logging_pki_files:
-          - ca_cert: "{{ __test_ca_cert }}"
-            cert: "{{ __test_cert }}"
-            private_key: "{{ __test_key }}"
         logging_inputs:
           - name: system_input
             type: basics
-          - name: remote_tcp
-            type: remote
-            tcp_ports: [6514, 40000, 40001]
+          - name: relp_server0
+            type: relp
+            port: 6514
             tls: true
-            pki_authmode: x509/name
+            ca_cert: "{{ __test_ca_cert }}"
+            cert: "{{ __test_cert }}"
+            private_key: "{{ __test_key }}"
+            pki_authmode: name
             permitted_clients:
               - '*.client.com'
               - '*.example.com'
-          - name: remote_ptcp
-            type: remote
-            tcp_ports: [514, 40010, 40011, 40012]
-          - name: remote_udp
-            type: remote
-            udp_ports: [514, 40020]
+          - name: relp_server1
+            type: relp
+            port: 20514
+            tls: true
+            ca_cert: "{{ __test_ca_cert }}"
+            cert: "{{ __test_cert }}"
+            private_key: "{{ __test_key }}"
+            pki_authmode: name
+            permitted_clients:
+              - '*.client.com'
+              - '*.example.com'
         logging_outputs:
           - name: files_output
             type: files
         logging_flows:
           - name: flows
-            inputs: [system_input, remote_tcp, remote_ptcp, remote_udp]
+            inputs: [system_input, relp_server0, relp_server1]
             outputs: [files_output]
       include_role:
         name: linux-system-roles.logging
@@ -74,7 +78,7 @@
 
     - name: Check file counts in rsyslog.d
       assert:
-        that: rsyslog_d_file_count.matched >= 12
+        that: rsyslog_d_file_count.matched >= 9
 
     - name: Install lsof
       package:
@@ -91,16 +95,9 @@
     - debug:
         msg: "lsof returned {{ __result.stdout }}"
 
-    - name: Check port 514, 6514, 40010 and 40011 is open for TCP
+    - name: Check port 6514, 20514 are open for TCP
       shell: |
         set -o pipefail
         lsof -i -nP | grep rsyslogd | grep TCP | grep {{ item }}
-      loop: [514, 6514, 40010, 40011]
-      changed_when: false
-
-    - name: Check port 514 and 40020 is open for UDP
-      shell: |
-        set -o pipefail
-        lsof -i -nP | grep rsyslogd | grep UDP | grep {{ item }}
-      loop: [514, 40020]
+      loop: [6514, 20514]
       changed_when: false

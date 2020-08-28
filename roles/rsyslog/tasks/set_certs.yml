@@ -1,0 +1,47 @@
+---
+- block:
+    # This block collect certificates from local location and copies them to the target host
+    - name: Copy ca_cert on the control host to the specified path on the target host
+      copy:
+        src: '{{ item.ca_cert_src }}'
+        dest: '{{ item.ca_cert | d(__rsyslog_config_dir) }}'
+      with_items:
+        - '{{ __rsyslog_cert_subject }}'
+      when: item.ca_cert_src | d()
+
+    - name: Copy cert on the control host to the specified path on the target host
+      copy:
+        src: '{{ item.cert_src }}'
+        dest: '{{ item.cert | d(__rsyslog_config_dir) }}'
+      with_items:
+        - '{{ __rsyslog_cert_subject }}'
+      when: item.cert_src | d()
+
+    - name: Copy key on the control host to the specified path on the target host
+      copy:
+        src: '{{ item.private_key_src }}'
+        dest: '{{ item.private_key | d(__rsyslog_config_dir) }}'
+      with_items:
+        - '{{ __rsyslog_cert_subject }}'
+      when: item.private_key_src | d()
+
+    - name: Check certs - tls is true, but triplets are not given
+      fail:
+        msg: "Error: you specified tls: true; you must specify all 3 of ca_cert, cert, private_key, or all 3 of ca_cert_src, cert_src, private_key_src, or set tls: false in the configuration named {{ item.name }}"
+      with_items:
+        - '{{ __rsyslog_cert_subject }}'
+      when:
+        - (item.tls is defined) | ternary(item.tls, item.use_cert | d(true))
+        - not ((item.ca_cert | d() and item.cert | d() and item.private_key | d()) or
+               (item.ca_cert_src | d() and item.cert_src | d() and item.private_key_src | d()))
+
+    - name: Check certs - key/certs data are provided, but tls is false
+      fail:
+        msg: "Error: you specified tls: false and also specified one or more cert/key files in the configuration named {{ item.name }}"
+      with_items:
+        - '{{ __rsyslog_cert_subject }}'
+      when:
+        - not ((item.tls is defined) | ternary(item.tls, item.use_cert | d(true)))
+        - item.ca_cert | d() or item.cert | d() or item.private_key | d()
+        - item.ca_cert_src | d() or item.cert_src | d() or item.private_key_src | d()
+  when: __rsyslog_cert_subject | d([])

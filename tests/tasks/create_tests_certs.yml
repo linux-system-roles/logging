@@ -1,0 +1,40 @@
+- name: Generate a CA key
+  openssl_privatekey:
+    path: "{{ __test_ca_key }}"
+    type: RSA
+
+- name: Generate a CA Certificate Signing Request
+  openssl_csr:
+    path: "{{ __test_ca_cert_csr }}"
+    privatekey_path: "{{ __test_ca_key }}"
+    common_name: test-ca.system_roles.fedora.org
+
+- name: Generate a self signed CA cert using the CA key
+  openssl_certificate:
+    path: "{{ __test_ca_cert }}"
+    privatekey_path: "{{ __test_ca_key }}"
+    csr_path: "{{ __test_ca_cert_csr }}"
+    provider: selfsigned
+
+- name: Generate a server/client key
+  openssl_privatekey:
+    path: "{{ __test_key }}"
+    type: RSA
+
+- name: Generate a server Certificate Signing Request
+  openssl_csr:
+    path: "{{ __test_cert_csr }}"
+    privatekey_path: "{{ __test_key }}"
+    country_name: US
+    organization_name: Fedora
+    email_address: logging@fedora.org
+    common_name: logging.fedora.org
+
+- name: Generate a server/client cert using the key, and signed by the self signed CA
+  openssl_certificate:
+    path: "{{ __test_cert }}"
+    privatekey_path: "{{ __test_key }}"
+    csr_path: "{{ __test_cert_csr }}"
+    ownca_path: "{{ __test_ca_cert }}"
+    ownca_privatekey_path: "{{ __test_ca_key }}"
+    provider: ownca

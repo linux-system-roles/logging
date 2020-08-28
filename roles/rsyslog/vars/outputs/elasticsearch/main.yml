@@ -9,11 +9,6 @@
 # List of rpm packages for Elasticsearch output.
 __rsyslog_elasticsearch_packages: ['rsyslog-elasticsearch']
 
-# Available configuration set
-# ----------------------------
-
-rsyslog_output_elasticsearch: []
-
 # Elasticsearch Rsyslog configuration rules
 # ---------------------------
 

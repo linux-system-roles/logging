@@ -1,10 +1,10 @@
 # Test Elasticsearch config - local certs are copied to the target host with the specified path.
 #
 # Elasticsearch output has this policy:
-#   use_cert: If true, key/certificates are used to access Elasticsearch.
-#             Triplets {`ca_cert`, `cert`, private_key`} and/or {`ca_cert_src`,
-#             `cert_src`, `private_key_src`} should be configured. Default to true.
-# In this test case, both triplets and use_cert option are properly set.
+#   tls: If true, key/certificates are used to access Elasticsearch.
+#        Triplets {`ca_cert`, `cert`, private_key`} and/or {`ca_cert_src`,
+#        `cert_src`, `private_key_src`} should be configured. Default to true.
+# In this test case, both triplets and tls option are properly set.
 #
 # [Configuration]
 # files input (imfile) ->  elasticsearch output (omelasticsearch)

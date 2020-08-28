@@ -19,6 +19,8 @@
     * [Standalone configuration](#standalone-configuration)
     * [Client configuration](#client-configuration)
     * [Server configuration](#server-configuration)
+    * [Client configuration with Relp](#client-configuration-with-relp)
+    * [Server configuration with Relp](#server-configuration-with-relp)
   * [Providers](#providers)
   * [Tests](#tests)
   * [Implementation Details](#implementation-details)
@@ -111,12 +113,25 @@ This is a schematic logging configuration to show log messages from input_nameA 
 - `ovirt` type - `ovirt` input supports oVirt specific inputs.<br>
    For the details, visit [oVirt Support](../../design_docs/rsyslog_ovirt_support.md).
 
-- `remote` type - `remote` input supports receiving logs from the remote logging system over the network. This input type makes rsyslog a server.<br>
+- `relp` type - `relp` input supports receiving logs from the remote logging system over the network using relp.<br>
+  **available options**
+  - `port`: Port number Relp is listening to. Default to `20514`.
+  - `tls`: If true, encrypt the connection with TLS. You must provide key/certificates and triplets {`ca_cert`, `cert`, `private_key`} and/or {`ca_cert_src`, `cert_src`, `private_key_src`}. Default to `true`.
+  - `ca_cert`: Path to CA cert to configure Relp with tls. Default to `logging_config_dir/basename of ca_cert_src`.
+  - `cert`: Path to cert to configure Relp with tls.  Default to `logging_config_dir/basename of cert_src`.
+  - `private_key`: Path to key to configure Relp with tls.  Default to `logging_config_dir/basename of private_key_src`.
+  - `ca_cert_src`: Local CA cert file path which is copied to the target host. If `ca_cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
+  - `cert_src`: Local cert file path which is copied to the target host. If `cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
+  - `private_key_src`: Local key file path which is copied to the target host. If `private_key` is specified, it is copied to the location. Otherwise, to logging_config_dir.
+  - `pki_authmode`: Specifying the authentication mode. `name` or `fingerprint` is accepted. Default to `name`.
+  - `permitted_clients`: List of hostnames, IP addresses, fingerprints(sha1), and wildcard DNS domains which will be allowed by the `logging` server to connect and send logs over TLS. Default to `['*.{{ logging_domain }}']`
+
+- `remote` type - `remote` input supports receiving logs from the remote logging system over the network.<br>
   **available options**
   - `udp_ports`: List of UDP port numbers to listen. If set, the `remote` input listens on the UDP ports. No defaults. If both `udp_ports` and `tcp_ports` are set in a `remote` input item, `udp_ports` is used and `tcp_ports` is dropped.
   - `tcp_ports`: List of TCP port numbers to listen. If set, the `remote` input listens on the TCP ports. Default to `[514]`. If both `udp_ports` and `tcp_ports` are set in a `remote` input item, `udp_ports` is used and `tcp_ports` is dropped. If both `udp_ports` and `tcp_ports` are not set in a `remote` input item, `tcp_ports: [514]` is added to the item.
   - `tls`: Set to `true` to encrypt the connection using the default TLS implementation used by the provider. Default to `false`.
-  - `pki_authmode`: Specifying the default network driver authentication mode. `x509/name`, `x509/fingerprint`, `anon` is accepted. Default to `x509/name`.
+  - `pki_authmode`: Specifying the default network driver authentication mode. `x509/name`, `x509/fingerprint`, or `anon` is accepted. Default to `x509/name`.
   - `permitted_clients`: List of hostnames, IP addresses, fingerprints(sha1), and wildcard DNS domains which will be allowed by the `logging` server to connect and send logs over TLS. Default to `['*.{{ logging_domain }}']`
 
   There are 3 types of items in the remote type - udp, plain tcp and tls tcp. The udp type configured using `udp_ports`; the plain tcp type is configured using `tcp_ports` without `tls` or with `tls: false`; the tls tcp type is configured using `tcp_ports` with `tls: true` at the same time. Please note there might be only one instance of each of the three types. E.g., if there are 2 `udp` type items, it fails to deploy.
@@ -169,10 +184,11 @@ This is a schematic logging configuration to show log messages from input_nameA 
   - `index_prefix`: Elasticsearch index prefix the particular log will be indexed to. **Required**.
   - `input_type`: Specifying the input type. Currently only type `ovirt` is supported. Default to `ovirt`.
   - `retryfailures`: Specifying whether retries or not in case of failure. Allowed value is `true` or `false`.  Default to `true`.
-  - `use_cert`: If true, key/certificates are used to access Elasticsearch. Triplets {`ca_cert`, `cert`, `private_key`} and/or {`ca_cert_src`, `cert_src`, `private_key_src`} should be configured. Default to `true`.
-  - `ca_cert`: Path to CA cert for Elasticsearch.  Default to `/etc/rsyslog.d/es-ca.crt`
-  - `cert`: Path to cert to connect to Elasticsearch.  Default to `/etc/rsyslog.d/es-cert.pem`.
-  - `private_key`: Path to key to connect to Elasticsearch.  Default to `/etc/rsyslog.d/es-key.pem`.
+  - `tls`: If true, encrypt the connection with TLS. You must provide key/certificates and triplets {`ca_cert`, `cert`, `private_key`} and/or {`ca_cert_src`, `cert_src`, `private_key_src`}. Default to `true`.
+  - `use_cert`: [DEPRECATED] If true, encrypt the connection with TLS. You must provide key/certificates and triplets {`ca_cert`, `cert`, `private_key`} and/or {`ca_cert_src`, `cert_src`, `private_key_src`}. Default to `true`. Option `use_cert` is deprecated in favor of `tls` and `use_cert` will be removed in the next minor release.
+  - `ca_cert`: Path to CA cert for Elasticsearch. Default to `logging_config_dir/basename of ca_cert_src`.
+  - `cert`: Path to cert to connect to Elasticsearch.  Default to `logging_config_dir/basename of cert_src`.
+  - `private_key`: Path to key to connect to Elasticsearch.  Default to `logging_config_dir/basename of private_key_src`.
   - `ca_cert_src`: Local CA cert file path which is copied to the target host. If `ca_cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
   - `cert_src`: Local cert file path which is copied to the target host. If `cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
   - `private_key_src`: Local key file path which is copied to the target host. If `private_key` is specified, it is copied to the location. Otherwise, to logging_config_dir.
@@ -196,7 +212,7 @@ This is a schematic logging configuration to show log messages from input_nameA 
   local7.*
   ```
 
-- `forwards` type - `forwards` output sends logs to the remote logging system over the network. This is for the client rsyslog.<br>
+- `forwards` type - `forwards` output sends logs to the remote logging system over the network.<br>
   **available options**
   - `facility`: Facility; default to `*`.
   - `severity`: Severity; default to `*`.
@@ -204,8 +220,23 @@ This is a schematic logging configuration to show log messages from input_nameA 
   - `udp_port`: UDP port number. Default to `514`.
   - `tcp_port`: TCP port number. Default to `514`.
   - `tls`: Set to `true` to encrypt the connection using the default TLS implementation used by the provider. Default to `false`.
-  - `pki_authmode`: Specifying the default network driver authentication mode. `x509/name`, `x509/fingerprint`, `anon` is accepted. Default to `x509/name`.
+  - `pki_authmode`: Specifying the default network driver authentication mode. `x509/name`, `x509/fingerprint`, or `anon` is accepted. Default to `x509/name`.
   - `permitted_server`: Hostname, IP address, fingerprint(sha1) or wildcard DNS domain of the server which this client will be allowed to connect and send logs over TLS. Default to `*.{{ logging_domain }}`
+
+- `relp` type - `relp` output sends logs to the remote logging system over the network using relp.<br>
+  **available options**
+  - `port`: Port number Relp is listening to. Default to `20514`.
+  - `server_host`: Host name the remote logging system is running on. **Required**.
+  - `server_port`: Port number the remote logging system is listening to. Default to `20514`.
+  - `tls`: If true, encrypt the connection with TLS. You must provide key/certificates and triplets {`ca_cert`, `cert`, `private_key`} and/or {`ca_cert_src`, `cert_src`, `private_key_src`}. Default to `true`.
+  - `ca_cert`: Path to CA cert to configure Relp with tls. Default to `logging_config_dir/basename of ca_cert_src`.
+  - `cert`: Path to cert to configure Relp with tls.  Default to `logging_config_dir/basename of cert_src`.
+  - `private_key`: Path to key to configure Relp with tls.  Default to `logging_config_dir/basename of private_key_src`.
+  - `ca_cert_src`: Local CA cert file path which is copied to the target host. If `ca_cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
+  - `cert_src`: Local cert file path which is copied to the target host. If `cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
+  - `private_key_src`: Local key file path which is copied to the target host. If `private_key` is specified, it is copied to the location. Otherwise, to logging_config_dir.
+  - `pki_authmode`: Specifying the authentication mode. `name` or `fingerprint` is accepted. Default to `name`.
+  - `permitted_servers`: List of hostnames, IP addresses, fingerprints(sha1), and wildcard DNS domains which will be allowed by the `logging` client to connect and send logs over TLS. Default to `['*.{{ logging_domain }}']`
 
 - `remote_files` type - `remote_files` output stores logs to the local files per remote host and program name originated the logs.<br>
   **available options**
@@ -589,6 +620,68 @@ The following playbook generates the same logging configuration files.
       - name: flow_0
         inputs: [remote_udp_input, remote_tcp_input]
         outputs: [remote_files_output0, remote_files_output1]
+```
+
+### Client configuration with Relp
+
+Deploying `basics input` reading logs from systemd journal and `relp output` to send the logs to the remote rsyslog over relp.
+```yaml
+---
+- name: Deploying basics input and relp output
+  hosts: clients
+  roles:
+    - linux-system-roles.logging
+  vars:
+    logging_inputs:
+      - name: basic_input
+        type: basics
+    logging_outputs:
+      - name: relp_client
+        type: relp
+        server_host: logging.server.com
+        port: 20514
+        tls: true
+        ca_cert_src: /path/to/ca.pem
+        cert_src: /path/to/client-cert.pem
+        private_key_src: /path/to/client-key.pem
+        pki_authmode: name
+        permitted_servers:
+          - '*.server.com'
+    logging_flows:
+      - name: flow
+        inputs: [basic_input]
+        outputs: [relp_client]
+```
+
+### Server configuration with Relp
+
+. Deploying `relp input` reading logs from remote rsyslog and `remote_files output` to write the logs to the local files under the directory named by the remote host name.
+```yaml
+---
+- name: Deploying remote input and remote_files output
+  hosts: server
+  roles:
+    - linux-system-roles.logging
+  vars:
+    logging_inputs:
+      - name: relp_server
+        type: relp
+        port: 20514
+        tls: true
+        ca_cert_src: /path/to/ca.pem
+        cert_src: /path/to/server-cert.pem
+        private_key_src: /path/to/server-key.pem
+        pki_authmode: name
+        permitted_clients:
+          - '*.client.com'
+          - '*.example.com'
+    logging_outputs:
+      - name: remote_files_output
+        type: remote_files
+    logging_flows:
+      - name: flow
+        inputs: [relp_server]
+        outputs: [remote_files_output]
 ```
 
 ## Providers

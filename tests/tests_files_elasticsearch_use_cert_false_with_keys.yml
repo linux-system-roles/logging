@@ -1,17 +1,17 @@
-# Error case for Elasticsearch config - although cert paths are specified, use_cert is false
+# Error case for Elasticsearch config - although cert paths are specified, tls is false
 #
 # Elasticsearch output has this policy:
-#   use_cert: If true, key/certificates are used to access Elasticsearch.
-#             Triplets {`ca_cert`, `cert`, private_key`} and/or {`ca_cert_src`,
-#             `cert_src`, `private_key_src`} should be configured. Default to true.
-# In this test case, both triplets are properly set, but use_cert is set to false,
+#   tls: If true, key/certificates are used to access Elasticsearch.
+#        Triplets {`ca_cert`, `cert`, private_key`} and/or {`ca_cert_src`,
+#        `cert_src`, `private_key_src`} should be configured. Default to true.
+# In this test case, both triplets are properly set, but tls is set to false,
 # which indicates configuration error.
 #
 # [Configuration]
 # files input (imfile) ->  elasticsearch output (omelasticsearch)
 # logging_outputs:
 #   - name: elasticsearch_output
-#     use_cert: false
+#     tls: false
 #     8< snip >8
 #
 # [Test scenario]
@@ -22,7 +22,7 @@
 # Note: This is a test for the elasticsearch certs/key.
 # The files input to the elasticsearch output is not supported.
 #
-- name: Error case for Elasticsearch config - although cert paths are specified, use_cert is false
+- name: Error case for Elasticsearch config - although cert paths are specified, tls is false
   hosts: all
   become: true
   vars:
@@ -30,7 +30,7 @@
     __test_ca_cert: /tmp/es-ca.crt
     __test_cert: /tmp/es-cert.pem
     __test_key: /tmp/es-key.pem
-    __expected_error: "Error: you specified use_cert: false and also specified one or more cert/key files in the elasticsearch output named elasticsearch_output"
+    __expected_error: "Error: you specified tls: false and also specified one or more cert/key files in the configuration named elasticsearch_output"
 
   tasks:
     - name: Generate fake key/certs files.
@@ -55,7 +55,7 @@
                 index_prefix: project.
                 input_type: ovirt
                 retryfailures: false
-                use_cert: false
+                tls: false
                 ca_cert: /etc/rsyslog.d/ca_cert.crt
                 cert: /etc/rsyslog.d/cert.pem
                 private_key: /etc/rsyslog.d/key.pem
