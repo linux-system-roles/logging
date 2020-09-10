@@ -21,6 +21,7 @@
     * [Server configuration](#server-configuration)
     * [Client configuration with Relp](#client-configuration-with-relp)
     * [Server configuration with Relp](#server-configuration-with-relp)
+  * [Port and SELinux](#port-and-selinux)
   * [Providers](#providers)
   * [Tests](#tests)
   * [Implementation Details](#implementation-details)
@@ -115,7 +116,7 @@ This is a schematic logging configuration to show log messages from input_nameA 
 
 - `relp` type - `relp` input supports receiving logs from the remote logging system over the network using relp.<br>
   **available options**
-  - `port`: Port number Relp is listening to. Default to `20514`.
+  - `port`: Port number Relp is listening to. Default to `20514`. See also [Port and SELinux](#port-and-selinux).
   - `tls`: If true, encrypt the connection with TLS. You must provide key/certificates and triplets {`ca_cert`, `cert`, `private_key`} and/or {`ca_cert_src`, `cert_src`, `private_key_src`}. Default to `true`.
   - `ca_cert`: Path to CA cert to configure Relp with tls. Default to `logging_config_dir/basename of ca_cert_src`.
   - `cert`: Path to cert to configure Relp with tls.  Default to `logging_config_dir/basename of cert_src`.
@@ -128,8 +129,8 @@ This is a schematic logging configuration to show log messages from input_nameA 
 
 - `remote` type - `remote` input supports receiving logs from the remote logging system over the network.<br>
   **available options**
-  - `udp_ports`: List of UDP port numbers to listen. If set, the `remote` input listens on the UDP ports. No defaults. If both `udp_ports` and `tcp_ports` are set in a `remote` input item, `udp_ports` is used and `tcp_ports` is dropped.
-  - `tcp_ports`: List of TCP port numbers to listen. If set, the `remote` input listens on the TCP ports. Default to `[514]`. If both `udp_ports` and `tcp_ports` are set in a `remote` input item, `udp_ports` is used and `tcp_ports` is dropped. If both `udp_ports` and `tcp_ports` are not set in a `remote` input item, `tcp_ports: [514]` is added to the item.
+  - `udp_ports`: List of UDP port numbers to listen. If set, the `remote` input listens on the UDP ports. No defaults. If both `udp_ports` and `tcp_ports` are set in a `remote` input item, `udp_ports` is used and `tcp_ports` is dropped. See also [Port and SELinux](#port-and-selinux).
+  - `tcp_ports`: List of TCP port numbers to listen. If set, the `remote` input listens on the TCP ports. Default to `[514]`. If both `udp_ports` and `tcp_ports` are set in a `remote` input item, `udp_ports` is used and `tcp_ports` is dropped. If both `udp_ports` and `tcp_ports` are not set in a `remote` input item, `tcp_ports: [514]` is added to the item. See also [Port and SELinux](#port-and-selinux).
   - `tls`: Set to `true` to encrypt the connection using the default TLS implementation used by the provider. Default to `false`.
   - `pki_authmode`: Specifying the default network driver authentication mode. `x509/name`, `x509/fingerprint`, or `anon` is accepted. Default to `x509/name`.
   - `permitted_clients`: List of hostnames, IP addresses, fingerprints(sha1), and wildcard DNS domains which will be allowed by the `logging` server to connect and send logs over TLS. Default to `['*.{{ logging_domain }}']`
@@ -683,6 +684,15 @@ Deploying `basics input` reading logs from systemd journal and `relp output` to 
         inputs: [relp_server]
         outputs: [remote_files_output]
 ```
+
+### Port and SELinux
+
+SELinux is only configured to allow sending and receiving on the following ports by default:
+```
+syslogd_port_t        tcp   514, 20514
+syslogd_port_t        udp   514, 20514
+```
+If other ports need to be configured, you can use [linux-system-roles/selinux](https://github.com/linux-system-roles/selinux) to manage SELinux contexts.
 
 ## Providers
 
