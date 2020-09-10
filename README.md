@@ -19,6 +19,7 @@
     * [Standalone configuration](#standalone-configuration)
     * [Client configuration](#client-configuration)
     * [Server configuration](#server-configuration)
+  * [Port and SELinux](#port-and-selinux)
   * [Providers](#providers)
   * [Tests](#tests)
   * [Implementation Details](#implementation-details)
@@ -111,10 +112,10 @@ This is a schematic logging configuration to show log messages from input_nameA 
 - `ovirt` type - `ovirt` input supports oVirt specific inputs.<br>
    For the details, visit [oVirt Support](../../design_docs/rsyslog_ovirt_support.md).
 
-- `remote` type - `remote` input supports receiving logs from the remote logging system over the network. This input type makes rsyslog a server.<br>
+- `remote` type - `remote` input supports receiving logs from the remote logging system over the network.<br>
   **available options**
-  - `udp_ports`: List of UDP port numbers to listen. If set, the `remote` input listens on the UDP ports. No defaults. If both `udp_ports` and `tcp_ports` are set in a `remote` input item, `udp_ports` is used and `tcp_ports` is dropped.
-  - `tcp_ports`: List of TCP port numbers to listen. If set, the `remote` input listens on the TCP ports. Default to `[514]`. If both `udp_ports` and `tcp_ports` are set in a `remote` input item, `udp_ports` is used and `tcp_ports` is dropped. If both `udp_ports` and `tcp_ports` are not set in a `remote` input item, `tcp_ports: [514]` is added to the item.
+  - `udp_ports`: List of UDP port numbers to listen. If set, the `remote` input listens on the UDP ports. No defaults. If both `udp_ports` and `tcp_ports` are set in a `remote` input item, `udp_ports` is used and `tcp_ports` is dropped. See also [Port and SELinux](#port-and-selinux).
+  - `tcp_ports`: List of TCP port numbers to listen. If set, the `remote` input listens on the TCP ports. Default to `[514]`. If both `udp_ports` and `tcp_ports` are set in a `remote` input item, `udp_ports` is used and `tcp_ports` is dropped. If both `udp_ports` and `tcp_ports` are not set in a `remote` input item, `tcp_ports: [514]` is added to the item. See also [Port and SELinux](#port-and-selinux).
   - `tls`: Set to `true` to encrypt the connection using the default TLS implementation used by the provider. Default to `false`.
   - `pki_authmode`: Specifying the default network driver authentication mode. `x509/name`, `x509/fingerprint`, `anon` is accepted. Default to `x509/name`.
   - `permitted_clients`: List of hostnames, IP addresses, fingerprints(sha1), and wildcard DNS domains which will be allowed by the `logging` server to connect and send logs over TLS. Default to `['*.{{ logging_domain }}']`
@@ -590,6 +591,15 @@ The following playbook generates the same logging configuration files.
         inputs: [remote_udp_input, remote_tcp_input]
         outputs: [remote_files_output0, remote_files_output1]
 ```
+
+### Port and SELinux
+
+SELinux is only configured to allow sending and receiving on the following ports by default:
+```
+syslogd_port_t        tcp   514, 20514
+syslogd_port_t        udp   514, 20514
+```
+If other ports need to be configured, you can use [linux-system-roles/selinux](https://github.com/linux-system-roles/selinux) to manage SELinux contexts.
 
 ## Providers
 
