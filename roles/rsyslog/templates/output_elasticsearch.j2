@@ -44,7 +44,7 @@ ruleset(name="{{ item.name }}") {
             bulkid="{{ item.bulkid | d("id_template") }}"
             dynbulkid="{{ item.dynbulkid | d('on') }}"
             allowUnsignedCerts="{{ item.allowUnsignedCerts | d("off") }}"
-{% if not item.retryfailures | d(true) %}
+{% if item.retryfailures | d(true) %}
 {%   if item.retryruleset | d() | length > 0 %}
             retryfailures="on"
             retryruleset="{{ item.retryruleset }}"
@@ -56,8 +56,6 @@ ruleset(name="{{ item.name }}") {
             retryfailures="off"
 {% endif %}
             usehttps="{{ item.usehttps | default("on") }}"
-
-
 {% if (item.tls is defined) | ternary(item.tls, item.use_cert | d(true)) %}
 {%   if item.ca_cert is defined %}
 {%     set __cacert = item.ca_cert %}

@@ -44,6 +44,7 @@
     __test_ca_cert: /tmp/es-ca.crt
     __test_cert: /tmp/es-cert.pem
     __test_key: /tmp/es-key.pem
+    __test_el: elasticsearch_output
 
   tasks:
     - name: Generate fake key/certs files.
@@ -60,13 +61,13 @@
     - name: deploy config to send to elasticsearch
       vars:
         logging_outputs:
-          - name: elasticsearch_output
+          - name: "{{ __test_el }}"
             type: elasticsearch
             server_host: logging-es
             server_port: 9200
             index_prefix: project.
             input_type: ovirt
-            retryfailures: false
+            retryfailures: on
             ca_cert_src: "{{ __test_ca_cert }}"
             cert_src: "{{ __test_cert }}"
             private_key_src: "{{ __test_key }}"
@@ -77,7 +78,7 @@
         logging_flows:
           - name: flow_0
             inputs: [files_input]
-            outputs: [elasticsearch_output, elasticsearch_output_ops]
+            outputs: "[{{ __test_el }}]"
       include_role:
         name: linux-system-roles.logging
 
@@ -119,3 +120,12 @@
         - mycert: "{{ __test_cert }}"
         - myprivkey: "{{ __test_key }}"
       changed_when: false
+
+    - name: Check retryfailures in {{ __test_outputfiles_conf }}
+      command: /bin/grep 'retryfailures="on"' {{ __test_outputfiles_conf }}
+      changed_when: false
+
+    - name: Check retryruleset in {{ __test_outputfiles_conf }}
+      command: /bin/grep 'retryruleset="{{ __test_el }}"' {{ __test_outputfiles_conf }}
+      changed_when: false
+
