@@ -44,7 +44,7 @@ ruleset(name="{{ item.name }}") {
             bulkid="{{ item.bulkid | d("id_template") }}"
             dynbulkid="{{ item.dynbulkid | d('on') }}"
             allowUnsignedCerts="{{ item.allowUnsignedCerts | d("off") }}"
-{% if not item.retryfailures | d(true) %}
+{% if item.retryfailures | d(true) %}
 {%   if item.retryruleset | d() | length > 0 %}
             retryfailures="on"
             retryruleset="{{ item.retryruleset }}"
