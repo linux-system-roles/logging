@@ -67,7 +67,7 @@
             server_port: 9200
             index_prefix: project.
             input_type: ovirt
-            retryfailures: on
+            retryfailures: true
             ca_cert_src: "{{ __test_ca_cert }}"
             cert_src: "{{ __test_cert }}"
             private_key_src: "{{ __test_key }}"
@@ -128,4 +128,3 @@
     - name: Check retryruleset in {{ __test_outputfiles_conf }}
       command: /bin/grep 'retryruleset="{{ __test_el }}"' {{ __test_outputfiles_conf }}
       changed_when: false
-
