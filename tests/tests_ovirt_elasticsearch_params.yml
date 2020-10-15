@@ -34,6 +34,8 @@
     __test_ovirt_engine_conf: /etc/rsyslog.d/90-input-ovirt-ovirt_engine_input.conf
     __test_ovirt_vdsm_conf: /etc/rsyslog.d/90-input-ovirt-ovirt_vdsm_input.conf
     __test_ovirt_bogus_conf: /etc/rsyslog.d/90-input-ovirt-ovirt_bogus_input.conf
+    __test_es_conf: /etc/rsyslog.d/31-output-elasticsearch-elasticsearch_output.conf
+    __test_es_ops_conf: /etc/rsyslog.d/31-output-elasticsearch-elasticsearch_output_ops.conf
     __test_collectd_name: ovirt_collectd_input
     __test_engine_name: ovirt_engine_input
     __test_vdsm_name: ovirt_vdsm_input
@@ -56,7 +58,6 @@
             server_port: 9200
             index_prefix: project.
             input_type: ovirt
-            retryfailures: false
             ca_cert: "/etc/rsyslog.d/es-ca.crt"
             cert: "/etc/rsyslog.d/es-cert.pem"
             private_key: "/etc/rsyslog.d/es-key.pem"
@@ -70,6 +71,11 @@
             ca_cert: "/etc/rsyslog.d/es-ca.crt"
             cert: "/etc/rsyslog.d/es-cert.pem"
             private_key: "/etc/rsyslog.d/es-key.pem"
+            dynSearchIndex: false
+            bulkmode: false
+            dynbulkid: false
+            allowUnsignedCerts: true
+            usehttps: false
         logging_inputs:
           - name: basic_input
             type: basics
@@ -164,4 +170,23 @@
 
     - name: Check index_prefix is "{{ __test_logs_index }}" in "{{ __test_ovirt_vdsm_conf }}"
       command: /bin/grep 'set $.index_prefix = "{{ __test_logs_index }}"' {{ __test_ovirt_vdsm_conf }}
-      changed_when: false
+
+    - name: Check default config params in "{{ __test_es_conf }}"
+      command: /bin/grep {{ item }} {{ __test_es_conf }}
+      loop:
+        - "dynSearchIndex=.on."
+        - "bulkmode=.on."
+        - "dynbulkid=.on."
+        - "allowUnsignedCerts=.off."
+        - "usehttps=.on."
+        - "retryfailures=.on."
+
+    - name: Check modified config params in "{{ __test_es_ops_conf }}"
+      command: /bin/grep {{ item }} {{ __test_es_ops_conf }}
+      loop:
+        - "dynSearchIndex=.off."
+        - "bulkmode=.off."
+        - "dynbulkid=.off."
+        - "allowUnsignedCerts=.on."
+        - "usehttps=.off."
+        - "retryfailures=.off."
