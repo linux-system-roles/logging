@@ -200,8 +200,8 @@ This is a schematic logging configuration to show log messages from input_nameA 
   - `severity`: Severity in selector; default to `*`.
   - `exclude`: Exclude list used in selector; default to none.
   - `property`: Property in property-based filter; no default
-  - `prop_op`: Operation in property-based filter; In case of not `!`, put the `prop_op` value in quotes; default to `contains`
-  - `prop_value`: Value in property-based filter; default to `error`
+  - `property_op`: Operation in property-based filter; In case of not `!`, put the `property_op` value in quotes; default to `contains`
+  - `property_value`: Value in property-based filter; default to `error`
   - `path`: Path to the output file.
 
   Selector options and property-based filter options are exclusive. If Property-based filter options are defined, selector options will be ignored.
@@ -224,8 +224,8 @@ This is a schematic logging configuration to show log messages from input_nameA 
   - `severity`: Severity in selector; default to `*`.
   - `exclude`: Exclude list used in selector; default to none.
   - `property`: Property in property-based filter; no default
-  - `prop_op`: Operation in property-based filter; In case of not `!`, put the `prop_op` value in quotes; default to `contains`
-  - `prop_value`: Value in property-based filter; default to `error`
+  - `property_op`: Operation in property-based filter; In case of not `!`, put the `property_op` value in quotes; default to `contains`
+  - `property_value`: Value in property-based filter; default to `error`
   - `target`: Target host (fqdn). **Required**.
   - `udp_port`: UDP port number. Default to `514`.
   - `tcp_port`: TCP port number. Default to `514`.
@@ -256,8 +256,8 @@ This is a schematic logging configuration to show log messages from input_nameA 
   - `severity`: Severity in selector; default to `*`.
   - `exclude`: Exclude list used in selector; default to none.
   - `property`: Property in property-based filter; no default
-  - `prop_op`: Operation in property-based filter; In case of not `!`, put the `prop_op` value in quotes; default to `contains`
-  - `prop_value`: Value in property-based filter; default to `error`
+  - `property_op`: Operation in property-based filter; In case of not `!`, put the `property_op` value in quotes; default to `contains`
+  - `property_value`: Value in property-based filter; default to `error`
   - `async_writing`: If set to `true`, the files are written asynchronously. Allowed value is `true` or `false`. Default to `false`.
   - `client_count`: Count of client logging system supported this rsyslog server. Default to `10`.
   - `io_buffer_size`: Buffer size used to write output data. Default to `65536` bytes.
@@ -512,14 +512,14 @@ The following playbook generates the same logging configuration files.
       - name: files_output0
         type: files
         property: msg
-        prop_op: contains
-        prop_value: error
+        property_op: contains
+        property_value: error
         path: /var/log/errors.log
       - name: files_output1
         type: files
         property: msg
-        prop_op: "!contains"
-        prop_value: error
+        property_op: "!contains"
+        property_value: error
         path: /var/log/others.log
     logging_flows:
       - name: flow0

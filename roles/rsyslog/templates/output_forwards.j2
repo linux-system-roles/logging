@@ -10,7 +10,7 @@
 {% endif %}
 ruleset(name="{{ item.name }}") {
 {% if item.property | d() %}
-    :{{ item.property }}, {{ item.prop_op | d('contains') }}, "{{ item.prop_value | d('error') }}" action(name="{{ item.name }}"
+    :{{ item.property }}, {{ item.property_op | d('contains') }}, "{{ item.property_value | d('error') }}" action(name="{{ item.name }}"
 {% elif item.exclude | d([]) %}
     {{ item.facility | d('*') }}.{{ item.severity | d('*') }};{{ item.exclude | join(';') }} action(name="{{ item.name }}"
 {% else %}
