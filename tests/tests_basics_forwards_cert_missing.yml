@@ -63,6 +63,10 @@
           assert:
             that: "'{{ ansible_failed_result.results.0.msg }}' is match('{{ __expected_error }}')"
 
+    - name: clean up test files
+      file: path="{{ __test_key }}" state=absent
+      delegate_to: localhost
+
     - name: default run for cleanup
       vars:
         logging_inputs:

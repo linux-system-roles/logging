@@ -9,7 +9,9 @@
 {%   set __forwards_protocol = '' %}
 {% endif %}
 ruleset(name="{{ item.name }}") {
-{% if item.exclude | d([]) %}
+{% if item.property | d() %}
+    :{{ item.property }}, {{ item.prop_op | d('contains') }}, "{{ item.prop_value | d('error') }}" action(name="{{ item.name }}"
+{% elif item.exclude | d([]) %}
     {{ item.facility | d('*') }}.{{ item.severity | d('*') }};{{ item.exclude | join(';') }} action(name="{{ item.name }}"
 {% else %}
     {{ item.facility | d('*') }}.{{ item.severity | d('*') }} action(name="{{ item.name }}"

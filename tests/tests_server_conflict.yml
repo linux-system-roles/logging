@@ -76,3 +76,11 @@
         - assert:
             that: item.msg is not defined or item.msg is defined and item.msg == __expected_error
           loop: "{{ ansible_failed_result.results }}"
+
+    - name: clean up test files
+      file: path="{{ item }}" state=absent
+      loop:
+        - "{{ __test_ca_cert }}"
+        - "{{ __test_cert }}"
+        - "{{ __test_key }}"
+      delegate_to: localhost
