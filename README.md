@@ -180,10 +180,15 @@ This is a schematic logging configuration to show log messages from input_nameA 
 
 - `files` type - `files` output supports storing logs in the local files usually in /var/log.<br>
   **available options**
-  - `facility`: Facility; default to `*`.
-  - `severity`: Severity; default to `*`.
-  - `exclude`: Exclude list; default to none.
+  - `facility`: Facility in selector; default to `*`.
+  - `severity`: Severity in selector; default to `*`.
+  - `exclude`: Exclude list used in selector; default to none.
+  - `property`: Property in property-based filter; no default
+  - `prop_op`: Operation in property-based filter; In case of not `!`, put the `prop_op` value in quotes; default to `contains`
+  - `prop_value`: Value in property-based filter; default to `error`
   - `path`: Path to the output file.
+
+  Selector options and property-based filter options are exclusive. If Property-based filter options are defined, selector options will be ignored.
 
   Unless the above options are given, these local file outputs are configured.
   ```
@@ -199,8 +204,12 @@ This is a schematic logging configuration to show log messages from input_nameA 
 
 - `forwards` type - `forwards` output sends logs to the remote logging system over the network. This is for the client rsyslog.<br>
   **available options**
-  - `facility`: Facility; default to `*`.
-  - `severity`: Severity; default to `*`.
+  - `facility`: Facility in selector; default to `*`.
+  - `severity`: Severity in selector; default to `*`.
+  - `exclude`: Exclude list used in selector; default to none.
+  - `property`: Property in property-based filter; no default
+  - `prop_op`: Operation in property-based filter; In case of not `!`, put the `prop_op` value in quotes; default to `contains`
+  - `prop_value`: Value in property-based filter; default to `error`
   - `target`: Target host (fqdn). **Required**.
   - `udp_port`: UDP port number. Default to `514`.
   - `tcp_port`: TCP port number. Default to `514`.
@@ -208,11 +217,16 @@ This is a schematic logging configuration to show log messages from input_nameA 
   - `pki_authmode`: Specifying the default network driver authentication mode. `x509/name`, `x509/fingerprint`, `anon` is accepted. Default to `x509/name`.
   - `permitted_server`: Hostname, IP address, fingerprint(sha1) or wildcard DNS domain of the server which this client will be allowed to connect and send logs over TLS. Default to `*.{{ logging_domain }}`
 
+  Selector options and property-based filter options are exclusive. If Property-based filter options are defined, selector options will be ignored.
+
 - `remote_files` type - `remote_files` output stores logs to the local files per remote host and program name originated the logs.<br>
   **available options**
-  - `facility`: Facility; default to `*`.
-  - `severity`: Severity; default to `*`.
-  - `exclude`: Exclude list; default to none.
+  - `facility`: Facility in selector; default to `*`.
+  - `severity`: Severity in selector; default to `*`.
+  - `exclude`: Exclude list used in selector; default to none.
+  - `property`: Property in property-based filter; no default
+  - `prop_op`: Operation in property-based filter; In case of not `!`, put the `prop_op` value in quotes; default to `contains`
+  - `prop_value`: Value in property-based filter; default to `error`
   - `async_writing`: If set to `true`, the files are written asynchronously. Allowed value is `true` or `false`. Default to `false`.
   - `client_count`: Count of client logging system supported this rsyslog server. Default to `10`.
   - `io_buffer_size`: Buffer size used to write output data. Default to `65536` bytes.
@@ -220,6 +234,8 @@ This is a schematic logging configuration to show log messages from input_nameA 
                        This is an example to support the per host output log files
                        `/path/to/output/dir/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log`
   - `remote_sub_path`: Relative path to logging_system_log_dir to store the filtered logs.
+
+  Selector options and property-based filter options are exclusive. If Property-based filter options are defined, selector options will be ignored.
 
   if both `remote_log_path` and `remote_sub_path` are _not_ specified, the remote_file output configured with the following settings.
   ```
@@ -446,32 +462,38 @@ The following playbook generates the same logging configuration files.
         outputs: [files_output0, files_output1]
 ```
 
-5. Deploying `files input` reading logs from a local file and `elasticsearch output` to store the logs. Assuming the ca_cert, cert and key to connect to Elasticsearch are prepared.
+5. Deploying `files input` reading logs from local files and `files output` to write to the local files based on the property-based filters.
 ```yaml
 ---
-- name: Deploying basic input and elasticsearch output
+- name: Deploying files input and configured files output
   hosts: all
   roles:
     - linux-system-roles.logging
   vars:
     logging_inputs:
-      - name: files_input
+      - name: files_input0
         type: files
-        input_log_path: /var/log/containers/*.log
+        input_log_path: /var/log/containerA/*.log
+      - name: files_input1
+        type: files
+        input_log_path: /var/log/containerB/*.log
     logging_outputs:
-      - name: elasticsearch_output
-        type: elasticsearch
-        server_host: your_target_host
-        server_port: 9200
-        index_prefix: project.
-        input_type: ovirt
-        ca_cert_src: /local/path/to/ca_cert
-        cert_src: /local/path/to/cert
-        private_key_src: /local/path/to/key
+      - name: files_output0
+        type: files
+        property: msg
+        prop_op: contains
+        prop_value: error
+        path: /var/log/errors.log
+      - name: files_output1
+        type: files
+        property: msg
+        prop_op: "!contains"
+        prop_value: error
+        path: /var/log/others.log
     logging_flows:
       - name: flow0
-        inputs: [files_input]
-        outputs: [elasticsearch_output]
+        inputs: [files_input0, files_input1]
+        outputs: [files_output0, files_output1]
 ```
 
 ### Client configuration

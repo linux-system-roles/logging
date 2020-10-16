@@ -139,3 +139,11 @@
         - /etc/pki/tls/certs/{{ __test_ca_cert_name }}
         - /etc/pki/tls/certs/{{ __test_cert_name }}
         - /etc/pki/tls/private/{{ __test_key_name }}
+
+    - name: clean up test files
+      file: path="{{ item }}" state=absent
+      loop:
+        - "{{ __test_ca_cert }}"
+        - "{{ __test_cert }}"
+        - "{{ __test_key }}"
+      delegate_to: localhost

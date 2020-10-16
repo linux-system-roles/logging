@@ -1,6 +1,8 @@
 {% if item.path is defined %}
 ruleset(name="{{ item.name }}") {
-{%   if item.exclude | d([]) %}
+{%   if item.property | d() %}
+    :{{ item.property }}, {{ item.prop_op | d('contains') }}, "{{ item.prop_value | d('error') }}" {{ item.path }}
+{%   elif item.exclude | d([]) %}
     {{ item.facility | d('*') }}.{{ item.severity | d('*') }};{{ item.exclude | join(';') }} {{ item.path }}
 {%   else %}
     {{ item.facility | d('*') }}.{{ item.severity | d('*') }} {{ item.path }}

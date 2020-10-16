@@ -10,9 +10,9 @@
 #    If logging role is executed, the file size is about 100 bytes.
 #    Thus, assert the size is less than 1000.
 # 2. Check file count in /etc/rsyslog.d.
-#    If logging role is executed, 8 config files are generated.
+#    If logging role is executed, 9 config files are generated.
 #    By setting logging_purge_confs, pre-existing config files are deleted.
-#    Thus, assert the the count is equal to 8.
+#    Thus, assert the the count is equal to 9.
 # 3. Check systemctl status of rsyslog as well as error or specific message in the output.
 # 4. To verify the generated filename is correct, check the config file of files output exists.
 # 4.1 Check the config file contains the expected filter and the output file as configured.
@@ -24,6 +24,8 @@
   vars:
     __test_files_conf: /etc/rsyslog.d/30-output-files-files_output1.conf
     __default_system_log: /var/log/messages
+    __prop_based_log0: /var/log/property_based_filter_in.log
+    __prop_based_log1: /var/log/property_based_filter_out.log
 
   tasks:
     - name: deploy config to output into local files
@@ -49,15 +51,23 @@
             path: :omusrmsg:*
           - name: files_output3
             type: files
-            facility: local7
-            path: /var/log/boot.log
+            property: msg
+            prop_op: contains
+            prop_value: property_based_filter_test
+            path: "{{ __prop_based_log0 }}"
+          - name: files_output4
+            type: files
+            property: msg
+            prop_op: "!contains"
+            prop_value: property_based_filter_test
+            path: "{{ __prop_based_log1 }}"
         logging_inputs:
           - name: basic_input
             type: basics
         logging_flows:
           - name: flow_0
             inputs: [basic_input]
-            outputs: [files_output0, files_output1, files_output2, files_output3]
+            outputs: [files_output0, files_output1, files_output2, files_output3, files_output4]
       include_role:
         name: linux-system-roles.logging
 
@@ -74,7 +84,7 @@
 
     - name: Check file counts in rsyslog.d
       assert:
-        that: rsyslog_d_file_count.matched == 8
+        that: rsyslog_d_file_count.matched == 9
 
     # Checking 'error' in stdout from systemctl status is for detecting the case in which rsyslog is running,
     # but some functionality is disabled due to some error, e.g., error: 'tls.cacert' file couldn't be accessed.
@@ -104,3 +114,21 @@
       retries: 5
       delay: 1
       changed_when: false
+
+    - name: Run logger to generate a test log message containing property_based_filter_test
+      command: /bin/logger -i -p local6.info -t testTag1 property_based_filter_test
+      changed_when: false
+
+    - name: Check the test log message in {{ __prop_based_log0 }}
+      command: /bin/grep property_based_filter_test "{{ __prop_based_log0 }}"
+      register: __result
+      until: __result is success
+      retries: 5
+      delay: 1
+      changed_when: false
+
+    - name: Check the test log message not in {{ __prop_based_log1 }}
+      command: /bin/grep property_based_filter_test "{{ __prop_based_log1 }}"
+      register: __result
+      changed_when: false
+      failed_when: "__result is not failed"
