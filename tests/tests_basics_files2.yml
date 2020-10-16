@@ -52,14 +52,14 @@
           - name: files_output3
             type: files
             property: msg
-            prop_op: contains
-            prop_value: property_based_filter_test
+            property_op: contains
+            property_value: property_based_filter_test
             path: "{{ __prop_based_log0 }}"
           - name: files_output4
             type: files
             property: msg
-            prop_op: "!contains"
-            prop_value: property_based_filter_test
+            property_op: "!contains"
+            property_value: property_based_filter_test
             path: "{{ __prop_based_log1 }}"
         logging_inputs:
           - name: basic_input
