@@ -112,7 +112,6 @@ This is a schematic logging configuration to show log messages from input_nameA 
   - `input_log_path`: File name to be read by the imfile plugin. The value should be full path. Wildcard '\*' is allowed in the path.  Default to `/var/log/containers/*.log`.
 
 - `ovirt` type - `ovirt` input supports oVirt specific inputs.<br>
-   For the details, visit [oVirt Support](https://linux-system-roles.github.io/documentation/design_docs/logging/rsyslog_ovirt_support.html).
 
 - `relp` type - `relp` input supports receiving logs from the remote logging system over the network using relp.<br>
   **available options**
@@ -723,9 +722,3 @@ If other ports need to be configured, you can use [linux-system-roles/selinux](h
 ## Tests
 
 [Automated CI-tests](tests) - This documentation shows how to execute CI tests in the [tests](tests) directory as well as how to debug when the test fails.
-
-[Manual tests](https://linux-system-roles.github.io/documentation/design_docs/logging/rsyslog_manual_tests.md) - This documentation shows how to run the logging role manually against the local host or a remote host.
-
-## Implementation Details
-
-[Design Documentations](https://linux-system-roles.github.io/documentation/design_docs/)
