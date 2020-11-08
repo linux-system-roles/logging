@@ -31,7 +31,7 @@
 #
 - name: Test the configuration, basics input and a forwards output with logging_pki_files
   hosts: all
-  become: true
+  become: false
   vars:
     __test_forward_conf_s_f: /etc/rsyslog.d/30-output-forwards-forwards_severity_and_facility.conf
     __test_ca_cert_name: test-ca.crt

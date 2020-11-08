@@ -39,7 +39,7 @@
 #
 - name: Elasticsearch config - local certs are copied to the target host with the specified path.
   hosts: all
-  become: true
+  become: false
   vars:
     __test_inputfiles_dir: /var/log/inputdirectory
     __test_inputfiles_conf: /etc/rsyslog.d/90-input-files-files_input.conf

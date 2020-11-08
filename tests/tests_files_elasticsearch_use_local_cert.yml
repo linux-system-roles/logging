@@ -36,7 +36,7 @@
 #
 - name: Ensure that the role runs with parameters from imfile to two elasticsearch outputs
   hosts: all
-  become: true
+  become: false
   vars:
     __test_inputfiles_dir: /var/log/inputdirectory
     __test_inputfiles_conf: /etc/rsyslog.d/90-input-files-files_input.conf

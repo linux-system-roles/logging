@@ -15,7 +15,7 @@
 #
 - name: Error case for setting logging_pki_files - missing cert_src
   hosts: all
-  become: true
+  become: false
   vars:
     __test_key_name: test-key.pem
     __test_key: /tmp/{{ __test_key_name }}

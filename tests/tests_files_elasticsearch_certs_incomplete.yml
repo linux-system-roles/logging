@@ -28,7 +28,7 @@
 #
 - name: Error case for Elasticsearch config - cert and ca_cert_src are missing
   hosts: all
-  become: true
+  become: false
   vars:
     __test_inputfiles_dir: /var/log/inputdirectory
     __test_inputfiles_conf: /etc/rsyslog.d/90-input-files-files_input.conf

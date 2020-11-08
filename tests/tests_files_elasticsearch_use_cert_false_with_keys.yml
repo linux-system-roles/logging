@@ -24,7 +24,7 @@
 #
 - name: Error case for Elasticsearch config - although cert paths are specified, tls is false
   hosts: all
-  become: true
+  become: false
   vars:
     __test_inputfiles_dir: /var/log/inputdirectory
     __test_ca_cert: /tmp/es-ca.crt
