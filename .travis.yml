@@ -19,11 +19,14 @@ matrix:
 services:
   - docker
 
-before_install:
-  - ./.travis/preinstall
+before_install:  # uses the wip tox-lsr plugin
+  - >
+    pip install configparser
+    git+https://github.com/richm/tox-lsr@initial-implementation
+  - lsr_travis_preinstall
 
 install:
   - pip install tox tox-travis
 
 script:
-  - ./.travis/runtox
+  - lsr_travis_runtox
