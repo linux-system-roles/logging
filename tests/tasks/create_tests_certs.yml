@@ -1,3 +1,13 @@
+- name: Install python2-cryptography
+  package:
+    name:
+      - python2-cryptography
+    state: present
+  when:
+    - ansible_facts["distribution"] == "CentOS" or
+      ansible_facts["distribution"] == "RedHat"
+    - ansible_facts["distribution_major_version"] == "7"
+
 - name: Generate a CA key
   openssl_privatekey:
     path: "{{ __test_ca_key }}"
@@ -7,7 +17,7 @@
   openssl_csr:
     path: "{{ __test_ca_cert_csr }}"
     privatekey_path: "{{ __test_ca_key }}"
-    common_name: test-ca.system_roles.fedora.org
+    common_name: test-ca.system-roles.fedora.org
 
 - name: Generate a self signed CA cert using the CA key
   openssl_certificate:
