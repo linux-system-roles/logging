@@ -1,3 +1,4 @@
+# yamllint disable rule:line-length
 name: tox
 on:  # yamllint disable-line rule:truthy
   - pull_request
@@ -30,13 +31,13 @@ jobs:
           toxenvs="py${toxpyver}"
           case "$toxpyver" in
           27) toxenvs="${toxenvs},coveralls,flake8,pylint,custom" ;;
-          36) toxenvs="${toxenvs},coveralls,black,yamllint,custom" ;;
+          36) toxenvs="${toxenvs},coveralls,black,yamllint,shellcheck,custom,collection" ;;
           37) toxenvs="${toxenvs},coveralls,custom" ;;
           38) toxenvs="${toxenvs},coveralls,custom" ;;
           esac
           TOXENV="$toxenvs" .travis/runtox
         env:
-          LSR_ANSIBLES: 'ansible==2.7.* ansible==2.8.* ansible==2.9.*'
+          LSR_ANSIBLES: 'ansible==2.8.* ansible==2.9.*'
           LSR_MSCENARIOS: default
   python-26:
     runs-on: ubuntu-16.04
@@ -59,7 +60,6 @@ jobs:
           sudo pip install 'tox<3' 'virtualenv==15.*' 'pluggy==0.5.*'
           sudo pip list
         env:
-          # yamllint disable-line rule:line-length
           PY26URL: https://storage.googleapis.com/travis-ci-language-archives/python/binaries/ubuntu/14.04/x86_64/python-2.6.tar.bz2
           VIRTUAL_ENV_DISABLE_PROMPT: "true"
       - name: Run tox tests
@@ -69,6 +69,6 @@ jobs:
           set -x
           tox -e py26,coveralls,custom
         env:
-          LSR_ANSIBLES: 'ansible==2.7.* ansible==2.8.* ansible==2.9.*'
+          LSR_ANSIBLES: 'ansible==2.8.* ansible==2.9.*'
           LSR_MSCENARIOS: default
           VIRTUAL_ENV_DISABLE_PROMPT: "true"
