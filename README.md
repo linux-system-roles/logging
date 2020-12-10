@@ -1,4 +1,5 @@
 # linux-system-roles/logging
+![CI Testing](https://github.com/linux-system-roles/logging/workflows/tox/badge.svg)
 
 ## Table of Contents
 
