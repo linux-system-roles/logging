@@ -8,6 +8,7 @@ lint:
   name: yamllint
   options:
     config-file: .yamllint.yml
+  enabled: false
 platforms:
   - name: centos-7
     image: docker.io/linuxsystemroles/centos-7
@@ -19,6 +20,7 @@ provisioner:
   log: true
   lint:
     name: ansible-lint
+    enabled: false
     options:
       x: ["204"]
   playbooks:
@@ -36,3 +38,4 @@ verifier:
   name: testinfra
   lint:
     name: flake8
+    enabled: false
