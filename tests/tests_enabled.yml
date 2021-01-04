@@ -24,19 +24,15 @@
       include_role:
         name: linux-system-roles.logging
 
-    - include_tasks: set_rsyslog_variables.yml
+    # notify restart rsyslogd is executed at the end of this test task.
+    # thus we have to force to invoke handlers
+    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+      meta: flush_handlers
 
-    - name: Check rsyslog.conf size
-      assert:
-        that: rsyslog_conf_stat.stat.size > 2000
-
-    - name: Check file counts in rsyslog.d
-      assert:
-        that: rsyslog_d_file_count.matched <= 2
-
-    # Checking 'error' in stdout from systemctl status is for detecting the case in which rsyslog is running,
-    # but some functionality is disabled due to some error, e.g., error: 'tls.cacert' file couldn't be accessed.
-    - name: Check rsyslog errors
-      command: systemctl status rsyslog
-      register: __result
-      failed_when: "'error' in __result.stdout or 'a RainerScript command' in __result.stdout or __result is failed"
+    - name: Ensure config file size and counts
+      vars:
+        __conf_count: 0
+        __conf_size: more
+        __conf_files: []
+        __check_systemctl_status: true
+      include_tasks: tasks/check_daemon_config_files.yml

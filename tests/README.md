@@ -2,45 +2,33 @@ CI tests
 ========
 The tests are implemented in tests/tests_*.yml.
 
-Rough naming convention of the tests - tests_inputname_outputname[_some_notes_if_any].conf, with some exceptions.
+Rough naming convention of the tests - tests_inputname[_outputname].conf.
 
 Tests are divided in to these groups.
 - basics input - input from imjournal or imuxsock, and output to omfile or omfwd
   - tests_basics_files.yml
-  - tests_basics_files2.yml
-  - tests_basics_files_log_dir.yml
-  - tests_basics_files_forwards.yml
   - tests_basics_forwards.yml
-  - tests_basics_forwards_cert.yml
-  - tests_basics_forwards_implicit_files.yml
   - tests_imuxsock_files.yml
 - files input - input from imfile and output to omfile
   - tests_files_files.yml
 - combination - input from imjournal and imfile, and output to omfile or omfwd 
   - tests_combination.yml
-  - tests_combination2.yml
-  - tests_combination_absent.yml
 - files_elasticsearch - input from imfile, and output to elasticsearch, including key/certs set up
   - tests_files_elasticsearch.yml
-  - tests_files_elasticsearch_use_local_cert.yml
-  - tests_files_elasticsearch_use_local_cert_all.yml
-  - tests_files_elasticsearch_certs_incomplete.yml
-  - tests_files_elasticsearch_use_local_cert_nokeys.yml
-  - tests_files_elasticsearch_use_cert_false_with_keys.yml
-- ovirt - input from ovirt, and output to elasticsearch and imfile
-  - tests_ovirt_elasticsearch_params.yml
+- ovirt - input from ovirt, and output to elasticsearch and omfile
   - tests_ovirt_elasticsearch.yml
-- server - input from imudp, imtcp or imptcp, and output to imfile
-  - tests_remote_default_remote.yml
-  - tests_remote_remote.yml
+- server - input from imudp, imtcp or imptcp, and output to omfile
+  - tests_remote.yml
+- relp - input from imrelp and output to omrelp
+  - tests_relp.yml
 - others
   - tests_default.yml
   - tests_enabled.yml
   - tests_version.yml
 
-The CI tests are triggered when a pull request is submitted. Each tests_testname.yml is written in the ansible playbook. The test part is a task made from the vars having `logging_outputs`, `logging_inputs` and `logging_flows` variables, and checking the deployed results.
+The CI tests are triggered when a pull request is submitted. Each tests_testname.yml is written in the ansible playbook format. The test part is a task made from the vars having `logging_outputs`, `logging_inputs` and `logging_flows` variables, and checking the deployed results.
 
-The tests are triggered when a pull request is submitted or updated.
+The tests are used in the upstream as well as the downstream CI testing.
 
 You can manually run the tests, as well.
 1. Download CentOS qcow2 image from https://cloud.centos.org/centos/.

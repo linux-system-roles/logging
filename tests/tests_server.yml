@@ -1,4 +1,3 @@
-# Test the server configuration containing tls tcp, plain tcp and udp connection
 #
 # [Configuration]
 # remote inputs configuration containing tls tcp, plain tcp and udp connection
@@ -24,11 +23,16 @@
     __test_key: "/etc/pki/tls/private/{{ __test_key_name }}"
     __test_cert_csr: "/etc/rsyslog.d/{{ __test_csr_name }}"
     __test_cert: "/etc/pki/tls/certs/{{ __test_cert_name }}"
+    __test_server_ptcp: /etc/rsyslog.d/11-input-remote-remote_ptcp.conf
+    __test_server_tcp: /etc/rsyslog.d/11-input-remote-remote_tcp.conf
+    __test_server_udp: /etc/rsyslog.d/11-input-remote-remote_udp.conf
+    __expected_error: "Error: remote_tcp_0 and remote_tcp_1 conflict."
 
   tasks:
     - include_tasks: tasks/create_tests_certs.yml
 
-    - name: Deploy rsyslog config on the target host
+    # TEST CASE 0
+    - name: TEST CASE 0; Test the server configuration containing tls tcp, plain tcp and udp connection
       vars:
         logging_pki_files:
           - ca_cert: "{{ __test_ca_cert }}"
@@ -61,20 +65,21 @@
       include_role:
         name: linux-system-roles.logging
 
-    - include_tasks: set_rsyslog_variables.yml
-
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
     - name: Force all notified handlers to run at this point, not waiting for normal sync points
       meta: flush_handlers
 
-    - name: Check rsyslog.conf size
-      assert:
-        that: rsyslog_conf_stat.stat.size < 1000
-
-    - name: Check file counts in rsyslog.d
-      assert:
-        that: rsyslog_d_file_count.matched >= 12
+    - name: Ensure config file size and counts
+      vars:
+        __conf_count: 12
+        __conf_size: less
+        __conf_files:
+          - "{{ __test_server_ptcp }}"
+          - "{{ __test_server_tcp }}"
+          - "{{ __test_server_udp }}"
+        __check_systemctl_status: true
+      include_tasks: tasks/check_daemon_config_files.yml
 
     - name: Install lsof
       package:
@@ -104,3 +109,124 @@
         lsof -i -nP | grep rsyslogd | grep UDP | grep {{ item }}
       loop: [514, 40020]
       changed_when: false
+
+    - name: END TEST CASE 0; Clean up the deployed config
+      vars:
+        logging_enabled: false
+        logging_inputs:
+          - name: system_input
+            type: basics
+            state: absent
+          - name: remote_tcp
+            type: remote
+            tcp_ports: [6514, 40000, 40001]
+            tls: true
+            pki_authmode: x509/name
+            permitted_clients:
+              - '*.client.com'
+              - '*.example.com'
+            state: absent
+          - name: remote_ptcp
+            type: remote
+            tcp_ports: [514, 40010, 40011, 40012]
+            state: absent
+          - name: remote_udp
+            type: remote
+            udp_ports: [514, 40020]
+            state: absent
+        logging_outputs:
+          - name: files_output
+            type: files
+            state: absent
+      include_role:
+        name: linux-system-roles.logging
+
+    # notify restart rsyslogd is executed at the end of this test task.
+    # thus we have to force to invoke handlers
+    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+      meta: flush_handlers
+
+    - block:
+        # TEST CASE 1
+        # remote inputs - both remote_tcp_0 and remote_tcp_1 configure the tls connection.
+        - name: TEST CASE 1; Test the server configuration containing conflicted tls inputs in the remote input
+          vars:
+            logging_pki_files:
+              - ca_cert: "{{ __test_ca_cert }}"
+                cert: "{{ __test_cert }}"
+                private_key: "{{ __test_key }}"
+            logging_inputs:
+              - name: system_input
+                type: basics
+              - name: remote_tcp_0
+                type: remote
+                tcp_ports: [6514, 40000, 40001]
+                tls: true
+                pki_authmode: x509/name
+                permitted_clients:
+                  - '*.client.com'
+                  - '*.example.com'
+              - name: remote_tcp_1
+                type: remote
+                tcp_ports: [514, 40010, 40011]
+                tls: true
+              - name: remote_udp
+                type: remote
+                udp_ports: [514, 40020]
+            logging_outputs:
+              - name: files_output
+                type: files
+            logging_flows:
+              - name: flows
+                inputs: [system_input, remote_tcp_0, remote_tcp_1, remote_udp]
+                outputs: [files_output]
+          include_role:
+            name: linux-system-roles.logging
+
+        - name: unreachable task
+          fail:
+            msg: UNREACH
+
+      rescue:
+        - debug:
+            msg: Caught an expected error - {{ ansible_failed_result }}
+        - assert:
+            that: item.msg is not defined or item.msg is defined and item.msg == __expected_error
+          loop: "{{ ansible_failed_result.results }}"
+
+    - block:
+        - name: END TEST CASE 1; Clean up the deployed config
+          vars:
+            logging_enabled: false
+            logging_inputs:
+              - name: system_input
+                type: basics
+                state: absent
+              - name: remote_tcp_0
+                type: remote
+                tcp_ports: [6514, 40000, 40001]
+                tls: true
+                pki_authmode: x509/name
+                permitted_clients:
+                  - '*.client.com'
+                  - '*.example.com'
+                state: absent
+              - name: remote_tcp_1
+                type: remote
+                tcp_ports: [514, 40010, 40011]
+                tls: true
+                state: absent
+              - name: remote_udp
+                type: remote
+                udp_ports: [514, 40020]
+                state: absent
+            logging_outputs:
+              - name: files_output
+                type: files
+                state: absent
+          include_role:
+            name: linux-system-roles.logging
+
+      rescue:
+        - debug:
+            msg: Caught an expected error - {{ ansible_failed_result }}

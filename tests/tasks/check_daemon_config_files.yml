@@ -1,0 +1,38 @@
+- name: Get info of /etc/rsyslog.conf
+  stat:
+    path: /etc/rsyslog.conf
+  register: __rsyslog_conf_stat
+
+- name: Get file counts in /etc/rsyslog.d
+  find:
+    paths: /etc/rsyslog.d
+    patterns: '[0-9][0-9]-*.conf,*.template,*.remote,*.rulebase'
+  register: __rsyslog_d_file_count
+
+- name: Check rsyslog.conf size (less)
+  assert:
+    that: __rsyslog_conf_stat.stat.size <= 1000
+  when: __conf_size == "less"
+
+- name: Check rsyslog.conf size (more)
+  assert:
+    that: __rsyslog_conf_stat.stat.size > 1000
+  when: __conf_size == "more"
+
+- name: Check file counts in rsyslog.d
+  assert:
+    that: __rsyslog_d_file_count.matched >= __conf_count
+
+- name: Check conf files exist
+  stat:
+    path: "{{ item }}"
+  register: __result
+  loop: "{{ __conf_files }}"
+  failed_when: not __result.stat.exists
+
+- name: Check rsyslog errors
+  command: systemctl status rsyslog
+  register: __result
+  when: __check_systemctl_status == "true"
+  failed_when: "'error' in __result.stdout or 'a RainerScript command'
+    in __result.stdout or __result is failed"
