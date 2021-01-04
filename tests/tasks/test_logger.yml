@@ -1,0 +1,17 @@
+---
+- name: Run logger to generate a test log message
+  vars:
+    __logging_tag: "testTag{{ __logging_index }}"
+    __logging_message: "testMessage{{ __logging_index }}"
+  command: /bin/logger -i -p local6.info -t "{{ __logging_tag }}" "{{ __logging_message }}"
+  changed_when: false
+
+- name: Check the test log message in {{ __default_system_log }}
+  vars:
+    __logging_message: "testMessage{{ __logging_index }}"
+  command: /bin/grep "{{ __logging_message }}" "{{ __logging_file }}"
+  register: __result
+  until: __result is success
+  retries: 5
+  delay: 1
+  changed_when: false
