@@ -96,14 +96,25 @@
 
     - name: Generate global rule to add to __rsyslog_common_rules
       vars:
-        __rsyslog_global_rule:
+        __rsyslog_global_common_rule:
           - filename: '00-global.conf'
             comment: 'Global options'
             options: "{{ lookup('template', 'global.j2') }}"
+          - name: 'local-modules'
+            type: 'modules'
+            state: '{{ "present" if logging_mark else "absent" }}'
+            sections:
+              - options: |-
+                  # Mark message periodically by immark, if set to true.
+                  module(load="immark" interval={{ logging_mark_interval }})
+          - name: 'common-defaults'
+            type: 'global'
+            sections:
+              - comment: 'Log every message'
+                options: |-
+                  $RepeatedMsgReduction {{ "on" if rsyslog_message_reduction | bool else "off" }}
       set_fact:
-        __rsyslog_common_rules: "{{ __rsyslog_global_rule + __rsyslog_common_rules }}"
-      when:
-        - __rsyslog_enabled | bool
+        __rsyslog_common_rules: "{{ __rsyslog_global_common_rule }}"
 
     - name: Generate common rsyslog configuration files in rsyslog.d
       template:
@@ -138,11 +149,9 @@
         loop_var: inner_item
       when:
         - not __rsyslog_enabled | bool
-        - logging_inputs | d([])
         - inner_item.filename | d() or inner_item.name | d()
         - inner_item.options | d() or inner_item.sections | d()
-        - inner_item.state is defined and inner_item.state == 'absent'
-      notify: restart rsyslogd
+      notify: stop rsyslogd
 
     # How to set rsyslog_custom_config_files:
     # rsyslog_custom_config_files: [ '/path/to/custom0.conf', '/path/to/custom1.conf' ]
@@ -228,7 +237,6 @@
       loop_control:
         loop_var: input_item
       when:
-        - __rsyslog_enabled | bool
         - input_item | d([])
 
     - name: Run input sub-tasks
@@ -240,7 +248,6 @@
       loop_control:
         loop_var: input_item
       when:
-        - __rsyslog_enabled | bool
         - input_item | d([])
 
     - name: Include output sub-vars
@@ -252,7 +259,6 @@
       loop_control:
         loop_var: output_item
       when:
-        - __rsyslog_enabled | bool
         - output_item | d([])
 
     - name: Run output sub-tasks
@@ -264,7 +270,6 @@
       loop_control:
         loop_var: output_item
       when:
-        - __rsyslog_enabled | bool
         - output_item | d([])
 
     - name: Enable rsyslog service

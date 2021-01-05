@@ -370,6 +370,29 @@ logging_flows:
     outputs: [output_name1]
 ```
 
+If you want to remove all the configuration files previously configured, in addition to setting `state: absent` to each logging_inputs and logging_outputs item, add `logging_enabled: false` to the configuration variables as follows. It will eliminate the global and common configuration files, as well.
+```
+logging_enabled: false
+logging_inputs:
+  - name: input_nameA
+    type: input_typeA
+    state: absent
+  - name: input_nameB
+    type: input_typeB
+    state: absent
+logging_outputs:
+  - name: output_name0
+    type: output_type0
+    state: absent
+  - name: output_name1
+    type: output_type1
+    state: absent
+logging_flows:
+  - name: flow_nameY
+    inputs: [input_nameB]
+    outputs: [output_name1]
+```
+
 ## Configuration Examples
 
 ### Standalone configuration

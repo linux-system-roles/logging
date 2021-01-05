@@ -10,7 +10,7 @@
     - not rsyslog_in_image | bool
   notify: restart rsyslogd
 
-- name: Generate role configuration files in rsyslog.d and subdir
+- name: Generate role configuration files in rsyslog.d
   template:
     src: 'rules.conf.j2'
     dest: >-
@@ -24,12 +24,13 @@
   loop_control:
     loop_var: inner_item
   when:
+    - __rsyslog_enabled | bool
     - inner_item.filename | d() or inner_item.name | d()
     - inner_item.options | d() or inner_item.sections | d()
     - inner_item.state is undefined or inner_item.state != 'absent'
   notify: restart rsyslogd
 
-- name: Remove role config files from subdir
+- name: Remove role config files from rsyslog.d
   file:
     path: >-
       {{ inner_item.path | d(__rsyslog_config_dir) }}/{{ inner_item.filename | d((inner_item.weight
@@ -40,7 +41,7 @@
   loop_control:
     loop_var: inner_item
   when:
+    - (not __rsyslog_enabled | bool) or (inner_item.state | d('present') == 'absent')
     - inner_item.filename | d() or inner_item.name | d()
     - inner_item.options | d() or inner_item.sections | d()
-    - inner_item.state | d('present') == 'absent'
   notify: restart rsyslogd
