@@ -3,3 +3,8 @@
   service:
     name: rsyslog
     state: restarted
+
+- name: stop rsyslogd
+  service:
+    name: rsyslog
+    state: stopped
