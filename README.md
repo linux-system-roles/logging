@@ -113,6 +113,20 @@ This is a schematic logging configuration to show log messages from input_nameA 
   - `input_log_path`: File name to be read by the imfile plugin. The value should be full path. Wildcard '\*' is allowed in the path.  Default to `/var/log/containers/*.log`.
 
 - `ovirt` type - `ovirt` input supports oVirt specific inputs.<br>
+  **available options**
+  - `subtype`: ovirt input subtype. Value is one of `engine`, `collectd`, and `vdsm`.
+  - `ovirt_env_name`: ovirt environment name. Default to `engine`.
+  - `ovirt_env_uuid`: ovirt uuid. Default to none.
+
+  **available options for engine and vdsm**
+  - `ovirt_elasticsearch_index_prefix`: Index prefix for elasticsearch. Default to `project.ovirt-logs`.
+  - `ovirt_engine_fqdn`: ovirt engine fqdn. Default to none.
+  - `ovirt_input_file`: ovirt input file. Default to `/var/log/ovirt-engine/test-engine.log` for `engine`; default to `/var/log/vdsm/vdsm.log` for `vdsm`.
+  - `ovirt_vds_cluster_name`: vds cluster name. Default to none.
+
+  **available options for collectd**
+  - `ovirt_collectd_port`: collectd port number. Default to `44514`.
+  - `ovirt_elasticsearch_index_prefix`: Index prefix for elasticsearch. Default to `project.ovirt-metrics`.
 
 - `relp` type - `relp` input supports receiving logs from the remote logging system over the network using relp.<br>
   **available options**
