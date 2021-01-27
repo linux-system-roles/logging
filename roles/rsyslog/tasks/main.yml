@@ -217,13 +217,13 @@
           notify: restart rsyslogd
 
       vars:
-        __logging_forwards_tls: "{{ logging_outputs | selectattr('type', '==', 'forwards') |
+        __logging_forwards_tls: "{{ logging_outputs | selectattr('type', 'match', '^forwards$') |
                                   selectattr('tls', 'defined') |
-                                  selectattr('tls', '==', true) | list }}"
-        __logging_remote_tls: "{{ logging_inputs | selectattr('type', '==', 'remote') |
+                                  selectattr('tls') | list }}"
+        __logging_remote_tls: "{{ logging_inputs | selectattr('type', 'match', '^remote$') |
                                   selectattr('tcp_ports', 'defined') |
                                   selectattr('tls', 'defined') |
-                                  selectattr('tls', '==', true) | list }}"
+                                  selectattr('tls') | list }}"
 
       when:
         - __rsyslog_enabled | bool

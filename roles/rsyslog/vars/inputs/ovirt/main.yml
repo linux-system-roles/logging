@@ -32,7 +32,7 @@ rsyslog_conf_ovirt_local_modules:
     sections:
 
       - options: |-
-          {% if logging_inputs | selectattr('name', 'defined') | selectattr('type', 'defined') | selectattr('type', '==', 'basics') | list | length == 0 %}
+          {% if logging_inputs | selectattr('name', 'defined') | selectattr('type', 'defined') | selectattr('type', 'match', '^basics$') | list | length == 0 %}
           # Log messages sent to local UNIX socket with use=off'
           module(load="imuxsock" SysSock.Use="off")
           {% endif %}
