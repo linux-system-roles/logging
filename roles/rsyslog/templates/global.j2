@@ -1,28 +1,30 @@
-{% set ns = namespace(ca_cert_path = '', cert_path = '', key_path = '') %}
+{% set ca_cert_path = '' %}
+{% set cert_path = '' %}
+{% set key_path = '' %}
 {% if logging_pki_files.0.ca_cert_src | d() or logging_pki_files.0.ca_cert | d() %}
 {%   set __ca_cert_file = logging_pki_files.0.ca_cert_src | d(__rsyslog_default_pki_ca_cert_name) | basename %}
-{%   set ns.ca_cert_path = logging_pki_files.0.ca_cert |
-                           d(__rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + __ca_cert_file) %}
+{%   set ca_cert_path = logging_pki_files.0.ca_cert |
+                        d(__rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + __ca_cert_file) %}
 {% endif %}
 {% if logging_pki_files.0.cert_src | d() or logging_pki_files.0.cert | d() %}
 {%   set __cert_file = logging_pki_files.0.cert_src | d(__rsyslog_default_pki_cert_name) | basename %}
-{%   set ns.cert_path = logging_pki_files.0.cert |
-                        d(__rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + __cert_file) %}
+{%   set cert_path = logging_pki_files.0.cert |
+                     d(__rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + __cert_file) %}
 {% endif %}
 {% if logging_pki_files.0.private_key_src | d() or logging_pki_files.0.private_key | d() %}
 {%   set __key_file = logging_pki_files.0.private_key_src | d(__rsyslog_default_pki_key_name) | basename %}
-{%   set ns.key_path = logging_pki_files.0.private_key |
-                       d(__rsyslog_default_pki_path + __rsyslog_default_pki_key_dir + __key_file) %}
+{%   set key_path = logging_pki_files.0.private_key |
+                    d(__rsyslog_default_pki_path + __rsyslog_default_pki_key_dir + __key_file) %}
 {% endif %}
 global(
   workDirectory="{{ rsyslog_work_dir }}"
-{% if ns.ca_cert_path != '' %}
-  defaultNetstreamDriverCAFile="{{ ns.ca_cert_path }}"
-{%   if ns.cert_path != '' %}
-  defaultNetstreamDriverCertFile="{{ ns.cert_path }}"
+{% if ca_cert_path != '' %}
+  defaultNetstreamDriverCAFile="{{ ca_cert_path }}"
+{%   if cert_path != '' %}
+  defaultNetstreamDriverCertFile="{{ cert_path }}"
 {%   endif %}
-{%   if ns.key_path != '' %}
-  defaultNetstreamDriverKeyFile="{{ ns.key_path }}"
+{%   if key_path != '' %}
+  defaultNetstreamDriverKeyFile="{{ key_path }}"
 {%   endif %}
 {% endif %}
 {% if rsyslog_max_message_size is defined %}

@@ -4,11 +4,13 @@
 
     - name: Set rsyslog_output_elasticsearch for the omelasticsearch output
       set_fact:
-        rsyslog_output_elasticsearch: "{{ logging_outputs | selectattr('name', 'defined') | selectattr('type', 'defined') | selectattr('type', '==', 'elasticsearch') | selectattr('server_host', 'defined') | list }}"
+        rsyslog_output_elasticsearch: "{{ logging_outputs | selectattr('name', 'defined') | selectattr('type', 'defined') |
+          selectattr('type', 'match', '^elasticsearch$') | selectattr('server_host', 'defined') | list }}"
 
     - name: Set rsyslog_output_files for the omfile outputs
       set_fact:
-        rsyslog_output_files: "{{ logging_outputs | selectattr('name', 'defined') | selectattr('type', 'defined') | selectattr('type', '==', 'files') | list }}"
+        rsyslog_output_files: "{{ logging_outputs | selectattr('name', 'defined') | selectattr('type', 'defined') |
+          selectattr('type', 'match', '^files$') | list }}"
 
     - name: Set files output if rsyslog_output_files is empty and logging_inputs is not empty
       set_fact:
@@ -19,19 +21,23 @@
 
     - name: Set rsyslog_output_forwards for the omfwd output
       set_fact:
-        rsyslog_output_forwards: "{{ logging_outputs | selectattr('name', 'defined') | selectattr('type', 'defined') | selectattr('target', 'defined') | selectattr('type', '==', 'forwards') | list }}"
+        rsyslog_output_forwards: "{{ logging_outputs | selectattr('name', 'defined') | selectattr('type', 'defined') |
+          selectattr('target', 'defined') | selectattr('type', 'match', '^forwards$') | list }}"
 
     - name: Set rsyslog_output_remote_files for the omfwd output for the remote input
       set_fact:
-        rsyslog_output_remote_files: "{{ logging_outputs | selectattr('name', 'defined') | selectattr('type', 'defined') | selectattr('type', '==', 'remote_files') | list }}"
+        rsyslog_output_remote_files: "{{ logging_outputs | selectattr('name', 'defined') | selectattr('type', 'defined') |
+          selectattr('type', 'match', '^remote_files$') | list }}"
 
     - name: Set rsyslog_output_relp for the relp output
       set_fact:
-        rsyslog_output_relp: "{{ logging_outputs | selectattr('name', 'defined') | selectattr('type', 'defined') | selectattr('type', '==', 'relp') | selectattr('server_host', 'defined') | list }}"
+        rsyslog_output_relp: "{{ logging_outputs | selectattr('name', 'defined') | selectattr('type', 'defined') |
+          selectattr('type', 'match', '^relp$') | selectattr('server_host', 'defined') | list }}"
 
     - name: Set rsyslog_input_relp for the relp input
       set_fact:
-        rsyslog_input_relp: "{{ logging_inputs | selectattr('name', 'defined') | selectattr('type', 'defined') | selectattr('type', '==', 'relp') | list }}"
+        rsyslog_input_relp: "{{ logging_inputs | selectattr('name', 'defined') | selectattr('type', 'defined') |
+          selectattr('type', 'match', '^relp$') | list }}"
 
     - name: Set rsyslog_outputs
       set_fact:
