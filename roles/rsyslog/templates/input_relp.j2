@@ -49,7 +49,7 @@ if
 {%         if not loop.first %}
   or
 {%         endif %}
-  ($inputname == "{{ item.name }}_{{ loop.index }}" )
+  ($inputname == "{{ item.name }}" )
 {%       endif %}
 {%     endfor %}
   then {

@@ -53,10 +53,14 @@
         logging_outputs:
           - name: files_output
             type: files
+          - name: forwards_output
+            type: forwards
+            target: host.domain
+            tcp_port: 1514
         logging_flows:
           - name: flows
             inputs: [system_input, relp_server0, relp_server1]
-            outputs: [files_output]
+            outputs: [files_output, forwards_output]
       include_role:
         name: linux-system-roles.logging
 
@@ -96,6 +100,18 @@
         lsof -i -nP | grep rsyslogd | grep TCP | grep {{ item }}
       loop: [6514, 20514]
       changed_when: false
+
+    - name: Check the flows in relp_server0 - 0
+      shell: grep "$inputname == \"relp_server0\"" "{{ __test_relp_server0 }}" | wc -l
+      register: __result
+      failed_when: __result.stdout != "2"
+
+    - name: Check the flows in relp_server0 - 1
+      shell: |-
+        grep -A 2 "$inputname == \"relp_server0\"" "{{ __test_relp_server0 }}" |
+        grep "call files_output" | wc -l
+      register: __result
+      failed_when: __result.stdout != "1"
 
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
