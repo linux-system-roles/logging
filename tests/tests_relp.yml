@@ -165,7 +165,7 @@
         logging_outputs:
           - name: relp_client0
             type: relp
-            server_host: localhost
+            target: localhost
             port: 6514
             tls: true
             ca_cert: "{{ __test_ca_cert }}"
@@ -177,8 +177,8 @@
               - '*.example.com'
           - name: relp_client1
             type: relp
-            server_host: localhost
-            port: 20514
+            target: localhost
+            port: 7514
             tls: true
             ca_cert: "{{ __test_ca_cert }}"
             cert: "{{ __test_cert }}"
@@ -209,6 +209,11 @@
         __check_systemctl_status: false
       include_tasks: tasks/check_daemon_config_files.yml
 
+    - name: Check the port in relp_client1
+      shell: grep "7514" "{{ __test_relp_client1 }}" | wc -l
+      register: __result
+      failed_when: __result.stdout != "1"
+
     - name: END TEST CASE 1; Clean up the deployed config
       vars:
         logging_enabled: false
@@ -219,7 +224,7 @@
         logging_outputs:
           - name: relp_client0
             type: relp
-            server_host: localhost
+            target: localhost
             port: 6514
             tls: true
             ca_cert: "{{ __test_ca_cert }}"
@@ -232,8 +237,8 @@
             state: absent
           - name: relp_client1
             type: relp
-            server_host: localhost
-            port: 20514
+            target: localhost
+            port: 7514
             tls: true
             ca_cert: "{{ __test_ca_cert }}"
             cert: "{{ __test_cert }}"
