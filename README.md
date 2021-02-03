@@ -252,8 +252,8 @@ This is a schematic logging configuration to show log messages from input_nameA 
 - `relp` type - `relp` output sends logs to the remote logging system over the network using relp.<br>
   **available options**
   - `port`: Port number Relp is listening to. Default to `20514`.
-  - `server_host`: Host name the remote logging system is running on. **Required**.
-  - `server_port`: Port number the remote logging system is listening to. Default to `20514`.
+  - `target`: Host name the remote logging system is running on. **Required**.
+  - `port`: Port number the remote logging system is listening to. Default to `20514`.
   - `tls`: If true, encrypt the connection with TLS. You must provide key/certificates and triplets {`ca_cert`, `cert`, `private_key`} and/or {`ca_cert_src`, `cert_src`, `private_key_src`}. Default to `true`.
   - `ca_cert`: Path to CA cert to configure Relp with tls. Default to `logging_config_dir/basename of ca_cert_src`.
   - `cert`: Path to cert to configure Relp with tls.  Default to `logging_config_dir/basename of cert_src`.
@@ -698,7 +698,7 @@ Deploying `basics input` reading logs from systemd journal and `relp output` to 
     logging_outputs:
       - name: relp_client
         type: relp
-        server_host: logging.server.com
+        target: logging.server.com
         port: 20514
         tls: true
         ca_cert_src: /path/to/ca.pem

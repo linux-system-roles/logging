@@ -1,8 +1,8 @@
 ruleset(name="{{ item.name }}") {
     action(name="{{ item.name }}"
            type="omrelp"
-           target="{{ item.server_host }}"
-           port="{{ item.server_port | d(20514) | int }}"
+           target="{{ item.target }}"
+           port="{{ item.port | d(20514) | int }}"
 {% if item.tls | default(true) %}
 {%   if item.ca_cert is defined %}
 {%     set __cacert = item.ca_cert %}

@@ -32,7 +32,7 @@
     - name: Set rsyslog_output_relp for the relp output
       set_fact:
         rsyslog_output_relp: "{{ logging_outputs | selectattr('name', 'defined') | selectattr('type', 'defined') |
-          selectattr('type', 'match', '^relp$') | selectattr('server_host', 'defined') | list }}"
+          selectattr('type', 'match', '^relp$') | selectattr('target', 'defined') | list }}"
 
     - name: Set rsyslog_input_relp for the relp input
       set_fact:
