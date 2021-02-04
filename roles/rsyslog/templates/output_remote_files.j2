@@ -31,28 +31,28 @@ ruleset(name="{{ item.name }}"
 template(
   name="RemoteMessage"
   type="string"
-  string="{{ __remote_log_path }}/msg/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
+  string="{{ __remote_log_path }}/msg/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log"
 )
 
 # Template for Remote host auth logs
 template(
   name="RemoteHostAuthLog"
   type="string"
-  string="{{ __remote_log_path }}/auth/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
+  string="{{ __remote_log_path }}/auth/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log"
 )
 
 # Template for Remote host cron logs
 template(
   name="RemoteHostCronLog"
   type="string"
-  string="{{ __remote_log_path }}/cron/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
+  string="{{ __remote_log_path }}/cron/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log"
 )
 
 # Template for Remote service mail logs
 template(
   name="RemoteHostMailLog"
   type="string"
-  string="{{ __remote_log_path }}/mail/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
+  string="{{ __remote_log_path }}/mail/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log"
 )
 
 ruleset(name="{{ item.name }}") {
