@@ -18,7 +18,7 @@ if
 {%         if item.type == "basics" %}
   ($inputname == "imjournal" or $inputname == "imuxsock")
 {%         elif item.type == "remote" %}
-  ($inputname == "{{ item.name }}" )
+  ($inputname == "{{ item.name }}")
 {%         else %}
   ($syslogtag == "{{ item.name }}")
 {%         endif %}
