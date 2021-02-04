@@ -277,7 +277,7 @@ This is a schematic logging configuration to show log messages from input_nameA 
   - `io_buffer_size`: Buffer size used to write output data. Default to `65536` bytes.
   - `remote_log_path`: Full path to store the filtered logs.
                        This is an example to support the per host output log files
-                       `/path/to/output/dir/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log`
+                       `/path/to/output/dir/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log`
   - `remote_sub_path`: Relative path to logging_system_log_dir to store the filtered logs.
 
   Selector options and property-based filter options are exclusive. If Property-based filter options are defined, selector options will be ignored.
@@ -287,22 +287,22 @@ This is a schematic logging configuration to show log messages from input_nameA 
   template(
     name="RemoteMessage"
     type="string"
-    string="/var/log/remote/msg/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
+    string="/var/log/remote/msg/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log"
   )
   template(
     name="RemoteHostAuthLog"
     type="string"
-    string="/var/log/remote/auth/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
+    string="/var/log/remote/auth/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log"
   )
   template(
     name="RemoteHostCronLog"
     type="string"
-    string="/var/log/remote/cron/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
+    string="/var/log/remote/cron/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log"
   )
   template(
     name="RemoteHostMailLog"
     type="string"
-    string="/var/log/remote/mail/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log"
+    string="/var/log/remote/mail/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log"
   )
   ruleset(name="unique_remote_files_output_name") {
     authpriv.*   action(name="remote_authpriv_host_log" type="omfile" DynaFile="RemoteHostAuthLog")
@@ -669,13 +669,13 @@ The following playbook generates the same logging configuration files.
     logging_outputs:
       - name: remote_files_output0
         type: remote_files
-        remote_log_path: /var/log/remote/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log
+        remote_log_path: /var/log/remote/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log
         async_writing: true
         client_count: 20
         io_buffer_size: 8192
       - name: remote_files_output1
         type: remote_files
-        remote_sub_path: others/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log
+        remote_sub_path: others/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log
     logging_flows:
       - name: flow_0
         inputs: [remote_udp_input, remote_tcp_input]

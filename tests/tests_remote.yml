@@ -114,7 +114,7 @@
         logging_outputs:
           - name: remote_files_output0
             type: remote_files
-            remote_log_path: /var/log/remote/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log
+            remote_log_path: /var/log/remote/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log
             comment: "This is a comment 0."
             severity: info
             exclude:
@@ -124,7 +124,7 @@
             async_writing: true
           - name: remote_files_output1
             type: remote_files
-            remote_sub_path: others/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log
+            remote_sub_path: others/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log
             facility: authpriv
         logging_inputs:
           - name: remote_tcp_input
@@ -195,7 +195,7 @@
         logging_outputs:
           - name: remote_files_output0
             type: remote_files
-            remote_log_path: /var/log/remote/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log
+            remote_log_path: /var/log/remote/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log
             comment: "This is a comment 0."
             severity: info
             exclude:
@@ -206,7 +206,7 @@
             state: absent
           - name: remote_files_output1
             type: remote_files
-            remote_sub_path: others/%HOSTNAME%/%PROGRAMNAME:::secpath-replace%.log
+            remote_sub_path: others/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log
             facility: authpriv
             state: absent
         logging_inputs:
