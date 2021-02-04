@@ -39,7 +39,7 @@ if
 {%             if not loop.first %}
   or
 {%             endif %}
-  ($inputname == "{{ item.name }}_{{ __logging_loop_index }}" )
+  ($inputname == "{{ item.name }}_{{ __logging_loop_index }}")
 {%           endif %}
 {%         endfor %}
   then {

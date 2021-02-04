@@ -102,7 +102,7 @@
       failed_when: __result.stat.exists
 
     - name: Check ovirt_collectd_port is "{{ __test_collectd_port }}"
-      command: /bin/grep 'input (name="{{ __test_collectd_name }}" type="imtcp" port="{{ __test_collectd_port }}"' {{ __test_ovirt_collectd_conf }}
+      command: /bin/grep 'input(name="{{ __test_collectd_name }}" type="imtcp" port="{{ __test_collectd_port }}"' {{ __test_ovirt_collectd_conf }}
       changed_when: false
 
     - name: Check index_prefix is "{{ __test_metrics_index }}" in "{{ __test_ovirt_collectd_conf }}"
@@ -281,7 +281,7 @@
       failed_when: __result.stat.exists
 
     - name: Check ovirt_collectd_port is "{{ __test_collectd_port }}"
-      command: /bin/grep 'input (name="{{ __test_collectd_name }}" type="imtcp" port="{{ __test_collectd_port }}"' {{ __test_ovirt_collectd_conf }}
+      command: /bin/grep 'input(name="{{ __test_collectd_name }}" type="imtcp" port="{{ __test_collectd_port }}"' {{ __test_ovirt_collectd_conf }}
       changed_when: false
 
     - name: Check index_prefix is "{{ __test_metrics_index }}" in "{{ __test_ovirt_collectd_conf }}"

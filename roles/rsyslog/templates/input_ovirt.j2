@@ -4,7 +4,7 @@
 {% if __rsyslog_ovirt_subtype == "collectd" %}
 {%   set __rsyslog_collectd_port = item.ovirt_collectd_port | d(44514) %}
 {%   set __rsyslog_elasticsearch_index_prefix = item.ovirt_elasticsearch_index_prefix | d('project.ovirt-metrics') %}
-input (name="{{ item.name }}" type="imtcp" port="{{ __rsyslog_collectd_port }}")
+input(name="{{ item.name }}" type="imtcp" port="{{ __rsyslog_collectd_port }}")
 if $inputname == "{{ item.name }}" then {
     set $!original_raw_message = $msg;
     action(name="collectd_mmjsonparse" type="mmjsonparse" cookie="") # parse entire message as json
