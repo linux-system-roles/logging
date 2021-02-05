@@ -30,7 +30,11 @@ ruleset(name="{{ item.name }}") {
            tls.mycert="{{ __mycert }}"
            tls.myprivkey="{{ __myprivkey }}"
            tls.authmode="{{ item.pki_authmode | d('name') }}"
-           tls.permittedpeer=["{{ item.permitted_servers | join('","') | d('*.' + logging_domain) }}"]
+{%   if item.permitted_servers is defined %}
+           tls.permittedpeer=["{{ item.permitted_servers | join('","') }}"]
+{%   else %}
+           tls.permittedpeer=["{{ '*.' + logging_domain }}"]
+{%   endif %}
 {% endif %}
     )
 }

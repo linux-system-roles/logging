@@ -29,7 +29,11 @@ input(name="{{ item.name }}"
       tls.mycert="{{ __mycert }}"
       tls.myprivkey="{{ __myprivkey }}"
       tls.authmode="{{ item.pki_authmode | d('name') }}"
-      tls.permittedpeer=["{{ item.permitted_clients | join('","') | d('*.' + logging_domain) }}"]
+{%   if item.permitted_clients is defined %}
+      tls.permittedpeer=["{{ item.permitted_clients | join('","') }}"]
+{%   else %}
+      tls.permittedpeer=["{{ '*.' + logging_domain }}"]
+{%   endif %}
 {% endif %}
 )
 {% set rsyslog_flows = logging_flows | d([ {"name": "default_flow", "inputs": [ item.name ], "outputs": ["default_files"]} ], true) %}
