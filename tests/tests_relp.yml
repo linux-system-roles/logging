@@ -47,9 +47,6 @@
             cert: "{{ __test_cert }}"
             private_key: "{{ __test_key }}"
             pki_authmode: name
-            permitted_clients:
-              - '*.client.com'
-              - '*.example.com'
         logging_outputs:
           - name: files_output
             type: files
@@ -63,6 +60,7 @@
             outputs: [files_output, forwards_output]
       include_role:
         name: linux-system-roles.logging
+        public: yes
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -143,6 +141,21 @@
       stat:
         path: /etc/pki/tls/private/test-key.pem
 
+    - name: Check tls.permittedpeer in relp_server0
+      shell: >-
+        grep 'tls.permittedpeer=\["\*.client.com","\*.example.com"\]'
+        "{{ __test_relp_server0 }}" | wc -l
+      register: __result
+      failed_when: __result.stdout != "1"
+
+    - name: Check tls.permittedpeer in relp_server1
+      shell: >-
+        grep "tls.permittedpeer=\[\"\*.$( _domain=$(hostname -d);
+        _domain=${_domain:-"{{ logging_domain }}"}; echo $_domain )\"\]"
+        "{{ __test_relp_server1 }}" | wc -l
+      register: __result
+      failed_when: __result.stdout != "1"
+
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
         logging_enabled: false
@@ -170,9 +183,6 @@
             cert: "{{ __test_cert }}"
             private_key: "{{ __test_key }}"
             pki_authmode: name
-            permitted_clients:
-              - '*.client.com'
-              - '*.example.com'
             state: absent
         logging_outputs:
           - name: files_output
@@ -214,15 +224,13 @@
             cert: "{{ __test_cert }}"
             private_key: "{{ __test_key }}"
             pki_authmode: name
-            permitted_servers:
-              - '*.server.com'
-              - '*.example.com'
         logging_flows:
           - name: flows
             inputs: [system_input]
             outputs: [relp_client0, relp_client1]
       include_role:
         name: linux-system-roles.logging
+        public: yes
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -274,6 +282,21 @@
       stat:
         path: /etc/pki/tls/private/test-key.pem
 
+    - name: Check tls.permittedpeer in relp_client0
+      shell: >-
+        grep 'tls.permittedpeer=\["\*.server.com","\*.example.com"\]'
+        "{{ __test_relp_client0 }}" | wc -l
+      register: __result
+      failed_when: __result.stdout != "1"
+
+    - name: Check tls.permittedpeer in relp_client1
+      shell: >-
+        grep "tls.permittedpeer=\[\"\*.$( _domain=$(hostname -d);
+        _domain=${_domain:-"{{ logging_domain }}"}; echo $_domain )\"\]"
+        "{{ __test_relp_client1 }}" | wc -l
+      register: __result
+      failed_when: __result.stdout != "1"
+
     - name: END TEST CASE 1; Clean up the deployed config
       vars:
         logging_enabled: false
@@ -304,9 +327,6 @@
             cert: "{{ __test_cert }}"
             private_key: "{{ __test_key }}"
             pki_authmode: name
-            permitted_servers:
-              - '*.server.com'
-              - '*.example.com'
             state: absent
       include_role:
         name: linux-system-roles.logging
