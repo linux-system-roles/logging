@@ -4,7 +4,7 @@
     - name: Copy ca_cert on the control host to the specified path on the target host
       copy:
         src: '{{ item.ca_cert_src }}'
-        dest: '{{ item.ca_cert | d(__rsyslog_config_dir) }}'
+        dest: '{{ item.ca_cert | d(__rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir) }}'
       with_items:
         - '{{ __rsyslog_cert_subject }}'
       when: item.ca_cert_src | d()
@@ -12,7 +12,7 @@
     - name: Copy cert on the control host to the specified path on the target host
       copy:
         src: '{{ item.cert_src }}'
-        dest: '{{ item.cert | d(__rsyslog_config_dir) }}'
+        dest: '{{ item.cert | d(__rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir) }}'
       with_items:
         - '{{ __rsyslog_cert_subject }}'
       when: item.cert_src | d()
@@ -20,7 +20,7 @@
     - name: Copy key on the control host to the specified path on the target host
       copy:
         src: '{{ item.private_key_src }}'
-        dest: '{{ item.private_key | d(__rsyslog_config_dir) }}'
+        dest: '{{ item.private_key | d(__rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir) }}'
       with_items:
         - '{{ __rsyslog_cert_subject }}'
       when: item.private_key_src | d()

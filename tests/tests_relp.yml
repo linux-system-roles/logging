@@ -113,6 +113,36 @@
       register: __result
       failed_when: __result.stdout != "1"
 
+    - name: Check the ca cert in relp_server0 - 0
+      shell: |-
+        grep 'tls.cacert="/etc/pki/tls/certs/test-ca.crt"' "{{ __test_relp_server0 }}" | wc -l
+      register: __result
+      failed_when: __result.stdout != "1"
+
+    - name: Check the ca cert in relp_server0 - 1
+      stat:
+        path: /etc/pki/tls/certs/test-ca.crt
+
+    - name: Check the cert in relp_server0 - 0
+      shell: |-
+        grep 'tls.mycert="/etc/pki/tls/certs/test-cert.pem"' "{{ __test_relp_server0 }}" | wc -l
+      register: __result
+      failed_when: __result.stdout != "1"
+
+    - name: Check the cert in relp_server0 - 1
+      stat:
+        path: /etc/pki/tls/certs/test-cert.pem
+
+    - name: Check the private key in relp_server0 - 0
+      shell: |-
+        grep 'tls.myprivkey="/etc/pki/tls/private/test-key.pem"' "{{ __test_relp_server0 }}" | wc -l
+      register: __result
+      failed_when: __result.stdout != "1"
+
+    - name: Check the private key in relp_server0 - 1
+      stat:
+        path: /etc/pki/tls/private/test-key.pem
+
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
         logging_enabled: false
@@ -213,6 +243,36 @@
       shell: grep "7514" "{{ __test_relp_client1 }}" | wc -l
       register: __result
       failed_when: __result.stdout != "1"
+
+    - name: Check the ca cert in relp_client0 - 0
+      shell: |-
+        grep 'tls.cacert="/etc/pki/tls/certs/test-ca.crt"' "{{ __test_relp_client0 }}" | wc -l
+      register: __result
+      failed_when: __result.stdout != "1"
+
+    - name: Check the ca cert in relp_client0 - 1
+      stat:
+        path: /etc/pki/tls/certs/test-ca.crt
+
+    - name: Check the cert in relp_client0 - 0
+      shell: |-
+        grep 'tls.mycert="/etc/pki/tls/certs/test-cert.pem"' "{{ __test_relp_client0 }}" | wc -l
+      register: __result
+      failed_when: __result.stdout != "1"
+
+    - name: Check the cert in relp_client0 - 1
+      stat:
+        path: /etc/pki/tls/certs/test-cert.pem
+
+    - name: Check the private key in relp_client0 - 0
+      shell: |-
+        grep 'tls.myprivkey="/etc/pki/tls/private/test-key.pem"' "{{ __test_relp_client0 }}" | wc -l
+      register: __result
+      failed_when: __result.stdout != "1"
+
+    - name: Check the private key in relp_client0 - 1
+      stat:
+        path: /etc/pki/tls/private/test-key.pem
 
     - name: END TEST CASE 1; Clean up the deployed config
       vars:

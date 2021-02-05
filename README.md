@@ -132,9 +132,9 @@ This is a schematic logging configuration to show log messages from input_nameA 
   **available options**
   - `port`: Port number Relp is listening to. Default to `20514`. See also [Port and SELinux](#port-and-selinux).
   - `tls`: If true, encrypt the connection with TLS. You must provide key/certificates and triplets {`ca_cert`, `cert`, `private_key`} and/or {`ca_cert_src`, `cert_src`, `private_key_src`}. Default to `true`.
-  - `ca_cert`: Path to CA cert to configure Relp with tls. Default to `logging_config_dir/basename of ca_cert_src`.
-  - `cert`: Path to cert to configure Relp with tls.  Default to `logging_config_dir/basename of cert_src`.
-  - `private_key`: Path to key to configure Relp with tls.  Default to `logging_config_dir/basename of private_key_src`.
+  - `ca_cert`: Path to CA cert to configure Relp with tls. Default to `/etc/pki/tls/certs/basename of ca_cert_src`.
+  - `cert`: Path to cert to configure Relp with tls. Default to `/etc/pki/tls/certs/basename of cert_src`.
+  - `private_key`: Path to key to configure Relp with tls. Default to `/etc/pki/tls/private/basename of private_key_src`.
   - `ca_cert_src`: Local CA cert file path which is copied to the target host. If `ca_cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
   - `cert_src`: Local cert file path which is copied to the target host. If `cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
   - `private_key_src`: Local key file path which is copied to the target host. If `private_key` is specified, it is copied to the location. Otherwise, to logging_config_dir.
@@ -201,9 +201,9 @@ This is a schematic logging configuration to show log messages from input_nameA 
   - `retryfailures`: Specifying whether retries or not in case of failure. Allowed value is `true` or `false`.  Default to `true`.
   - `tls`: If true, encrypt the connection with TLS. You must provide key/certificates and triplets {`ca_cert`, `cert`, `private_key`} and/or {`ca_cert_src`, `cert_src`, `private_key_src`}. Default to `true`.
   - `use_cert`: [DEPRECATED] If true, encrypt the connection with TLS. You must provide key/certificates and triplets {`ca_cert`, `cert`, `private_key`} and/or {`ca_cert_src`, `cert_src`, `private_key_src`}. Default to `true`. Option `use_cert` is deprecated in favor of `tls` and `use_cert` will be removed in the next minor release.
-  - `ca_cert`: Path to CA cert for Elasticsearch. Default to `logging_config_dir/basename of ca_cert_src`.
-  - `cert`: Path to cert to connect to Elasticsearch.  Default to `logging_config_dir/basename of cert_src`.
-  - `private_key`: Path to key to connect to Elasticsearch.  Default to `logging_config_dir/basename of private_key_src`.
+  - `ca_cert`: Path to CA cert for Elasticsearch. Default to `/etc/pki/tls/certs/basename of ca_cert_src`.
+  - `cert`: Path to cert to connect to Elasticsearch. Default to `/etc/pki/tls/certs/basename of cert_src`.
+  - `private_key`: Path to key to connect to Elasticsearch. Default to `/etc/pki/tls/private/basename of private_key_src`.
   - `ca_cert_src`: Local CA cert file path which is copied to the target host. If `ca_cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
   - `cert_src`: Local cert file path which is copied to the target host. If `cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
   - `private_key_src`: Local key file path which is copied to the target host. If `private_key` is specified, it is copied to the location. Otherwise, to logging_config_dir.
@@ -254,9 +254,9 @@ This is a schematic logging configuration to show log messages from input_nameA 
   - `target`: Host name the remote logging system is running on. **Required**.
   - `port`: Port number the remote logging system is listening to. Default to `20514`.
   - `tls`: If true, encrypt the connection with TLS. You must provide key/certificates and triplets {`ca_cert`, `cert`, `private_key`} and/or {`ca_cert_src`, `cert_src`, `private_key_src`}. Default to `true`.
-  - `ca_cert`: Path to CA cert to configure Relp with tls. Default to `logging_config_dir/basename of ca_cert_src`.
-  - `cert`: Path to cert to configure Relp with tls.  Default to `logging_config_dir/basename of cert_src`.
-  - `private_key`: Path to key to configure Relp with tls.  Default to `logging_config_dir/basename of private_key_src`.
+  - `ca_cert`: Path to CA cert to configure Relp with tls. Default to `/etc/pki/tls/certs/basename of ca_cert_src`.
+  - `cert`: Path to cert to configure Relp with tls. Default to `/etc/pki/tls/certs/basename of cert_src`.
+  - `private_key`: Path to key to configure Relp with tls. Default to `/etc/pki/tls/private/basename of private_key_src`.
   - `ca_cert_src`: Local CA cert file path which is copied to the target host. If `ca_cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
   - `cert_src`: Local cert file path which is copied to the target host. If `cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
   - `private_key_src`: Local key file path which is copied to the target host. If `private_key` is specified, it is copied to the location. Otherwise, to logging_config_dir.
