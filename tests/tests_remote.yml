@@ -45,6 +45,13 @@
         __check_systemctl_status: true
       include_tasks: tasks/check_daemon_config_files.yml
 
+    - name: Ensure installed packages
+      vars:
+        __expected:
+          - rsyslog
+          - ca-certificates
+      include_tasks: tasks/check_packages.yml
+
     # Checking 'error' in stdout from systemctl status is for detecting the case in which rsyslog is running,
     # but some functionality is disabled due to some error, e.g., error: 'tls.cacert' file couldn't be accessed.
     - name: Check rsyslog errors
@@ -156,6 +163,13 @@
           - "{{ __test_output_remote1 }}"
         __check_systemctl_status: true
       include_tasks: tasks/check_daemon_config_files.yml
+
+    - name: Ensure installed packages
+      vars:
+        __expected:
+          - rsyslog
+          - ca-certificates
+      include_tasks: tasks/check_packages.yml
 
     - name: Install lsof
       package:

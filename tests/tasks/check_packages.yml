@@ -1,0 +1,41 @@
+- name: Gather the package facts
+  package_facts:
+    manager: auto
+
+- name: Check expected packages are installed
+  assert:
+    that: "{{ item in ansible_facts.packages }}"
+  loop: "{{ __expected }}"
+
+- name: Get not installed list
+  set_fact:
+    __not_installed: "{{ __all_rsyslog_packages | difference(__expected) }}"
+  vars:
+    __all_rsyslog_packages:
+      - ca-certificates
+      - librelp
+      - rsyslog-crypto
+      - rsyslog-elasticsearch
+      - rsyslog-gnutls
+      - rsyslog-gssapi
+      - rsyslog-hiredis
+      - rsyslog-kafka
+      - rsyslog-libdbi
+      - rsyslog-mmaudit
+      - rsyslog-mmjsonparse
+      - rsyslog-mmkubernetes
+      - rsyslog-mmnormalize
+      - rsyslog-mmsnmptrapd
+      - rsyslog-mongodb
+      - rsyslog-mysql
+      - rsyslog-omamqp1
+      - rsyslog-pgsql
+      - rsyslog-rabbitmq
+      - rsyslog-relp
+      - rsyslog-snmp
+      - rsyslog-udpspoof
+
+- name: Check packages that should not be are not installed
+  assert:
+    that: "{{ item not in ansible_facts.packages }}"
+  loop: "{{ __not_installed }}"
