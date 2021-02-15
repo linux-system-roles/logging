@@ -39,6 +39,13 @@
         __check_systemctl_status: true
       include_tasks: tasks/check_daemon_config_files.yml
 
+    - name: Ensure installed packages
+      vars:
+        __expected:
+          - rsyslog
+          - ca-certificates
+      include_tasks: tasks/check_packages.yml
+
     - name: Grep output to messages line
       command: /bin/grep '\*.info;mail.none;authpriv.none;cron.none.*{{ __default_system_log }}' '{{ __test_default_files_conf }}'
       changed_when: false
@@ -98,6 +105,13 @@
           - "{{ __test_files_conf0 }}"
         __check_systemctl_status: true
       include_tasks: tasks/check_daemon_config_files.yml
+
+    - name: Ensure installed packages
+      vars:
+        __expected:
+          - rsyslog
+          - ca-certificates
+      include_tasks: tasks/check_packages.yml
 
     - name: Ensure logger message is logged in a file
       vars:
@@ -282,6 +296,13 @@
           - "{{ __test_forwards_conf }}"
         __check_systemctl_status: true
       include_tasks: tasks/check_daemon_config_files.yml
+
+    - name: Ensure installed packages
+      vars:
+        __expected:
+          - rsyslog
+          - ca-certificates
+      include_tasks: tasks/check_packages.yml
 
     - name: Check the filter
       command: /bin/grep '\*.info;authpriv.none;auth.none;cron.none;mail.none.*{{ __default_system_log }}' '{{ __test_files_conf0 }}'
