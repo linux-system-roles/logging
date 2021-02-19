@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/bash -eu
 # SPDX-License-Identifier: MIT
 
-set -euo pipefail
+set -o pipefail
 
 if [ -n "${DEBUG:-}" ] ; then
     set -x

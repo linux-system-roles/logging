@@ -61,7 +61,7 @@ __rsyslog_default_pki_authmode: "x509/name"
 __rsyslog_tls_netstream_driver: "gtls"
 
 # Specifying the TLS library used by librelp.
-# Note that “gnutls” is the current default for historic reasons.
+# Note that `gnutls` is the current default for historic reasons.
 __rsyslog_tls_library: "gnutls"
 
 # Rsyslog configuration rules
