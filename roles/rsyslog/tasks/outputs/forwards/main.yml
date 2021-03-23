@@ -1,6 +1,7 @@
 ---
 # Deploy configuration files
-- name: Install/Update forwards output packages and generate configuration files in /etc/rsyslog.d
+- name: "Install/Update forwards output packages and generate
+  configuration files in /etc/rsyslog.d"
   vars:
     __rsyslog_packages: "{{ __rsyslog_forwards_output_packages }}"
     __rsyslog_rules: "{{ __rsyslog_forwards_output_rules }}"

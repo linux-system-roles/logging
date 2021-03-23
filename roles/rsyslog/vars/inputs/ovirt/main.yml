@@ -5,7 +5,12 @@
 # ---------------------------------
 
 # List of rpm packages to install.
-__rsyslog_ovirt_packages: ['rsyslog-mmnormalize', 'rsyslog-mmjsonparse', 'libfastjson', 'liblognorm', 'libestr']
+__rsyslog_ovirt_packages:
+  - rsyslog-mmnormalize
+  - rsyslog-mmjsonparse
+  - libfastjson
+  - liblognorm
+  - libestr
 __rsyslog_ovirt_prereq_packages: []
 
 # oVirt Rsyslog configuration rules
@@ -32,7 +37,9 @@ rsyslog_conf_ovirt_local_modules:
     sections:
 
       - options: |-
-          {% if logging_inputs | selectattr('name', 'defined') | selectattr('type', 'defined') | selectattr('type', 'match', '^basics$') | list | length == 0 %}
+          {% if logging_inputs | selectattr('name', 'defined') |
+            selectattr('type', 'defined') |
+            selectattr('type', 'match', '^basics$') | list | length == 0 %}
           # Log messages sent to local UNIX socket with use=off'
           module(load="imuxsock" SysSock.Use="off")
           {% endif %}
@@ -66,6 +73,7 @@ rsyslog_conf_ovirt_main_modules:
 
 rsyslog_rulebase_ovirt_engine:
 
+  # yamllint disable rule:line-length
   - name: 'ovirt_engine'
     filename: 'ovirt_engine.rulebase'
     nocomment: true
@@ -83,6 +91,7 @@ rsyslog_rulebase_ovirt_vdsm:
       - options: |-
           version=2
           rule=:%date:date-iso% %time:time-24hr%,%msec:number%%tz:word% %level:word%%-:whitespace%%class:string{"quoting.char.begin":"(","quoting.char.end":")"}% %thread:string{"quoting.char.begin":"[","quoting.char.end":"]"}% %message:rest%
+  # yamllint enable rule:line-length
 
 rsyslog_rulebase_ovirt_parse_json:
 

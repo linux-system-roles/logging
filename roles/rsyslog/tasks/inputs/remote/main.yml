@@ -4,11 +4,13 @@
     - name: Ensure Remote inputs contain no conflict connection type
       fail:
         msg: "Error: {{ item.0.name }} and {{ item.1.name }} conflict."
-      loop: "{{ [__logging_remote_udp, __logging_remote_ptcp, __logging_remote_tlstcp] }}"
+      loop: "{{ [__logging_remote_udp, __logging_remote_ptcp,
+                 __logging_remote_tlstcp] }}"
       when:
         - item | length > 1
   vars:
-    __logging_remote: "{{ logging_inputs | selectattr('type', 'match', '^remote$') | list }}"
+    __logging_remote: "{{ logging_inputs |
+                          selectattr('type', 'match', '^remote$') | list }}"
     __logging_remote_udp: "{{ __logging_remote |
                               selectattr('udp_ports', 'defined') | list }}"
     __logging_remote_tcp: "{{ __logging_remote |
@@ -17,10 +19,13 @@
                               selectattr('tls', 'defined') | list }}"
     __logging_remote_ptcp: "{{ __logging_remote_tcp |
                                selectattr('tls', 'undefined') | list }} +
-                            {{ __logging_remote_tls | rejectattr('tls') | list }}"
-    __logging_remote_tlstcp: "{{ __logging_remote_tls | selectattr('tls') | list }}"
+                            {{ __logging_remote_tls | rejectattr('tls')
+                               | list }}"
+    __logging_remote_tlstcp: "{{ __logging_remote_tls | selectattr('tls')
+                              | list }}"
 
-- name: Install/Update remote input packages and generate configuration files in /etc/rsyslog.d
+- name: "Install/Update remote input packages and generate
+  configuration files in /etc/rsyslog.d"
   vars:
     __rsyslog_packages: "{{ __rsyslog_remote_packages }}"
     __rsyslog_rules:

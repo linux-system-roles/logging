@@ -1,10 +1,12 @@
 ---
-- name: Combination test - test for 2 types of inputs x 2 types of outputs combination
+- name: "Combination test - test for (2 types of inputs) x
+  (2 types of outputs) combination"
   hosts: all
   become: true
   vars:
     __test_files_conf: /etc/rsyslog.d/30-output-files-files_test0.conf
-    __test_forwards_conf_s_f: /etc/rsyslog.d/30-output-forwards-forwards_severity_and_facility.conf
+    __test_forwards_conf_s_f: >-
+      /etc/rsyslog.d/30-output-forwards-forwards_severity_and_facility.conf
     __test_tag: files_input
     __test_inputfiles_conf: /etc/rsyslog.d/90-input-files-{{ __test_tag }}.conf
     __test_basics_conf: /etc/rsyslog.d/90-input-basics-basic_input.conf
@@ -19,7 +21,8 @@
         mode: 0700
 
     # TEST CASE 0
-    - name: TEST CASE 0; Ensure that the role runs with complicated flows - M x N combinations
+    - name: "TEST CASE 0; Ensure that the role runs with complicated flows
+      - M x N combinations"
       vars:
         logging_outputs:
           - name: files_test0
@@ -59,7 +62,11 @@
         logging_flows:
           - name: flow_0
             inputs: [basic_input]
-            outputs: [files_test0, files_test1, forwards_severity_and_facility, forwards_facility_only]
+            outputs:
+              - files_test0
+              - files_test1
+              - forwards_severity_and_facility
+              - forwards_facility_only
           - name: flow_1
             inputs: ["{{ __test_tag }}"]
             outputs: [files_test0, files_test1]
@@ -68,7 +75,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: Ensure config file size and counts
@@ -95,9 +103,14 @@
       register: __result
       failed_when: not __result.stat.exists
 
+    # yamllint disable rule:line-length
     - name: Check the filter and action in the files output config
-      command: /bin/grep '\*.info;authpriv.none;auth.none;cron.none;mail.none.*{{ __default_system_log }}' '{{ __test_files_conf }}'
+      command: >-
+        /bin/grep
+        '\*.info;authpriv.none;auth.none;cron.none;mail.none.*{{ __default_system_log }}'
+        {{ __test_files_conf }}
       changed_when: false
+    # yamllint enable rule:line-length
 
     - name: Ensure logger message is logged in a file
       vars:
@@ -118,6 +131,7 @@
                   Protocol="tcp"
               )
           }
+        mode: '0600'
 
     - name: Check severity_and_facility
       command: diff -B /tmp/__testfile__ '{{ __test_forwards_conf_s_f }}'
@@ -130,16 +144,27 @@
       failed_when: not __result.stat.exists
 
     - name: Check the input call with tag={{ __test_tag }}
-      command: /bin/grep ' *input(type="imfile" file="\/var\/log\/inputdirectory\/\*.log" tag="{{ __test_tag }}"' '{{ __test_inputfiles_conf }}'
+      command: >-
+        /bin/grep
+        ' *input(type="imfile"
+        file="/var/log/inputdirectory/\*.log"
+        tag="{{ __test_tag }}"'
+        {{ __test_inputfiles_conf }}
       changed_when: false
 
-    - name: Create a test log file with a log message in {{ __test_inputfiles_dir }}
-      shell: echo "<167>Mar 20 01:00:00 11.22.33.44 tag msgnum:00000000:26:abcdefghijklmnopqrstuvwxyz" > "{{ __test_inputfiles_dir }}/test.log"
+    # yamllint disable rule:line-length
+    - name: "Create a test log file with a log message in
+      {{ __test_inputfiles_dir }}"
+      shell: |-
+        set -euo pipefail
+        echo '<167>Mar 20 01:00:00 11.22.33.44 tag msgnum:00000000:26:abcdefghijklmnopqrstuvwxyz' > {{ __test_inputfiles_dir }}/test.log
       changed_when: false
 
     - name: Check the fake test log message in {{ __default_system_log }}
-      command: /bin/grep '{{ __test_tag }} .*abcdefghijklmnopqrstuvwxyz$' '{{ __default_system_log }}'
+      command: >-
+        /bin/grep '{{ __test_tag }} .*abcdefghijklmnopqrstuvwxyz$' {{ __default_system_log }}
       changed_when: false
+    # yamllint enable rule:line-length
 
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
@@ -191,11 +216,13 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     # TEST CASE 1
-    - name: TEST CASE 1; Ensure that the role runs with complicated flows - N x M combinations
+    - name: "TEST CASE 1; Ensure that the role runs with complicated flows
+      - N x M combinations"
       vars:
         logging_outputs:
           - name: files_test0
@@ -247,7 +274,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: Ensure config file size and counts
@@ -274,9 +302,14 @@
       register: __result
       failed_when: not __result.stat.exists
 
+    # yamllint disable rule:line-length
     - name: Grep output to messages line
-      command: /bin/grep '*.info;authpriv.none;auth.none;cron.none;mail.none.*{{ __default_system_log }}' '{{ __test_files_conf }}'
+      command: >-
+        /bin/grep
+        '\*.info;authpriv.none;auth.none;cron.none;mail.none.*{{ __default_system_log }}'
+        {{ __test_files_conf }}
       changed_when: false
+    # yamllint enable rule:line-length
 
     - name: Ensure logger message is logged in a file
       vars:
@@ -303,6 +336,7 @@
                   Protocol="tcp"
               )
           }
+        mode: '0600'
 
     - name: Check severity_and_facility
       command: diff -B /tmp/__testfile__ '{{ __test_forwards_conf_s_f }}'
@@ -315,16 +349,27 @@
       failed_when: not __result.stat.exists
 
     - name: Check the input call with tag={{ __test_tag }}
-      command: /bin/grep ' *input(type="imfile" file="\/var\/log\/inputdirectory\/\*.log" tag="{{ __test_tag }}"' '{{ __test_inputfiles_conf }}'
+      command: >-
+        /bin/grep
+        ' *input(type="imfile"
+        file="/var/log/inputdirectory/\*.log"
+        tag="{{ __test_tag }}"'
+        {{ __test_inputfiles_conf }}
       changed_when: false
 
-    - name: Create a test log file with a log message in {{ __test_inputfiles_dir }}
-      shell: echo "<167>Dec 26 01:00:00 11.22.33.44 tag msgnum:00000001:26:ABCDEFGHIJKLMNOPQRSTUVWXYZ" >> "{{ __test_inputfiles_dir }}/test.log"
+    # yamllint disable rule:line-length
+    - name: "Create a test log file with a log message in
+      {{ __test_inputfiles_dir }}"
+      shell: |-
+        set -euo pipefail
+        echo '<167>Dec 26 01:00:00 11.22.33.44 tag msgnum:00000001:26:ABCDEFGHIJKLMNOPQRSTUVWXYZ' >> {{ __test_inputfiles_dir }}/test.log
       changed_when: false
 
     - name: Check the fake test log message in {{ __default_system_log }}
-      command: /bin/grep '{{ __test_tag }} .*ABCDEFGHIJKLMNOPQRSTUVWXYZ$' '{{ __default_system_log }}'
+      command: >-
+        /bin/grep '{{ __test_tag }} .*ABCDEFGHIJKLMNOPQRSTUVWXYZ$' {{ __default_system_log }}
       changed_when: false
+    # yamllint enable rule:line-length
 
     - name: END TEST CASE 1; Clean up the deployed config
       vars:
@@ -372,11 +417,13 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     # TEST CASE 2
-    - name: TEST CASE 2; Absent state test - Running combination configured logging role twice;
+    - name: "TEST CASE 2; Absent state test -
+      Running combination configured logging role twice"
       vars:
         logging_outputs:
           - name: files_test0
@@ -413,7 +460,11 @@
         logging_flows:
           - name: flow_0
             inputs: [basic_input]
-            outputs: [files_test0, files_test1, forwards_severity_and_facility, forwards_facility_only]
+            outputs:
+              - files_test0
+              - files_test1
+              - forwards_severity_and_facility
+              - forwards_facility_only
           - name: flow_1
             inputs: ["{{ __test_tag }}"]
             outputs: [files_test0, files_test1]
@@ -422,7 +473,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: Ensure config file size and counts
@@ -448,8 +500,10 @@
         dest: "{{ __test_basics_conf }}"
         content: |-
           # GENERATED BASICS CONFIG FILE
-          module(load="imuxsock"    # provides support for local system logging (e.g. via logger command)
-                 SysSock.Use="off") # Turn off message reception via local log socket.
+          module(load="imuxsock"    # provides support for local system logging
+                                    # (e.g. via logger command)
+                 SysSock.Use="off") # Turn off message reception via local log
+                                    # socket
           module(load="imjournal"
                  StateFile="/var/lib/rsyslog/imjournal.state"
                  RateLimit.Burst="20000"
@@ -460,6 +514,7 @@
             then {
               call files_test0
           }
+        mode: '0644'
 
     - name: deploy reduced config to output into local files
       vars:
@@ -508,7 +563,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: Ensure config file size and counts
@@ -528,7 +584,10 @@
       include_tasks: tasks/check_packages.yml
 
     - name: Check {{ __test_basics_conf }} was updated
-      command: '/bin/grep "# GENERATED BASICS CONFIG FILE" {{ __test_basics_conf }}'
+      command: >-
+        /bin/grep
+        "# GENERATED BASICS CONFIG FILE"
+        {{ __test_basics_conf }}
       register: __result
       changed_when: false
       failed_when: "__result is not failed"
@@ -536,6 +595,7 @@
     - name: Check rsyslog errors
       command: systemctl status rsyslog
       register: __result
+      changed_when: false
       failed_when: "'error' in __result.stdout or __result is failed"
 
     - name: END TEST CASE 2; Clean up the deployed config
@@ -560,7 +620,13 @@
       include_role:
         name: linux-system-roles.logging
 
+    - name: Cleaning up __testfile__
+      file:
+        path: "/tmp/__testfile__"
+        state: absent
+
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers

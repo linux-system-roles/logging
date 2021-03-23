@@ -1,12 +1,14 @@
 ---
 # Deploy configuration files
-- name: Install/Update files input packages and generate configuration files in /etc/rsyslog.d
+- name: "Install/Update files input packages and generate
+  configuration files in /etc/rsyslog.d"
   vars:
     __rsyslog_packages: "{{ __rsyslog_files_input_packages }}"
     __rsyslog_rules: "{{ __rsyslog_files_input_rules }}"
   include_tasks:
     file: "{{ role_path }}/tasks/deploy.yml"
 
+# yamllint disable rule:line-length
 - name: Create files input configuration files in /etc/rsyslog.d
   vars:
     __rsyslog_packages: []
@@ -17,10 +19,11 @@
         sections:
           - options: |-
               input(type="imfile" file="{{ item.input_log_path }}" tag="{{ item.name }}")
-              {{ lookup('template', 'input_template.j2') }}
+              {{ lookup("template", "input_template.j2") }}
   include_tasks:
     file: "{{ role_path }}/tasks/deploy.yml"
   loop: '{{ logging_inputs }}'
   when:
     - item.type | d() == 'files'
     - item.input_log_path | d() | length > 0
+# yamllint enable rule:line-length

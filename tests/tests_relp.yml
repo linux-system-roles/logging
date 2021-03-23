@@ -23,7 +23,8 @@
     - include_tasks: tasks/create_tests_certs.yml
 
     # TEST CASE 0
-    - name: TEST CASE 0; Test the server configuration containing tls tcp, plain tcp and udp connection
+    - name: "TEST CASE 0; Test the server configuration containing tls tcp,
+      plain tcp and udp connection"
       vars:
         logging_inputs:
           - name: system_input
@@ -64,7 +65,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: Ensure config file size and counts
@@ -92,8 +94,8 @@
         state: present
 
     - name: lsof outputs for rsyslogd
-      shell: |
-        set -o pipefail
+      shell: |-
+        set -euo pipefail
         lsof -i -nP | grep rsyslogd
       register: __result
       changed_when: false
@@ -102,28 +104,35 @@
         msg: "lsof returned {{ __result.stdout }}"
 
     - name: Check port 6514, 20514 are open for TCP
-      shell: |
-        set -o pipefail
+      shell: |-
+        set -euo pipefail
         lsof -i -nP | grep rsyslogd | grep TCP | grep {{ item }}
       loop: [6514, 20514]
       changed_when: false
 
+    # yamllint disable rule:line-length
     - name: Check the flows in relp_server0 - 0
-      shell: grep "$inputname == \"relp_server0\"" "{{ __test_relp_server0 }}" | wc -l
+      shell: |-
+        set -euo pipefail
+        grep '$inputname == "relp_server0"' "{{ __test_relp_server0 }}" | wc -l
       register: __result
+      changed_when: false
       failed_when: __result.stdout != "2"
 
     - name: Check the flows in relp_server0 - 1
       shell: |-
-        grep -A 2 "$inputname == \"relp_server0\"" "{{ __test_relp_server0 }}" |
-        grep "call files_output" | wc -l
+        set -euo pipefail
+        grep -A 2 '$inputname == "relp_server0"' "{{ __test_relp_server0 }}" | grep "call files_output" | wc -l
       register: __result
+      changed_when: false
       failed_when: __result.stdout != "1"
 
     - name: Check the ca cert in relp_server0 - 0
       shell: |-
+        set -euo pipefail
         grep 'tls.cacert="/etc/pki/tls/certs/test-ca.crt"' "{{ __test_relp_server0 }}" | wc -l
       register: __result
+      changed_when: false
       failed_when: __result.stdout != "1"
 
     - name: Check the ca cert in relp_server0 - 1
@@ -132,8 +141,10 @@
 
     - name: Check the cert in relp_server0 - 0
       shell: |-
+        set -euo pipefail
         grep 'tls.mycert="/etc/pki/tls/certs/test-cert.pem"' "{{ __test_relp_server0 }}" | wc -l
       register: __result
+      changed_when: false
       failed_when: __result.stdout != "1"
 
     - name: Check the cert in relp_server0 - 1
@@ -142,8 +153,10 @@
 
     - name: Check the private key in relp_server0 - 0
       shell: |-
+        set -euo pipefail
         grep 'tls.myprivkey="/etc/pki/tls/private/test-key.pem"' "{{ __test_relp_server0 }}" | wc -l
       register: __result
+      changed_when: false
       failed_when: __result.stdout != "1"
 
     - name: Check the private key in relp_server0 - 1
@@ -151,19 +164,23 @@
         path: /etc/pki/tls/private/test-key.pem
 
     - name: Check tls.permittedpeer in relp_server0
-      shell: >-
-        grep 'tls.permittedpeer=\["\*.client.com","\*.example.com"\]'
-        "{{ __test_relp_server0 }}" | wc -l
+      shell: |-
+        set -euo pipefail
+        grep 'tls.permittedpeer=\["\*.client.com","\*.example.com"\]' "{{ __test_relp_server0 }}" | wc -l
       register: __result
+      changed_when: false
       failed_when: __result.stdout != "1"
 
     - name: Check tls.permittedpeer in relp_server1
       shell: >-
-        grep "tls.permittedpeer=\[\"\*.$( _domain=$(hostname -d);
-        _domain=${_domain:-"{{ logging_domain }}"}; echo $_domain )\"\]"
+        set -euo pipefail;
+        grep
+        "tls.permittedpeer=\[\"\*.$( _domain=$(hostname -d); _domain=${_domain:-"{{ logging_domain }}"}; echo $_domain )\"\]"
         "{{ __test_relp_server1 }}" | wc -l
       register: __result
+      changed_when: false
       failed_when: __result.stdout != "1"
+    # yamllint enable rule:line-length
 
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
@@ -202,7 +219,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: Uninstall relp
@@ -248,7 +266,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: Ensure config file size and counts
@@ -271,14 +290,20 @@
       include_tasks: tasks/check_packages.yml
 
     - name: Check the port in relp_client1
-      shell: grep "7514" "{{ __test_relp_client1 }}" | wc -l
+      shell: |-
+        set -euo pipefail
+        grep "7514" "{{ __test_relp_client1 }}" | wc -l
       register: __result
+      changed_when: false
       failed_when: __result.stdout != "1"
 
+    # yamllint disable rule:line-length
     - name: Check the ca cert in relp_client0 - 0
       shell: |-
+        set -euo pipefail
         grep 'tls.cacert="/etc/pki/tls/certs/test-ca.crt"' "{{ __test_relp_client0 }}" | wc -l
       register: __result
+      changed_when: false
       failed_when: __result.stdout != "1"
 
     - name: Check the ca cert in relp_client0 - 1
@@ -287,8 +312,10 @@
 
     - name: Check the cert in relp_client0 - 0
       shell: |-
+        set -euo pipefail
         grep 'tls.mycert="/etc/pki/tls/certs/test-cert.pem"' "{{ __test_relp_client0 }}" | wc -l
       register: __result
+      changed_when: false
       failed_when: __result.stdout != "1"
 
     - name: Check the cert in relp_client0 - 1
@@ -297,8 +324,10 @@
 
     - name: Check the private key in relp_client0 - 0
       shell: |-
+        set -euo pipefail
         grep 'tls.myprivkey="/etc/pki/tls/private/test-key.pem"' "{{ __test_relp_client0 }}" | wc -l
       register: __result
+      changed_when: false
       failed_when: __result.stdout != "1"
 
     - name: Check the private key in relp_client0 - 1
@@ -306,19 +335,23 @@
         path: /etc/pki/tls/private/test-key.pem
 
     - name: Check tls.permittedpeer in relp_client0
-      shell: >-
-        grep 'tls.permittedpeer=\["\*.server.com","\*.example.com"\]'
-        "{{ __test_relp_client0 }}" | wc -l
+      shell: |-
+        set -euo pipefail
+        grep 'tls.permittedpeer=\["\*.server.com","\*.example.com"\]' "{{ __test_relp_client0 }}" | wc -l
       register: __result
+      changed_when: false
       failed_when: __result.stdout != "1"
 
     - name: Check tls.permittedpeer in relp_client1
       shell: >-
-        grep "tls.permittedpeer=\[\"\*.$( _domain=$(hostname -d);
-        _domain=${_domain:-"{{ logging_domain }}"}; echo $_domain )\"\]"
-        "{{ __test_relp_client1 }}" | wc -l
+        set -euo pipefail;
+        grep
+        "tls.permittedpeer=\[\"\*.$( _domain=$(hostname -d); _domain=${_domain:-"{{ logging_domain }}"}; echo $_domain )\"\]" "{{ __test_relp_client1 }}"
+        | wc -l
       register: __result
+      changed_when: false
       failed_when: __result.stdout != "1"
+    # yamllint enable rule:line-length
 
     - name: END TEST CASE 1; Clean up the deployed config
       vars:
@@ -356,7 +389,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: clean up pki files

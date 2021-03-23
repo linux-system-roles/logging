@@ -7,15 +7,11 @@
 # true if the target host is a container and use rsyslog in the image.
 rsyslog_in_image: false
 
-# rsyslog_work_dir
-#
-# Rsyslog work directory
-rsyslog_work_dir: '/var/lib/rsyslog'
-
 # rsyslog_message_reduction
 #
-# Enable or disable message reduction. This is disabled by default so that log
-# parsers like :program:`fail2ban` can work correctly.
+# Enable or disable message reduction.
+# This is disabled by default so that log parsers
+# like :program:`fail2ban` can work correctly.
 rsyslog_message_reduction: false
 
 # rpm packages
@@ -25,8 +21,9 @@ rsyslog_message_reduction: false
 # rsyslog_extra_packages
 #
 # List of extra rpm packages to install.
-# If custom configurations are to be installed, which requires additional rsyslog
-# packages, this variable can be used to install them.
+# If custom configurations are to be installed,
+# which requires additional rsyslog packages,
+# this variable can be used to install them.
 rsyslog_extra_packages: []
 
 # rsyslog_custom_config_files

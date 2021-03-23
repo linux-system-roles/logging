@@ -1,5 +1,6 @@
 ---
-- name: Ensure that the role runs with parameters for basics input and files output
+- name: "Ensure that the role runs with parameters for
+  basics input and files output"
   hosts: all
   become: true
   vars:
@@ -9,7 +10,8 @@
     __test_files_conf2: /etc/rsyslog.d/30-output-files-files_output2.conf
     __test_files_conf3: /etc/rsyslog.d/30-output-files-files_output3.conf
     __test_files_conf4: /etc/rsyslog.d/30-output-files-files_output4.conf
-    __test_forwards_conf: /etc/rsyslog.d/30-output-forwards-forwards_severity_and_facility.conf
+    __test_forwards_conf: >-
+      /etc/rsyslog.d/30-output-forwards-forwards_severity_and_facility.conf
     __default_system_log: /var/log/messages
     __prop_based_log0: /var/log/property_based_filter_in.log
     __prop_based_log1: /var/log/property_based_filter_out.log
@@ -17,7 +19,8 @@
 
   tasks:
     # TEST CASE 0
-    - name: TEST CASE 0; Test the simplest configuration, basics input and implicit files output
+    - name: "TEST CASE 0; Test the simplest configuration,
+      basics input and implicit files output"
       vars:
         logging_inputs:
           - name: basic_input
@@ -27,7 +30,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: Ensure config file size and counts
@@ -47,7 +51,10 @@
       include_tasks: tasks/check_packages.yml
 
     - name: Grep output to messages line
-      command: /bin/grep '\*.info;mail.none;authpriv.none;cron.none.*{{ __default_system_log }}' '{{ __test_default_files_conf }}'
+      command: >-
+        /bin/grep
+        '*.info;mail.none;authpriv.none;cron.none.*{{ __default_system_log }}'
+        {{ __test_default_files_conf }}
       changed_when: false
 
     - name: Ensure logger message is logged in a file
@@ -72,11 +79,13 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     # TEST CASE 1
-    - name: TEST CASE 1; logging_system_log_dir - test switching the local log output file location
+    - name: "TEST CASE 1; logging_system_log_dir -
+      test switching the local log output file location"
       vars:
         logging_system_log_dir: "{{ __logging_system_log_dir }}"
         logging_outputs:
@@ -94,7 +103,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: Ensure config file size and counts
@@ -119,13 +129,19 @@
         __logging_file: "{{ __logging_system_log_dir }}/messages"
       include_tasks: tasks/test_logger.yml
 
-    - name: Check the files output config that the path is {{ __logging_system_log_dir }}/messages
-      command: /bin/grep '\*.info;mail.none;authpriv.none;cron.none.*{{ __logging_system_log_dir }}/messages' {{ __test_files_conf0 }}
+    # yamllint disable rule:line-length
+    - name: "Check the files output config that the path is
+      {{ __logging_system_log_dir }}/messages"
+      command: >-
+        /bin/grep
+        '\*.info;mail.none;authpriv.none;cron.none.*{{ __logging_system_log_dir }}/messages'
+        {{ __test_files_conf0 }}
       register: __result
       until: __result is success
       retries: 5
       delay: 1
       changed_when: false
+    # yamllint enable rule:line-length
 
     - name: END TEST CASE 1; Clean up the deployed config
       vars:
@@ -148,12 +164,14 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     # TEST CASE 2
     - block:
-        - name: TEST CASE 2; Test the configuration, which flow contains a undefined input bogus_basic_input
+        - name: "TEST CASE 2; Test the configuration, which flow
+          contains a undefined input bogus_basic_input"
           vars:
             logging_purge_confs: true
             logging_outputs:
@@ -184,7 +202,11 @@
             logging_flows:
               - name: flow_0
                 inputs: [bogus_basic_input]
-                outputs: [files_output0, files_output1, files_output2, files_output3]
+                outputs:
+                  - files_output0
+                  - files_output1
+                  - files_output2
+                  - files_output3
           include_role:
             name: linux-system-roles.logging
 
@@ -192,13 +214,16 @@
           fail:
             msg: UNREACH
       vars:
-        __expected_error: "Error: ['bogus_basic_input'] includes undefined logging_inputs item."
-        __expected_error2: "Error: [u'bogus_basic_input'] includes undefined logging_inputs item."
+        __expected_error: >
+          Error: ['bogus_basic_input'] includes undefined logging_inputs item.
+        __expected_error2: >
+          Error: [u'bogus_basic_input'] includes undefined logging_inputs item.
       rescue:
-        - debug:
-            msg: |
-              Caught an expected error - {{ ansible_failed_result }}
-        - assert:
+        - name: Expected error
+          debug:
+            msg: "{{ ansible_failed_result }}"
+        - name: Ensure the expected error message is issued
+          assert:
             that: ansible_failed_result.results.0.msg == __expected_error or
                   ansible_failed_result.results.0.msg == __expected_error2
 
@@ -240,11 +265,13 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     # TEST CASE 3
-    - name: TEST CASE 3; Ensure that the role runs with parameters from imjournal input to two omfile and two omfwd outputs
+    - name: "TEST CASE 3; Ensure that the role runs with parameters
+      from imjournal input to two omfile and two omfwd outputs"
       vars:
         logging_outputs:
           - name: files_output0
@@ -277,13 +304,18 @@
         logging_flows:
           - name: flow_0
             inputs: [basic_input0]
-            outputs: [files_output0, files_output1, forwards_severity_and_facility, forwards_facility_only]
+            outputs:
+              - files_output0
+              - files_output1
+              - forwards_severity_and_facility
+              - forwards_facility_only
       include_role:
         name: linux-system-roles.logging
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: Ensure config file size and counts
@@ -304,9 +336,14 @@
           - ca-certificates
       include_tasks: tasks/check_packages.yml
 
+    # yamllint disable rule:line-length
     - name: Check the filter
-      command: /bin/grep '\*.info;authpriv.none;auth.none;cron.none;mail.none.*{{ __default_system_log }}' '{{ __test_files_conf0 }}'
+      command: >-
+        /bin/grep
+        '\*.info;authpriv.none;auth.none;cron.none;mail.none.*{{ __default_system_log }}'
+        {{ __test_files_conf0 }}
       changed_when: false
+    # yamllint enable rule:line-length
 
     - name: Ensure logger message is logged in a file
       vars:
@@ -327,6 +364,7 @@
                   Protocol="tcp"
               )
           }
+        mode: '0600'
 
     - name: Check severity_and_facility
       command: diff -B /tmp/__testfile__ '{{ __test_forwards_conf }}'
@@ -370,3 +408,8 @@
             state: absent
       include_role:
         name: linux-system-roles.logging
+
+    - name: Cleaning up __testfile__
+      file:
+        path: /tmp/__testfile__
+        state: absent

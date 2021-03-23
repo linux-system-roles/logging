@@ -4,7 +4,7 @@
 - name: Install/Update required packages
   package:
     name: "{{ __rsyslog_packages }}"
-    state: latest
+    state: present
   when:
     - __rsyslog_packages | length > 0
     - not rsyslog_in_image | bool
@@ -13,10 +13,12 @@
 - name: Generate role configuration files in rsyslog.d
   template:
     src: 'rules.conf.j2'
-    dest: >-
-      {{ inner_item.path | d(__rsyslog_config_dir) }}/{{ inner_item.filename | d((inner_item.weight
-      if inner_item.weight | d() else rsyslog_weight_map[inner_item.type | d("rules")]) +
-      "-" + (inner_item.name | d("rules")) + "." + (inner_item.suffix | d("conf"))) }}
+    dest: '{{ inner_item.path |
+      d(__rsyslog_config_dir) }}/{{ inner_item.filename | d((inner_item.weight
+      if inner_item.weight | d() else
+      rsyslog_weight_map[inner_item.type | d("rules")]) +
+      "-" + (inner_item.name | d("rules")) + "." +
+      (inner_item.suffix | d("conf"))) }}'
     owner: '{{ inner_item.owner | d("root") }}'
     group: '{{ inner_item.group | d("root") }}'
     mode: '{{ inner_item.mode  | d("0644") }}'
@@ -32,16 +34,19 @@
 
 - name: Remove role config files from rsyslog.d
   file:
-    path: >-
-      {{ inner_item.path | d(__rsyslog_config_dir) }}/{{ inner_item.filename | d((inner_item.weight
-      if inner_item.weight | d() else rsyslog_weight_map[inner_item.type | d("rules")]) +
-      "-" + (inner_item.name | d("rules")) + "." + (inner_item.suffix | d("conf"))) }}
+    path: '{{ inner_item.path |
+      d(__rsyslog_config_dir) }}/{{ inner_item.filename | d((inner_item.weight
+      if inner_item.weight | d() else
+      rsyslog_weight_map[inner_item.type | d("rules")]) +
+      "-" + (inner_item.name | d("rules")) + "." +
+      (inner_item.suffix | d("conf"))) }}'
     state: absent
   loop: '{{ __rsyslog_rules | flatten }}'
   loop_control:
     loop_var: inner_item
   when:
-    - (not __rsyslog_enabled | bool) or (inner_item.state | d('present') == 'absent')
+    - (not __rsyslog_enabled | bool) or
+      (inner_item.state | d('present') == 'absent')
     - inner_item.filename | d() or inner_item.name | d()
     - inner_item.options | d() or inner_item.sections | d()
   notify: restart rsyslogd

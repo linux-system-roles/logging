@@ -1,15 +1,23 @@
 ---
-- name: Ensure that the role runs with parameters for basics input and forwards output
+- name: "Ensure that the role runs with parameters for basics input
+  and forwards output"
   hosts: all
   become: true
   vars:
-    __test_files_conf: /etc/rsyslog.d/30-output-files-default_files.conf
-    __test_forward_conf_s_f: /etc/rsyslog.d/30-output-forwards-forwards_severity_and_facility.conf
-    __test_forward_conf_f: /etc/rsyslog.d/30-output-forwards-forwards_facility_only.conf
-    __test_forward_conf_s: /etc/rsyslog.d/30-output-forwards-forwards_severity_only.conf
-    __test_forward_conf_no: /etc/rsyslog.d/30-output-forwards-forwards_no_severity_and_facility.conf
-    __test_forward_conf_no_udp: /etc/rsyslog.d/30-output-forwards-forwards_no_severity_and_facility_udp.conf
-    __test_forward_conf_no_p_p: /etc/rsyslog.d/30-output-forwards-forwards_no_severity_and_facility_protocol_port.conf
+    __test_files_conf: >-
+      /etc/rsyslog.d/30-output-files-default_files.conf
+    __test_forward_conf_s_f: >-
+      /etc/rsyslog.d/30-output-forwards-forwards_severity_and_facility.conf
+    __test_forward_conf_f: >-
+      /etc/rsyslog.d/30-output-forwards-forwards_facility_only.conf
+    __test_forward_conf_s: >-
+      /etc/rsyslog.d/30-output-forwards-forwards_severity_only.conf
+    __test_forward_conf_no: >-
+      /etc/rsyslog.d/30-output-forwards-forwards_no_severity_and_facility.conf
+    __test_forward_conf_no_udp: >-
+      /etc/rsyslog.d/30-output-forwards-forwards_no_severity_and_facility_udp.conf
+    __test_forward_conf_no_p_p: >-
+      /etc/rsyslog.d/30-output-forwards-forwards_no_severity_and_facility_protocol_port.conf
     __default_system_log: /var/log/messages
     __test_ca_cert_name: test-ca.crt
     __test_cert_name: test-cert.pem
@@ -17,11 +25,14 @@
     __test_ca_cert: /tmp/{{ __test_ca_cert_name }}
     __test_cert: /tmp/{{ __test_cert_name }}
     __test_key: /tmp/{{ __test_key_name }}
-    __expected_error: "Error: tls is enabled in forwards_severity_and_facility; you must specify logging_pki_files ca_cert_src and/or ca_cert in the playbook var section."
+    __expected_error: "Error: tls is enabled in forwards_severity_and_facility;
+      you must specify logging_pki_files ca_cert_src and/or ca_cert in the
+      playbook var section."
 
   tasks:
     # TEST CASE 0
-    - name: TEST CASE 0; Ensure that the logs from basics inputs are sent to the forwards outputs and implicit files output
+    - name: "TEST CASE 0; Ensure that the logs from basics inputs
+      are sent to the forwards outputs and implicit files output"
       vars:
         logging_outputs:
           - name: forwards_severity_and_facility
@@ -76,7 +87,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: Ensure config file size and counts
@@ -114,6 +126,7 @@
                   Protocol="tcp"
               )
           }
+        mode: '0600'
 
     - name: Check severity_and_facility
       command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_s_f }}'
@@ -132,6 +145,7 @@
                   Protocol="tcp"
               )
           }
+        mode: '0600'
 
     - name: Check facility_only
       command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_f }}'
@@ -150,6 +164,7 @@
                   Protocol="tcp"
               )
           }
+        mode: '0600'
 
     - name: Check severity_only
       command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_s }}'
@@ -168,6 +183,7 @@
                   Protocol="tcp"
               )
           }
+        mode: '0600'
 
     - name: Check no_severity_and_facility
       command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_no }}'
@@ -186,6 +202,7 @@
                   Protocol="udp"
               )
           }
+        mode: '0600'
 
     - name: Check no_severity_and_facility_udp
       command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_no_udp }}'
@@ -202,26 +219,34 @@
                   Target="host.domain"
               )
           }
+        mode: '0600'
 
     - name: Check no_severity_and_facility_protocol_port
       command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_no_p_p }}'
       changed_when: false
 
+    # yamllint disable rule:line-length
     - name: Grep no_severity_and_facility_protocol_port_target
-      shell: /bin/grep "\<action.*forwards_no_severity_and_facility_protocol_port_target\>" /etc/rsyslog.d/30-output-forwards*.conf
+      shell: |-
+        set -euo pipefail
+        /bin/grep '<action.*forwards_no_severity_and_facility_protocol_port_target>' /etc/rsyslog.d/30-output-forwards*.conf
       register: __result
       changed_when: false
       failed_when: "__result is not failed"
 
     - name: Grep no_name
-      shell: /bin/grep "\<action.*forwards_no_name\.localdomain\>" /etc/rsyslog.d/30-output-forwards*.conf
+      shell: |-
+        set -euo pipefail
+        /bin/grep '<action.*forwards_no_name\.localdomain>' /etc/rsyslog.d/30-output-forwards*.conf
       register: __result
       changed_when: false
       failed_when: "__result is not failed"
 
     - name: Check output to messages line
-      command: /bin/grep '\*.info;mail.none;authpriv.none;cron.none.*{{ __default_system_log }}' '{{ __test_files_conf }}'
+      command: >-
+        /bin/grep '\*.info;mail.none;authpriv.none;cron.none.*{{ __default_system_log }}' '{{ __test_files_conf }}'
       changed_when: false
+    # yamllint enable rule:line-length
 
     - name: Ensure logger message is logged in a file
       vars:
@@ -281,7 +306,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: Creating fake key/certs files for the following test cases
@@ -289,6 +315,7 @@
         dest: "{{ item }}"
         content:
           This is a fake {{ item }}.
+        mode: '0444'
       delegate_to: localhost
       loop:
         - "{{ __test_ca_cert }}"
@@ -296,7 +323,8 @@
         - "{{ __test_key }}"
 
     # TEST CASE 1
-    - name: TEST CASE 1; Test the configuration, basics input and a forwards output with ca_cert
+    - name: "TEST CASE 1; Test the configuration, basics input
+      and a forwards output with ca_cert"
       vars:
         logging_pki_files:
           - ca_cert_src: "{{ __test_ca_cert }}"
@@ -322,7 +350,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: Ensure config file size and counts
@@ -360,6 +389,7 @@
                   Protocol="tcp"
               )
           }
+        mode: '0600'
 
     - name: Check severity_and_facility
       command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_s_f }}'
@@ -372,7 +402,10 @@
       failed_when: not __result.stat.exists
 
     - name: Check the fake key/certs paths are set in the global config.
-      command: /bin/grep "/etc/pki/tls/certs/{{ __test_ca_cert_name }}" /etc/rsyslog.d/00-global.conf
+      command: >
+        /bin/grep "/etc/pki/tls/certs/{{ __test_ca_cert_name }}"
+        /etc/rsyslog.d/00-global.conf
+      changed_when: false
 
     - name: END TEST CASE 1; Clean up the deployed config
       vars:
@@ -400,7 +433,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: clean up fake pki files
@@ -414,7 +448,8 @@
         state: absent
 
     # TEST CASE 2
-    - name: TEST CASE 2; Test the configuration, basics input and a forwards output with logging_pki_files
+    - name: "TEST CASE 2; Test the configuration, basics input
+      and a forwards output with logging_pki_files"
       vars:
         logging_pki_files:
           - ca_cert_src: "{{ __test_ca_cert }}"
@@ -441,7 +476,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: Ensure config file size and counts
@@ -479,6 +515,7 @@
                   Protocol="tcp"
               )
           }
+        mode: '0600'
 
     - name: Check severity_and_facility
       command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_s_f }}'
@@ -500,6 +537,7 @@
         - /etc/pki/tls/certs/{{ __test_ca_cert_name }}
         - /etc/pki/tls/certs/{{ __test_cert_name }}
         - /etc/pki/tls/private/{{ __test_key_name }}
+      changed_when: false
 
     - name: END TEST CASE 2; Clean up the deployed config
       vars:
@@ -528,7 +566,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: clean up fake pki files
@@ -540,7 +579,8 @@
 
     # TEST CASE 3
     - block:
-        - name: TEST CASE 3; Error case for setting logging_pki_files - missing cert_src
+        - name: "TEST CASE 3; Error case for setting logging_pki_files
+          - missing cert_src"
           vars:
             logging_pki_files:
               - private_key_src: "{{ __test_key }}"
@@ -571,7 +611,7 @@
             msg: "Caught an expected error - {{ ansible_failed_result }}"
         - name: assert...
           assert:
-            that: "'{{ ansible_failed_result.results.0.msg }}' is match('{{ __expected_error }}')"
+            that: ansible_failed_result.results.0.msg is match(__expected_error)
 
     - name: END TEST CASE 3; Clean up the deployed config
       vars:

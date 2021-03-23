@@ -7,13 +7,15 @@
 # 0. Run logging role.
 #    If no variables are given, the logging role is not executed.
 # 1. Check rsyslog.conf file size.
-#    If logging role is _not_ executed, the original file size is about 3000 bytes.
+#    If logging role is _not_ executed, the original file size is about
+#    3000 bytes.
 #    Thus, assert the size is greater than 2000.
 # 2. Check file count in /etc/rsyslog.d.
-#    If logging role is _not_ executed, only configuration files only added by
-#    other package could exist. That is usually 1 (RHEL8) or 2 (RHEL7).
+#    If logging role is _not_ executed, only configuration files only added
+#    by other package could exist. That is usually 1 (RHEL8) or 2 (RHEL7).
 #    Thus, assert the the count is less than or equal to 2.
-# 3. Check systemctl status of rsyslog as well as error or specific message in the output.
+# 3. Check systemctl status of rsyslog as well as error or specific message
+#    in the output.
 #
 - name: Ensure that the role runs with default parameters
   hosts: all
@@ -26,7 +28,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: Ensure config file size and counts

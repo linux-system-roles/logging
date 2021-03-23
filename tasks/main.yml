@@ -4,15 +4,21 @@
 
     - name: Set rsyslog_output_elasticsearch for the omelasticsearch output
       set_fact:
-        rsyslog_output_elasticsearch: "{{ logging_outputs | selectattr('name', 'defined') | selectattr('type', 'defined') |
-          selectattr('type', 'match', '^elasticsearch$') | selectattr('server_host', 'defined') | list }}"
+        rsyslog_output_elasticsearch: "{{ logging_outputs |
+          selectattr('name', 'defined') |
+          selectattr('type', 'defined') |
+          selectattr('type', 'match', '^elasticsearch$') |
+          selectattr('server_host', 'defined') | list }}"
 
     - name: Set rsyslog_output_files for the omfile outputs
       set_fact:
-        rsyslog_output_files: "{{ logging_outputs | selectattr('name', 'defined') | selectattr('type', 'defined') |
+        rsyslog_output_files: "{{ logging_outputs |
+          selectattr('name', 'defined') |
+          selectattr('type', 'defined') |
           selectattr('type', 'match', '^files$') | list }}"
 
-    - name: Set files output if rsyslog_output_files is empty and logging_inputs is not empty
+    - name: "Set files output if rsyslog_output_files is empty
+      and logging_inputs is not empty"
       set_fact:
         rsyslog_output_files: [ {"name": "default_files", "type": "files"} ]
       when:
@@ -21,27 +27,40 @@
 
     - name: Set rsyslog_output_forwards for the omfwd output
       set_fact:
-        rsyslog_output_forwards: "{{ logging_outputs | selectattr('name', 'defined') | selectattr('type', 'defined') |
-          selectattr('target', 'defined') | selectattr('type', 'match', '^forwards$') | list }}"
+        rsyslog_output_forwards: "{{ logging_outputs |
+          selectattr('name', 'defined') |
+          selectattr('type', 'defined') |
+          selectattr('target', 'defined') |
+          selectattr('type', 'match', '^forwards$') | list }}"
 
-    - name: Set rsyslog_output_remote_files for the omfwd output for the remote input
+    - name: "Set rsyslog_output_remote_files for the omfwd output
+      for the remote input"
       set_fact:
-        rsyslog_output_remote_files: "{{ logging_outputs | selectattr('name', 'defined') | selectattr('type', 'defined') |
+        rsyslog_output_remote_files: "{{ logging_outputs |
+          selectattr('name', 'defined') | selectattr('type', 'defined') |
           selectattr('type', 'match', '^remote_files$') | list }}"
 
     - name: Set rsyslog_output_relp for the relp output
       set_fact:
-        rsyslog_output_relp: "{{ logging_outputs | selectattr('name', 'defined') | selectattr('type', 'defined') |
-          selectattr('type', 'match', '^relp$') | selectattr('target', 'defined') | list }}"
+        rsyslog_output_relp: "{{ logging_outputs |
+          selectattr('name', 'defined') |
+          selectattr('type', 'defined') |
+          selectattr('type', 'match', '^relp$') |
+          selectattr('target', 'defined') | list }}"
 
     - name: Set rsyslog_input_relp for the relp input
       set_fact:
-        rsyslog_input_relp: "{{ logging_inputs | selectattr('name', 'defined') | selectattr('type', 'defined') |
+        rsyslog_input_relp: "{{ logging_inputs | selectattr('name', 'defined') |
+          selectattr('type', 'defined') |
           selectattr('type', 'match', '^relp$') | list }}"
 
     - name: Set rsyslog_outputs
       set_fact:
-        rsyslog_outputs: '{{ rsyslog_output_elasticsearch | d([]) }} + {{ rsyslog_output_files | d([]) }} + {{ rsyslog_output_forwards | d([]) }} + {{ rsyslog_output_remote_files | d([]) }} + {{ rsyslog_output_relp | d([]) }}'
+        rsyslog_outputs: '{{ rsyslog_output_elasticsearch | d([]) }} +
+          {{ rsyslog_output_files | d([]) }} +
+          {{ rsyslog_output_forwards | d([]) }} +
+          {{ rsyslog_output_remote_files | d([]) }} +
+          {{ rsyslog_output_relp | d([]) }}'
 
     - name: Set custom_config_files fact
       set_fact:
@@ -54,13 +73,16 @@
     - block:
         - name: Check logging_inputs item in logging_flows.inputs
           fail:
-            msg: "Error: {{ item.inputs }} includes undefined logging_inputs item."
+            msg: >
+              Error: {{ item.inputs }} includes undefined logging_inputs item.
           loop: "{{ logging_flows }}"
           when:
             - logging_enabled | d(true)
-            - item.inputs | intersect(__logging_input_names) | length != item.inputs | length
+            - item.inputs | intersect(__logging_input_names) |
+              length != item.inputs | length
       vars:
-        __logging_input_names: "{{ logging_inputs | map(attribute='name') | list }}"
+        __logging_input_names: "{{ logging_inputs |
+          map(attribute='name') | list }}"
 
     - block:
         - name: Re-read facts after adding custom fact
@@ -96,7 +118,8 @@
           lineinfile:
             path: "{{ role_path }}/debug/main.yml"
             create: yes
-            line: "{{ item.key }}: {{ item.value | d() | to_nice_json(indent=2) }}"
+            line: "{{ item.key }}: {{ item.value | d() |
+              to_nice_json(indent=2) }}"
           with_dict: "{{ __logging_debug_hostname }}"
 
       when:

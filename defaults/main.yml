@@ -36,7 +36,8 @@ logging_udp_batch_size: 32
 # Queue configuration for the files outputs for the server
 logging_server_queue_type: LinkedList
 logging_server_queue_size: 50000
-logging_server_threads: "{{ logging_udp_threads | int + logging_tcp_threads | int }}"
+logging_server_threads: "{{ logging_udp_threads |
+  int + logging_tcp_threads | int }}"
 
 # Mark message periodically by immark, if set to true.
 logging_mark: false
@@ -44,8 +45,8 @@ logging_mark: false
 # Interval for logging_mark in seconds.
 logging_mark_interval: 3600
 
-# When the provider is rsyslog, default 8192 - allows to specify maximum supported message size
-# both for sending and receiving. Must be greater than 1024.
+# When the provider is rsyslog, allows to specify maximum supported message size
+# both for sending and receiving. Must be greater than 1024. Default to 8192.
 logging_max_message_size: 8192
 
 # list of pki files dict
@@ -58,7 +59,8 @@ logging_max_message_size: 8192
 #                      If given, it's copied to the managed host.
 #     private_key_src: location of the key on the control host.
 #                      If given, it's copied to the managed host.
-#     ca_cert:     path to be deployed on the managed host; the path is also used in the rsyslog config.
+#     ca_cert:     path to be deployed on the managed host;
+#                  the path is also used in the rsyslog config.
 #                  default to /etc/pki/tls/certs/<ca_cert_src basename>
 #     cert:        ditto
 #                  default to /etc/pki/tls/certs/<cert_src basename>

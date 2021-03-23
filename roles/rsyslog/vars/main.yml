@@ -7,6 +7,9 @@ __rsyslog_base_packages: ['rsyslog']
 # rsyslog configuration directory
 __rsyslog_config_dir: /etc/rsyslog.d
 
+# rsyslog work directory
+__rsyslog_work_dir: '/var/lib/rsyslog'
+
 # __rsyslog_tls_packages
 #
 # List of rpm packages required for TLS support.
@@ -70,8 +73,8 @@ __rsyslog_tls_library: "gnutls"
 # rsyslog_weight_map
 #
 # This is a dictionary map of different configuration "types" corresponding to
-# numbers used to sort configuration files in `{{ __rsyslog_config_dir }}` directory
-# (configuration order is important). You can specify a type in the
+# numbers used to sort configuration files in `{{ __rsyslog_config_dir }}`
+# directory (configuration order is important). You can specify a type in the
 # configuration by using the ``item.type`` parameter.
 #
 # If you change the default weight map values, you will most likely need to
