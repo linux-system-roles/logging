@@ -40,7 +40,8 @@
     email_address: logging@fedora.org
     common_name: logging.fedora.org
 
-- name: Generate a server/client cert using the key, and signed by the self signed CA
+- name: "Generate a server/client cert using the key,
+  and signed by the self signed CA"
   openssl_certificate:
     path: "{{ __test_cert }}"
     privatekey_path: "{{ __test_key }}"

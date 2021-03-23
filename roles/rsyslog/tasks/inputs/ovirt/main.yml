@@ -1,8 +1,10 @@
 ---
 # Deploy configuration files
-- name: Install/Update oVirt input packages and generate configuration files in /etc/rsyslog.d
+- name: "Install/Update oVirt input packages and generate
+  configuration files in /etc/rsyslog.d"
   vars:
-    __rsyslog_packages: "{{ __rsyslog_ovirt_prereq_packages + __rsyslog_ovirt_packages }}"
+    __rsyslog_packages: "{{ __rsyslog_ovirt_prereq_packages +
+                            __rsyslog_ovirt_packages }}"
     __rsyslog_rules: "{{ __rsyslog_ovirt_rules }}"
   include_tasks:
     file: "{{ role_path }}/tasks/deploy.yml"

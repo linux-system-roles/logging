@@ -17,7 +17,7 @@
                     d(__rsyslog_default_pki_path + __rsyslog_default_pki_key_dir + __key_file) %}
 {% endif %}
 global(
-  workDirectory="{{ rsyslog_work_dir }}"
+  workDirectory="{{ __rsyslog_work_dir }}"
 {% if ca_cert_path != '' %}
   defaultNetstreamDriverCAFile="{{ ca_cert_path }}"
 {%   if cert_path != '' %}

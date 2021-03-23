@@ -6,7 +6,8 @@
     __rsyslog_cert_subject: "{{ rsyslog_output_elasticsearch }}"
 
 # Deploy configuration files
-- name: Install/Update elasticsearch logging packages and generate configuration files in /etc/rsyslog.d
+- name: "Install/Update elasticsearch logging packages and generate
+  configuration files in /etc/rsyslog.d"
   vars:
     __rsyslog_packages: "{{ __rsyslog_elasticsearch_packages }}"
     __rsyslog_rules: "{{ __rsyslog_elasticsearch_rules }}"

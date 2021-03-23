@@ -19,9 +19,10 @@ __rsyslog_conf_files_output_modules:
     type: 'modules'
     sections:
 
-      - comment: 'Log messages into files with timestamp format either traditional or default'
+      - comment: 'Log messages into files with timestamp format either
+        traditional or default'
         options: |-
-          {% if rsyslog_basics_use_traditional_timestamp_format | default(true) %}
+          {% if rsyslog_basics_use_traditional_timestamp_format | d(true) %}
           module(load="builtin:omfile" Template="RSYSLOG_TraditionalFileFormat")
           {% else %}
           module(load="builtin:omfile")

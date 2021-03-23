@@ -9,8 +9,9 @@ __rsyslog_files_input_packages: []
 
 # __rsyslog_files_input_rules
 #
-# List of YAML dictionaries, each dictionary should contain ``rsyslogd`` configuration
-# in a special format. This list specifies ``rsyslogd`` imfile configuration.
+# List of YAML dictionaries, each dictionary should contain ``rsyslogd``
+# configuration in a special format. This list specifies ``rsyslogd``
+# imfile configuration.
 __rsyslog_files_input_rules:
   - '{{ __rsyslog_conf_imfile_modules }}'
 

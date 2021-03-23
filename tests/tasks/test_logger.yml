@@ -3,7 +3,8 @@
   vars:
     __logging_tag: "testTag{{ __logging_index }}"
     __logging_message: "testMessage{{ __logging_index }}"
-  command: /bin/logger -i -p local6.info -t "{{ __logging_tag }}" "{{ __logging_message }}"
+  command: "/bin/logger -i -p local6.info -t {{ __logging_tag }}
+    {{ __logging_message }}"
   changed_when: false
 
 - name: Check the test log message in {{ __default_system_log }}

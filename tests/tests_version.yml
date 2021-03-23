@@ -3,7 +3,8 @@
 # [Test scenario]
 # 0. Run logging role.
 #    In the execution, __rsyslog_version is set to the rsyslog version.
-# 1. Check variable __rsyslog_version value is is no longer the initial value "0.0.0".
+# 1. Check variable __rsyslog_version value is is no longer
+#    the initial value "0.0.0".
 #
 - name: Ensure internal var __rsyslog_version is set correctly
   hosts: all

@@ -1,4 +1,4 @@
-# Ensure that the role runs with parameters from two files inputs to two files outputs
+# Ensure that the role runs with parameters from files inputs to files outputs
 #
 # [Configuration]
 # 2 files input (imfile) -> 2 files output (omfile)
@@ -15,13 +15,17 @@
 #    Other package could add rsyslog config files such as 21-cloudinit.conf to
 #    /etc/rsyslog.d and the number varies per RHEL version.
 #    Thus, assert the the count is greater than or equal to 8.
-# 3. Check systemctl status of rsyslog as well as error or specific message in the output.
-# 4. Check a files output config file exists which verifies the generated filename is correct.
-# 5. Check a files_input2 input config file does not exist since it does not have input_log_path in the config.
+# 3. Check systemctl status of rsyslog as well as error or specific message in
+#    the output.
+# 4. Check a files output config file exists which verifies the generated
+#    filename is correct.
+# 5. Check a files_input2 input config file does not exist since it does not
+#    have input_log_path in the config.
 # 6. Check 2 input config files exist.
 # 7. Check 2 input config files contains the configured input_log_path.
 #
-- name: Ensure that the role runs with parameters from two files inputs to two files outputs
+- name: "Ensure that the role runs with parameters from two files inputs
+  to two files outputs"
   hosts: all
   become: true
   vars:
@@ -35,7 +39,8 @@
 
   tasks:
     # TEST CASE 0
-    - name: TEST CASE 0; Ensure that the role runs with parameters from two files inputs to two files outputs
+    - name: "TEST CASE 0; Ensure that the role runs with parameters
+      from two files inputs to two files outputs"
       vars:
         logging_outputs:
           - name: files_output0
@@ -69,7 +74,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: Ensure config file size and counts
@@ -97,7 +103,8 @@
       failed_when: __result.stat.exists
 
     - name: Grep output to messages line
-      command: /bin/grep "{{ __default_system_log }}" {{ __test_outputfiles_conf }}
+      command: >-
+        /bin/grep {{ __default_system_log }} {{ __test_outputfiles_conf }}
       changed_when: false
 
     - name: Check if the input files config exists 0
@@ -113,11 +120,21 @@
       failed_when: not __result.stat.exists
 
     - name: Check the filter 0
-      command: /bin/grep 'input(type="imfile" file="\/var\/log\/inputdirectory0\/\*\.log" tag="files_input0")' '{{ __test_inputfiles_conf0 }}'
+      command: >-
+        /bin/grep
+        'input(type="imfile"
+        file="/var/log/inputdirectory0/\*.log"
+        tag="files_input0")'
+        {{ __test_inputfiles_conf0 }}
       changed_when: false
 
     - name: Check the filter 1
-      command: /bin/grep 'input(type="imfile" file="\/var\/log\/inputdirectory1\/\*\.log" tag="files_input1")' '{{ __test_inputfiles_conf1 }}'
+      command: >-
+        /bin/grep
+        'input(type="imfile"
+        file="/var/log/inputdirectory1/\*.log"
+        tag="files_input1")'
+        {{ __test_inputfiles_conf1 }}
       changed_when: false
 
     - name: END TEST CASE 0; Clean up the deployed config
@@ -156,5 +173,6 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers

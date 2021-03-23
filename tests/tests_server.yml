@@ -8,7 +8,8 @@
 # 2. Check the configured ports are opened.
 #
 ---
-- name: Test the server configuration containing tls tcp, plain tcp and udp connection
+- name: "Test the server configuration containing tls tcp,
+  plain tcp and udp connection"
   hosts: all
   vars:
     __test_ca_key_name: test-ca-key.pem
@@ -32,7 +33,8 @@
     - include_tasks: tasks/create_tests_certs.yml
 
     # TEST CASE 0
-    - name: TEST CASE 0; Test the server configuration containing tls tcp, plain tcp and udp connection
+    - name: "TEST CASE 0; Test the server configuration containing tls tcp,
+      plain tcp and udp connection"
       vars:
         logging_pki_files:
           - ca_cert: "{{ __test_ca_cert }}"
@@ -67,7 +69,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: Ensure config file size and counts
@@ -95,7 +98,7 @@
         state: present
 
     - name: lsof outputs for rsyslogd
-      shell: |
+      shell: |-
         set -o pipefail
         lsof -i -nP | grep rsyslogd
       register: __result
@@ -105,14 +108,14 @@
         msg: "lsof returned {{ __result.stdout }}"
 
     - name: Check port 514, 6514, 40010 and 40011 is open for TCP
-      shell: |
+      shell: |-
         set -o pipefail
         lsof -i -nP | grep rsyslogd | grep TCP | grep {{ item }}
       loop: [514, 6514, 40010, 40011]
       changed_when: false
 
     - name: Check port 514 and 40020 is open for UDP
-      shell: |
+      shell: |-
         set -o pipefail
         lsof -i -nP | grep rsyslogd | grep UDP | grep {{ item }}
       loop: [514, 40020]
@@ -151,13 +154,16 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - block:
         # TEST CASE 1
-        # remote inputs - both remote_tcp_0 and remote_tcp_1 configure the tls connection.
-        - name: TEST CASE 1; Test the server configuration containing conflicted tls inputs in the remote input
+        # remote inputs - both remote_tcp_0 and remote_tcp_1 configure
+        # the tls connection.
+        - name: "TEST CASE 1; Test the server configuration containing
+          conflicted tls inputs in the remote input"
           vars:
             logging_pki_files:
               - ca_cert: "{{ __test_ca_cert }}"
@@ -196,10 +202,13 @@
             msg: UNREACH
 
       rescue:
-        - debug:
-            msg: Caught an expected error - {{ ansible_failed_result }}
-        - assert:
-            that: item.msg is not defined or item.msg is defined and item.msg == __expected_error
+        - name: Expected error
+          debug:
+            msg: "{{ ansible_failed_result }}"
+        - name: Ensure the expected error message is issued
+          assert:
+            that: item.msg is not defined or item.msg is defined and
+              item.msg == __expected_error
           loop: "{{ ansible_failed_result.results }}"
 
     - block:

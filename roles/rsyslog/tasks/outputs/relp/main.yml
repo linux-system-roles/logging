@@ -6,7 +6,8 @@
     __rsyslog_cert_subject: "{{ rsyslog_output_relp }}"
 
 # Deploy configuration files
-- name: Install/Update relp logging packages and generate configuration files in /etc/rsyslog.d
+- name: "Install/Update relp logging packages and generate
+  configuration files in /etc/rsyslog.d"
   vars:
     __rsyslog_packages: "{{ __rsyslog_output_relp_packages }}"
     __rsyslog_rules: "{{ __rsyslog_output_relp_rules }}"

@@ -1,8 +1,9 @@
 # Test the configuration, basics input with use_imuxsock option and files output
 #
 # [Configuration]
-# basics input (imuxsock) -> files output (omfile), which is implicitly configured.
-#                            default means using the default rsyslog conf in roles/rsyslog/template/output_files.j2.
+# basics input (imuxsock) -> files output (omfile); it is implicitly configured.
+#                            default means using the default rsyslog conf in
+#                            roles/rsyslog/template/output_files.j2.
 # use_imuxsock: true
 #
 # [Test scenario]
@@ -16,12 +17,17 @@
 #    Other package could add rsyslog config files such as 21-cloudinit.conf to
 #    /etc/rsyslog.d and the number varies per RHEL version.
 #    Thus, assert the the count is greater than or equal to 5.
-# 3. Check systemctl status of rsyslog as well as error or specific message in the output.
-# 4. Check a files output config file exists which verifies the generated filename is correct.
-# 4.1 Check if the files output config file contains the expected filter and the output file as configured.
-# 4.2 Run logger command and check the log is in the local output file in {{ __default_system_log }}.
+# 3. Check systemctl status of rsyslog as well as error or specific message in
+#    the output.
+# 4. Check a files output config file exists which verifies the generated
+#    filename is correct.
+# 4.1 Check if the files output config file contains the expected filter and
+#     the output file as configured.
+# 4.2 Run logger command and check the log is in the local output file in
+#     {{ __default_system_log }}.
 #
-- name: Ensure that the role runs with parameters with the simplest configuration using imuxsock instead of imjournal
+- name: "Ensure that the role runs with parameters with the simplest
+  configuration using imuxsock instead of imjournal"
   hosts: all
   become: true
   vars:
@@ -40,7 +46,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: Ensure config file size and counts
@@ -60,7 +67,10 @@
       include_tasks: tasks/check_packages.yml
 
     - name: Check output to messages line
-      command: /bin/grep '\*.info;mail.none;authpriv.none;cron.none.*{{ __default_system_log }}' '{{ __test_files_conf }}'
+      command: >-
+        /bin/grep
+        '\\*.info;mail.none;authpriv.none;cron.none.*{{ __default_system_log }}'
+        {{ __test_files_conf }}
       changed_when: false
 
     - name: Ensure logger message is logged in a file
@@ -86,5 +96,6 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers

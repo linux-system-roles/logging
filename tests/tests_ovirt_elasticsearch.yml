@@ -1,14 +1,20 @@
 ---
-- name: Ensure that the role runs with parameters from ovirt to two elasticsearch outputs and local files output
+- name: "Ensure that the role runs with parameters from ovirt to
+  two elasticsearch outputs and local files output"
   hosts: all
   become: true
   vars:
-    __test_ovirt_collectd_conf: /etc/rsyslog.d/90-input-ovirt-ovirt_collectd_input.conf
-    __test_ovirt_engine_conf: /etc/rsyslog.d/90-input-ovirt-ovirt_engine_input.conf
+    __test_ovirt_collectd_conf: >-
+      /etc/rsyslog.d/90-input-ovirt-ovirt_collectd_input.conf
+    __test_ovirt_engine_conf: >-
+      /etc/rsyslog.d/90-input-ovirt-ovirt_engine_input.conf
     __test_ovirt_vdsm_conf: /etc/rsyslog.d/90-input-ovirt-ovirt_vdsm_input.conf
-    __test_ovirt_bogus_conf: /etc/rsyslog.d/90-input-ovirt-ovirt_bogus_input.conf
-    __test_es_conf: /etc/rsyslog.d/31-output-elasticsearch-elasticsearch_output.conf
-    __test_es_ops_conf: /etc/rsyslog.d/31-output-elasticsearch-elasticsearch_output_ops.conf
+    __test_ovirt_bogus_conf: >-
+      /etc/rsyslog.d/90-input-ovirt-ovirt_bogus_input.conf
+    __test_es_conf: >-
+      /etc/rsyslog.d/31-output-elasticsearch-elasticsearch_output.conf
+    __test_es_ops_conf: >-
+      /etc/rsyslog.d/31-output-elasticsearch-elasticsearch_output_ops.conf
     __test_collectd_name: ovirt_collectd_input
     __test_engine_name: ovirt_engine_input
     __test_vdsm_name: ovirt_vdsm_input
@@ -61,7 +67,10 @@
             subtype: bogus
         logging_flows:
           - name: flow_0
-            inputs: ["{{ __test_collectd_name }}", "{{ __test_engine_name }}", "{{ __test_vdsm_name }}"]
+            inputs:
+              - "{{ __test_collectd_name }}"
+              - "{{ __test_engine_name }}"
+              - "{{ __test_vdsm_name }}"
             outputs: [elasticsearch_output, elasticsearch_output_ops]
           - name: flow_1
             inputs: [basic_input]
@@ -71,7 +80,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: Ensure config file size and counts
@@ -98,7 +108,8 @@
           - libestr
       include_tasks: tasks/check_packages.yml
 
-    - name: Check "{{ __test_ovirt_collectd_conf }}, {{ __test_ovirt_engine_conf }}, {{ __test_ovirt_vdsm_conf }}"
+    - name: "Check {{ __test_ovirt_collectd_conf }},
+      {{ __test_ovirt_engine_conf }}, {{ __test_ovirt_vdsm_conf }}"
       stat:
         path: "{{ item }}"
       register: __result
@@ -115,27 +126,44 @@
       failed_when: __result.stat.exists
 
     - name: Check ovirt_collectd_port is "{{ __test_collectd_port }}"
-      command: /bin/grep 'input(name="{{ __test_collectd_name }}" type="imtcp" port="{{ __test_collectd_port }}"' {{ __test_ovirt_collectd_conf }}
+      command: >-
+        /bin/grep 'input(name="{{ __test_collectd_name }}" type="imtcp"
+        port="{{ __test_collectd_port }}"' {{ __test_ovirt_collectd_conf }}
       changed_when: false
 
-    - name: Check index_prefix is "{{ __test_metrics_index }}" in "{{ __test_ovirt_collectd_conf }}"
-      command: /bin/grep 'set $.index_prefix = "{{ __test_metrics_index }}"' {{ __test_ovirt_collectd_conf }}
+    - name: "Check index_prefix is {{ __test_metrics_index }} in
+      {{ __test_ovirt_collectd_conf }}"
+      command: >-
+        /bin/grep 'set $.index_prefix = "{{ __test_metrics_index }}"'
+        {{ __test_ovirt_collectd_conf }}
       changed_when: false
 
-    - name: Check input file is "{{ __test_engine_input }}" in "{{ __test_ovirt_engine_conf }}"
-      command: /bin/grep 'input(type="imfile" file="{{ __test_engine_input }}" tag="{{ __test_engine_name }}"' {{ __test_ovirt_engine_conf }}
+    - name: "Check input file is {{ __test_engine_input }} in
+      {{ __test_ovirt_engine_conf }}"
+      command: >-
+        /bin/grep 'input(type="imfile" file="{{ __test_engine_input }}"
+        tag="{{ __test_engine_name }}"' {{ __test_ovirt_engine_conf }}
       changed_when: false
 
-    - name: Check index_prefix is "{{ __test_logs_index }}" in "{{ __test_ovirt_engine_conf }}"
-      command: /bin/grep 'set $.index_prefix = "{{ __test_logs_index }}"' {{ __test_ovirt_engine_conf }}
+    - name: "Check index_prefix is {{ __test_logs_index }} in
+      {{ __test_ovirt_engine_conf }}"
+      command: >-
+        /bin/grep 'set $.index_prefix = "{{ __test_logs_index }}"'
+        {{ __test_ovirt_engine_conf }}
       changed_when: false
 
-    - name: Check input file is "{{ __test_vdsm_input }}" in "{{ __test_ovirt_vdsm_conf }}"
-      command: /bin/grep 'input(type="imfile" file="{{ __test_vdsm_input }}" tag="{{ __test_vdsm_name }}"' {{ __test_ovirt_vdsm_conf }}
+    - name: "Check input file is {{ __test_vdsm_input }} in
+      {{ __test_ovirt_vdsm_conf }}"
+      command: >-
+        /bin/grep 'input(type="imfile" file="{{ __test_vdsm_input }}"
+        tag="{{ __test_vdsm_name }}"' {{ __test_ovirt_vdsm_conf }}
       changed_when: false
 
-    - name: Check index_prefix is "{{ __test_logs_index }}" in "{{ __test_ovirt_vdsm_conf }}"
-      command: /bin/grep 'set $.index_prefix = "{{ __test_logs_index }}"' {{ __test_ovirt_vdsm_conf }}
+    - name: "Check index_prefix is {{ __test_logs_index }} in
+      {{ __test_ovirt_vdsm_conf }}"
+      command: >-
+        /bin/grep 'set $.index_prefix = "{{ __test_logs_index }}"'
+        {{ __test_ovirt_vdsm_conf }}
       changed_when: false
 
     - name: END TEST CASE 0; Ensure basic ovirt configuration works
@@ -188,10 +216,12 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
-    - name: Uninstall rsyslog-elasticsearch,mmjsonparse,mmnormalize,libestr,libfastjson,liblognorm
+    - name: "Uninstall rsyslog-elasticsearch, mmjsonparse, mmnormalize,
+      libestr, libfastjson, liblognorm"
       package:
         name:
           - rsyslog-elasticsearch
@@ -264,7 +294,10 @@
             subtype: bogus
         logging_flows:
           - name: flow_0
-            inputs: ["{{ __test_collectd_name }}", "{{ __test_engine_name }}", "{{ __test_vdsm_name }}"]
+            inputs:
+              - "{{ __test_collectd_name }}"
+              - "{{ __test_engine_name }}"
+              - "{{ __test_vdsm_name }}"
             outputs: [elasticsearch_output, elasticsearch_output_ops]
           - name: flow_1
             inputs: [basic_input]
@@ -274,7 +307,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: Ensure config file size and counts
@@ -301,7 +335,8 @@
           - libestr
       include_tasks: tasks/check_packages.yml
 
-    - name: Check "{{ __test_ovirt_collectd_conf }}, {{ __test_ovirt_engine_conf }}, {{ __test_ovirt_vdsm_conf }}"
+    - name: "Check {{ __test_ovirt_collectd_conf }},
+      {{ __test_ovirt_engine_conf }}, {{ __test_ovirt_vdsm_conf }}"
       stat:
         path: "{{ item }}"
       register: __result
@@ -318,27 +353,45 @@
       failed_when: __result.stat.exists
 
     - name: Check ovirt_collectd_port is "{{ __test_collectd_port }}"
-      command: /bin/grep 'input(name="{{ __test_collectd_name }}" type="imtcp" port="{{ __test_collectd_port }}"' {{ __test_ovirt_collectd_conf }}
+      command: >-
+        /bin/grep 'input(name="{{ __test_collectd_name }}" type="imtcp"
+        port="{{ __test_collectd_port }}"' {{ __test_ovirt_collectd_conf }}
       changed_when: false
 
-    - name: Check index_prefix is "{{ __test_metrics_index }}" in "{{ __test_ovirt_collectd_conf }}"
-      command: /bin/grep 'set $.index_prefix = "{{ __test_metrics_index }}"' {{ __test_ovirt_collectd_conf }}
+    - name: "Check index_prefix is {{ __test_metrics_index }} in
+      {{ __test_ovirt_collectd_conf }}"
+      command: >-
+        /bin/grep 'set $.index_prefix = "{{ __test_metrics_index }}"'
+        {{ __test_ovirt_collectd_conf }}
       changed_when: false
 
-    - name: Check input file is "{{ __test_engine_input }}" in "{{ __test_ovirt_engine_conf }}"
-      command: /bin/grep 'input(type="imfile" file="{{ __test_engine_input }}" tag="{{ __test_engine_name }}"' {{ __test_ovirt_engine_conf }}
+    - name: "Check input file is {{ __test_engine_input }} in
+      {{ __test_ovirt_engine_conf }}"
+      command: >-
+        /bin/grep 'input(type="imfile" file="{{ __test_engine_input }}"
+        tag="{{ __test_engine_name }}"' {{ __test_ovirt_engine_conf }}
       changed_when: false
 
-    - name: Check index_prefix is "{{ __test_logs_index }}" in "{{ __test_ovirt_engine_conf }}"
-      command: /bin/grep 'set $.index_prefix = "{{ __test_logs_index }}"' {{ __test_ovirt_engine_conf }}
+    - name: "Check index_prefix is {{ __test_logs_index }} in
+      {{ __test_ovirt_engine_conf }}"
+      command: >-
+        /bin/grep 'set $.index_prefix = "{{ __test_logs_index }}"'
+        {{ __test_ovirt_engine_conf }}
       changed_when: false
 
-    - name: Check input file is "{{ __test_vdsm_input }}" in "{{ __test_ovirt_vdsm_conf }}"
-      command: /bin/grep 'input(type="imfile" file="{{ __test_vdsm_input }}" tag="{{ __test_vdsm_name }}"' {{ __test_ovirt_vdsm_conf }}
+    - name: "Check input file is {{ __test_vdsm_input }} in
+      {{ __test_ovirt_vdsm_conf }}"
+      command: >-
+        /bin/grep 'input(type="imfile" file="{{ __test_vdsm_input }}"
+        tag="{{ __test_vdsm_name }}"' {{ __test_ovirt_vdsm_conf }}
       changed_when: false
 
-    - name: Check index_prefix is "{{ __test_logs_index }}" in "{{ __test_ovirt_vdsm_conf }}"
-      command: /bin/grep 'set $.index_prefix = "{{ __test_logs_index }}"' {{ __test_ovirt_vdsm_conf }}
+    - name: "Check index_prefix is {{ __test_logs_index }} in
+      {{ __test_ovirt_vdsm_conf }}"
+      command: >-
+        /bin/grep 'set $.index_prefix = "{{ __test_logs_index }}"'
+        {{ __test_ovirt_vdsm_conf }}
+      changed_when: false
 
     - name: Check default config params in "{{ __test_es_conf }}"
       command: /bin/grep {{ item }} {{ __test_es_conf }}
@@ -349,6 +402,7 @@
         - "allowUnsignedCerts=.off."
         - "usehttps=.on."
         - "retryfailures=.on."
+      changed_when: false
 
     - name: Check modified config params in "{{ __test_es_ops_conf }}"
       command: /bin/grep {{ item }} {{ __test_es_ops_conf }}
@@ -359,6 +413,7 @@
         - "allowUnsignedCerts=.on."
         - "usehttps=.off."
         - "retryfailures=.off."
+      changed_when: false
 
     - name: END TEST CASE 1; Ensure basic ovirt configuration works
       vars:
@@ -430,10 +485,12 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
-    - name: Uninstall rsyslog-elasticsearch,mmjsonparse,mmnormalize,libestr,libfastjson,liblognorm
+    - name: "Uninstall rsyslog-elasticsearch,mmjsonparse,mmnormalize,
+      libestr,libfastjson,liblognorm"
       package:
         name:
           - rsyslog-elasticsearch

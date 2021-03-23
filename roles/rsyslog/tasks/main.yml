@@ -7,16 +7,18 @@
     - "{{ role_path }}/vars/default.yml"
     - "{{ role_path }}/vars/{{ ansible_facts['os_family'] }}.yml"
     - "{{ role_path }}/vars/{{ ansible_facts['distribution'] }}.yml"
-    - "{{ role_path }}/vars/{{ ansible_facts['distribution'] }}_{{ ansible_facts['distribution_major_version'] }}.yml"
-    - "{{ role_path }}/vars/{{ ansible_facts['distribution'] }}_{{ ansible_facts['distribution_version'] }}.yml"
+    - "{{ role_path }}/vars/{{ ansible_facts['distribution'] }}_\
+      {{ ansible_facts['distribution_major_version'] }}.yml"
+    - "{{ role_path }}/vars/{{ ansible_facts['distribution'] }}_\
+      {{ ansible_facts['distribution_version'] }}.yml"
   when: item is file
 
 - name: Install/Update required packages
   package:
-    name: "{{ __rsyslog_base_packages }} +
-      {{ __rsyslog_tls_packages if (logging_pki_files | d([]) | length > 0) else [] }} +
+    name: "{{ __rsyslog_base_packages }} + {{ __rsyslog_tls_packages
+      if (logging_pki_files | d([]) | length > 0) else [] }} +
       {{ rsyslog_extra_packages | flatten }}"
-    state: latest
+    state: present
   when:
     - __rsyslog_enabled | bool
 
@@ -32,11 +34,13 @@
          else '0.0.0' }}
 
 - debug:
-    msg: "Rsyslog_version is {{ __rsyslog_version }}, which is older than \"8.37.0-7.2\"."
+    msg: "Rsyslog_version is {{ __rsyslog_version }},
+      which is older than \"8.37.0-7.2\"."
   when: __rsyslog_version is version('8.37.0-7.2', '<')
 
 - debug:
-    msg: "Rsyslog_version is {{ __rsyslog_version }}, which is newer than \"8.37.0-7.2\"."
+    msg: "Rsyslog_version is {{ __rsyslog_version }},
+      which is newer than \"8.37.0-7.2\"."
   when: __rsyslog_version is version('8.37.0-7.2', '>')
 
 - block:
@@ -51,23 +55,26 @@
       file:
         state: directory
         path: '{{ __rsyslog_config_dir }}'
+        mode: '0755'
 
     # Creating a work directory
     - name: Create a work directory
       file:
         state: directory
-        path: '{{ rsyslog_work_dir }}'
+        path: '{{ __rsyslog_work_dir }}'
+        mode: '0700'
 
     # Creating a backup dir for rsyslog.d
     - name: Set backup dir name
       set_fact:
-        rsyslog_backup_dir: '{{ rsyslog_backup_dir | default("/tmp") }}/rsyslog.d-{{ ansible_date_time.iso8601_basic_short }}'
+        rsyslog_backup_dir: '{{ rsyslog_backup_dir |
+          d("/tmp") }}/rsyslog.d-{{ ansible_date_time.iso8601_basic_short }}'
 
     - name: Create a backup dir
       file:
         state: directory
         path: '{{ rsyslog_backup_dir }}'
-        mode: 0700
+        mode: '0700'
       changed_when: false
 
     # Back up the pre-existing rsyslog config files in the backup dir,
@@ -77,20 +84,28 @@
         path: ["{{ __rsyslog_config_dir }}", /etc/rsyslog.conf]
         dest: "{{ rsyslog_backup_dir }}/backup.tgz"
         remove: '{{ true if __rsyslog_purge_original_conf | bool else false }}'
+        mode: '0600'
       changed_when: false
 
-    - name: Create logging directory if it does not exist or the ownership and/or modes are different.
+    - name: "Create logging directory if it does not exist or
+      the ownership and/or modes are different."
       file:
         state: directory
         path: '{{ __rsyslog_system_log_dir }}'
         owner: 'root'
         group: 'root'
-        mode: '0700'
+        mode: '0755'
+
+    - name: Get mode of rsyslog.conf if it exists
+      stat:
+        path: /etc/rsyslog.conf
+      register: __rsyslog_register_stat_conf
 
     - name: Generate main rsyslog configuration
       template:
         src: 'rsyslog.conf.j2'
         dest: '/etc/rsyslog.conf'
+        mode: "{{ __rsyslog_register_stat_conf.stat.mode | d('0700') }}"
       when:
         - __rsyslog_enabled | bool
         - logging_inputs | d([])
@@ -114,7 +129,8 @@
             sections:
               - comment: 'Log every message'
                 options: |-
-                  $RepeatedMsgReduction {{ "on" if rsyslog_message_reduction | bool else "off" }}
+                  $RepeatedMsgReduction {{ "on"
+                  if rsyslog_message_reduction | bool else "off" }}
       set_fact:
         __rsyslog_common_rules: "{{ __rsyslog_global_common_rule }}"
 
@@ -122,8 +138,10 @@
       template:
         src: 'rules.conf.j2'
         dest: |-
-          {{ __rsyslog_config_dir }}/{{ inner_item.filename | d((inner_item.weight if inner_item.weight | d()
-          else rsyslog_weight_map[inner_item.type | d("rules")]) + "-" + (inner_item.name | d("rules")) +
+          {{ __rsyslog_config_dir }}/{{ inner_item.filename |
+          d((inner_item.weight if inner_item.weight | d() else
+          rsyslog_weight_map[inner_item.type | d("rules")]) +
+          "-" + (inner_item.name | d("rules")) +
           "." + (inner_item.suffix | d("conf"))) }}
         owner: '{{ inner_item.owner | d("root") }}'
         group: '{{ inner_item.group | d("root") }}'
@@ -142,8 +160,10 @@
     - name: Remove common config files in rsyslog.d
       file:
         path: |-
-          {{ __rsyslog_config_dir }}/{{ inner_item.filename | d((inner_item.weight if inner_item.weight | d() else
-          rsyslog_weight_map[inner_item.type | d("rules")]) + "-" + (inner_item.name | d("rules")) + "." +
+          {{ __rsyslog_config_dir }}/{{ inner_item.filename |
+          d((inner_item.weight if inner_item.weight | d() else
+          rsyslog_weight_map[inner_item.type | d("rules")]) +
+          "-" + (inner_item.name | d("rules")) + "." +
           (inner_item.suffix | d("conf"))) }}
         state: absent
       loop: '{{ __rsyslog_common_rules | flatten }}'
@@ -156,10 +176,14 @@
       notify: stop rsyslogd
 
     # How to set rsyslog_custom_config_files:
-    # rsyslog_custom_config_files: [ '/path/to/custom0.conf', '/path/to/custom1.conf' ]
+    # rsyslog_custom_config_files:
+    #   - /path/to/custom0.conf
+    #   - /path/to/custom1.conf
     # The specified custom config files are copied to /etc/rsyslog.d.
-    # If the array contains non-existing file, the deployment stops there with an error.
-    - name: Copy custom config files if they are specified in rsyslog_custom_config_files variable array.
+    # If the array contains non-existing file, the deployment stops
+    # there with an error.
+    - name: "Copy custom config files if they are specified in
+      rsyslog_custom_config_files variable array."
       copy:
         src: '{{ item }}'
         dest: '{{ __rsyslog_config_dir }}'
@@ -174,23 +198,31 @@
         # Check if tls is enabled in forwards output or remote input and
         #          logging_pki_files.{ca_cert_src,ca_cert} is defined
         # Otherwise it fails.
-        - name: Check tls is enabled in forwards output or remote input and logging_pki_files
+        - name: "Check tls is enabled in forwards output or
+          remote input and logging_pki_files"
           fail:
-            msg: "Error: tls is enabled in {{ item.0.name }}; you must specify logging_pki_files ca_cert_src and/or ca_cert in the playbook var section."
+            msg: "Error: tls is enabled in {{ item.0.name }};
+              you must specify logging_pki_files ca_cert_src and/or
+              ca_cert in the playbook var section."
           loop: "{{ [__logging_forwards_tls, __logging_remote_tls] }}"
           when:
             - item | length > 0
-            - not (logging_pki_files.0.ca_cert_src | d() or logging_pki_files.0.ca_cert | d())
+            - not (logging_pki_files.0.ca_cert_src | d() or
+                logging_pki_files.0.ca_cert | d())
 
         - name: Copy local ca_cert file to the target if needed
           vars:
             __pki_file: '{{ logging_pki_files.0.ca_cert_src | basename }}'
           copy:
             src: '{{ logging_pki_files.0.ca_cert_src }}'
-            dest: '{{ logging_pki_files.0.ca_cert if logging_pki_files.0.ca_cert is defined else (__rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + __pki_file) }}'
+            dest: '{{ logging_pki_files.0.ca_cert
+              if logging_pki_files.0.ca_cert is defined
+              else (__rsyslog_default_pki_path +
+                __rsyslog_default_pki_cert_dir + __pki_file) }}'
             mode: "0600"
           when:
-            - __logging_forwards_tls | length > 0 or __logging_remote_tls | length > 0
+            - __logging_forwards_tls | length > 0 or
+              __logging_remote_tls | length > 0
             - logging_pki_files.0.ca_cert_src | d("")
           notify: restart rsyslogd
 
@@ -199,10 +231,14 @@
             __pki_file: '{{ logging_pki_files.0.cert_src | basename }}'
           copy:
             src: '{{ logging_pki_files.0.cert_src }}'
-            dest: '{{ logging_pki_files.0.cert if logging_pki_files.0.cert is defined else (__rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + __pki_file) }}'
+            dest: '{{ logging_pki_files.0.cert
+              if logging_pki_files.0.cert is defined
+              else (__rsyslog_default_pki_path +
+                __rsyslog_default_pki_cert_dir + __pki_file) }}'
             mode: "0600"
           when:
-            - __logging_forwards_tls | length > 0 or __logging_remote_tls | length > 0
+            - __logging_forwards_tls | length > 0 or
+              __logging_remote_tls | length > 0
             - logging_pki_files.0.cert_src | d("")
           notify: restart rsyslogd
 
@@ -211,18 +247,24 @@
             __pki_file: '{{ logging_pki_files.0.private_key_src | basename }}'
           copy:
             src: '{{ logging_pki_files.0.private_key_src }}'
-            dest: '{{ logging_pki_files.0.private_key if logging_pki_files.0.private_key is defined else (__rsyslog_default_pki_path + __rsyslog_default_pki_key_dir + __pki_file) }}'
+            dest: '{{ logging_pki_files.0.private_key
+              if logging_pki_files.0.private_key is defined
+              else (__rsyslog_default_pki_path +
+                __rsyslog_default_pki_key_dir + __pki_file) }}'
             mode: "0400"
           when:
-            - __logging_forwards_tls | length > 0 or __logging_remote_tls | length > 0
+            - __logging_forwards_tls | length > 0 or
+              __logging_remote_tls | length > 0
             - logging_pki_files.0.private_key_src | d("")
           notify: restart rsyslogd
 
       vars:
-        __logging_forwards_tls: "{{ logging_outputs | selectattr('type', 'match', '^forwards$') |
+        __logging_forwards_tls: "{{ logging_outputs |
+                                  selectattr('type', 'match', '^forwards$') |
                                   selectattr('tls', 'defined') |
                                   selectattr('tls') | list }}"
-        __logging_remote_tls: "{{ logging_inputs | selectattr('type', 'match', '^remote$') |
+        __logging_remote_tls: "{{ logging_inputs |
+                                  selectattr('type', 'match', '^remote$') |
                                   selectattr('tcp_ports', 'defined') |
                                   selectattr('tls', 'defined') |
                                   selectattr('tls') | list }}"

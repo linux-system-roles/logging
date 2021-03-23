@@ -1,11 +1,3 @@
 ---
 skip_list:
-- '106'
-- '204'
-- '208'
-- '301'  # Commands should not change things if nothing needs doing
 - '303'  # systemctl used in place of systemd module
-- '306'
-- '403'
-- '502'
-- '602'

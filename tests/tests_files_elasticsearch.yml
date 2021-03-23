@@ -1,11 +1,14 @@
 ---
-- name: Ensure that the role runs with parameters from imfile to two elasticsearch outputs
+- name: "Ensure that the role runs with parameters from
+  imfile to two elasticsearch outputs"
   hosts: all
   become: true
   vars:
     __test_inputfiles_dir: /var/log/inputdirectory
-    __test_inputfiles_conf: /etc/rsyslog.d/90-input-files-files_input.conf
-    __test_outputfiles_conf: /etc/rsyslog.d/31-output-elasticsearch-elasticsearch_output.conf
+    __test_inputfiles_conf: >-
+      /etc/rsyslog.d/90-input-files-files_input.conf
+    __test_outputfiles_conf: >-
+      /etc/rsyslog.d/31-output-elasticsearch-elasticsearch_output.conf
     __test_ca_cert: /tmp/es-ca.crt
     __test_cert: /tmp/es-cert.pem
     __test_key: /tmp/es-key.pem
@@ -13,15 +16,22 @@
     __test_cert_target: /etc/rsyslog.d/es-cert-target.pem
     __test_key_target: /etc/rsyslog.d/es-key-target.pem
     __test_el: elasticsearch_output
-    __expected_error1: "Error: you specified tls: true; you must specify all 3 of ca_cert, cert, private_key, or all 3 of ca_cert_src, cert_src, private_key_src, or set tls: false in the configuration named elasticsearch_output"
-    __expected_error2: "Error: you specified tls: false and also specified one or more cert/key files in the configuration named elasticsearch_output"
+    __expected_err1: "Error: you specified tls: true; you must
+      specify all 3 of ca_cert, cert, private_key, or all 3 of
+      ca_cert_src, cert_src, private_key_src, or set tls:
+      false in the configuration named elasticsearch_output"
+    __expected_err2: "Error: you specified tls: false and also
+      specified one or more cert/key files in the configuration
+      named elasticsearch_output"
 
   tasks:
-    - name: local certs are copied to the target host with the default configuration path.
+    - name: "local certs are copied to the target host with
+      the default configuration path."
       copy:
         dest: "{{ item }}"
         content:
           This is a fake {{ item }}.
+        mode: '0400'
       delegate_to: localhost
       loop:
         - "{{ __test_ca_cert }}"
@@ -29,7 +39,8 @@
         - "{{ __test_key }}"
 
     # TEST CASE 0
-    - name: TEST CASE 0; local certs are copied to the target host with the default configuration path.
+    - name: "TEST CASE 0; local certs are copied to the target host
+      with the default configuration path"
       vars:
         logging_outputs:
           - name: "{{ __test_el }}"
@@ -55,7 +66,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: Ensure config file size and counts
@@ -93,14 +105,20 @@
         path: "/etc/rsyslog.d/{{ __test_key | basename }}"
 
     - name: Check certs in {{ __test_outputfiles_conf }}
-      command: /bin/grep 'tls.{{ item.key }}="/etc/pki/tls/certs/{{ item.value | basename }}"' {{ __test_outputfiles_conf }}
+      command: >-
+        /bin/grep
+        'tls.{{ item.key }}="/etc/pki/tls/certs/{{ item.value | basename }}"'
+        {{ __test_outputfiles_conf }}
       with_dict:
         - cacert: "{{ __test_ca_cert }}"
         - mycert: "{{ __test_cert }}"
       changed_when: false
 
     - name: Check key in {{ __test_outputfiles_conf }}
-      command: /bin/grep 'tls.myprivkey="/etc/pki/tls/private/{{ __test_key | basename }}"' {{ __test_outputfiles_conf }}
+      command: >-
+        /bin/grep
+        'tls.myprivkey="/etc/pki/tls/private/{{ __test_key | basename }}"'
+        {{ __test_outputfiles_conf }}
       changed_when: false
 
     - name: Check retryfailures in {{ __test_outputfiles_conf }}
@@ -108,7 +126,8 @@
       changed_when: false
 
     - name: Check retryruleset in {{ __test_outputfiles_conf }}
-      command: /bin/grep 'retryruleset="{{ __test_el }}"' {{ __test_outputfiles_conf }}
+      command: >-
+        /bin/grep 'retryruleset="{{ __test_el }}"' {{ __test_outputfiles_conf }}
       changed_when: false
 
     - name: END TEST CASE 0; Clean up the deployed config
@@ -136,7 +155,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: clean up fake pki files
@@ -152,7 +172,8 @@
         state: absent
 
     # TEST CASE 1
-    - name: TEST CASE 1; Elasticsearch config - local certs are copied to the target host with the specified path.
+    - name: "TEST CASE 1; Elasticsearch config -
+      local certs are copied to the target host with the specified path"
       vars:
         logging_outputs:
           - name: elasticsearch_output
@@ -181,7 +202,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: Ensure config file size and counts
@@ -227,7 +249,9 @@
         path: "{{ __test_key_target }}"
 
     - name: Check key/certs in {{ __test_outputfiles_conf }}
-      command: /bin/grep 'tls.{{ item.key }}="{{ item.value }}"' {{ __test_outputfiles_conf }}
+      command: >-
+        /bin/grep 'tls.{{ item.key }}="{{ item.value }}"'
+        {{ __test_outputfiles_conf }}
       with_dict:
         - cacert: "{{ __test_ca_cert_target }}"
         - mycert: "{{ __test_cert_target }}"
@@ -262,7 +286,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: clean up fake pki files
@@ -274,7 +299,8 @@
 
     # TEST CASE 2
     - block:
-        - name: TEST CASE 2; Error case for Elasticsearch config - cert and ca_cert_src are missing
+        - name: "TEST CASE 2; Error case for Elasticsearch config -
+          cert and ca_cert_src are missing"
           vars:
             logging_outputs:
               - name: elasticsearch_output
@@ -305,10 +331,11 @@
 
       rescue:
         - debug:
-            msg: "Caught an expected error - {{ ansible_failed_result.results }}"
+            msg: "Caught an expected error -
+              {{ ansible_failed_result.results }}"
         - name: assert...
           assert:
-            that: "'{{ ansible_failed_result.results.0.msg }}' is match('{{ __expected_error1 }}')"
+            that: ansible_failed_result.results.0.msg is match(__expected_err1)
 
     - name: END TEST CASE 2; Clean up the deployed config
       vars:
@@ -333,7 +360,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: clean up fake pki files
@@ -344,7 +372,8 @@
 
     # TEST CASE 3
     - block:
-        - name: TEST CASE 3; Error case for Elasticsearch config - although cert paths are specified, tls is false
+        - name: "TEST CASE 3; Error case for Elasticsearch config -
+          although cert paths are specified, tls is false"
           vars:
             logging_outputs:
               - name: elasticsearch_output
@@ -378,10 +407,11 @@
 
       rescue:
         - debug:
-            msg: "Caught an expected error - {{ ansible_failed_result.results }}"
+            msg: "Caught an expected error -
+              {{ ansible_failed_result.results }}"
         - name: assert...
           assert:
-            that: "'{{ ansible_failed_result.results.0.msg }}' is match('{{ __expected_error2 }}')"
+            that: ansible_failed_result.results.0.msg is match(__expected_err2)
 
     - name: END TEST CASE 3; Clean up the deployed config
       vars:
@@ -412,7 +442,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: clean up fake pki files
@@ -424,7 +455,8 @@
 
     # TEST CASE 4
     - block:
-        - name: TEST CASE 4; Error case for Elasticsearch config - although tls is true, no cert data are given.
+        - name: "TEST CASE 4; Error case for Elasticsearch config -
+          although tls is true, no cert data are given."
           vars:
             logging_outputs:
               - name: elasticsearch_output
@@ -452,10 +484,11 @@
 
       rescue:
         - debug:
-            msg: "Caught an expected error - {{ ansible_failed_result.results }}"
+            msg: "Caught an expected error -
+              {{ ansible_failed_result.results }}"
         - name: assert...
           assert:
-            that: "'{{ ansible_failed_result.results.0.msg }}' is match('{{ __expected_error1 }}')"
+            that: ansible_failed_result.results.0.msg is match(__expected_err1)
 
     - name: END TEST CASE 4; Clean up the deployed config
       vars:
@@ -481,7 +514,8 @@
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
-    - name: Force all notified handlers to run at this point, not waiting for normal sync points
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
       meta: flush_handlers
 
     - name: Uninstall rsyslog-elasticsearch
