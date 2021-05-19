@@ -65,6 +65,7 @@ Logging role allows to have variables `logging_inputs`, `logging_outputs`, and `
 Currently, the logging role supports four types of logging [inputs](tasks/inputs/): `basics`, `files`, `ovirt`, and `remote`.  And four types of [outputs](tasks/outputs/): `elasticsearch`, `files`, `forwards`, and `remote_files`.  To deploy configuration files with these inputs and outputs, specify the inputs as `logging_inputs` and the outputs as `logging_outputs`. To define the flows from inputs to outputs, use `logging_flows`.  The `logging_flows` has three keys `name`, `inputs`, and `outputs`, where `inputs` is a list of `logging_inputs name` values and `outputs` is a list of `logging_outputs name` values.
 
 This is a schematic logging configuration to show log messages from input_nameA are passed to output_name0 and output_name1; log messages from input_nameB are passed only to output_name1.
+
 ```yaml
 ---
 - name: a schematic logging configuration
@@ -90,6 +91,7 @@ This is a schematic logging configuration to show log messages from input_nameA 
         inputs: [input_nameB]
         outputs: [output_name1]
 ```
+
 ### Variables
 
 #### Logging_inputs options
@@ -410,7 +412,8 @@ logging_flows:
 
 ### Standalone configuration
 
-1. Deploying `basics input` reading logs from systemd journal and implicit `files output` to write to the local files.
+Deploying `basics input` reading logs from systemd journal and implicit `files output` to write to the local files.
+
 ```yaml
 ---
 - name: Deploying basics input and implicit files output
@@ -422,7 +425,9 @@ logging_flows:
       - name: system_input
         type: basics
 ```
+
 The following playbook generates the same logging configuration files.
+
 ```yaml
 ---
 - name: Deploying basics input and files output
@@ -442,7 +447,8 @@ The following playbook generates the same logging configuration files.
         outputs: [files_output]
 ```
 
-2. Deploying `basics input` reading logs from systemd unix socket and `files output` to write to the local files.
+Deploying `basics input` reading logs from systemd unix socket and `files output` to write to the local files.
+
 ```yaml
 ---
 - name: Deploying basics input using systemd unix socket and files output
@@ -463,7 +469,8 @@ The following playbook generates the same logging configuration files.
         outputs: [files_output]
 ```
 
-3. Deploying `basics input` reading logs from systemd journal and `files output` to write to the individually configured local files.
+Deploying `basics input` reading logs from systemd journal and `files output` to write to the individually configured local files.
+
 ```yaml
 ---
 - name: Deploying basic input and configured files output
@@ -494,7 +501,8 @@ The following playbook generates the same logging configuration files.
         outputs: [files_output0, files_output1]
 ```
 
-4. Deploying `files input` reading logs from local files and `files output` to write to the individually configured local files.
+Deploying `files input` reading logs from local files and `files output` to write to the individually configured local files.
+
 ```yaml
 ---
 - name: Deploying files input and configured files output
@@ -529,7 +537,8 @@ The following playbook generates the same logging configuration files.
         outputs: [files_output0, files_output1]
 ```
 
-5. Deploying `files input` reading logs from local files and `files output` to write to the local files based on the property-based filters.
+Deploying `files input` reading logs from local files and `files output` to write to the local files based on the property-based filters.
+
 ```yaml
 ---
 - name: Deploying files input and configured files output
@@ -565,7 +574,8 @@ The following playbook generates the same logging configuration files.
 
 ### Client configuration
 
-1. Deploying `basics input` reading logs from systemd journal and `forwards output` to forward the logs to the remote rsyslog.
+Deploying `basics input` reading logs from systemd journal and `forwards output` to forward the logs to the remote rsyslog.
+
 ```yaml
 ---
 - name: Deploying basics input and forwards output
@@ -593,7 +603,8 @@ The following playbook generates the same logging configuration files.
         outputs: [forward_output0, forward_output1]
 ```
 
-2. Deploying `files input` reading logs from a local file and `forwards output` to forward the logs to the remote rsyslog over tls. Assuming the ca_cert, cert and key files are prepared at the specified paths on the control host. The files are deployed to the default location `/etc/pki/tls/certs/`, `/etc/pki/tls/certs/`, and `/etc/pki/tls/private`, respectively.
+Deploying `files input` reading logs from a local file and `forwards output` to forward the logs to the remote rsyslog over tls. Assuming the ca_cert, cert and key files are prepared at the specified paths on the control host. The files are deployed to the default location `/etc/pki/tls/certs/`, `/etc/pki/tls/certs/`, and `/etc/pki/tls/private`, respectively.
+
 ```yaml
 ---
 - name: Deploying files input and forwards output with certs
@@ -624,7 +635,8 @@ The following playbook generates the same logging configuration files.
 
 ### Server configuration
 
-1. Deploying `remote input` reading logs from remote rsyslog and `remote_files output` to write the logs to the local files under the directory named by the remote host name.
+Deploying `remote input` reading logs from remote rsyslog and `remote_files output` to write the logs to the local files under the directory named by the remote host name.
+
 ```yaml
 ---
 - name: Deploying remote input and remote_files output
@@ -648,7 +660,8 @@ The following playbook generates the same logging configuration files.
         outputs: [remote_files_output]
 ```
 
-2. Deploying `remote input` reading logs from remote rsyslog and `remote_files output` to write the logs to the configured local files with the tls setup supporting 20 clients. Assuming the ca_cert, cert and key files are prepared at the specified paths on the control host. The files are deployed to the default location `/etc/pki/tls/certs/`, `/etc/pki/tls/certs/`, and `/etc/pki/tls/private`, respectively.
+Deploying `remote input` reading logs from remote rsyslog and `remote_files output` to write the logs to the configured local files with the tls setup supporting 20 clients. Assuming the ca_cert, cert and key files are prepared at the specified paths on the control host. The files are deployed to the default location `/etc/pki/tls/certs/`, `/etc/pki/tls/certs/`, and `/etc/pki/tls/private`, respectively.
+
 ```yaml
 ---
 - name: Deploying remote input and remote_files output with certs
@@ -684,6 +697,7 @@ The following playbook generates the same logging configuration files.
 ### Client configuration with Relp
 
 Deploying `basics input` reading logs from systemd journal and `relp output` to send the logs to the remote rsyslog over relp.
+
 ```yaml
 ---
 - name: Deploying basics input and relp output
@@ -714,7 +728,8 @@ Deploying `basics input` reading logs from systemd journal and `relp output` to 
 
 ### Server configuration with Relp
 
-. Deploying `relp input` reading logs from remote rsyslog and `remote_files output` to write the logs to the local files under the directory named by the remote host name.
+Deploying `relp input` reading logs from remote rsyslog and `remote_files output` to write the logs to the local files under the directory named by the remote host name.
+
 ```yaml
 ---
 - name: Deploying remote input and remote_files output
