@@ -42,19 +42,19 @@ This role is supported on RHEL/CentOS-7, RHEL/CentOS-8 and Fedora distributions.
 
 ## Definitions
 
-  - `logging_inputs` - List of logging inputs dictionary to specify input types.
+- `logging_inputs` - List of logging inputs dictionary to specify input types.
     * `basics` - basic inputs configuring inputs from systemd journal or unix socket.
     * `files` - files inputs configuring inputs from local files.
     * `remote` - remote inputs configuring inputs from the other logging system over network.
     * `ovirt` - ovirt inputs configuring inputs from the oVirt system.
-  - `logging_outputs` - List of logging outputs dictionary to specify output types.
+- `logging_outputs` - List of logging outputs dictionary to specify output types.
     * `elasticsearch` - elasticsearch outputs configuring outputs to elasticsearch. It is available only when the input is `ovirt`.
     * `files` - files outputs configuring outputs to the local files.
     * `forwards` - forwards outputs configuring outputs to the other logging system.
     * `remote_files` - remote files outputs configuring outputs from the other logging system to the local files.
-  - `logging_flows` - List of logging flows dictionary to define relationships between logging inputs and outputs.
-  - [`Rsyslog`](https://www.rsyslog.com/) - The logging role default log provider used for log processing.
-  - [`Elasticsearch`](https://www.elastic.co/) - Elasticsearch is a distributed, search and analytic engine for all types of data. One of the supported outputs in the logging role.
+- `logging_flows` - List of logging flows dictionary to define relationships between logging inputs and outputs.
+- [`Rsyslog`](https://www.rsyslog.com/) - The logging role default log provider used for log processing.
+- [`Elasticsearch`](https://www.elastic.co/) - Elasticsearch is a distributed, search and analytic engine for all types of data. One of the supported outputs in the logging role.
 
 ## Logging Configuration
 
@@ -97,64 +97,71 @@ This is a schematic logging configuration to show log messages from input_nameA 
 #### Logging_inputs options
 
 `logging_inputs`: A list of following dictionary to configure inputs.
-- common keys
-  - `name`: Unique name of the input. Used in the `logging_flows` inputs list and a part of the generated config filename.
-  - `type`: Type of the input element. Currently, `basics`, `files`, `ovirt`, and `remote` are supported. The `type` is used to specify a task type which corresponds to a directory name in roles/rsyslog/{tasks,vars}/inputs/.
-  - `state`: State of the configuration file. `present` or `absent`. Default to `present`.
 
-- `basics` type - `basics` input supports reading logs from systemd journal or systemd unix socket.<br>
-  **available options**
-  - `kernel_message`: Load `imklog` if set to `true`. Default to `false`.
-  - `use_imuxsock`: Use `imuxsock` instead of `imjournal`. Default to `false`.
-  - `ratelimit_burst`: Maximum number of messages that can be emitted within ratelimit_interval. Default to `20000` if use_imuxsock is false. Default to `200` if use_imuxsock is true.
-  - `ratelimit_interval`: Interval to evaluate ratelimit_burst. Default to `600` seconds if use_imuxsock is false. Default to `0` if use_imuxsock is true. 0 indicates ratelimiting is turned off.
-  - `persist_state_interval`: Journal state is persisted every value messages. Default to `10`. Effective only when use_imuxsock is false.
+##### common keys
 
-- `files` type - `files` input supports reading logs from the local files.<br>
-  **available options**
-  - `input_log_path`: File name to be read by the imfile plugin. The value should be full path. Wildcard '\*' is allowed in the path.  Default to `/var/log/containers/*.log`.
+- `name`: Unique name of the input. Used in the `logging_flows` inputs list and a part of the generated config filename.
+- `type`: Type of the input element. Currently, `basics`, `files`, `ovirt`, and `remote` are supported. The `type` is used to specify a task type which corresponds to a directory name in roles/rsyslog/{tasks,vars}/inputs/.
+- `state`: State of the configuration file. `present` or `absent`. Default to `present`.
 
-- `ovirt` type - `ovirt` input supports oVirt specific inputs.<br>
-  **available options**
-  - `subtype`: ovirt input subtype. Value is one of `engine`, `collectd`, and `vdsm`.
-  - `ovirt_env_name`: ovirt environment name. Default to `engine`.
-  - `ovirt_env_uuid`: ovirt uuid. Default to none.
+##### `basics` type - `basics` input supports reading logs from systemd journal or systemd unix socket.
 
-  **available options for engine and vdsm**
-  - `ovirt_elasticsearch_index_prefix`: Index prefix for elasticsearch. Default to `project.ovirt-logs`.
-  - `ovirt_engine_fqdn`: ovirt engine fqdn. Default to none.
-  - `ovirt_input_file`: ovirt input file. Default to `/var/log/ovirt-engine/test-engine.log` for `engine`; default to `/var/log/vdsm/vdsm.log` for `vdsm`.
-  - `ovirt_vds_cluster_name`: vds cluster name. Default to none.
+###### available options
+- `kernel_message`: Load `imklog` if set to `true`. Default to `false`.
+- `use_imuxsock`: Use `imuxsock` instead of `imjournal`. Default to `false`.
+- `ratelimit_burst`: Maximum number of messages that can be emitted within ratelimit_interval. Default to `20000` if use_imuxsock is false. Default to `200` if use_imuxsock is true.
+- `ratelimit_interval`: Interval to evaluate ratelimit_burst. Default to `600` seconds if use_imuxsock is false. Default to `0` if use_imuxsock is true. 0 indicates ratelimiting is turned off.
+- `persist_state_interval`: Journal state is persisted every value messages. Default to `10`. Effective only when use_imuxsock is false.
 
-  **available options for collectd**
-  - `ovirt_collectd_port`: collectd port number. Default to `44514`.
-  - `ovirt_elasticsearch_index_prefix`: Index prefix for elasticsearch. Default to `project.ovirt-metrics`.
+##### `files` type - `files` input supports reading logs from the local files.
 
-- `relp` type - `relp` input supports receiving logs from the remote logging system over the network using relp.<br>
-  **available options**
-  - `port`: Port number Relp is listening to. Default to `20514`. See also [Port and SELinux](#port-and-selinux).
-  - `tls`: If true, encrypt the connection with TLS. You must provide key/certificates and triplets {`ca_cert`, `cert`, `private_key`} and/or {`ca_cert_src`, `cert_src`, `private_key_src`}. Default to `true`.
-  - `ca_cert`: Path to CA cert to configure Relp with tls. Default to `/etc/pki/tls/certs/basename of ca_cert_src`.
-  - `cert`: Path to cert to configure Relp with tls. Default to `/etc/pki/tls/certs/basename of cert_src`.
-  - `private_key`: Path to key to configure Relp with tls. Default to `/etc/pki/tls/private/basename of private_key_src`.
-  - `ca_cert_src`: Local CA cert file path which is copied to the target host. If `ca_cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
-  - `cert_src`: Local cert file path which is copied to the target host. If `cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
-  - `private_key_src`: Local key file path which is copied to the target host. If `private_key` is specified, it is copied to the location. Otherwise, to logging_config_dir.
-  - `pki_authmode`: Specifying the authentication mode. `name` or `fingerprint` is accepted. Default to `name`.
-  - `permitted_clients`: List of hostnames, IP addresses, fingerprints(sha1), and wildcard DNS domains which will be allowed by the `logging` server to connect and send logs over TLS. Default to `['*.{{ logging_domain }}']`
+###### available options
+- `input_log_path`: File name to be read by the imfile plugin. The value should be full path. Wildcard '\*' is allowed in the path.  Default to `/var/log/containers/*.log`.
 
-- `remote` type - `remote` input supports receiving logs from the remote logging system over the network.<br>
-  **available options**
-  - `udp_ports`: List of UDP port numbers to listen. If set, the `remote` input listens on the UDP ports. No defaults. If both `udp_ports` and `tcp_ports` are set in a `remote` input item, `udp_ports` is used and `tcp_ports` is dropped. See also [Port and SELinux](#port-and-selinux).
-  - `tcp_ports`: List of TCP port numbers to listen. If set, the `remote` input listens on the TCP ports. Default to `[514]`. If both `udp_ports` and `tcp_ports` are set in a `remote` input item, `udp_ports` is used and `tcp_ports` is dropped. If both `udp_ports` and `tcp_ports` are not set in a `remote` input item, `tcp_ports: [514]` is added to the item. See also [Port and SELinux](#port-and-selinux).
-  - `tls`: Set to `true` to encrypt the connection using the default TLS implementation used by the provider. Default to `false`.
-  - `pki_authmode`: Specifying the default network driver authentication mode. `x509/name`, `x509/fingerprint`, or `anon` is accepted. Default to `x509/name`.
-  - `permitted_clients`: List of hostnames, IP addresses, fingerprints(sha1), and wildcard DNS domains which will be allowed by the `logging` server to connect and send logs over TLS. Default to `['*.{{ logging_domain }}']`
+##### `ovirt` type - `ovirt` input supports oVirt specific inputs.
 
-  There are 3 types of items in the remote type - udp, plain tcp and tls tcp. The udp type configured using `udp_ports`; the plain tcp type is configured using `tcp_ports` without `tls` or with `tls: false`; the tls tcp type is configured using `tcp_ports` with `tls: true` at the same time. Please note there might be only one instance of each of the three types. E.g., if there are 2 `udp` type items, it fails to deploy.
+###### available options
+- `subtype`: ovirt input subtype. Value is one of `engine`, `collectd`, and `vdsm`.
+- `ovirt_env_name`: ovirt environment name. Default to `engine`.
+- `ovirt_env_uuid`: ovirt uuid. Default to none.
 
-  Valid configuration example
-  ```
+###### available options for engine and vdsm
+- `ovirt_elasticsearch_index_prefix`: Index prefix for elasticsearch. Default to `project.ovirt-logs`.
+- `ovirt_engine_fqdn`: ovirt engine fqdn. Default to none.
+- `ovirt_input_file`: ovirt input file. Default to `/var/log/ovirt-engine/test-engine.log` for `engine`; default to `/var/log/vdsm/vdsm.log` for `vdsm`.
+- `ovirt_vds_cluster_name`: vds cluster name. Default to none.
+
+###### available options for collectd
+- `ovirt_collectd_port`: collectd port number. Default to `44514`.
+- `ovirt_elasticsearch_index_prefix`: Index prefix for elasticsearch. Default to `project.ovirt-metrics`.
+
+##### `relp` type - `relp` input supports receiving logs from the remote logging system over the network using relp.
+
+###### available options
+- `port`: Port number Relp is listening to. Default to `20514`. See also [Port and SELinux](#port-and-selinux).
+- `tls`: If true, encrypt the connection with TLS. You must provide key/certificates and triplets {`ca_cert`, `cert`, `private_key`} and/or {`ca_cert_src`, `cert_src`, `private_key_src`}. Default to `true`.
+- `ca_cert`: Path to CA cert to configure Relp with tls. Default to `/etc/pki/tls/certs/basename of ca_cert_src`.
+- `cert`: Path to cert to configure Relp with tls. Default to `/etc/pki/tls/certs/basename of cert_src`.
+- `private_key`: Path to key to configure Relp with tls. Default to `/etc/pki/tls/private/basename of private_key_src`.
+- `ca_cert_src`: Local CA cert file path which is copied to the target host. If `ca_cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
+- `cert_src`: Local cert file path which is copied to the target host. If `cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
+- `private_key_src`: Local key file path which is copied to the target host. If `private_key` is specified, it is copied to the location. Otherwise, to logging_config_dir.
+- `pki_authmode`: Specifying the authentication mode. `name` or `fingerprint` is accepted. Default to `name`.
+- `permitted_clients`: List of hostnames, IP addresses, fingerprints(sha1), and wildcard DNS domains which will be allowed by the `logging` server to connect and send logs over TLS. Default to `['*.{{ logging_domain }}']`
+
+##### `remote` type - `remote` input supports receiving logs from the remote logging system over the network.
+
+###### available options
+- `udp_ports`: List of UDP port numbers to listen. If set, the `remote` input listens on the UDP ports. No defaults. If both `udp_ports` and `tcp_ports` are set in a `remote` input item, `udp_ports` is used and `tcp_ports` is dropped. See also [Port and SELinux](#port-and-selinux).
+- `tcp_ports`: List of TCP port numbers to listen. If set, the `remote` input listens on the TCP ports. Default to `[514]`. If both `udp_ports` and `tcp_ports` are set in a `remote` input item, `udp_ports` is used and `tcp_ports` is dropped. If both `udp_ports` and `tcp_ports` are not set in a `remote` input item, `tcp_ports: [514]` is added to the item. See also [Port and SELinux](#port-and-selinux).
+- `tls`: Set to `true` to encrypt the connection using the default TLS implementation used by the provider. Default to `false`.
+- `pki_authmode`: Specifying the default network driver authentication mode. `x509/name`, `x509/fingerprint`, or `anon` is accepted. Default to `x509/name`.
+- `permitted_clients`: List of hostnames, IP addresses, fingerprints(sha1), and wildcard DNS domains which will be allowed by the `logging` server to connect and send logs over TLS. Default to `['*.{{ logging_domain }}']`
+
+**Note:** There are 3 types of items in the remote type - udp, plain tcp and tls tcp. The udp type configured using `udp_ports`; the plain tcp type is configured using `tcp_ports` without `tls` or with `tls: false`; the tls tcp type is configured using `tcp_ports` with `tls: true` at the same time. Please note there might be only one instance of each of the three types. E.g., if there are 2 `udp` type items, it fails to deploy.
+
+```yaml
+  # Valid configuration example
   - name: remote_udp
     type: remote
     udp_ports: [514, ...]
@@ -167,63 +174,70 @@ This is a schematic logging configuration to show log messages from input_nameA 
     tls: true
     pki_authmode: x509/name
     permitted_clients: ['*.example.com']
-  ```
-  Invalid configuration example 1; duplicated udp
-  ```
+```
+
+```yaml
+  # Invalid configuration example 1; duplicated udp
   - name: remote_udp0
     type: remote
     udp_ports: [514]
   - name: remote_udp1
     type: remote
     udp_ports: [1514]
-  ```
-  Invalid configuration example 2; duplicated tcp
-  ```
+```
+
+```yaml
+  # Invalid configuration example 2; duplicated tcp
   - name: remote_implicit_tcp
     type: remote
   - name: remote_tcp
     type: remote
     tcp_ports: [1514]
-  ```
+```
 
 #### Logging_outputs options
 
 `logging_outputs`: A list of following dictionary to configure outputs.
-- common keys
-  - `name`: Unique name of the output. Used in the `logging_flows` outputs list and a part of the generated config filename.
-  - `type`: Type of the output element. Currently, `elasticsearch`, `files`, `forwards`, and `remote_files` are supported. The `type` is used to specify a task type which corresponds to a directory name in roles/rsyslog/{tasks,vars}/outputs/.
-  - `state`: State of the configuration file. `present` or `absent`. Default to `present`.
 
-- `elasticsearch` type - `elasticsearch` output supports sending logs to Elasticsearch. It is available only when the input is `ovirt`. Assuming Elasticsearch is already configured and running.<br>
-  **available options**
-  - `server_host`: Host name Elasticsearch is running on. **Required**.
-  - `server_port`: Port number Elasticsearch is listening to. Default to `9200`.
-  - `index_prefix`: Elasticsearch index prefix the particular log will be indexed to. **Required**.
-  - `input_type`: Specifying the input type. Currently only type `ovirt` is supported. Default to `ovirt`.
-  - `retryfailures`: Specifying whether retries or not in case of failure. Allowed value is `true` or `false`.  Default to `true`.
-  - `tls`: If true, encrypt the connection with TLS. You must provide key/certificates and triplets {`ca_cert`, `cert`, `private_key`} and/or {`ca_cert_src`, `cert_src`, `private_key_src`}. Default to `true`.
-  - `use_cert`: [DEPRECATED] If true, encrypt the connection with TLS. You must provide key/certificates and triplets {`ca_cert`, `cert`, `private_key`} and/or {`ca_cert_src`, `cert_src`, `private_key_src`}. Default to `true`. Option `use_cert` is deprecated in favor of `tls` and `use_cert` will be removed in the next minor release.
-  - `ca_cert`: Path to CA cert for Elasticsearch. Default to `/etc/pki/tls/certs/basename of ca_cert_src`.
-  - `cert`: Path to cert to connect to Elasticsearch. Default to `/etc/pki/tls/certs/basename of cert_src`.
-  - `private_key`: Path to key to connect to Elasticsearch. Default to `/etc/pki/tls/private/basename of private_key_src`.
-  - `ca_cert_src`: Local CA cert file path which is copied to the target host. If `ca_cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
-  - `cert_src`: Local cert file path which is copied to the target host. If `cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
-  - `private_key_src`: Local key file path which is copied to the target host. If `private_key` is specified, it is copied to the location. Otherwise, to logging_config_dir.
+##### common keys
 
-- `files` type - `files` output supports storing logs in the local files usually in /var/log.<br>
-  **available options**
-  - `facility`: Facility in selector; default to `*`.
-  - `severity`: Severity in selector; default to `*`.
-  - `exclude`: Exclude list used in selector; default to none.
-  - `property`: Property in property-based filter; no default
-  - `property_op`: Operation in property-based filter; In case of not `!`, put the `property_op` value in quotes; default to `contains`
-  - `property_value`: Value in property-based filter; default to `error`
-  - `path`: Path to the output file.
+- `name`: Unique name of the output. Used in the `logging_flows` outputs list and a part of the generated config filename.
+- `type`: Type of the output element. Currently, `elasticsearch`, `files`, `forwards`, and `remote_files` are supported. The `type` is used to specify a task type which corresponds to a directory name in roles/rsyslog/{tasks,vars}/outputs/.
+- `state`: State of the configuration file. `present` or `absent`. Default to `present`.
 
-  Selector options and property-based filter options are exclusive. If Property-based filter options are defined, selector options will be ignored.
+##### `elasticsearch` type - `elasticsearch` output supports sending logs to Elasticsearch. It is available only when the input is `ovirt`. Assuming Elasticsearch is already configured and running.
 
-  Unless the above options are given, these local file outputs are configured.
-  ```
+###### available options
+- `server_host`: Host name Elasticsearch is running on. **Required**.
+- `server_port`: Port number Elasticsearch is listening to. Default to `9200`.
+- `index_prefix`: Elasticsearch index prefix the particular log will be indexed to. **Required**.
+- `input_type`: Specifying the input type. Currently only type `ovirt` is supported. Default to `ovirt`.
+- `retryfailures`: Specifying whether retries or not in case of failure. Allowed value is `true` or `false`.  Default to `true`.
+- `tls`: If true, encrypt the connection with TLS. You must provide key/certificates and triplets {`ca_cert`, `cert`, `private_key`} and/or {`ca_cert_src`, `cert_src`, `private_key_src`}. Default to `true`.
+- `use_cert`: [DEPRECATED] If true, encrypt the connection with TLS. You must provide key/certificates and triplets {`ca_cert`, `cert`, `private_key`} and/or {`ca_cert_src`, `cert_src`, `private_key_src`}. Default to `true`. Option `use_cert` is deprecated in favor of `tls` and `use_cert` will be removed in the next minor release.
+- `ca_cert`: Path to CA cert for Elasticsearch. Default to `/etc/pki/tls/certs/basename of ca_cert_src`.
+- `cert`: Path to cert to connect to Elasticsearch. Default to `/etc/pki/tls/certs/basename of cert_src`.
+- `private_key`: Path to key to connect to Elasticsearch. Default to `/etc/pki/tls/private/basename of private_key_src`.
+- `ca_cert_src`: Local CA cert file path which is copied to the target host. If `ca_cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
+- `cert_src`: Local cert file path which is copied to the target host. If `cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
+- `private_key_src`: Local key file path which is copied to the target host. If `private_key` is specified, it is copied to the location. Otherwise, to logging_config_dir.
+
+##### `files` type - `files` output supports storing logs in the local files usually in /var/log.
+
+###### available options
+- `facility`: Facility in selector; default to `*`.
+- `severity`: Severity in selector; default to `*`.
+- `exclude`: Exclude list used in selector; default to none.
+- `property`: Property in property-based filter; no default
+- `property_op`: Operation in property-based filter; In case of not `!`, put the `property_op` value in quotes; default to `contains`
+- `property_value`: Value in property-based filter; default to `error`
+- `path`: Path to the output file.
+
+**Note:** Selector options and property-based filter options are exclusive. If Property-based filter options are defined, selector options will be ignored.
+
+**Note:** Unless the above options are given, these local file outputs are configured.
+
+```
   kern.*                                      /dev/console
   *.info;mail.none;authpriv.none;cron.none    /var/log/messages
   authpriv.*                                  /var/log/secure
@@ -232,59 +246,63 @@ This is a schematic logging configuration to show log messages from input_nameA 
   *.emerg                                     :omusrmsg:*
   uucp,news.crit                              /var/log/spooler
   local7.*
-  ```
+```
 
-- `forwards` type - `forwards` output sends logs to the remote logging system over the network.<br>
-  **available options**
-  - `facility`: Facility in selector; default to `*`.
-  - `severity`: Severity in selector; default to `*`.
-  - `exclude`: Exclude list used in selector; default to none.
-  - `property`: Property in property-based filter; no default
-  - `property_op`: Operation in property-based filter; In case of not `!`, put the `property_op` value in quotes; default to `contains`
-  - `property_value`: Value in property-based filter; default to `error`
-  - `target`: Target host (fqdn). **Required**.
-  - `udp_port`: UDP port number. Default to `514`.
-  - `tcp_port`: TCP port number. Default to `514`.
-  - `tls`: Set to `true` to encrypt the connection using the default TLS implementation used by the provider. Default to `false`.
-  - `pki_authmode`: Specifying the default network driver authentication mode. `x509/name`, `x509/fingerprint`, or `anon` is accepted. Default to `x509/name`.
-  - `permitted_server`: Hostname, IP address, fingerprint(sha1) or wildcard DNS domain of the server which this client will be allowed to connect and send logs over TLS. Default to `*.{{ logging_domain }}`
+##### `forwards` type - `forwards` output sends logs to the remote logging system over the network.
 
-  Selector options and property-based filter options are exclusive. If Property-based filter options are defined, selector options will be ignored.
+###### available options
+- `facility`: Facility in selector; default to `*`.
+- `severity`: Severity in selector; default to `*`.
+- `exclude`: Exclude list used in selector; default to none.
+- `property`: Property in property-based filter; no default
+- `property_op`: Operation in property-based filter; In case of not `!`, put the `property_op` value in quotes; default to `contains`
+- `property_value`: Value in property-based filter; default to `error`
+- `target`: Target host (fqdn). **Required**.
+- `udp_port`: UDP port number. Default to `514`.
+- `tcp_port`: TCP port number. Default to `514`.
+- `tls`: Set to `true` to encrypt the connection using the default TLS implementation used by the provider. Default to `false`.
+- `pki_authmode`: Specifying the default network driver authentication mode. `x509/name`, `x509/fingerprint`, or `anon` is accepted. Default to `x509/name`.
+- `permitted_server`: Hostname, IP address, fingerprint(sha1) or wildcard DNS domain of the server which this client will be allowed to connect and send logs over TLS. Default to `*.{{ logging_domain }}`
 
-- `relp` type - `relp` output sends logs to the remote logging system over the network using relp.<br>
-  **available options**
-  - `target`: Host name the remote logging system is running on. **Required**.
-  - `port`: Port number the remote logging system is listening to. Default to `20514`.
-  - `tls`: If true, encrypt the connection with TLS. You must provide key/certificates and triplets {`ca_cert`, `cert`, `private_key`} and/or {`ca_cert_src`, `cert_src`, `private_key_src`}. Default to `true`.
-  - `ca_cert`: Path to CA cert to configure Relp with tls. Default to `/etc/pki/tls/certs/basename of ca_cert_src`.
-  - `cert`: Path to cert to configure Relp with tls. Default to `/etc/pki/tls/certs/basename of cert_src`.
-  - `private_key`: Path to key to configure Relp with tls. Default to `/etc/pki/tls/private/basename of private_key_src`.
-  - `ca_cert_src`: Local CA cert file path which is copied to the target host. If `ca_cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
-  - `cert_src`: Local cert file path which is copied to the target host. If `cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
-  - `private_key_src`: Local key file path which is copied to the target host. If `private_key` is specified, it is copied to the location. Otherwise, to logging_config_dir.
-  - `pki_authmode`: Specifying the authentication mode. `name` or `fingerprint` is accepted. Default to `name`.
-  - `permitted_servers`: List of hostnames, IP addresses, fingerprints(sha1), and wildcard DNS domains which will be allowed by the `logging` client to connect and send logs over TLS. Default to `['*.{{ logging_domain }}']`
+**Note:** Selector options and property-based filter options are exclusive. If Property-based filter options are defined, selector options will be ignored.
 
-- `remote_files` type - `remote_files` output stores logs to the local files per remote host and program name originated the logs.<br>
-  **available options**
-  - `facility`: Facility in selector; default to `*`.
-  - `severity`: Severity in selector; default to `*`.
-  - `exclude`: Exclude list used in selector; default to none.
-  - `property`: Property in property-based filter; no default
-  - `property_op`: Operation in property-based filter; In case of not `!`, put the `property_op` value in quotes; default to `contains`
-  - `property_value`: Value in property-based filter; default to `error`
-  - `async_writing`: If set to `true`, the files are written asynchronously. Allowed value is `true` or `false`. Default to `false`.
-  - `client_count`: Count of client logging system supported this rsyslog server. Default to `10`.
-  - `io_buffer_size`: Buffer size used to write output data. Default to `65536` bytes.
-  - `remote_log_path`: Full path to store the filtered logs.
+##### `relp` type - `relp` output sends logs to the remote logging system over the network using relp.
+
+###### available options
+- `target`: Host name the remote logging system is running on. **Required**.
+- `port`: Port number the remote logging system is listening to. Default to `20514`.
+- `tls`: If true, encrypt the connection with TLS. You must provide key/certificates and triplets {`ca_cert`, `cert`, `private_key`} and/or {`ca_cert_src`, `cert_src`, `private_key_src`}. Default to `true`.
+- `ca_cert`: Path to CA cert to configure Relp with tls. Default to `/etc/pki/tls/certs/basename of ca_cert_src`.
+- `cert`: Path to cert to configure Relp with tls. Default to `/etc/pki/tls/certs/basename of cert_src`.
+- `private_key`: Path to key to configure Relp with tls. Default to `/etc/pki/tls/private/basename of private_key_src`.
+- `ca_cert_src`: Local CA cert file path which is copied to the target host. If `ca_cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
+- `cert_src`: Local cert file path which is copied to the target host. If `cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
+- `private_key_src`: Local key file path which is copied to the target host. If `private_key` is specified, it is copied to the location. Otherwise, to logging_config_dir.
+- `pki_authmode`: Specifying the authentication mode. `name` or `fingerprint` is accepted. Default to `name`.
+- `permitted_servers`: List of hostnames, IP addresses, fingerprints(sha1), and wildcard DNS domains which will be allowed by the `logging` client to connect and send logs over TLS. Default to `['*.{{ logging_domain }}']`
+
+##### `remote_files` type - `remote_files` output stores logs to the local files per remote host and program name originated the logs.
+
+###### available options
+- `facility`: Facility in selector; default to `*`.
+- `severity`: Severity in selector; default to `*`.
+- `exclude`: Exclude list used in selector; default to none.
+- `property`: Property in property-based filter; no default
+- `property_op`: Operation in property-based filter; In case of not `!`, put the `property_op` value in quotes; default to `contains`
+- `property_value`: Value in property-based filter; default to `error`
+- `async_writing`: If set to `true`, the files are written asynchronously. Allowed value is `true` or `false`. Default to `false`.
+- `client_count`: Count of client logging system supported this rsyslog server. Default to `10`.
+- `io_buffer_size`: Buffer size used to write output data. Default to `65536` bytes.
+- `remote_log_path`: Full path to store the filtered logs.
                        This is an example to support the per host output log files
                        `/path/to/output/dir/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log`
-  - `remote_sub_path`: Relative path to logging_system_log_dir to store the filtered logs.
+- `remote_sub_path`: Relative path to logging_system_log_dir to store the filtered logs.
 
-  Selector options and property-based filter options are exclusive. If Property-based filter options are defined, selector options will be ignored.
+**Note:** Selector options and property-based filter options are exclusive. If Property-based filter options are defined, selector options will be ignored.
 
-  if both `remote_log_path` and `remote_sub_path` are _not_ specified, the remote_file output configured with the following settings.
-  ```
+**Note:** If both `remote_log_path` and `remote_sub_path` are _not_ specified, the remote_file output configured with the following settings.
+
+```
   template(
     name="RemoteMessage"
     type="string"
@@ -311,24 +329,25 @@ This is a schematic logging configuration to show log messages from input_nameA 
     cron.*       action(name="remote_cron_log" type="omfile" DynaFile="RemoteHostCronLog")
     mail.*       action(name="remote_mail_service_log" type="omfile" DynaFile="RemoteHostMailLog")
   }
-  ```
+```
 
 #### Logging_flows options
 
-  - `name`: Unique name of the flow.
-  - `inputs`: A list of inputs, from which processing log messages starts.
-  - `outputs`: A list of outputs. to which the log messages are sent.
+- `name`: Unique name of the flow.
+- `inputs`: A list of inputs, from which processing log messages starts.
+- `outputs`: A list of outputs. to which the log messages are sent.
 
 #### Security options
 
 These variables are set in the same level of the `logging_inputs`, `logging_output`, and `logging_flows`.
 
-- `logging_pki_files`: Specifying either of the paths of the ca_cert, cert, and key on the control host or
+##### `logging_pki_files`: Specifying either of the paths of the ca_cert, cert, and key on the control host or
   the paths of theirs on the managed host or both of them.
   When TLS connection is configured, `ca_cert_src` and/or `ca_cert` is required.
   To configure the certificate of the logging system, `cert_src` and/or `cert` is required.
   To configure the private key of the logging system, `private_key_src` and/or `private_key` is required.
-``` 
+
+```
   ca_cert_src:     location of the ca_cert on the control host; if given, the file is copied to the managed host.
   cert_src:        location of the cert on the control host; if given, the file is copied to the managed host.
   private_key_src: location of the key on the control host; if given, the file is copied to the managed host.
@@ -338,8 +357,9 @@ These variables are set in the same level of the `logging_inputs`, `logging_outp
                default to /etc/pki/tls/certs/<cert_src basename>
   private_key: ditto
                default to /etc/pki/tls/private/<private_key_src basename>
-``` 
-- `logging_domain`: The default DNS domain used to accept remote incoming logs from remote hosts. Default to "{{ ansible_domain if ansible_domain else ansible_hostname }}"
+```
+
+##### `logging_domain`: The default DNS domain used to accept remote incoming logs from remote hosts. Default to "{{ ansible_domain if ansible_domain else ansible_hostname }}"
 
 #### Server performance optimization options
 
@@ -366,7 +386,8 @@ These variables are set in the same level of the `logging_inputs`, `logging_outp
 ### Update and Delete
 
 Due to the nature of ansible idempotency, if you run ansible-playbook multiple times without changing any variables and options, no changes are made from the second time. If some changes are made, only the rsyslog configuration files affected by the changes are recreated. To delete any existing rsyslog input or output config files generated by the previous ansible-playbook run, you need to add "state: absent" to the dictionary to be deleted (in this case, input_nameA and output_name0). And remove the flow dictionary related to the input and output as follows.
-```
+
+```yaml
 logging_inputs:
   - name: input_nameA
     type: input_typeA
@@ -386,7 +407,8 @@ logging_flows:
 ```
 
 If you want to remove all the configuration files previously configured, in addition to setting `state: absent` to each logging_inputs and logging_outputs item, add `logging_enabled: false` to the configuration variables as follows. It will eliminate the global and common configuration files, as well.
-```
+
+```yaml
 logging_enabled: false
 logging_inputs:
   - name: input_nameA
@@ -761,10 +783,12 @@ Deploying `relp input` reading logs from remote rsyslog and `remote_files output
 ### Port and SELinux
 
 SELinux is only configured to allow sending and receiving on the following ports by default:
+
 ```
 syslogd_port_t        tcp   514, 20514
 syslogd_port_t        udp   514, 20514
 ```
+
 If other ports need to be configured, you can use [linux-system-roles/selinux](https://github.com/linux-system-roles/selinux) to manage SELinux contexts.
 
 ## Providers
