@@ -6,16 +6,15 @@
 <!--ts-->
   * [Background](#background)
   * [Definitions](#definitions)
-  * [Logging Configuration](#logging-configuration)
-    * [Brief overview](#brief-overview)
-    * [Variables](#variables)
-      * [Logging_inputs options](#logging_inputs-options)
-      * [Logging_outputs options](#logging_outputs-options)
-      * [Logging_flows options](#logging_flows-options)
-      * [Security options](#security-options)
-      * [Server performance optimization options](#server-performance-optimization-options)
-      * [Other options](#other-options)
-    * [Update and Delete](#update-and-delete)
+  * [Logging Configuration Overview](#logging-configuration-overview)
+  * [Variables](#variables)
+    * [Logging_inputs options](#logging_inputs-options)
+    * [Logging_outputs options](#logging_outputs-options)
+    * [Logging_flows options](#logging_flows-options)
+    * [Security options](#security-options)
+    * [Server performance optimization options](#server-performance-optimization-options)
+    * [Other options](#other-options)
+  * [Update and Delete](#update-and-delete)
   * [Configuration Examples](#configuration-examples)
     * [Standalone configuration](#standalone-configuration)
     * [Client configuration](#client-configuration)
@@ -25,7 +24,6 @@
   * [Port and SELinux](#port-and-selinux)
   * [Providers](#providers)
   * [Tests](#tests)
-  * [Implementation Details](#implementation-details)
 <!--te-->
 
 ## Background
@@ -34,7 +32,7 @@ Logging role is an abstract layer for provisioning and configuring the logging s
 
 In the nature of logging, there are multiple ways to read logs and multiple ways to output them. For instance, the logging system may read logs from local files, or read them from systemd/journal, or receive them from the other logging system over the network. Then, the logs may be stored in the local files in the /var/log directory, or sent to Elasticsearch, or forwarded to other logging system. The combination between the inputs and the outputs needs to be flexible. For instance, you may want to inputs from journal stored just in the local file, while inputs read from files stored in the local log files as well as forwarded to the other logging system.
 
-To satisfy such requirements, logging role introduced 3 primary variables `logging_inputs`, `logging_outputs`, and `logging_flows`. The inputs are represented in the list of `logging_inputs` dictionary, the outputs are in the list of `logging_outputs` dictionary, and the relationship between them are defined as a list of `logging_flows` dictionary. The details are described in [Logging Configuration](#logging-configuration).
+To satisfy such requirements, logging role introduced 3 primary variables `logging_inputs`, `logging_outputs`, and `logging_flows`. The inputs are represented in the list of `logging_inputs` dictionary, the outputs are in the list of `logging_outputs` dictionary, and the relationship between them are defined as a list of `logging_flows` dictionary. The details are described in [Logging Configuration Overview](#logging-configuration-overview).
 
 ## Requirements
 
@@ -56,13 +54,11 @@ This role is supported on RHEL/CentOS-7, RHEL/CentOS-8 and Fedora distributions.
 - [`Rsyslog`](https://www.rsyslog.com/) - The logging role default log provider used for log processing.
 - [`Elasticsearch`](https://www.elastic.co/) - Elasticsearch is a distributed, search and analytic engine for all types of data. One of the supported outputs in the logging role.
 
-## Logging Configuration
-
-### Brief overview
+## Logging Configuration Overview
 
 Logging role allows to have variables `logging_inputs`, `logging_outputs`, and `logging_flows` with additional options to configure logging system such as `rsyslog`.
 
-Currently, the logging role supports four types of logging [inputs](tasks/inputs/): `basics`, `files`, `ovirt`, and `remote`.  And four types of [outputs](tasks/outputs/): `elasticsearch`, `files`, `forwards`, and `remote_files`.  To deploy configuration files with these inputs and outputs, specify the inputs as `logging_inputs` and the outputs as `logging_outputs`. To define the flows from inputs to outputs, use `logging_flows`.  The `logging_flows` has three keys `name`, `inputs`, and `outputs`, where `inputs` is a list of `logging_inputs name` values and `outputs` is a list of `logging_outputs name` values.
+Currently, the logging role supports four types of logging inputs: `basics`, `files`, `ovirt`, and `remote`.  And four types of outputs: `elasticsearch`, `files`, `forwards`, and `remote_files`.  To deploy configuration files with these inputs and outputs, specify the inputs as `logging_inputs` and the outputs as `logging_outputs`. To define the flows from inputs to outputs, use `logging_flows`.  The `logging_flows` has three keys `name`, `inputs`, and `outputs`, where `inputs` is a list of `logging_inputs name` values and `outputs` is a list of `logging_outputs name` values.
 
 This is a schematic logging configuration to show log messages from input_nameA are passed to output_name0 and output_name1; log messages from input_nameB are passed only to output_name1.
 
@@ -92,52 +88,60 @@ This is a schematic logging configuration to show log messages from input_nameA 
         outputs: [output_name1]
 ```
 
-### Variables
+## Variables
 
-#### Logging_inputs options
+### Logging_inputs options
 
-`logging_inputs`: A list of following dictionary to configure inputs.
+`logging_inputs`: A list of the following dictionaries to configure inputs.
 
-##### common keys
+#### common keys
 
 - `name`: Unique name of the input. Used in the `logging_flows` inputs list and a part of the generated config filename.
 - `type`: Type of the input element. Currently, `basics`, `files`, `ovirt`, and `remote` are supported. The `type` is used to specify a task type which corresponds to a directory name in roles/rsyslog/{tasks,vars}/inputs/.
 - `state`: State of the configuration file. `present` or `absent`. Default to `present`.
 
-##### `basics` type - `basics` input supports reading logs from systemd journal or systemd unix socket.
+#### basics type
 
-###### available options
+`basics` input supports reading logs from systemd journal or systemd unix socket.
+
+Available options:
 - `kernel_message`: Load `imklog` if set to `true`. Default to `false`.
 - `use_imuxsock`: Use `imuxsock` instead of `imjournal`. Default to `false`.
 - `ratelimit_burst`: Maximum number of messages that can be emitted within ratelimit_interval. Default to `20000` if use_imuxsock is false. Default to `200` if use_imuxsock is true.
 - `ratelimit_interval`: Interval to evaluate ratelimit_burst. Default to `600` seconds if use_imuxsock is false. Default to `0` if use_imuxsock is true. 0 indicates ratelimiting is turned off.
 - `persist_state_interval`: Journal state is persisted every value messages. Default to `10`. Effective only when use_imuxsock is false.
 
-##### `files` type - `files` input supports reading logs from the local files.
+#### files type
 
-###### available options
+`files` input supports reading logs from the local files.
+
+Available options:
 - `input_log_path`: File name to be read by the imfile plugin. The value should be full path. Wildcard '\*' is allowed in the path.  Default to `/var/log/containers/*.log`.
 
-##### `ovirt` type - `ovirt` input supports oVirt specific inputs.
+#### ovirt type
 
-###### available options
+`ovirt` input supports oVirt specific inputs.
+
+Available options:
 - `subtype`: ovirt input subtype. Value is one of `engine`, `collectd`, and `vdsm`.
 - `ovirt_env_name`: ovirt environment name. Default to `engine`.
 - `ovirt_env_uuid`: ovirt uuid. Default to none.
 
-###### available options for engine and vdsm
+Available options for engine and vdsm:
 - `ovirt_elasticsearch_index_prefix`: Index prefix for elasticsearch. Default to `project.ovirt-logs`.
 - `ovirt_engine_fqdn`: ovirt engine fqdn. Default to none.
 - `ovirt_input_file`: ovirt input file. Default to `/var/log/ovirt-engine/test-engine.log` for `engine`; default to `/var/log/vdsm/vdsm.log` for `vdsm`.
 - `ovirt_vds_cluster_name`: vds cluster name. Default to none.
 
-###### available options for collectd
+Available options for collectd:
 - `ovirt_collectd_port`: collectd port number. Default to `44514`.
 - `ovirt_elasticsearch_index_prefix`: Index prefix for elasticsearch. Default to `project.ovirt-metrics`.
 
-##### `relp` type - `relp` input supports receiving logs from the remote logging system over the network using relp.
+#### relp type
 
-###### available options
+`relp` input supports receiving logs from the remote logging system over the network using relp.
+
+Available options:
 - `port`: Port number Relp is listening to. Default to `20514`. See also [Port and SELinux](#port-and-selinux).
 - `tls`: If true, encrypt the connection with TLS. You must provide key/certificates and triplets {`ca_cert`, `cert`, `private_key`} and/or {`ca_cert_src`, `cert_src`, `private_key_src`}. Default to `true`.
 - `ca_cert`: Path to CA cert to configure Relp with tls. Default to `/etc/pki/tls/certs/basename of ca_cert_src`.
@@ -149,9 +153,11 @@ This is a schematic logging configuration to show log messages from input_nameA 
 - `pki_authmode`: Specifying the authentication mode. `name` or `fingerprint` is accepted. Default to `name`.
 - `permitted_clients`: List of hostnames, IP addresses, fingerprints(sha1), and wildcard DNS domains which will be allowed by the `logging` server to connect and send logs over TLS. Default to `['*.{{ logging_domain }}']`
 
-##### `remote` type - `remote` input supports receiving logs from the remote logging system over the network.
+#### remote type
 
-###### available options
+`remote` input supports receiving logs from the remote logging system over the network.
+
+Available options:
 - `udp_ports`: List of UDP port numbers to listen. If set, the `remote` input listens on the UDP ports. No defaults. If both `udp_ports` and `tcp_ports` are set in a `remote` input item, `udp_ports` is used and `tcp_ports` is dropped. See also [Port and SELinux](#port-and-selinux).
 - `tcp_ports`: List of TCP port numbers to listen. If set, the `remote` input listens on the TCP ports. Default to `[514]`. If both `udp_ports` and `tcp_ports` are set in a `remote` input item, `udp_ports` is used and `tcp_ports` is dropped. If both `udp_ports` and `tcp_ports` are not set in a `remote` input item, `tcp_ports: [514]` is added to the item. See also [Port and SELinux](#port-and-selinux).
 - `tls`: Set to `true` to encrypt the connection using the default TLS implementation used by the provider. Default to `false`.
@@ -195,19 +201,21 @@ This is a schematic logging configuration to show log messages from input_nameA 
     tcp_ports: [1514]
 ```
 
-#### Logging_outputs options
+### Logging_outputs options
 
 `logging_outputs`: A list of following dictionary to configure outputs.
 
-##### common keys
+#### common keys
 
 - `name`: Unique name of the output. Used in the `logging_flows` outputs list and a part of the generated config filename.
 - `type`: Type of the output element. Currently, `elasticsearch`, `files`, `forwards`, and `remote_files` are supported. The `type` is used to specify a task type which corresponds to a directory name in roles/rsyslog/{tasks,vars}/outputs/.
 - `state`: State of the configuration file. `present` or `absent`. Default to `present`.
 
-##### `elasticsearch` type - `elasticsearch` output supports sending logs to Elasticsearch. It is available only when the input is `ovirt`. Assuming Elasticsearch is already configured and running.
+#### elasticsearch type
 
-###### available options
+`elasticsearch` output supports sending logs to Elasticsearch. It is available only when the input is `ovirt`. Assuming Elasticsearch is already configured and running.
+
+Available options:
 - `server_host`: Host name Elasticsearch is running on. **Required**.
 - `server_port`: Port number Elasticsearch is listening to. Default to `9200`.
 - `index_prefix`: Elasticsearch index prefix the particular log will be indexed to. **Required**.
@@ -222,9 +230,11 @@ This is a schematic logging configuration to show log messages from input_nameA 
 - `cert_src`: Local cert file path which is copied to the target host. If `cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
 - `private_key_src`: Local key file path which is copied to the target host. If `private_key` is specified, it is copied to the location. Otherwise, to logging_config_dir.
 
-##### `files` type - `files` output supports storing logs in the local files usually in /var/log.
+#### files type
 
-###### available options
+`files` output supports storing logs in the local files usually in /var/log.
+
+Available options:
 - `facility`: Facility in selector; default to `*`.
 - `severity`: Severity in selector; default to `*`.
 - `exclude`: Exclude list used in selector; default to none.
@@ -248,9 +258,11 @@ This is a schematic logging configuration to show log messages from input_nameA 
   local7.*
 ```
 
-##### `forwards` type - `forwards` output sends logs to the remote logging system over the network.
+#### forwards type
 
-###### available options
+`forwards` output sends logs to the remote logging system over the network.
+
+Available options:
 - `facility`: Facility in selector; default to `*`.
 - `severity`: Severity in selector; default to `*`.
 - `exclude`: Exclude list used in selector; default to none.
@@ -266,9 +278,11 @@ This is a schematic logging configuration to show log messages from input_nameA 
 
 **Note:** Selector options and property-based filter options are exclusive. If Property-based filter options are defined, selector options will be ignored.
 
-##### `relp` type - `relp` output sends logs to the remote logging system over the network using relp.
+#### relp type
 
-###### available options
+`relp` output sends logs to the remote logging system over the network using relp.
+
+Available options:
 - `target`: Host name the remote logging system is running on. **Required**.
 - `port`: Port number the remote logging system is listening to. Default to `20514`.
 - `tls`: If true, encrypt the connection with TLS. You must provide key/certificates and triplets {`ca_cert`, `cert`, `private_key`} and/or {`ca_cert_src`, `cert_src`, `private_key_src`}. Default to `true`.
@@ -281,9 +295,11 @@ This is a schematic logging configuration to show log messages from input_nameA 
 - `pki_authmode`: Specifying the authentication mode. `name` or `fingerprint` is accepted. Default to `name`.
 - `permitted_servers`: List of hostnames, IP addresses, fingerprints(sha1), and wildcard DNS domains which will be allowed by the `logging` client to connect and send logs over TLS. Default to `['*.{{ logging_domain }}']`
 
-##### `remote_files` type - `remote_files` output stores logs to the local files per remote host and program name originated the logs.
+#### remote_files type
 
-###### available options
+`remote_files` output stores logs to the local files per remote host and program name originated the logs.
+
+Available options:
 - `facility`: Facility in selector; default to `*`.
 - `severity`: Severity in selector; default to `*`.
 - `exclude`: Exclude list used in selector; default to none.
@@ -331,21 +347,23 @@ This is a schematic logging configuration to show log messages from input_nameA 
   }
 ```
 
-#### Logging_flows options
+### Logging_flows options
 
 - `name`: Unique name of the flow.
 - `inputs`: A list of inputs, from which processing log messages starts.
 - `outputs`: A list of outputs. to which the log messages are sent.
 
-#### Security options
+### Security options
 
 These variables are set in the same level of the `logging_inputs`, `logging_output`, and `logging_flows`.
 
-##### `logging_pki_files`: Specifying either of the paths of the ca_cert, cert, and key on the control host or
-  the paths of theirs on the managed host or both of them.
-  When TLS connection is configured, `ca_cert_src` and/or `ca_cert` is required.
-  To configure the certificate of the logging system, `cert_src` and/or `cert` is required.
-  To configure the private key of the logging system, `private_key_src` and/or `private_key` is required.
+#### logging_pki_files
+
+Specifying either of the paths of the ca_cert, cert, and key on the control host or
+the paths of theirs on the managed host or both of them.
+When TLS connection is configured, `ca_cert_src` and/or `ca_cert` is required.
+To configure the certificate of the logging system, `cert_src` and/or `cert` is required.
+To configure the private key of the logging system, `private_key_src` and/or `private_key` is required.
 
 ```
   ca_cert_src:     location of the ca_cert on the control host; if given, the file is copied to the managed host.
@@ -359,9 +377,11 @@ These variables are set in the same level of the `logging_inputs`, `logging_outp
                default to /etc/pki/tls/private/<private_key_src basename>
 ```
 
-##### `logging_domain`: The default DNS domain used to accept remote incoming logs from remote hosts. Default to "{{ ansible_domain if ansible_domain else ansible_hostname }}"
+#### logging_domain
 
-#### Server performance optimization options
+The default DNS domain used to accept remote incoming logs from remote hosts. Default to "{{ ansible_domain if ansible_domain else ansible_hostname }}"
+
+### Server performance optimization options
 
 These variables are set in the same level of the `logging_inputs`, `logging_output`, and `logging_flows`.
 
@@ -373,7 +393,7 @@ These variables are set in the same level of the `logging_inputs`, `logging_outp
 - `logging_server_queue_size`: Maximum number of messages in the queue. Default to `50000`.
 - `logging_server_threads`: Number of worker threads. Default to `logging_tcp_threads` + `logging_udp_threads`.
 
-#### Other options
+### Other options
 
 These variables are set in the same level of the `logging_inputs`, `logging_output`, and `logging_flows`.
 
@@ -793,8 +813,8 @@ If other ports need to be configured, you can use [linux-system-roles/selinux](h
 
 ## Providers
 
-[Rsyslog](roles/rsyslog) - This documentation contains rsyslog specific information.
+- Rsyslog
 
 ## Tests
 
-[Automated CI-tests](tests) - This documentation shows how to execute CI tests in the [tests](tests) directory as well as how to debug when the test fails.
+tests/README.md - This documentation shows how to execute CI tests in the tests directory as well as how to debug when the test fails.
