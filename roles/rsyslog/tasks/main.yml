@@ -64,28 +64,31 @@
         path: '{{ __rsyslog_work_dir }}'
         mode: '0700'
 
-    # Creating a backup dir for rsyslog.d
-    - name: Set backup dir name
-      set_fact:
-        rsyslog_backup_dir: '{{ rsyslog_backup_dir |
-          d("/tmp") }}/rsyslog.d-{{ ansible_date_time.iso8601_basic_short }}'
-
-    - name: Create a backup dir
-      file:
-        state: directory
-        path: '{{ rsyslog_backup_dir }}'
-        mode: '0700'
-      changed_when: false
-
     # Back up the pre-existing rsyslog config files in the backup dir,
     # then removing the files/dirs in rsyslog.d.
-    - name: Archive the contents of {{ __rsyslog_config_dir }} to the backup dir
-      archive:
-        path: ["{{ __rsyslog_config_dir }}", /etc/rsyslog.conf]
-        dest: "{{ rsyslog_backup_dir }}/backup.tgz"
-        remove: '{{ true if __rsyslog_purge_original_conf | bool else false }}'
-        mode: '0600'
-      changed_when: false
+    - block:
+        - name: Create a backup dir
+          file:
+            state: directory
+            path: '{{ __rsyslog_backup_dir }}'
+            mode: '0700'
+          changed_when: false
+
+        - name: Archive the contents of {{ __rsyslog_config_dir }} to
+            the backup dir
+          command: >
+            tar -cvzf "{{ __rsyslog_backup_dir }}/backup.tgz"
+                /etc/rsyslog.conf "{{ __rsyslog_config_dir }}"
+          changed_when: false
+
+        - name: Purge original conf
+          file:
+            state: absent
+            path: "{{ __rsyslog_config_dir }}/*"
+          when: __rsyslog_purge_original_conf | bool | d(false)
+      vars:
+        __rsyslog_backup_dir: '{{ rsyslog_backup_dir |
+          d("/tmp") }}/rsyslog.d-{{ ansible_date_time.iso8601_basic_short }}'
 
     - name: "Create logging directory if it does not exist or
       the ownership and/or modes are different."
