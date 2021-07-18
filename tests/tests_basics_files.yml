@@ -173,7 +173,6 @@
         - name: "TEST CASE 2; Test the configuration, which flow
           contains a undefined input bogus_basic_input"
           vars:
-            logging_purge_confs: true
             logging_outputs:
               - name: files_output0
                 type: files
@@ -273,6 +272,7 @@
     - name: "TEST CASE 3; Ensure that the role runs with parameters
       from imjournal input to two omfile and two omfwd outputs"
       vars:
+        logging_purge_confs: true
         logging_outputs:
           - name: files_output0
             type: files
