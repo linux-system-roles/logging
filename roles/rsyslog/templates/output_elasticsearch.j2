@@ -33,7 +33,13 @@ ruleset(name="{{ item.name }}") {
         action(
             type="omelasticsearch"
             name="{{ item.name }}"
-            server="{{ item.server_host | d('logging-es') }}"
+{% if item.server_host is string %}
+            server="{{ item.server_host }}"
+{% elif item.server_host is sequence %}
+            server={{ item.server_host }}
+{% else %}
+            server="logging-es"
+{% endif %}
             serverport="{{ item.server_port | d(9200) | int }}"
             template="{{ item.template | d("es_template") }}"
             searchIndex="{{ item.searchIndex | d("index_template") }}"
