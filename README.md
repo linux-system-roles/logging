@@ -216,11 +216,11 @@ Available options:
 `elasticsearch` output supports sending logs to Elasticsearch. It is available only when the input is `ovirt`. Assuming Elasticsearch is already configured and running.
 
 Available options:
-- `server_host`: Host name Elasticsearch is running on. **Required**.
+- `server_host`: Host name Elasticsearch is running on. The value is a single host or list of hosts. **Required**.
 - `server_port`: Port number Elasticsearch is listening to. Default to `9200`.
 - `index_prefix`: Elasticsearch index prefix the particular log will be indexed to. **Required**.
 - `input_type`: Specifying the input type. Currently only type `ovirt` is supported. Default to `ovirt`.
-- `retryfailures`: Specifying whether retries or not in case of failure. Allowed value is `true` or `false`.  Default to `true`.
+- `retryfailures`: Specifying whether retries or not in case of failure. Allowed value is `true` or `false`. Default to `true`.
 - `tls`: If true, encrypt the connection with TLS. You must provide key/certificates and triplets {`ca_cert`, `cert`, `private_key`} and/or {`ca_cert_src`, `cert_src`, `private_key_src`}. Default to `true`.
 - `use_cert`: [DEPRECATED] If true, encrypt the connection with TLS. You must provide key/certificates and triplets {`ca_cert`, `cert`, `private_key`} and/or {`ca_cert_src`, `cert_src`, `private_key_src`}. Default to `true`. Option `use_cert` is deprecated in favor of `tls` and `use_cert` will be removed in the next minor release.
 - `ca_cert`: Path to CA cert for Elasticsearch. Default to `/etc/pki/tls/certs/basename of ca_cert_src`.

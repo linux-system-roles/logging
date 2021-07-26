@@ -166,6 +166,14 @@
         {{ __test_ovirt_vdsm_conf }}
       changed_when: false
 
+    - name: Check server param in "{{ __test_es_conf }}"
+      command: /bin/grep 'server="logging-es"' {{ __test_es_conf }}
+      changed_when: false
+
+    - name: Check server param in "{{ __test_es_ops_conf }}"
+      command: /bin/grep 'server="logging-es-ops"' {{ __test_es_ops_conf }}
+      changed_when: false
+
     - name: END TEST CASE 0; Ensure basic ovirt configuration works
       vars:
         logging_enabled: false
@@ -239,7 +247,7 @@
             type: file
           - name: elasticsearch_output
             type: elasticsearch
-            server_host: logging-es
+            server_host: [logging-es0, logging-es1]
             server_port: 9200
             index_prefix: project.
             input_type: ovirt
@@ -248,7 +256,9 @@
             private_key: "/etc/rsyslog.d/es-key.pem"
           - name: elasticsearch_output_ops
             type: elasticsearch
-            server_host: logging-es-ops
+            server_host:
+              - logging-es-ops0
+              - logging-es-ops1
             server_port: 9200
             index_prefix: .operations.
             input_type: ovirt
@@ -415,6 +425,17 @@
         - "retryfailures=.off."
       changed_when: false
 
+    - name: Check server param in "{{ __test_es_conf }}"
+      command: >-
+        /bin/grep "server=\['logging-es0', 'logging-es1'\]" {{ __test_es_conf }}
+      changed_when: false
+
+    - name: Check server param in "{{ __test_es_ops_conf }}"
+      command: >-
+        /bin/grep "server=\['logging-es-ops0', 'logging-es-ops1'\]"
+                  {{ __test_es_ops_conf }}
+      changed_when: false
+
     - name: END TEST CASE 1; Ensure basic ovirt configuration works
       vars:
         logging_enabled: false
@@ -424,7 +445,7 @@
             state: absent
           - name: elasticsearch_output
             type: elasticsearch
-            server_host: logging-es
+            server_host: [logging-es0, logging-es1]
             server_port: 9200
             index_prefix: project.
             input_type: ovirt
@@ -434,7 +455,9 @@
             state: absent
           - name: elasticsearch_output_ops
             type: elasticsearch
-            server_host: logging-es-ops
+            server_host:
+              - logging-es-ops0
+              - logging-es-ops1
             server_port: 9200
             index_prefix: .operations.
             input_type: ovirt
