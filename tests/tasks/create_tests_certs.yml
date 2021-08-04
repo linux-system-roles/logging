@@ -1,4 +1,4 @@
-- name: Install python2-cryptography
+- name: Ensure python2-cryptography exists in RedHat/CentOS-7
   package:
     name:
       - python2-cryptography
@@ -7,6 +7,16 @@
     - ansible_facts["distribution"] == "CentOS" or
       ansible_facts["distribution"] == "RedHat"
     - ansible_facts["distribution_major_version"] == "7"
+
+- name: Ensure python3-cryptography exists in RedHat/CentOS-8 and newer
+  package:
+    name:
+      - python3-cryptography
+    state: present
+  when:
+    - ansible_facts["distribution"] == "CentOS" or
+      ansible_facts["distribution"] == "RedHat"
+    - ansible_facts["distribution_major_version"] >= "8"
 
 - name: Generate a CA key
   openssl_privatekey:
