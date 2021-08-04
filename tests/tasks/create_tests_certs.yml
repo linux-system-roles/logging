@@ -1,12 +1,22 @@
-- name: Install python2-cryptography
+- name: Install python-cryptography
   package:
     name:
-      - python2-cryptography
+      - python-cryptography
     state: present
   when:
     - ansible_facts["distribution"] == "CentOS" or
       ansible_facts["distribution"] == "RedHat"
     - ansible_facts["distribution_major_version"] == "7"
+
+- name: Install python3-cryptography
+  package:
+    name:
+      - python3-cryptography
+    state: present
+  when:
+    - not (ansible_facts["distribution"] == "CentOS" or
+      ansible_facts["distribution"] == "RedHat") or
+      ansible_facts["distribution_major_version"] | int > 7
 
 - name: Generate a CA key
   openssl_privatekey:
