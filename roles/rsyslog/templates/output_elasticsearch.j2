@@ -87,6 +87,10 @@ ruleset(name="{{ item.name }}") {
             tls.mycert="{{ __mycert }}"
             tls.myprivkey="{{ __myprivkey }}"
 {% endif %}
+{% if logging_elasticsearch_password | length > 0 and item.uid is defined and item.uid | length > 0 %}
+            uid="{{ item.uid }}"
+            pwd="{{ logging_elasticsearch_password }}"
+{% endif %}
         )
     }
 }

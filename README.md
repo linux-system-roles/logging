@@ -229,6 +229,9 @@ Available options:
 - `ca_cert_src`: Local CA cert file path which is copied to the target host. If `ca_cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
 - `cert_src`: Local cert file path which is copied to the target host. If `cert` is specified, it is copied to the location. Otherwise, to logging_config_dir.
 - `private_key_src`: Local key file path which is copied to the target host. If `private_key` is specified, it is copied to the location. Otherwise, to logging_config_dir.
+- `uid`: If basic HTTP authentication is deployed, the user name is specified with this key.
+
+logging_elasticsearch_password: If basic HTTP authentication is deployed, the password is specified with this global variable. Please be careful that this `logging_elasticsearch_password` is a global variable to be placed at the same level as `logging_output`, `logging_input`, and `logging_flows` are. Another things to be aware of are this `logging_elasticsearch_password` is shared among all the elasticsearch outputs. That is, the elasticsearch servers should share one password if there are multiple of servers. Plus, the uid and password are configured if both of them are found in the playbook. For instance, if there are multiple elasticsearch outputs and one of them is missing the `uid` key, then the configured output does not have the uid and password.
 
 #### files type
 
