@@ -88,9 +88,9 @@
           when: not __backup_stat.stat.exists
 
         - name: Purge original conf
-          file:
-            state: absent
-            path: "{{ __rsyslog_config_dir }}/*"
+          shell: |-
+            set -euo pipefail
+            /bin/rm -rfv {{ __rsyslog_config_dir }}/*
           when: __rsyslog_purge_original_conf | bool | d(false)
 
         - block:
