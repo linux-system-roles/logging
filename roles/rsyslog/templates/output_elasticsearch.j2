@@ -36,7 +36,7 @@ ruleset(name="{{ item.name }}") {
 {% if item.server_host is string %}
             server="{{ item.server_host }}"
 {% elif item.server_host is sequence %}
-            server={{ item.server_host }}
+            server=[{% for srv in item.server_host %}"{{ srv }}"{{ '' if loop.last else ', ' }}{% endfor %}]
 {% else %}
             server="logging-es"
 {% endif %}
