@@ -400,7 +400,7 @@ These variables are set in the same level of the `logging_inputs`, `logging_outp
 - `logging_enabled`: When 'true', logging role will deploy specified configuration file set. Default to 'true'.
 - `logging_mark`: Mark message periodically by immark, if set to `true`. Default to `false`.
 - `logging_mark_interval`: Interval for `logging_mark` in seconds. Default to `3600`.
-- `logging_purge_original_conf`: `true` or `false`. If set to `true`, files in /etc/rsyslog.d are purged.
+- `logging_purge_confs`: `true` or `false`. If set to `true`, files in /etc/rsyslog.d are purged.
 - `logging_system_log_dir`: Directory where the local log output files are placed. Default to `/var/log`.
 
 ### Update and Delete
