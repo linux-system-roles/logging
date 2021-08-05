@@ -427,12 +427,13 @@
 
     - name: Check server param in "{{ __test_es_conf }}"
       command: >-
-        /bin/grep "server=\['logging-es0', 'logging-es1'\]" {{ __test_es_conf }}
+        /bin/grep "server=\[\"logging-es0\", \"logging-es1\"\]"
+                  {{ __test_es_conf }}
       changed_when: false
 
     - name: Check server param in "{{ __test_es_ops_conf }}"
       command: >-
-        /bin/grep "server=\['logging-es-ops0', 'logging-es-ops1'\]"
+        /bin/grep "server=\[\"logging-es-ops0\", \"logging-es-ops1\"\]"
                   {{ __test_es_ops_conf }}
       changed_when: false
 
