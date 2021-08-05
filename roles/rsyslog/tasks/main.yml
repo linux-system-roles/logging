@@ -82,7 +82,9 @@
           changed_when: false
 
         - name: Purge original conf
-          shell: "/bin/rm -rf {{ __rsyslog_config_dir }}/*"
+          shell: |-
+            set -euo pipefail
+            /bin/rm -rf {{ __rsyslog_config_dir }}/*
         # 'file' module "state=absent" does not work with "path=/some/dir/*" (wildcard)
         # 'file' module should support "state=empty" see: https://github.com/ansible/ansible/issues/18910
         #  file:
