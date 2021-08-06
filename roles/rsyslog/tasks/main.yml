@@ -77,8 +77,10 @@
         - name: Archive the contents of {{ __rsyslog_config_dir }} to
             the backup dir
           command: >
-            tar -cvzf "{{ __rsyslog_backup_dir }}/backup.tgz"
+            tar -cvzPf "{{ __rsyslog_backup_dir }}/backup.tgz"
                 /etc/rsyslog.conf "{{ __rsyslog_config_dir }}"
+          args:
+            warn: false  # suppress 'unarchive' warning
           changed_when: false
 
         - name: Purge original conf
