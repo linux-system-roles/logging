@@ -85,11 +85,6 @@
           shell: |-
             set -euo pipefail
             /bin/rm -rf {{ __rsyslog_config_dir }}/*
-        # 'file' module "state=absent" does not work with "path=/some/dir/*" (wildcard)
-        # 'file' module should support "state=empty" see: https://github.com/ansible/ansible/issues/18910
-        #  file:
-        #    state: empty
-        #    path: "{{ __rsyslog_config_dir }}"
           when: __rsyslog_purge_original_conf | bool | d(false)
       vars:
         __rsyslog_backup_dir: '{{ rsyslog_backup_dir |
