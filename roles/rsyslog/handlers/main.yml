@@ -3,6 +3,10 @@
   service:
     name: rsyslog
     state: restarted
+  ignore_errors: true
+
+- name: restart rsyslogd
+  command: journalctl -u rsyslog
 
 - name: stop rsyslogd
   service:
