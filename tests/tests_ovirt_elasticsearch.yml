@@ -2,7 +2,6 @@
 - name: "Ensure that the role runs with parameters from ovirt to
   two elasticsearch outputs and local files output"
   hosts: all
-  become: true
   vars:
     __test_ovirt_collectd_conf: >-
       /etc/rsyslog.d/90-input-ovirt-ovirt_collectd_input.conf

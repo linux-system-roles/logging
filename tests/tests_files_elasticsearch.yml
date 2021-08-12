@@ -2,7 +2,6 @@
 - name: "Ensure that the role runs with parameters from
   imfile to two elasticsearch outputs"
   hosts: all
-  become: true
   vars:
     __test_inputfiles_dir: /var/log/inputdirectory
     __test_inputfiles_conf: >-

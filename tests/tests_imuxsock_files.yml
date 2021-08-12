@@ -29,7 +29,6 @@
 - name: "Ensure that the role runs with parameters with the simplest
   configuration using imuxsock instead of imjournal"
   hosts: all
-  become: true
   vars:
     __test_files_conf: /etc/rsyslog.d/30-output-files-default_files.conf
     __default_system_log: /var/log/messages

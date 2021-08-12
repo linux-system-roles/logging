@@ -2,7 +2,6 @@
 - name: "Ensure inputs from the remote logging system passed
   to the local files outputs."
   hosts: all
-  become: true
   vars:
     __test_input_remote_tcp: >-
       /etc/rsyslog.d/11-input-remote-remote_tcp_input.conf

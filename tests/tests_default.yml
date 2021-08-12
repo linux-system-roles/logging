@@ -2,7 +2,6 @@
 #
 - name: Ensure that the role runs with default parameters
   hosts: all
-  become: true
 
   tasks:
     - name: default run (NOOP)

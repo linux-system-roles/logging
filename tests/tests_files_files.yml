@@ -27,7 +27,6 @@
 - name: "Ensure that the role runs with parameters from two files inputs
   to two files outputs"
   hosts: all
-  become: true
   vars:
     __test_inputfiles_dir0: /var/log/inputdirectory0
     __test_inputfiles_dir1: /var/log/inputdirectory1

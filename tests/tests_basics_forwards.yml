@@ -2,7 +2,6 @@
 - name: "Ensure that the role runs with parameters for basics input
   and forwards output"
   hosts: all
-  become: true
   vars:
     __test_files_conf: >-
       /etc/rsyslog.d/30-output-files-default_files.conf
