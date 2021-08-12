@@ -8,7 +8,6 @@
 #
 - name: Ensure internal var __rsyslog_version is set correctly
   hosts: all
-  become: true
   vars:
     __rsyslog_version: "0.0.0"
 

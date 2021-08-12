@@ -2,7 +2,6 @@
 - name: "Combination test - test for (2 types of inputs) x
   (2 types of outputs) combination"
   hosts: all
-  become: true
   vars:
     __test_files_conf: /etc/rsyslog.d/30-output-files-files_test0.conf
     __test_forwards_conf_s_f: >-
