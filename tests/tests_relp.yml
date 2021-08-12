@@ -175,8 +175,7 @@
       shell: >-
         set -euo pipefail;
         grep
-        "tls.permittedpeer=\[\"\*.$( _domain=$(hostname -d); _domain=${_domain:-"{{ logging_domain }}"}; echo $_domain )\"\]"
-        "{{ __test_relp_server1 }}" | wc -l
+        "tls.permittedpeer=\[\"\*.{{ logging_domain }}\"\]" "{{ __test_relp_server1 }}" | wc -l
       register: __result
       changed_when: false
       failed_when: __result.stdout != "1"
@@ -346,8 +345,7 @@
       shell: >-
         set -euo pipefail;
         grep
-        "tls.permittedpeer=\[\"\*.$( _domain=$(hostname -d); _domain=${_domain:-"{{ logging_domain }}"}; echo $_domain )\"\]" "{{ __test_relp_client1 }}"
-        | wc -l
+        "tls.permittedpeer=\[\"\*.{{ logging_domain }}\"\]" "{{ __test_relp_client1 }}" | wc -l
       register: __result
       changed_when: false
       failed_when: __result.stdout != "1"
