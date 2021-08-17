@@ -11,7 +11,7 @@
         mode: '0444'
       with_items:
         - '{{ __rsyslog_cert_subject }}'
-      when: 
+      when:
         - item.ca_cert_src | d()
         - (item.tls is defined) | ternary(item.tls, item.use_cert | d(true))
 
@@ -24,7 +24,7 @@
         mode: '0444'
       with_items:
         - '{{ __rsyslog_cert_subject }}'
-      when: 
+      when:
         - item.cert_src | d()
         - (item.tls is defined) | ternary(item.tls, item.use_cert | d(true))
 
@@ -37,7 +37,7 @@
         mode: '0400'
       with_items:
         - '{{ __rsyslog_cert_subject }}'
-      when: 
+      when:
         - item.private_key_src | d()
         - (item.tls is defined) | ternary(item.tls, item.use_cert | d(true))
 
