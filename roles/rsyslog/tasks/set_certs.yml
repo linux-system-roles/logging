@@ -11,7 +11,9 @@
         mode: '0444'
       with_items:
         - '{{ __rsyslog_cert_subject }}'
-      when: item.ca_cert_src | d()
+      when: 
+        - item.ca_cert_src | d()
+        - (item.tls is defined) | ternary(item.tls, item.use_cert | d(true))
 
     - name: "Copy cert on the control host to the specified path
       on the target host"
@@ -22,7 +24,9 @@
         mode: '0444'
       with_items:
         - '{{ __rsyslog_cert_subject }}'
-      when: item.cert_src | d()
+      when: 
+        - item.cert_src | d()
+        - (item.tls is defined) | ternary(item.tls, item.use_cert | d(true))
 
     - name: "Copy key on the control host to the specified path
       on the target host"
@@ -33,7 +37,9 @@
         mode: '0400'
       with_items:
         - '{{ __rsyslog_cert_subject }}'
-      when: item.private_key_src | d()
+      when: 
+        - item.private_key_src | d()
+        - (item.tls is defined) | ternary(item.tls, item.use_cert | d(true))
 
     - name: Check certs - tls is true, but triplets are not given
       fail:
