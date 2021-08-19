@@ -51,8 +51,8 @@
       when: item.tls is defined | ternary(item.tls, item.use_cert | d(true))
 
     - name: Check certs - key/certs data are provided, but tls is false
-      fail:
-        msg: "Error: you specified tls: false and also specified one or
+      debug:
+        msg: "WARNING: you specified tls: false and also specified one or
           more cert/key files in the configuration named {{ item.name }}"
       with_items:
         - '{{ __rsyslog_cert_subject }}'
