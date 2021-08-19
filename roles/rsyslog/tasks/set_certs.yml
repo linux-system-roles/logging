@@ -57,10 +57,8 @@
       with_items:
         - '{{ __rsyslog_cert_subject }}'
       when:
-        - not ((item.tls is defined) | ternary(item.tls, item.use_cert |
-          d(true)))
-        - item.ca_cert | d() or item.cert | d() or item.private_key | d()
-        - item.ca_cert_src | d() or
-          item.cert_src | d() or
-          item.private_key_src | d()
+        - not (item.tls is defined | ternary(item.tls, item.use_cert | d(true)))
+        - (item.ca_cert | d() or item.cert | d() or item.private_key | d()) or
+          (item.ca_cert_src | d() or item.cert_src | d() or
+           item.private_key_src | d())
   when: __rsyslog_cert_subject | d([])
