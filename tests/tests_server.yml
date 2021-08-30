@@ -18,12 +18,18 @@
     __test_key_name: test-key.pem
     __test_csr_name: test-cert.csr
     __test_cert_name: test-cert.pem
-    __test_ca_key: "/etc/pki/tls/private/{{ __test_ca_key_name }}"
-    __test_ca_cert_csr: "/etc/rsyslog.d/{{ __test_ca_csr }}"
-    __test_ca_cert: "/etc/pki/tls/certs/{{ __test_ca_cert_name }}"
-    __test_key: "/etc/pki/tls/private/{{ __test_key_name }}"
-    __test_cert_csr: "/etc/rsyslog.d/{{ __test_csr_name }}"
-    __test_cert: "/etc/pki/tls/certs/{{ __test_cert_name }}"
+    __test_ca_path: /etc/pki/CA
+    __test_ca_key_path: "{{ __test_ca_path }}/private"
+    __test_ca_cert_path: "{{ __test_ca_path }}/certs"
+    __test_key_path: /etc/pki/tls/private
+    __test_cert_path: /etc/pki/tls/certs
+    __test_csr_path: /etc/rsyslog.d
+    __test_ca_key: "{{ __test_ca_key_path }}/{{ __test_ca_key_name }}"
+    __test_ca_cert_csr: "{{ __test_csr_path }}/{{ __test_ca_csr }}"
+    __test_ca_cert: "{{ __test_ca_cert_path }}/{{ __test_ca_cert_name }}"
+    __test_key: "{{ __test_key_path }}/{{ __test_key_name }}"
+    __test_cert_csr: "{{ __test_csr_path }}/{{ __test_csr_name }}"
+    __test_cert: "{{ __test_cert_path }}/{{ __test_cert_name }}"
     __test_server_ptcp: /etc/rsyslog.d/11-input-remote-remote_ptcp.conf
     __test_server_tcp: /etc/rsyslog.d/11-input-remote-remote_tcp.conf
     __test_server_udp: /etc/rsyslog.d/11-input-remote-remote_udp.conf
