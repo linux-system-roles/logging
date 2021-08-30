@@ -3,17 +3,21 @@
   hosts: all
   vars:
     __test_ca_key_name: test-ca-key.pem
-    __test_ca_csr: test-ca.csr
     __test_ca_cert_name: test-ca.crt
     __test_key_name: test-key.pem
     __test_csr_name: test-cert.csr
     __test_cert_name: test-cert.pem
-    __test_ca_key: "/etc/pki/tls/private/{{ __test_ca_key_name }}"
-    __test_ca_cert_csr: "/etc/rsyslog.d/{{ __test_ca_csr }}"
-    __test_ca_cert: "/etc/pki/tls/certs/{{ __test_ca_cert_name }}"
-    __test_key: "/etc/pki/tls/private/{{ __test_key_name }}"
-    __test_cert_csr: "/etc/rsyslog.d/{{ __test_csr_name }}"
-    __test_cert: "/etc/pki/tls/certs/{{ __test_cert_name }}"
+    __test_ca_path: /etc/pki/CA
+    __test_ca_key_path: "{{ __test_ca_path }}/private"
+    __test_ca_cert_path: "{{ __test_ca_path }}/certs"
+    __test_key_path: /etc/pki/tls/private
+    __test_cert_path: /etc/pki/tls/certs
+    __test_csr_path: /etc/rsyslog.d
+    __test_ca_key: "{{ __test_ca_key_path }}/{{ __test_ca_key_name }}"
+    __test_ca_cert: "{{ __test_ca_cert_path }}/{{ __test_ca_cert_name }}"
+    __test_key: "{{ __test_key_path }}/{{ __test_key_name }}"
+    __test_cert_csr: "{{ __test_csr_path }}/{{ __test_csr_name }}"
+    __test_cert: "{{ __test_cert_path }}/{{ __test_cert_name }}"
     __test_relp_server0: /etc/rsyslog.d/11-input-relp-relp_server0.conf
     __test_relp_server1: /etc/rsyslog.d/11-input-relp-relp_server1.conf
     __test_relp_client0: /etc/rsyslog.d/31-output-relp-relp_client0.conf
@@ -130,38 +134,38 @@
     - name: Check the ca cert in relp_server0 - 0
       shell: |-
         set -euo pipefail
-        grep 'tls.cacert="/etc/pki/tls/certs/test-ca.crt"' "{{ __test_relp_server0 }}" | wc -l
+        grep 'tls.cacert="{{ __test_ca_cert }}"' "{{ __test_relp_server0 }}" | wc -l
       register: __result
       changed_when: false
       failed_when: __result.stdout != "1"
 
     - name: Check the ca cert in relp_server0 - 1
       stat:
-        path: /etc/pki/tls/certs/test-ca.crt
+        path: "{{ __test_ca_cert }}"
 
     - name: Check the cert in relp_server0 - 0
       shell: |-
         set -euo pipefail
-        grep 'tls.mycert="/etc/pki/tls/certs/test-cert.pem"' "{{ __test_relp_server0 }}" | wc -l
+        grep 'tls.mycert="{{ __test_cert }}"' "{{ __test_relp_server0 }}" | wc -l
       register: __result
       changed_when: false
       failed_when: __result.stdout != "1"
 
     - name: Check the cert in relp_server0 - 1
       stat:
-        path: /etc/pki/tls/certs/test-cert.pem
+        path: "{{ __test_cert }}"
 
     - name: Check the private key in relp_server0 - 0
       shell: |-
         set -euo pipefail
-        grep 'tls.myprivkey="/etc/pki/tls/private/test-key.pem"' "{{ __test_relp_server0 }}" | wc -l
+        grep 'tls.myprivkey="{{ __test_key }}"' "{{ __test_relp_server0 }}" | wc -l
       register: __result
       changed_when: false
       failed_when: __result.stdout != "1"
 
     - name: Check the private key in relp_server0 - 1
       stat:
-        path: /etc/pki/tls/private/test-key.pem
+        path: "{{ __test_key }}"
 
     - name: Check tls.permittedpeer in relp_server0
       shell: |-
@@ -300,38 +304,38 @@
     - name: Check the ca cert in relp_client0 - 0
       shell: |-
         set -euo pipefail
-        grep 'tls.cacert="/etc/pki/tls/certs/test-ca.crt"' "{{ __test_relp_client0 }}" | wc -l
+        grep 'tls.cacert="{{ __test_ca_cert }}"' "{{ __test_relp_client0 }}" | wc -l
       register: __result
       changed_when: false
       failed_when: __result.stdout != "1"
 
     - name: Check the ca cert in relp_client0 - 1
       stat:
-        path: /etc/pki/tls/certs/test-ca.crt
+        path: "{{ __test_ca_cert }}"
 
     - name: Check the cert in relp_client0 - 0
       shell: |-
         set -euo pipefail
-        grep 'tls.mycert="/etc/pki/tls/certs/test-cert.pem"' "{{ __test_relp_client0 }}" | wc -l
+        grep 'tls.mycert="{{ __test_cert }}"' "{{ __test_relp_client0 }}" | wc -l
       register: __result
       changed_when: false
       failed_when: __result.stdout != "1"
 
     - name: Check the cert in relp_client0 - 1
       stat:
-        path: /etc/pki/tls/certs/test-cert.pem
+        path: "{{ __test_cert }}"
 
     - name: Check the private key in relp_client0 - 0
       shell: |-
         set -euo pipefail
-        grep 'tls.myprivkey="/etc/pki/tls/private/test-key.pem"' "{{ __test_relp_client0 }}" | wc -l
+        grep 'tls.myprivkey="{{ __test_key }}"' "{{ __test_relp_client0 }}" | wc -l
       register: __result
       changed_when: false
       failed_when: __result.stdout != "1"
 
     - name: Check the private key in relp_client0 - 1
       stat:
-        path: /etc/pki/tls/private/test-key.pem
+        path: "{{ __test_key }}"
 
     - name: Check tls.permittedpeer in relp_client0
       shell: |-
@@ -395,7 +399,6 @@
       file: path="{{ item }}" state=absent
       loop:
         - "{{ __test_ca_key }}"
-        - "{{ __test_ca_cert_csr }}"
         - "{{ __test_ca_cert }}"
         - "{{ __test_key }}"
         - "{{ __test_cert_csr }}"
