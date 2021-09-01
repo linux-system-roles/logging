@@ -26,6 +26,7 @@
   tasks:
     - name: TEST CASE 0; Ensure basic ovirt default configuration works
       vars:
+        logging_elasticsearch_password: password0
         logging_outputs:
           - name: default_files
             type: file
@@ -39,6 +40,7 @@
             ca_cert: "/etc/rsyslog.d/es-ca.crt"
             cert: "/etc/rsyslog.d/es-cert.pem"
             private_key: "/etc/rsyslog.d/es-key.pem"
+            uid: testuser0
           - name: elasticsearch_output_ops
             type: elasticsearch
             server_host: logging-es-ops
@@ -173,9 +175,20 @@
       command: /bin/grep 'server="logging-es-ops"' {{ __test_es_ops_conf }}
       changed_when: false
 
+    - name: Check password is in "{{ __test_es_conf }}"
+      command: /bin/grep 'pwd="password0"'  {{ __test_es_conf }}
+      changed_when: false
+
+    - name: Check pwd= is not in "{{ __test_es_ops_conf }}"
+      command: /bin/grep "pwd="  {{ __test_es_ops_conf }}
+      register: __result
+      changed_when: false
+      failed_when: __result.rc != 1
+
     - name: END TEST CASE 0; Ensure basic ovirt configuration works
       vars:
         logging_enabled: false
+        logging_elasticsearch_password: password0
         logging_outputs:
           - name: default_files
             type: file
@@ -191,6 +204,7 @@
             cert: "/etc/rsyslog.d/es-cert.pem"
             private_key: "/etc/rsyslog.d/es-key.pem"
             state: absent
+            uid: testuser0
           - name: elasticsearch_output_ops
             type: elasticsearch
             server_host: logging-es-ops
@@ -253,6 +267,7 @@
             ca_cert: "/etc/rsyslog.d/es-ca.crt"
             cert: "/etc/rsyslog.d/es-cert.pem"
             private_key: "/etc/rsyslog.d/es-key.pem"
+            uid: testuser0
           - name: elasticsearch_output_ops
             type: elasticsearch
             server_host:
@@ -453,6 +468,7 @@
             cert: "/etc/rsyslog.d/es-cert.pem"
             private_key: "/etc/rsyslog.d/es-key.pem"
             state: absent
+            uid: testuser0
           - name: elasticsearch_output_ops
             type: elasticsearch
             server_host:
