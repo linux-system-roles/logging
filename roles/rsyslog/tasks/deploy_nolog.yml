@@ -1,0 +1,58 @@
+---
+# SPDX-License-Identifier: GPL-3.0-only
+
+# If the input/output has a possibility to reveal some sensitive data,
+# include this deploy_nolog.yml file.
+# See tasks/outputs/elasticsearch/main.yml for an examle.
+
+- name: Install/Update required packages
+  package:
+    name: "{{ __rsyslog_packages }}"
+    state: present
+  when:
+    - __rsyslog_packages | length > 0
+    - not rsyslog_in_image | bool
+  notify: restart rsyslogd
+
+- name: Generate role configuration files in rsyslog.d with no_log
+  template:
+    src: 'rules.conf.j2'
+    dest: '{{ inner_item.path |
+      d(__rsyslog_config_dir) }}/{{ inner_item.filename | d((inner_item.weight
+      if inner_item.weight | d() else
+      rsyslog_weight_map[inner_item.type | d("rules")]) +
+      "-" + (inner_item.name | d("rules")) + "." +
+      (inner_item.suffix | d("conf"))) }}'
+    owner: '{{ inner_item.owner | d("root") }}'
+    group: '{{ inner_item.group | d("root") }}'
+    mode: '{{ inner_item.mode  | d("0644") }}'
+  loop: '{{ __rsyslog_rules | flatten }}'
+  loop_control:
+    loop_var: inner_item
+  no_log: true
+  when:
+    - __rsyslog_enabled | bool
+    - inner_item.state is undefined or inner_item.state != 'absent'
+    - inner_item.filename | d() or inner_item.name | d()
+    - inner_item.options | d() or inner_item.sections | d()
+  notify: restart rsyslogd
+
+- name: Remove role config files from rsyslog.d with no_log
+  file:
+    path: '{{ inner_item.path |
+      d(__rsyslog_config_dir) }}/{{ inner_item.filename | d((inner_item.weight
+      if inner_item.weight | d() else
+      rsyslog_weight_map[inner_item.type | d("rules")]) +
+      "-" + (inner_item.name | d("rules")) + "." +
+      (inner_item.suffix | d("conf"))) }}'
+    state: absent
+  loop: '{{ __rsyslog_rules | flatten }}'
+  loop_control:
+    loop_var: inner_item
+  no_log: true
+  when:
+    - (not __rsyslog_enabled | bool) or
+      (inner_item.state | d('present') == 'absent')
+    - inner_item.filename | d() or inner_item.name | d()
+    - inner_item.options | d() or inner_item.sections | d()
+  notify: restart rsyslogd

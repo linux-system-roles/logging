@@ -72,3 +72,8 @@ logging_pki_files: []
 #
 # The default DNS domain used to accept remote incoming logs from remote hosts.
 logging_domain: '{{ ansible_domain if ansible_domain else ansible_hostname }}'
+
+# logging_elasticsearch_password
+#
+# Password to pass to the elasticsearch output
+logging_elasticsearch_password: ""
