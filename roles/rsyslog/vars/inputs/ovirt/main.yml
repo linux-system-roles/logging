@@ -11,7 +11,6 @@ __rsyslog_ovirt_packages:
   - libfastjson
   - liblognorm
   - libestr
-__rsyslog_ovirt_prereq_packages: []
 
 # oVirt Rsyslog configuration rules
 # ---------------------------

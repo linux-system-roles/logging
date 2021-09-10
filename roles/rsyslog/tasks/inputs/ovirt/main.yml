@@ -1,4 +1,18 @@
 ---
+# yamllint disable rule:line-length
+- name: Set platform/version specific variables
+  include_vars: "{{ item }}"
+  loop:
+    - "{{ role_path }}/vars/inputs/ovirt/default.yml"
+    - "{{ role_path }}/vars/inputs/ovirt/{{ ansible_facts['os_family'] }}.yml"
+    - "{{ role_path }}/vars/inputs/ovirt/{{ ansible_facts['distribution'] }}.yml"
+    - "{{ role_path }}/vars/inputs/ovirt/{{ ansible_facts['distribution'] }}_\
+      {{ ansible_facts['distribution_major_version'] }}.yml"
+    - "{{ role_path }}/vars/inputs/ovirt/{{ ansible_facts['distribution'] }}_\
+      {{ ansible_facts['distribution_version'] }}.yml"
+  when: item is file
+
+# yamllint enable rule:line-length
 # Deploy configuration files
 - name: "Install/Update oVirt input packages and generate
   configuration files in /etc/rsyslog.d"
@@ -25,12 +39,24 @@
     - item.type | d('') == 'ovirt'
     - item.subtype | d('') in ['collectd','engine','vdsm']
 
-- name: Allow rsyslog to listen on collectd port
-  seport:
-    ports: "{{ item.rsyslog_read_collectd_port | d(44514) }}"
-    proto: tcp
-    setype: syslogd_port_t
-    state: present
+- name: Ensure collectd port is allowed for rsyslogd to listen to
+  shell: |-
+    set -euo pipefail
+    sport={{ item.rsyslog_read_collectd_port | d(44514) }}
+    plist=$( semanage port -l | grep "$sport" || : )
+    if [ "$plist" = "" ]; then
+      semanage port -a -t syslogd_port_t -p tcp "$sport"
+    else
+      elems=()
+      for pl in "$plist"
+      do
+        elems+=($pl)
+      done
+      if [ "${elems[0]}" != "syslogd_port_t" -o \
+           "${elems[1]}" != "tcp" ]; then
+        semanage port -a -t syslogd_port_t -p tcp "$sport"
+      fi
+    fi
   loop: '{{ logging_inputs }}'
   when:
     - item.type | d() == 'ovirt'
