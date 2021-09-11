@@ -8,15 +8,15 @@
   include_tasks:
     file: "{{ role_path }}/tasks/deploy.yml"
 
-- name: Create files output configuration files in /etc/rsyslog.d
+- name: "Create files output configuration file
+  output-files-{{ _output.name }} in /etc/rsyslog.d"
   vars:
     __rsyslog_packages: []
     __rsyslog_rules:
-      - name: "output-files-{{ item.name }}"
+      - name: "output-files-{{ _output.name }}"
         type: "output"
-        state: "{{ item.state | d('present') }}"
+        state: "{{ _output.state | d('present') }}"
         sections:
           - options: "{{ lookup('template', 'output_files.j2') }}"
   include_tasks:
     file: "{{ role_path }}/tasks/deploy.yml"
-  loop: '{{ rsyslog_output_files }}'

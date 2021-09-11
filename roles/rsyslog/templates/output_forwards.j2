@@ -1,28 +1,28 @@
-{% if item.tcp_port | d() %}
-{%   set __forwards_port = item.tcp_port %}
+{% if _output.tcp_port | d() %}
+{%   set __forwards_port = _output.tcp_port %}
 {%   set __forwards_protocol = 'tcp' %}
-{% elif item.udp_port | d() %}
-{%   set __forwards_port = item.udp_port %}
+{% elif _output.udp_port | d() %}
+{%   set __forwards_port = _output.udp_port %}
 {%   set __forwards_protocol = 'udp' %}
 {% else %}
 {%   set __forwards_port = '' %}
 {%   set __forwards_protocol = '' %}
 {% endif %}
-ruleset(name="{{ item.name }}") {
-{% if item.property | d() %}
-    :{{ item.property }}, {{ item.property_op | d('contains') }}, "{{ item.property_value | d('error') }}" action(name="{{ item.name }}"
-{% elif item.exclude | d([]) %}
-    {{ item.facility | d('*') }}.{{ item.severity | d('*') }};{{ item.exclude | join(';') }} action(name="{{ item.name }}"
+ruleset(name="{{ _output.name }}") {
+{% if _output.property | d() %}
+    :{{ _output.property }}, {{ _output.property_op | d('contains') }}, "{{ _output.property_value | d('error') }}" action(name="{{ _output.name }}"
+{% elif _output.exclude | d([]) %}
+    {{ _output.facility | d('*') }}.{{ _output.severity | d('*') }};{{ _output.exclude | join(';') }} action(name="{{ _output.name }}"
 {% else %}
-    {{ item.facility | d('*') }}.{{ item.severity | d('*') }} action(name="{{ item.name }}"
+    {{ _output.facility | d('*') }}.{{ _output.severity | d('*') }} action(name="{{ _output.name }}"
 {% endif %}
         type="omfwd"
-        Target="{{ item.target }}"
-{% if item.tls | d(false) | bool %}
+        Target="{{ _output.target }}"
+{% if _output.tls | d(false) | bool %}
         StreamDriver="{{ __rsyslog_tls_netstream_driver }}"
         StreamDriverMode="1"
-        StreamDriverAuthMode="{{ item.pki_authmode | d(__rsyslog_default_pki_authmode) }}"
-        StreamDriverPermittedPeers="{{ item.permitted_server | d('*.' + logging_domain) }}"
+        StreamDriverAuthMode="{{ _output.pki_authmode | d(__rsyslog_default_pki_authmode) }}"
+        StreamDriverPermittedPeers="{{ _output.permitted_server | d('*.' + logging_domain) }}"
 {% endif %}
 {% if __forwards_port != '' %}
         Port="{{ __forwards_port }}"

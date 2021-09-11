@@ -9,21 +9,21 @@
     file: "{{ role_path }}/tasks/deploy.yml"
 
 # yamllint disable rule:line-length
-- name: Create files input configuration files in /etc/rsyslog.d
+- name: "Create files input configuration file
+  input-files-{{ _input.name }} in /etc/rsyslog.d"
   vars:
     __rsyslog_packages: []
     __rsyslog_rules:
-      - name: "input-files-{{ item.name }}"
+      - name: "input-files-{{ _input.name }}"
         type: input
-        state: "{{ item.state | d('present') }}"
+        state: "{{ _input.state | d('present') }}"
         sections:
           - options: |-
-              input(type="imfile" file="{{ item.input_log_path }}" tag="{{ item.name }}")
+              input(type="imfile" file="{{ _input.input_log_path }}" tag="{{ _input.name }}")
               {{ lookup("template", "input_template.j2") }}
   include_tasks:
     file: "{{ role_path }}/tasks/deploy.yml"
-  loop: '{{ logging_inputs }}'
   when:
-    - item.type | d() == 'files'
-    - item.input_log_path | d() | length > 0
+    - _input.type | d() == 'files'
+    - _input.input_log_path | d() | length > 0
 # yamllint enable rule:line-length

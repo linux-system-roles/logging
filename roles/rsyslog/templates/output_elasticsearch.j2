@@ -1,4 +1,4 @@
-ruleset(name="{{ item.name }}") {
+ruleset(name="{{ _output.name }}") {
     if (strlen($.omes) > 0) and (strlen($.omes!status) > 0) then {
         # retry case
         if ($.omes!status == 200) or ($.omes!status == 201) or (($.omes!status == 409) and ($.omes!writeoperation == "create")) then {
@@ -29,57 +29,57 @@ ruleset(name="{{ item.name }}") {
     } else {
         set $.index_name = exec_template("prefix_index_template");
     }
-    if ($.input_type == "{{ item.input_type | d('ovirt') }}") and ($.index_prefix startswith "{{ item.index_prefix }}") then {
+    if ($.input_type == "{{ _output.input_type | d('ovirt') }}") and ($.index_prefix startswith "{{ _output.index_prefix }}") then {
         action(
             type="omelasticsearch"
-            name="{{ item.name }}"
-{% if item.server_host is string %}
-            server="{{ item.server_host }}"
-{% elif item.server_host is sequence %}
-            server=[{% for srv in item.server_host %}"{{ srv }}"{{ '' if loop.last else ', ' }}{% endfor %}]
+            name="{{ _output.name }}"
+{% if _output.server_host is string %}
+            server="{{ _output.server_host }}"
+{% elif _output.server_host is sequence %}
+            server=[{% for srv in _output.server_host %}"{{ srv }}"{{ '' if loop.last else ', ' }}{% endfor %}]
 {% else %}
             server="logging-es"
 {% endif %}
-            serverport="{{ item.server_port | d(9200) | int }}"
-            template="{{ item.template | d("es_template") }}"
-            searchIndex="{{ item.searchIndex | d("index_template") }}"
-            dynSearchIndex="{{ item.dynSearchIndex | d(true) | ternary('on', 'off') }}"
-            searchType="{{ item.searchType | d("com.redhat.viaq.common") }}"
-            bulkmode="{{ item.bulkmode | d(true) | ternary('on', 'off') }}"
-            writeoperation="{{ item.writeoperation | d("create") }}"
-            bulkid="{{ item.bulkid | d("id_template") }}"
-            dynbulkid="{{ item.dynbulkid | d(true) | ternary('on', 'off') }}"
-            allowUnsignedCerts="{{ item.allowUnsignedCerts | d(false) | ternary('on', 'off') }}"
-{% if item.retryfailures | d(true) %}
+            serverport="{{ _output.server_port | d(9200) | int }}"
+            template="{{ _output.template | d("es_template") }}"
+            searchIndex="{{ _output.searchIndex | d("index_template") }}"
+            dynSearchIndex="{{ _output.dynSearchIndex | d(true) | ternary('on', 'off') }}"
+            searchType="{{ _output.searchType | d("com.redhat.viaq.common") }}"
+            bulkmode="{{ _output.bulkmode | d(true) | ternary('on', 'off') }}"
+            writeoperation="{{ _output.writeoperation | d("create") }}"
+            bulkid="{{ _output.bulkid | d("id_template") }}"
+            dynbulkid="{{ _output.dynbulkid | d(true) | ternary('on', 'off') }}"
+            allowUnsignedCerts="{{ _output.allowUnsignedCerts | d(false) | ternary('on', 'off') }}"
+{% if _output.retryfailures | d(true) %}
             retryfailures="on"
-{%   if item.retryruleset | d() | length > 0 %}
-            retryruleset="{{ item.retryruleset }}"
+{%   if _output.retryruleset | d() | length > 0 %}
+            retryruleset="{{ _output.retryruleset }}"
 {%   else %}
-            retryruleset="{{ item.name }}"
+            retryruleset="{{ _output.name }}"
 {%   endif %}
 {% else %}
             retryfailures="off"
 {% endif %}
-            usehttps="{{ item.usehttps | d(true) | ternary('on', 'off') }}"
-{% if (item.tls is defined) | ternary(item.tls, item.use_cert | d(true)) %}
-{%   if item.ca_cert is defined %}
-{%     set __cacert = item.ca_cert %}
-{%   elif item.ca_cert_src is defined %}
-{%     set __cacert = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + item.ca_cert_src | basename %}
+            usehttps="{{ _output.usehttps | d(true) | ternary('on', 'off') }}"
+{% if (_output.tls is defined) | ternary(_output.tls, _output.use_cert | d(true)) %}
+{%   if _output.ca_cert is defined %}
+{%     set __cacert = _output.ca_cert %}
+{%   elif _output.ca_cert_src is defined %}
+{%     set __cacert = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + _output.ca_cert_src | basename %}
 {%   else %}
 {%     set __cacert = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + 'es-ca.crt' %}
 {%   endif %}
-{%   if item.cert is defined %}
-{%     set __mycert = item.cert %}
-{%   elif item.cert_src is defined %}
-{%     set __mycert = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + item.cert_src | basename %}
+{%   if _output.cert is defined %}
+{%     set __mycert = _output.cert %}
+{%   elif _output.cert_src is defined %}
+{%     set __mycert = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + _output.cert_src | basename %}
 {%   else %}
 {%     set __mycert = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + 'es-cert.pem' %}
 {%   endif %}
-{%   if item.private_key is defined %}
-{%     set __myprivkey = item.private_key %}
-{%   elif item.private_key_src is defined %}
-{%     set __myprivkey = __rsyslog_default_pki_path + __rsyslog_default_pki_key_dir + item.private_key_src | basename %}
+{%   if _output.private_key is defined %}
+{%     set __myprivkey = _output.private_key %}
+{%   elif _output.private_key_src is defined %}
+{%     set __myprivkey = __rsyslog_default_pki_path + __rsyslog_default_pki_key_dir + _output.private_key_src | basename %}
 {%   else %}
 {%     set __myprivkey = __rsyslog_default_pki_path + __rsyslog_default_pki_key_dir + 'es-key.pem' %}
 {%   endif %}
@@ -87,8 +87,8 @@ ruleset(name="{{ item.name }}") {
             tls.mycert="{{ __mycert }}"
             tls.myprivkey="{{ __myprivkey }}"
 {% endif %}
-{% if logging_elasticsearch_password | length > 0 and item.uid is defined and item.uid | length > 0 %}
-            uid="{{ item.uid }}"
+{% if logging_elasticsearch_password | length > 0 and _output.uid is defined and _output.uid | length > 0 %}
+            uid="{{ _output.uid }}"
             pwd="{{ logging_elasticsearch_password }}"
 {% endif %}
         )

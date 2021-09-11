@@ -293,6 +293,7 @@
         file: "{{ tasks }}"
       vars:
         tasks: "{{ role_path }}/tasks/inputs/{{ input_item.type }}/main.yml"
+        _input: "{{ input_item }}"
       loop: "{{ logging_inputs }}"
       loop_control:
         loop_var: input_item
@@ -315,6 +316,7 @@
         file: "{{ tasks }}"
       vars:
         tasks: "{{ role_path }}/tasks/outputs/{{ output_item.type }}/main.yml"
+        _output: "{{ output_item }}"
       loop: "{{ rsyslog_outputs }}"
       loop_control:
         loop_var: output_item
