@@ -1,17 +1,17 @@
-{% if item.kernel_message | d(false) | bool %}
+{% if _input.kernel_message | d(false) | bool %}
 module(load="imklog" permitnonkernelfacility="on")
 {% endif %}
 $ModLoad imuxsock # provides support for local system logging (e.g. via logger command)
-{% if item.use_imuxsock | d(false) | bool %}
+{% if _input.use_imuxsock | d(false) | bool %}
 # Turn on message reception via local log socket;
 $OmitLocalLogging off
 {% else %}
 $ModLoad imjournal # provides access to the systemd journal
 # File to store the position in the journal
 $IMJournalStateFile imjournal.state
-$imjournalRatelimitBurst {{ item.ratelimit_burst | d(20000) }}
-$imjournalRatelimitInterval {{ item.ratelimit_interval | d(600) }}
-$imjournalPersistStateInterval {{ item.journal_persist_state_interval | d(10) }}
+$imjournalRatelimitBurst {{ _input.ratelimit_burst | d(20000) }}
+$imjournalRatelimitInterval {{ _input.ratelimit_interval | d(600) }}
+$imjournalPersistStateInterval {{ _input.journal_persist_state_interval | d(10) }}
 
 # Turn off message reception via local log socket;
 # local messages are retrieved through imjournal now.

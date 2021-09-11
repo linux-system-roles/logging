@@ -14,14 +14,15 @@
   include_tasks:
     file: "{{ role_path }}/tasks/deploy.yml"
 
-- name: Create elasticsearch output configuration files in /etc/rsyslog.d
+- name: "Create elasticsearch output configuration file
+  output-elasticsearch-{{ _output.name }} in /etc/rsyslog.d"
   vars:
     __rsyslog_packages: []
     __rsyslog_rules:
-      - name: "output-elasticsearch-{{ item.name }}"
+      - name: "output-elasticsearch-{{ _output.name }}"
         type: "output"
         weight: "31"
-        state: "{{ item.state | d('present') }}"
+        state: "{{ _output.state | d('present') }}"
         sections:
           - options: "{{ lookup('template', 'output_elasticsearch.j2') }}"
         mode: "0600"
@@ -29,19 +30,18 @@
         group: "root"
   include_tasks:
     file: "{{ role_path }}/tasks/deploy.yml"
-  loop: '{{ rsyslog_output_elasticsearch }}'
   when: (logging_elasticsearch_password is not defined) or
         (logging_elasticsearch_password | length == 0)
 
-- name: "Create elasticsearch output configuration files in
-  /etc/rsyslog.d (no_log)"
+- name: "Create elasticsearch output configuration file
+  output-elasticsearch-{{ _output.name }} in /etc/rsyslog.d (no_log)"
   vars:
     __rsyslog_packages: []
     __rsyslog_rules:
-      - name: "output-elasticsearch-{{ item.name }}"
+      - name: "output-elasticsearch-{{ _output.name }}"
         type: "output"
         weight: "31"
-        state: "{{ item.state | d('present') }}"
+        state: "{{ _output.state | d('present') }}"
         sections:
           - options: "{{ lookup('template', 'output_elasticsearch.j2') }}"
         mode: "0600"
@@ -49,7 +49,6 @@
         group: "root"
   include_tasks:
     file: "{{ role_path }}/tasks/deploy_nolog.yml"
-  loop: '{{ rsyslog_output_elasticsearch }}'
   when:
     - logging_elasticsearch_password is defined
     - logging_elasticsearch_password | length > 0

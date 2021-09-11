@@ -29,26 +29,25 @@
   vars:
     __rsyslog_packages: "{{ __rsyslog_remote_packages }}"
     __rsyslog_rules:
-      - name: "input-remote-modules-{{ item.name }}"
+      - name: "input-remote-modules-{{ _input.name }}"
         type: modules
         sections:
           - options: "{{ lookup('template', 'input_remote_module.j2') }}"
   include_tasks:
     file: "{{ role_path }}/tasks/deploy.yml"
-  loop: '{{ logging_inputs }}'
-  when: item.type | d() == 'remote'
+  when: _input.type | d() == 'remote'
 
-- name: Create remote input configuration files in /etc/rsyslog.d
+- name: "Create remote input configuration file
+  input-remote-{{ _input.name }} in /etc/rsyslog.d"
   vars:
     __rsyslog_packages: []
     __rsyslog_rules:
-      - name: "input-remote-{{ item.name }}"
+      - name: "input-remote-{{ _input.name }}"
         type: input
         weight: "11"
-        state: "{{ item.state | d('present') }}"
+        state: "{{ _input.state | d('present') }}"
         sections:
           - options: "{{ lookup('template', 'input_remote.j2') }}"
   include_tasks:
     file: "{{ role_path }}/tasks/deploy.yml"
-  loop: '{{ logging_inputs }}'
-  when: item.type | d() == 'remote'
+  when: _input.type | d() == 'remote'

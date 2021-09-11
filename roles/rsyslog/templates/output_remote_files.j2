@@ -1,28 +1,28 @@
-{% if item.remote_log_path | d() or item.remote_sub_path | d() %}
-{%   if item.remote_log_path | d() %}
-{%     set __remote_log_path = item.remote_log_path %}
+{% if _output.remote_log_path | d() or _output.remote_sub_path | d() %}
+{%   if _output.remote_log_path | d() %}
+{%     set __remote_log_path = _output.remote_log_path %}
 {%   else %}
-{%     set __remote_log_path = __rsyslog_system_log_dir ~ item.remote_sub_path %}
+{%     set __remote_log_path = __rsyslog_system_log_dir ~ _output.remote_sub_path %}
 {%   endif %}
-{%   if item.comment | d() %}
-# {{ item.comment }}
+{%   if _output.comment | d() %}
+# {{ _output.comment }}
 {%   endif %}
 template(
-  name="{{ item.name }}_template"
+  name="{{ _output.name }}_template"
   type="string"
   string="{{ __remote_log_path }}"
 )
-ruleset(name="{{ item.name }}"
+ruleset(name="{{ _output.name }}"
         queue.type="{{ logging_server_queue_type }}"
         queue.size="{{ logging_server_queue_size }}"
         queue.workerThreads="{{ logging_server_threads }}") {
     # Store remote logs in separate logfiles
-{%   if item.property | d() %}
-    :{{ item.property }}, {{ item.property_op | d('contains') }}, "{{ item.property_value | d('error') }}" action(name="{{ item.name }}" type="omfile" DynaFile="{{ item.name }}_template" DynaFileCacheSize="{{ item.client_count | d(10) }}" ioBufferSize="{{ item.io_buffer_size | d('65536') }}" asyncWriting="{{ 'on' if item.async_writing | d(false) | bool else 'off' }}")
-{%   elif item.exclude | d([]) %}
-    {{ item.facility | d('*') }}.{{ item.severity | d('*') }};{{ item.exclude | join(';') }} action(name="{{ item.name }}" type="omfile" DynaFile="{{ item.name }}_template" DynaFileCacheSize="{{ item.client_count | d(10) }}" ioBufferSize="{{ item.io_buffer_size | d('65536') }}" asyncWriting="{{ 'on' if item.async_writing | d(false) | bool else 'off' }}")
+{%   if _output.property | d() %}
+    :{{ _output.property }}, {{ _output.property_op | d('contains') }}, "{{ _output.property_value | d('error') }}" action(name="{{ _output.name }}" type="omfile" DynaFile="{{ _output.name }}_template" DynaFileCacheSize="{{ _output.client_count | d(10) }}" ioBufferSize="{{ _output.io_buffer_size | d('65536') }}" asyncWriting="{{ 'on' if _output.async_writing | d(false) | bool else 'off' }}")
+{%   elif _output.exclude | d([]) %}
+    {{ _output.facility | d('*') }}.{{ _output.severity | d('*') }};{{ _output.exclude | join(';') }} action(name="{{ _output.name }}" type="omfile" DynaFile="{{ _output.name }}_template" DynaFileCacheSize="{{ _output.client_count | d(10) }}" ioBufferSize="{{ _output.io_buffer_size | d('65536') }}" asyncWriting="{{ 'on' if _output.async_writing | d(false) | bool else 'off' }}")
 {%   else %}
-    {{ item.facility | d('*') }}.{{ item.severity | d('*') }} action(name="{{ item.name }}" type="omfile" DynaFile="{{ item.name }}_template" DynaFileCacheSize="{{ item.client_count | d(10) }}" ioBufferSize="{{ item.io_buffer_size | d('65536') }}" asyncWriting="{{ 'on' if item.async_writing | d(false) | bool else 'off' }}")
+    {{ _output.facility | d('*') }}.{{ _output.severity | d('*') }} action(name="{{ _output.name }}" type="omfile" DynaFile="{{ _output.name }}_template" DynaFileCacheSize="{{ _output.client_count | d(10) }}" ioBufferSize="{{ _output.io_buffer_size | d('65536') }}" asyncWriting="{{ 'on' if _output.async_writing | d(false) | bool else 'off' }}")
 {%   endif %}
 }
 {% else %}
@@ -55,7 +55,7 @@ template(
   string="{{ __remote_log_path }}/mail/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log"
 )
 
-ruleset(name="{{ item.name }}") {
+ruleset(name="{{ _output.name }}") {
     # Store remote logs in separate logfiles
     authpriv.*   action(name="remote_authpriv_host_log" type="omfile" DynaFile="RemoteHostAuthLog")
     *.info;mail.none;authpriv.none;cron.none action(name="remote_message" type="omfile" DynaFile="RemoteMessage")

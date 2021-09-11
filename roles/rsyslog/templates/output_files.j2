@@ -1,15 +1,15 @@
-{% if item.path is defined %}
-ruleset(name="{{ item.name }}") {
-{%   if item.property | d() %}
-    :{{ item.property }}, {{ item.property_op | d('contains') }}, "{{ item.property_value | d('error') }}" {{ item.path }}
-{%   elif item.exclude | d([]) %}
-    {{ item.facility | d('*') }}.{{ item.severity | d('*') }};{{ item.exclude | join(';') }} {{ item.path }}
+{% if _output.path is defined %}
+ruleset(name="{{ _output.name }}") {
+{%   if _output.property | d() %}
+    :{{ _output.property }}, {{ _output.property_op | d('contains') }}, "{{ _output.property_value | d('error') }}" {{ _output.path }}
+{%   elif _output.exclude | d([]) %}
+    {{ _output.facility | d('*') }}.{{ _output.severity | d('*') }};{{ _output.exclude | join(';') }} {{ _output.path }}
 {%   else %}
-    {{ item.facility | d('*') }}.{{ item.severity | d('*') }} {{ item.path }}
+    {{ _output.facility | d('*') }}.{{ _output.severity | d('*') }} {{ _output.path }}
 {%   endif %}
 }
 {% else %}
-ruleset(name="{{ item.name }}") {
+ruleset(name="{{ _output.name }}") {
     # Log all kernel messages to the console.
     # Logging much else clutters up the screen.
     kern.*                                                 /dev/console

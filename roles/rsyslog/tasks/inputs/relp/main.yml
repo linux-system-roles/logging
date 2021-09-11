@@ -14,16 +14,16 @@
   include_tasks:
     file: "{{ role_path }}/tasks/deploy.yml"
 
-- name: Create relp input configuration files in /etc/rsyslog.d
+- name: "Create relp input configuration file
+  input-relp-{{ _input.name }} in /etc/rsyslog.d"
   vars:
     __rsyslog_packages: []
     __rsyslog_rules:
-      - name: "input-relp-{{ item.name }}"
+      - name: "input-relp-{{ _input.name }}"
         type: input
         weight: "11"
-        state: "{{ item.state | d('present') }}"
+        state: "{{ _input.state | d('present') }}"
         sections:
           - options: "{{ lookup('template', 'input_relp.j2') }}"
   include_tasks:
     file: "{{ role_path }}/tasks/deploy.yml"
-  loop: "{{ rsyslog_input_relp }}"

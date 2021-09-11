@@ -1,26 +1,26 @@
-input(name="{{ item.name }}"
+input(name="{{ _input.name }}"
       type="imrelp"
-      port="{{ item.port | d(20514) | int }}"
-      maxDataSize="{{ item.max_data_size | d(logging_max_message_size) | int }}"
-{% if item.tls | default(true) %}
-{%   if item.ca_cert is defined %}
-{%     set __cacert = item.ca_cert %}
-{%   elif item.ca_cert_src is defined %}
-{%     set __cacert = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + item.ca_cert_src | basename %}
+      port="{{ _input.port | d(20514) | int }}"
+      maxDataSize="{{ _input.max_data_size | d(logging_max_message_size) | int }}"
+{% if _input.tls | default(true) %}
+{%   if _input.ca_cert is defined %}
+{%     set __cacert = _input.ca_cert %}
+{%   elif _input.ca_cert_src is defined %}
+{%     set __cacert = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + _input.ca_cert_src | basename %}
 {%   else %}
 {%     set __cacert = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + 'relp-ca.crt' %}
 {%   endif %}
-{%   if item.cert is defined %}
-{%     set __mycert = item.cert %}
-{%   elif item.cert_src is defined %}
-{%     set __mycert = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + item.cert_src | basename %}
+{%   if _input.cert is defined %}
+{%     set __mycert = _input.cert %}
+{%   elif _input.cert_src is defined %}
+{%     set __mycert = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + _input.cert_src | basename %}
 {%   else %}
 {%     set __mycert = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + 'relp-cert.pem' %}
 {%   endif %}
-{%   if item.private_key is defined %}
-{%     set __myprivkey = item.private_key %}
-{%   elif item.private_key_src is defined %}
-{%     set __myprivkey = __rsyslog_default_pki_path + __rsyslog_default_pki_key_dir + item.private_key_src | basename %}
+{%   if _input.private_key is defined %}
+{%     set __myprivkey = _input.private_key %}
+{%   elif _input.private_key_src is defined %}
+{%     set __myprivkey = __rsyslog_default_pki_path + __rsyslog_default_pki_key_dir + _input.private_key_src | basename %}
 {%   else %}
 {%     set __myprivkey = __rsyslog_default_pki_path + __rsyslog_default_pki_key_dir + 'relp-key.pem' %}
 {%   endif %}
@@ -28,20 +28,20 @@ input(name="{{ item.name }}"
       tls.cacert="{{ __cacert }}"
       tls.mycert="{{ __mycert }}"
       tls.myprivkey="{{ __myprivkey }}"
-      tls.authmode="{{ item.pki_authmode | d('name') }}"
-{%   if item.permitted_clients is defined %}
-      tls.permittedpeer=["{{ item.permitted_clients | join('","') }}"]
+      tls.authmode="{{ _input.pki_authmode | d('name') }}"
+{%   if _input.permitted_clients is defined %}
+      tls.permittedpeer=["{{ _input.permitted_clients | join('","') }}"]
 {%   else %}
       tls.permittedpeer=["{{ '*.' + logging_domain }}"]
 {%   endif %}
 {% endif %}
 )
-{% set rsyslog_flows = logging_flows | d([ {"name": "default_flow", "inputs": [ item.name ], "outputs": ["default_files"]} ], true) %}
+{% set rsyslog_flows = logging_flows | d([ {"name": "default_flow", "inputs": [ _input.name ], "outputs": ["default_files"]} ], true) %}
 {% set outdict = {} %}
 {% for flow in rsyslog_flows %}
-{%   if flow.inputs | intersect([ item.name ]) %}
+{%   if flow.inputs | intersect([ _input.name ]) %}
 {%     for oname in flow.outputs %}
-{%       set _ = outdict.__setitem__(oname, outdict.get(oname,[])|union([ item.name ])) %}
+{%       set _ = outdict.__setitem__(oname, outdict.get(oname,[])|union([ _input.name ])) %}
 {%     endfor %}
 {%   endif %}
 {% endfor %}
@@ -49,11 +49,11 @@ input(name="{{ item.name }}"
 {%   if outdict[output.name] | d(false) %}
 if
 {%     for inputname in outdict[output.name] %}
-{%       if inputname == item.name %}
+{%       if inputname == _input.name %}
 {%         if not loop.first %}
   or
 {%         endif %}
-  ($inputname == "{{ item.name }}")
+  ($inputname == "{{ _input.name }}")
 {%       endif %}
 {%     endfor %}
   then {

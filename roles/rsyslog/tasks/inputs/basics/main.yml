@@ -7,22 +7,17 @@
   include_tasks:
     file: "{{ role_path }}/tasks/deploy.yml"
 
-- name: Create basics input configuration files in /etc/rsyslog.d
+- name: "Create basics input configuration file
+  input-basics-{{ _input.name }} in /etc/rsyslog.d"
   vars:
     __rsyslog_packages: []
     __rsyslog_rules:
-      - name: "input-basics-{{ item.name }}"
+      - name: "input-basics-{{ _input.name }}"
         type: input
-        state: "{{ item.state | d('present') }}"
+        state: "{{ _input.state | d('present') }}"
         sections:
           - options: "{{ lookup('template', __rsyslog_input_basics) }}"
   include_tasks:
     file: "{{ role_path }}/tasks/deploy.yml"
-  loop: '{{ logging_inputs | sort(attribute="type") }}'
-  loop_control:
-    extended: yes
   when:
-    - item.type | d() == 'basics'
-    - ansible_loop.previtem is not defined or
-      (ansible_loop.previtem is defined and
-       ansible_loop.previtem.type != 'basics')
+    - _input.type | d() == 'basics'
