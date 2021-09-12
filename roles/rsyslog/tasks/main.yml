@@ -294,11 +294,18 @@
       vars:
         tasks: "{{ role_path }}/tasks/inputs/{{ input_item.type }}/main.yml"
         _input: "{{ input_item }}"
-      loop: "{{ logging_inputs }}"
+      loop: '{{ logging_inputs | sort(attribute="type") }}'
       loop_control:
+        extended: yes
         loop_var: input_item
       when:
         - input_item | d([])
+        - input_item.type | d()
+        - input_item.type != "basics" or
+          (input_item.type == "basics" and
+           (ansible_loop.previtem is not defined or
+            (ansible_loop.previtem is defined and
+             ansible_loop.previtem.type != 'basics')))
 
     - name: Include output sub-vars
       include_vars:
@@ -310,6 +317,7 @@
         loop_var: output_item
       when:
         - output_item | d([])
+        - output_item.type | d()
 
     - name: Run output sub-tasks
       include_tasks:
