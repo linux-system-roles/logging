@@ -1,28 +1,28 @@
-{% if _output.tcp_port | d() %}
-{%   set __forwards_port = _output.tcp_port %}
+{% if __rsyslog_output.tcp_port | d() %}
+{%   set __forwards_port = __rsyslog_output.tcp_port %}
 {%   set __forwards_protocol = 'tcp' %}
-{% elif _output.udp_port | d() %}
-{%   set __forwards_port = _output.udp_port %}
+{% elif __rsyslog_output.udp_port | d() %}
+{%   set __forwards_port = __rsyslog_output.udp_port %}
 {%   set __forwards_protocol = 'udp' %}
 {% else %}
 {%   set __forwards_port = '' %}
 {%   set __forwards_protocol = '' %}
 {% endif %}
-ruleset(name="{{ _output.name }}") {
-{% if _output.property | d() %}
-    :{{ _output.property }}, {{ _output.property_op | d('contains') }}, "{{ _output.property_value | d('error') }}" action(name="{{ _output.name }}"
-{% elif _output.exclude | d([]) %}
-    {{ _output.facility | d('*') }}.{{ _output.severity | d('*') }};{{ _output.exclude | join(';') }} action(name="{{ _output.name }}"
+ruleset(name="{{ __rsyslog_output.name }}") {
+{% if __rsyslog_output.property | d() %}
+    :{{ __rsyslog_output.property }}, {{ __rsyslog_output.property_op | d('contains') }}, "{{ __rsyslog_output.property_value | d('error') }}" action(name="{{ __rsyslog_output.name }}"
+{% elif __rsyslog_output.exclude | d([]) %}
+    {{ __rsyslog_output.facility | d('*') }}.{{ __rsyslog_output.severity | d('*') }};{{ __rsyslog_output.exclude | join(';') }} action(name="{{ __rsyslog_output.name }}"
 {% else %}
-    {{ _output.facility | d('*') }}.{{ _output.severity | d('*') }} action(name="{{ _output.name }}"
+    {{ __rsyslog_output.facility | d('*') }}.{{ __rsyslog_output.severity | d('*') }} action(name="{{ __rsyslog_output.name }}"
 {% endif %}
         type="omfwd"
-        Target="{{ _output.target }}"
-{% if _output.tls | d(false) | bool %}
+        Target="{{ __rsyslog_output.target }}"
+{% if __rsyslog_output.tls | d(false) | bool %}
         StreamDriver="{{ __rsyslog_tls_netstream_driver }}"
         StreamDriverMode="1"
-        StreamDriverAuthMode="{{ _output.pki_authmode | d(__rsyslog_default_pki_authmode) }}"
-        StreamDriverPermittedPeers="{{ _output.permitted_server | d('*.' + logging_domain) }}"
+        StreamDriverAuthMode="{{ __rsyslog_output.pki_authmode | d(__rsyslog_default_pki_authmode) }}"
+        StreamDriverPermittedPeers="{{ __rsyslog_output.permitted_server | d('*.' + logging_domain) }}"
 {% endif %}
 {% if __forwards_port != '' %}
         Port="{{ __forwards_port }}"

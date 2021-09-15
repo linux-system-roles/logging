@@ -1,27 +1,27 @@
-ruleset(name="{{ _output.name }}") {
-    action(name="{{ _output.name }}"
+ruleset(name="{{ __rsyslog_output.name }}") {
+    action(name="{{ __rsyslog_output.name }}"
            type="omrelp"
-           target="{{ _output.target }}"
-           port="{{ _output.port | d(20514) | int }}"
-{% if _output.tls | default(true) %}
-{%   if _output.ca_cert is defined %}
-{%     set __cacert = _output.ca_cert %}
-{%   elif _output.ca_cert_src is defined %}
-{%     set __cacert = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + _output.ca_cert_src | basename %}
+           target="{{ __rsyslog_output.target }}"
+           port="{{ __rsyslog_output.port | d(20514) | int }}"
+{% if __rsyslog_output.tls | default(true) %}
+{%   if __rsyslog_output.ca_cert is defined %}
+{%     set __cacert = __rsyslog_output.ca_cert %}
+{%   elif __rsyslog_output.ca_cert_src is defined %}
+{%     set __cacert = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + __rsyslog_output.ca_cert_src | basename %}
 {%   else %}
 {%     set __cacert = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + 'relp-ca.crt' %}
 {%   endif %}
-{%   if _output.cert is defined %}
-{%     set __mycert = _output.cert %}
-{%   elif _output.cert_src is defined %}
-{%     set __mycert = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + _output.cert_src | basename %}
+{%   if __rsyslog_output.cert is defined %}
+{%     set __mycert = __rsyslog_output.cert %}
+{%   elif __rsyslog_output.cert_src is defined %}
+{%     set __mycert = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + __rsyslog_output.cert_src | basename %}
 {%   else %}
 {%     set __mycert = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + 'relp-cert.pem' %}
 {%   endif %}
-{%   if _output.private_key is defined %}
-{%     set __myprivkey = _output.private_key %}
-{%   elif _output.private_key_src is defined %}
-{%     set __myprivkey = __rsyslog_default_pki_path + __rsyslog_default_pki_key_dir + _output.private_key_src | basename %}
+{%   if __rsyslog_output.private_key is defined %}
+{%     set __myprivkey = __rsyslog_output.private_key %}
+{%   elif __rsyslog_output.private_key_src is defined %}
+{%     set __myprivkey = __rsyslog_default_pki_path + __rsyslog_default_pki_key_dir + __rsyslog_output.private_key_src | basename %}
 {%   else %}
 {%     set __myprivkey = __rsyslog_default_pki_path + __rsyslog_default_pki_key_dir + 'relp-key.pem' %}
 {%   endif %}
@@ -29,9 +29,9 @@ ruleset(name="{{ _output.name }}") {
            tls.cacert="{{ __cacert }}"
            tls.mycert="{{ __mycert }}"
            tls.myprivkey="{{ __myprivkey }}"
-           tls.authmode="{{ _output.pki_authmode | d('name') }}"
-{%   if _output.permitted_servers is defined %}
-           tls.permittedpeer=["{{ _output.permitted_servers | join('","') }}"]
+           tls.authmode="{{ __rsyslog_output.pki_authmode | d('name') }}"
+{%   if __rsyslog_output.permitted_servers is defined %}
+           tls.permittedpeer=["{{ __rsyslog_output.permitted_servers | join('","') }}"]
 {%   else %}
            tls.permittedpeer=["{{ '*.' + logging_domain }}"]
 {%   endif %}

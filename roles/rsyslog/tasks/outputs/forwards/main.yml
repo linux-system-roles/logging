@@ -9,13 +9,13 @@
     file: "{{ role_path }}/tasks/deploy.yml"
 
 - name: "Create forwards output configuration file
-  output-forwards-{{ _output.name }} in /etc/rsyslog.d"
+  output-forwards-{{ __rsyslog_output.name }} in /etc/rsyslog.d"
   vars:
     __rsyslog_packages: []
     __rsyslog_rules:
-      - name: "output-forwards-{{ _output.name }}"
+      - name: "output-forwards-{{ __rsyslog_output.name }}"
         type: "output"
-        state: "{{ _output.state | d('present') }}"
+        state: "{{ __rsyslog_output.state | d('present') }}"
         sections:
           - options: "{{ lookup('template', 'output_forwards.j2') }}"
   include_tasks:

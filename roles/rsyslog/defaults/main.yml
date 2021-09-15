@@ -37,9 +37,3 @@ rsyslog_custom_config_files: []
 # Traditional timestamp format looks like 'Mar 27 14:16:47'
 # By setting false, it'd change 2020-03-27T14:16:47.139796+00:00)
 rsyslog_basics_use_traditional_timestamp_format: true
-
-# Files and Forwards outputs
-# --------------------------
-
-rsyslog_output_files: []
-rsyslog_output_forwards: []

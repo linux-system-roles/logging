@@ -418,11 +418,10 @@
 
       rescue:
         - debug:
-            msg: "Caught an expected error -
-              {{ ansible_failed_result.results }}"
+            msg: "Caught an expected error - {{ ansible_failed_result }}"
         - name: assert...
           assert:
-            that: ansible_failed_result.results.0.msg is match(__expected_err1)
+            that: ansible_failed_result.msg is match(__expected_err1)
 
     - name: END TEST CASE 3; Clean up the deployed config
       vars:
@@ -488,11 +487,10 @@
 
       rescue:
         - debug:
-            msg: "Caught an expected error -
-              {{ ansible_failed_result.results }}"
+            msg: "Caught an expected error - {{ ansible_failed_result }}"
         - name: assert...
           assert:
-            that: ansible_failed_result.results.0.msg is match(__expected_err1)
+            that: ansible_failed_result.msg is match(__expected_err1)
 
     - name: END TEST CASE 4; Clean up the deployed config
       vars:

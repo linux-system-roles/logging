@@ -8,16 +8,16 @@
     file: "{{ role_path }}/tasks/deploy.yml"
 
 - name: "Create basics input configuration file
-  input-basics-{{ _input.name }} in /etc/rsyslog.d"
+  input-basics-{{ __rsyslog_input.name }} in /etc/rsyslog.d"
   vars:
     __rsyslog_packages: []
     __rsyslog_rules:
-      - name: "input-basics-{{ _input.name }}"
+      - name: "input-basics-{{ __rsyslog_input.name }}"
         type: input
-        state: "{{ _input.state | d('present') }}"
+        state: "{{ __rsyslog_input.state | d('present') }}"
         sections:
           - options: "{{ lookup('template', __rsyslog_input_basics) }}"
   include_tasks:
     file: "{{ role_path }}/tasks/deploy.yml"
   when:
-    - _input.type | d() == 'basics'
+    - __rsyslog_input.type | d() == 'basics'

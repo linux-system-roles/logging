@@ -29,7 +29,7 @@
         logging_elasticsearch_password: password0
         logging_outputs:
           - name: default_files
-            type: file
+            type: files
           - name: elasticsearch_output
             type: elasticsearch
             server_host: logging-es
@@ -191,7 +191,7 @@
         logging_elasticsearch_password: password0
         logging_outputs:
           - name: default_files
-            type: file
+            type: files
             state: absent
           - name: elasticsearch_output
             type: elasticsearch
@@ -257,7 +257,7 @@
       vars:
         logging_outputs:
           - name: default_files
-            type: file
+            type: files
           - name: elasticsearch_output
             type: elasticsearch
             server_host: [logging-es0, logging-es1]
@@ -456,7 +456,7 @@
         logging_enabled: false
         logging_outputs:
           - name: default_files
-            type: file
+            type: files
             state: absent
           - name: elasticsearch_output
             type: elasticsearch

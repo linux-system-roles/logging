@@ -3,7 +3,7 @@
   include_tasks:
     file: "{{ role_path }}/tasks/set_certs.yml"
   vars:
-    __rsyslog_cert_subject: "{{ rsyslog_output_relp }}"
+    __rsyslog_cert_subject: "{{ __rsyslog_output }}"
 
 # Deploy configuration files
 - name: "Install/Update relp logging packages and generate
@@ -15,14 +15,14 @@
     file: "{{ role_path }}/tasks/deploy.yml"
 
 - name: "Create relp output configuration file
-  output-relp-{{ _output.name }} in /etc/rsyslog.d"
+  output-relp-{{ __rsyslog_output.name }} in /etc/rsyslog.d"
   vars:
     __rsyslog_packages: []
     __rsyslog_rules:
-      - name: "output-relp-{{ _output.name }}"
+      - name: "output-relp-{{ __rsyslog_output.name }}"
         type: "output"
         weight: "31"
-        state: "{{ _output.state | d('present') }}"
+        state: "{{ __rsyslog_output.state | d('present') }}"
         sections:
           - options: "{{ lookup('template', 'output_relp.j2') }}"
   include_tasks:
