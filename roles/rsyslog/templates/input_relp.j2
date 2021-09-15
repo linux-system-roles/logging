@@ -1,26 +1,26 @@
-input(name="{{ _input.name }}"
+input(name="{{ __rsyslog_input.name }}"
       type="imrelp"
-      port="{{ _input.port | d(20514) | int }}"
-      maxDataSize="{{ _input.max_data_size | d(logging_max_message_size) | int }}"
-{% if _input.tls | default(true) %}
-{%   if _input.ca_cert is defined %}
-{%     set __cacert = _input.ca_cert %}
-{%   elif _input.ca_cert_src is defined %}
-{%     set __cacert = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + _input.ca_cert_src | basename %}
+      port="{{ __rsyslog_input.port | d(20514) | int }}"
+      maxDataSize="{{ __rsyslog_input.max_data_size | d(logging_max_message_size) | int }}"
+{% if __rsyslog_input.tls | default(true) %}
+{%   if __rsyslog_input.ca_cert is defined %}
+{%     set __cacert = __rsyslog_input.ca_cert %}
+{%   elif __rsyslog_input.ca_cert_src is defined %}
+{%     set __cacert = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + __rsyslog_input.ca_cert_src | basename %}
 {%   else %}
 {%     set __cacert = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + 'relp-ca.crt' %}
 {%   endif %}
-{%   if _input.cert is defined %}
-{%     set __mycert = _input.cert %}
-{%   elif _input.cert_src is defined %}
-{%     set __mycert = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + _input.cert_src | basename %}
+{%   if __rsyslog_input.cert is defined %}
+{%     set __mycert = __rsyslog_input.cert %}
+{%   elif __rsyslog_input.cert_src is defined %}
+{%     set __mycert = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + __rsyslog_input.cert_src | basename %}
 {%   else %}
 {%     set __mycert = __rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir + 'relp-cert.pem' %}
 {%   endif %}
-{%   if _input.private_key is defined %}
-{%     set __myprivkey = _input.private_key %}
-{%   elif _input.private_key_src is defined %}
-{%     set __myprivkey = __rsyslog_default_pki_path + __rsyslog_default_pki_key_dir + _input.private_key_src | basename %}
+{%   if __rsyslog_input.private_key is defined %}
+{%     set __myprivkey = __rsyslog_input.private_key %}
+{%   elif __rsyslog_input.private_key_src is defined %}
+{%     set __myprivkey = __rsyslog_default_pki_path + __rsyslog_default_pki_key_dir + __rsyslog_input.private_key_src | basename %}
 {%   else %}
 {%     set __myprivkey = __rsyslog_default_pki_path + __rsyslog_default_pki_key_dir + 'relp-key.pem' %}
 {%   endif %}
@@ -28,20 +28,20 @@ input(name="{{ _input.name }}"
       tls.cacert="{{ __cacert }}"
       tls.mycert="{{ __mycert }}"
       tls.myprivkey="{{ __myprivkey }}"
-      tls.authmode="{{ _input.pki_authmode | d('name') }}"
-{%   if _input.permitted_clients is defined %}
-      tls.permittedpeer=["{{ _input.permitted_clients | join('","') }}"]
+      tls.authmode="{{ __rsyslog_input.pki_authmode | d('name') }}"
+{%   if __rsyslog_input.permitted_clients is defined %}
+      tls.permittedpeer=["{{ __rsyslog_input.permitted_clients | join('","') }}"]
 {%   else %}
       tls.permittedpeer=["{{ '*.' + logging_domain }}"]
 {%   endif %}
 {% endif %}
 )
-{% set rsyslog_flows = logging_flows | d([ {"name": "default_flow", "inputs": [ _input.name ], "outputs": ["default_files"]} ], true) %}
+{% set rsyslog_flows = logging_flows | d([ {"name": "default_flow", "inputs": [ __rsyslog_input.name ], "outputs": ["default_files"]} ], true) %}
 {% set outdict = {} %}
 {% for flow in rsyslog_flows %}
-{%   if flow.inputs | intersect([ _input.name ]) %}
+{%   if flow.inputs | intersect([ __rsyslog_input.name ]) %}
 {%     for oname in flow.outputs %}
-{%       set _ = outdict.__setitem__(oname, outdict.get(oname,[])|union([ _input.name ])) %}
+{%       set _ = outdict.__setitem__(oname, outdict.get(oname,[])|union([ __rsyslog_input.name ])) %}
 {%     endfor %}
 {%   endif %}
 {% endfor %}
@@ -49,11 +49,11 @@ input(name="{{ _input.name }}"
 {%   if outdict[output.name] | d(false) %}
 if
 {%     for inputname in outdict[output.name] %}
-{%       if inputname == _input.name %}
+{%       if inputname == __rsyslog_input.name %}
 {%         if not loop.first %}
   or
 {%         endif %}
-  ($inputname == "{{ _input.name }}")
+  ($inputname == "{{ __rsyslog_input.name }}")
 {%       endif %}
 {%     endfor %}
   then {

@@ -1,15 +1,15 @@
-{% if _output.path is defined %}
-ruleset(name="{{ _output.name }}") {
-{%   if _output.property | d() %}
-    :{{ _output.property }}, {{ _output.property_op | d('contains') }}, "{{ _output.property_value | d('error') }}" {{ _output.path }}
-{%   elif _output.exclude | d([]) %}
-    {{ _output.facility | d('*') }}.{{ _output.severity | d('*') }};{{ _output.exclude | join(';') }} {{ _output.path }}
+{% if __rsyslog_output.path is defined %}
+ruleset(name="{{ __rsyslog_output.name }}") {
+{%   if __rsyslog_output.property | d() %}
+    :{{ __rsyslog_output.property }}, {{ __rsyslog_output.property_op | d('contains') }}, "{{ __rsyslog_output.property_value | d('error') }}" {{ __rsyslog_output.path }}
+{%   elif __rsyslog_output.exclude | d([]) %}
+    {{ __rsyslog_output.facility | d('*') }}.{{ __rsyslog_output.severity | d('*') }};{{ __rsyslog_output.exclude | join(';') }} {{ __rsyslog_output.path }}
 {%   else %}
-    {{ _output.facility | d('*') }}.{{ _output.severity | d('*') }} {{ _output.path }}
+    {{ __rsyslog_output.facility | d('*') }}.{{ __rsyslog_output.severity | d('*') }} {{ __rsyslog_output.path }}
 {%   endif %}
 }
 {% else %}
-ruleset(name="{{ _output.name }}") {
+ruleset(name="{{ __rsyslog_output.name }}") {
     # Log all kernel messages to the console.
     # Logging much else clutters up the screen.
     kern.*                                                 /dev/console

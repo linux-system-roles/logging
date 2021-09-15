@@ -1,45 +1,45 @@
-{# If both udp_ports and tcp_ports appear in the _input, \
+{# If both udp_ports and tcp_ports appear in the __rsyslog_input, \
    udp_ports are used in the rsyslog config and tcp_ports are dropped. \
    If both udp_ports and tcp_ports are not configured, \
    it is default to 'tcp_ports: [514]'. #}
-{% if _input.udp_ports | d([]) %}
+{% if __rsyslog_input.udp_ports | d([]) %}
 # Log messages from remote hosts over UDP
 {%   set __logging_loop_index = loop.index %}
-input(name="{{ _input.name }}" type="imudp" port=["{{ _input.udp_ports | join('","') }}"])
+input(name="{{ __rsyslog_input.name }}" type="imudp" port=["{{ __rsyslog_input.udp_ports | join('","') }}"])
 {{ lookup('template', 'input_template.j2') }}
 {% else %}
-{%   if not _input.tcp_ports | d([]) %}
+{%   if not __rsyslog_input.tcp_ports | d([]) %}
 {%     set item_tcp_ports = ["514"] %}
 {%   else %}
-{%     set item_tcp_ports = _input.tcp_ports %}
+{%     set item_tcp_ports = __rsyslog_input.tcp_ports %}
 {%   endif %}
-{%   set rsyslog_flows = logging_flows | d([ {"name": "default_flow", "inputs": [ _input.name ], "outputs": ["default_files"]} ], true) %}
+{%   set rsyslog_flows = logging_flows | d([ {"name": "default_flow", "inputs": [ __rsyslog_input.name ], "outputs": ["default_files"]} ], true) %}
 {%   set outdict = {} %}
 {%   for flow in rsyslog_flows %}
-{%     if flow.inputs | intersect([ _input.name ]) %}
+{%     if flow.inputs | intersect([ __rsyslog_input.name ]) %}
 {%       for oname in flow.outputs %}
-{%         set _ = outdict.__setitem__(oname, outdict.get(oname,[])|union([ _input.name ])) %}
+{%         set _ = outdict.__setitem__(oname, outdict.get(oname,[])|union([ __rsyslog_input.name ])) %}
 {%       endfor %}
 {%     endif %}
 {%   endfor %}
 {%   for tport in item_tcp_ports %}
 {%     set __logging_loop_index = loop.index %}
-{%     if not _input.tls | d(false) | bool %}
+{%     if not __rsyslog_input.tls | d(false) | bool %}
 # Log messages from remote hosts over plain TCP
-input(name="{{ _input.name }}_{{ __logging_loop_index }}" type="imptcp" port="{{ tport }}")
+input(name="{{ __rsyslog_input.name }}_{{ __logging_loop_index }}" type="imptcp" port="{{ tport }}")
 {%     else %}
 # Log messages from remote hosts over TLS
-input(name="{{ _input.name }}_{{ __logging_loop_index }}" type="imtcp" port="{{ tport }}")
+input(name="{{ __rsyslog_input.name }}_{{ __logging_loop_index }}" type="imtcp" port="{{ tport }}")
 {%     endif %}
 {%     for output in rsyslog_outputs %}
 {%       if outdict[output.name] | d(false) %}
 if
 {%         for inputname in outdict[output.name] %}
-{%           if inputname == _input.name %}
+{%           if inputname == __rsyslog_input.name %}
 {%             if not loop.first %}
   or
 {%             endif %}
-  ($inputname == "{{ _input.name }}_{{ __logging_loop_index }}")
+  ($inputname == "{{ __rsyslog_input.name }}_{{ __logging_loop_index }}")
 {%           endif %}
 {%         endfor %}
   then {

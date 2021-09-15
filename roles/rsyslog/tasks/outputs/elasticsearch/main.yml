@@ -3,7 +3,7 @@
   include_tasks:
     file: "{{ role_path }}/tasks/set_certs.yml"
   vars:
-    __rsyslog_cert_subject: "{{ rsyslog_output_elasticsearch }}"
+    __rsyslog_cert_subject: "{{ __rsyslog_output }}"
 
 # Deploy configuration files
 - name: "Install/Update elasticsearch logging packages and generate
@@ -15,14 +15,14 @@
     file: "{{ role_path }}/tasks/deploy.yml"
 
 - name: "Create elasticsearch output configuration file
-  output-elasticsearch-{{ _output.name }} in /etc/rsyslog.d"
+  output-elasticsearch-{{ __rsyslog_output.name }} in /etc/rsyslog.d"
   vars:
     __rsyslog_packages: []
     __rsyslog_rules:
-      - name: "output-elasticsearch-{{ _output.name }}"
+      - name: "output-elasticsearch-{{ __rsyslog_output.name }}"
         type: "output"
         weight: "31"
-        state: "{{ _output.state | d('present') }}"
+        state: "{{ __rsyslog_output.state | d('present') }}"
         sections:
           - options: "{{ lookup('template', 'output_elasticsearch.j2') }}"
         mode: "0600"
@@ -34,14 +34,14 @@
         (logging_elasticsearch_password | length == 0)
 
 - name: "Create elasticsearch output configuration file
-  output-elasticsearch-{{ _output.name }} in /etc/rsyslog.d (no_log)"
+  output-elasticsearch-{{ __rsyslog_output.name }} in /etc/rsyslog.d (no_log)"
   vars:
     __rsyslog_packages: []
     __rsyslog_rules:
-      - name: "output-elasticsearch-{{ _output.name }}"
+      - name: "output-elasticsearch-{{ __rsyslog_output.name }}"
         type: "output"
         weight: "31"
-        state: "{{ _output.state | d('present') }}"
+        state: "{{ __rsyslog_output.state | d('present') }}"
         sections:
           - options: "{{ lookup('template', 'output_elasticsearch.j2') }}"
         mode: "0600"

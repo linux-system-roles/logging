@@ -9,7 +9,7 @@
       when:
         - item | length > 1
   vars:
-    __logging_remote: "{{ logging_inputs |
+    __logging_remote: "{{ rsyslog_inputs |
                           selectattr('type', 'match', '^remote$') | list }}"
     __logging_remote_udp: "{{ __logging_remote |
                               selectattr('udp_ports', 'defined') | list }}"
@@ -29,25 +29,25 @@
   vars:
     __rsyslog_packages: "{{ __rsyslog_remote_packages }}"
     __rsyslog_rules:
-      - name: "input-remote-modules-{{ _input.name }}"
+      - name: "input-remote-modules-{{ __rsyslog_input.name }}"
         type: modules
         sections:
           - options: "{{ lookup('template', 'input_remote_module.j2') }}"
   include_tasks:
     file: "{{ role_path }}/tasks/deploy.yml"
-  when: _input.type | d() == 'remote'
+  when: __rsyslog_input.type | d() == 'remote'
 
 - name: "Create remote input configuration file
-  input-remote-{{ _input.name }} in /etc/rsyslog.d"
+  input-remote-{{ __rsyslog_input.name }} in /etc/rsyslog.d"
   vars:
     __rsyslog_packages: []
     __rsyslog_rules:
-      - name: "input-remote-{{ _input.name }}"
+      - name: "input-remote-{{ __rsyslog_input.name }}"
         type: input
         weight: "11"
-        state: "{{ _input.state | d('present') }}"
+        state: "{{ __rsyslog_input.state | d('present') }}"
         sections:
           - options: "{{ lookup('template', 'input_remote.j2') }}"
   include_tasks:
     file: "{{ role_path }}/tasks/deploy.yml"
-  when: _input.type | d() == 'remote'
+  when: __rsyslog_input.type | d() == 'remote'

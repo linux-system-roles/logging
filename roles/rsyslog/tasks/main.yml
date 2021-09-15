@@ -113,7 +113,7 @@
         mode: "{{ __rsyslog_register_stat_conf.stat.mode | d('0700') }}"
       when:
         - __rsyslog_enabled | bool
-        - logging_inputs | d([])
+        - rsyslog_inputs | d([])
       notify: restart rsyslogd
 
     - name: Generate global rule to add to __rsyslog_common_rules
@@ -156,7 +156,7 @@
         loop_var: inner_item
       when:
         - __rsyslog_enabled | bool
-        - logging_inputs | d([])
+        - rsyslog_inputs | d([])
         - inner_item.filename | d() or inner_item.name | d()
         - inner_item.state is undefined or inner_item.state != 'absent'
         - inner_item.options | d() or inner_item.sections | d()
@@ -264,11 +264,12 @@
           notify: restart rsyslogd
 
       vars:
-        __logging_forwards_tls: "{{ logging_outputs |
+        __logging_forwards_tls: "{{ rsyslog_outputs |
+                                  selectattr('target', 'defined') |
                                   selectattr('type', 'match', '^forwards$') |
                                   selectattr('tls', 'defined') |
                                   selectattr('tls') | list }}"
-        __logging_remote_tls: "{{ logging_inputs |
+        __logging_remote_tls: "{{ rsyslog_inputs |
                                   selectattr('type', 'match', '^remote$') |
                                   selectattr('tcp_ports', 'defined') |
                                   selectattr('tls', 'defined') |
@@ -282,7 +283,7 @@
         file: "{{ role_path }}/vars/{{ varfile }}"
       vars:
         varfile: "inputs/{{ input_item.type }}/main.yml"
-      loop: "{{ logging_inputs }}"
+      loop: "{{ rsyslog_inputs }}"
       loop_control:
         loop_var: input_item
       when:
@@ -293,8 +294,8 @@
         file: "{{ tasks }}"
       vars:
         tasks: "{{ role_path }}/tasks/inputs/{{ input_item.type }}/main.yml"
-        _input: "{{ input_item }}"
-      loop: '{{ logging_inputs | sort(attribute="type") }}'
+        __rsyslog_input: "{{ input_item }}"
+      loop: '{{ rsyslog_inputs | sort(attribute="type") }}'
       loop_control:
         extended: yes
         loop_var: input_item
@@ -324,7 +325,7 @@
         file: "{{ tasks }}"
       vars:
         tasks: "{{ role_path }}/tasks/outputs/{{ output_item.type }}/main.yml"
-        _output: "{{ output_item }}"
+        __rsyslog_output: "{{ output_item }}"
       loop: "{{ rsyslog_outputs }}"
       loop_control:
         loop_var: output_item
