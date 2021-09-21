@@ -1,6 +1,6 @@
 {# SPDX-License-Identifier: GPL-3.0-only #}
 {% if not inner_item.nocomment | d(false) %}
-# {{ ansible_managed }}
+{{ ansible_managed | comment }}
 {% endif %}
 {% macro print_config(element) %}
 {%   if element is mapping %}
