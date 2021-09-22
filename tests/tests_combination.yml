@@ -117,11 +117,13 @@
         __logging_file: "{{ __default_system_log }}"
       include_tasks: tasks/test_logger.yml
 
-    - name: Generated a file to check severity_and_facility
+    - name: Generate a file to check severity_and_facility
       copy:
         dest: /tmp/__testfile__
         content: |
+          #
           # Ansible managed
+          #
           ruleset(name="forwards_severity_and_facility") {
               local1.info action(name="forwards_severity_and_facility"
                   type="omfwd"
@@ -322,11 +324,13 @@
       register: __result
       failed_when: not __result.stat.exists
 
-    - name: Generated a file to check severity_and_facility
+    - name: Generate a file to check severity_and_facility
       copy:
         dest: /tmp/__testfile__
         content: |
+          #
           # Ansible managed
+          #
           ruleset(name="forwards_severity_and_facility") {
               local1.info action(name="forwards_severity_and_facility"
                   type="omfwd"
