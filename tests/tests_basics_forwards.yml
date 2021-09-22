@@ -112,11 +112,13 @@
           - ca-certificates
       include_tasks: tasks/check_packages.yml
 
-    - name: Generated a file to check severity_and_facility
+    - name: Generate a file to check severity_and_facility
       copy:
         dest: /tmp/__testfile__
         content: |
+          #
           # Ansible managed
+          #
           ruleset(name="forwards_severity_and_facility") {
               local1.info action(name="forwards_severity_and_facility"
                   type="omfwd"
@@ -131,11 +133,13 @@
       command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_s_f }}'
       changed_when: false
 
-    - name: Generated a file to check facility_only
+    - name: Generate a file to check facility_only
       copy:
         dest: /tmp/__testfile__
         content: |
+          #
           # Ansible managed
+          #
           ruleset(name="forwards_facility_only") {
               local2.* action(name="forwards_facility_only"
                   type="omfwd"
@@ -150,11 +154,13 @@
       command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_f }}'
       changed_when: false
 
-    - name: Generated a file to check severity_only
+    - name: Generate a file to check severity_only
       copy:
         dest: /tmp/__testfile__
         content: |
+          #
           # Ansible managed
+          #
           ruleset(name="forwards_severity_only") {
               *.err action(name="forwards_severity_only"
                   type="omfwd"
@@ -169,11 +175,13 @@
       command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_s }}'
       changed_when: false
 
-    - name: Generated a file to check no_severity_and_facility
+    - name: Generate a file to check no_severity_and_facility
       copy:
         dest: /tmp/__testfile__
         content: |
+          #
           # Ansible managed
+          #
           ruleset(name="forwards_no_severity_and_facility") {
               *.* action(name="forwards_no_severity_and_facility"
                   type="omfwd"
@@ -188,11 +196,13 @@
       command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_no }}'
       changed_when: false
 
-    - name: Generated a file to check no_severity_and_facility_udp
+    - name: Generate a file to check no_severity_and_facility_udp
       copy:
         dest: /tmp/__testfile__
         content: |
+          #
           # Ansible managed
+          #
           ruleset(name="forwards_no_severity_and_facility_udp") {
               *.* action(name="forwards_no_severity_and_facility_udp"
                   type="omfwd"
@@ -207,11 +217,13 @@
       command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_no_udp }}'
       changed_when: false
 
-    - name: Generated a file to check no_severity_and_facility_protocol_port
+    - name: Generate a file to check no_severity_and_facility_protocol_port
       copy:
         dest: /tmp/__testfile__
         content: |
+          #
           # Ansible managed
+          #
           ruleset(name="forwards_no_severity_and_facility_protocol_port") {
               *.* action(name="forwards_no_severity_and_facility_protocol_port"
                   type="omfwd"
@@ -371,11 +383,13 @@
           - ca-certificates
       include_tasks: tasks/check_packages.yml
 
-    - name: Generated a file to check severity_and_facility
+    - name: Generate a file to check severity_and_facility
       copy:
         dest: /tmp/__testfile__
         content: |
+          #
           # Ansible managed
+          #
           ruleset(name="forwards_severity_and_facility") {
               local1.info action(name="forwards_severity_and_facility"
                   type="omfwd"
@@ -497,11 +511,13 @@
           - ca-certificates
       include_tasks: tasks/check_packages.yml
 
-    - name: Generated a file to check severity_and_facility
+    - name: Generate a file to check severity_and_facility
       copy:
         dest: /tmp/__testfile__
         content: |
+          #
           # Ansible managed
+          #
           ruleset(name="forwards_severity_and_facility") {
               local1.info action(name="forwards_severity_and_facility"
                   type="omfwd"
