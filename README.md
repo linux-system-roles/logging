@@ -28,6 +28,8 @@
 
 ## Background
 
+TEST TEST TEST
+
 Logging role is an abstract layer for provisioning and configuring the logging system. Currently, rsyslog is the only supported provider.
 
 In the nature of logging, there are multiple ways to read logs and multiple ways to output them. For instance, the logging system may read logs from local files, or read them from systemd/journal, or receive them from the other logging system over the network. Then, the logs may be stored in the local files in the /var/log directory, or sent to Elasticsearch, or forwarded to other logging system. The combination between the inputs and the outputs needs to be flexible. For instance, you may want to inputs from journal stored just in the local file, while inputs read from files stored in the local log files as well as forwarded to the other logging system.
