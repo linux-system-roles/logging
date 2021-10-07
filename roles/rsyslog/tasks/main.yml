@@ -33,12 +33,14 @@
          if 'rsyslog' in ansible_facts.packages
          else '0.0.0' }}
 
-- debug:
+- name: Check rsyslog version 1
+  debug:
     msg: "Rsyslog_version is {{ __rsyslog_version }},
       which is older than \"8.37.0-7.2\"."
   when: __rsyslog_version is version('8.37.0-7.2', '<')
 
-- debug:
+- name: Check rsyslog version 2
+  debug:
     msg: "Rsyslog_version is {{ __rsyslog_version }},
       which is newer than \"8.37.0-7.2\"."
   when: __rsyslog_version is version('8.37.0-7.2', '>')
