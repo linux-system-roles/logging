@@ -130,7 +130,7 @@
             sections:
               - options: |-
                   # Mark message periodically by immark, if set to true.
-                  module(load="immark" interval={{ logging_mark_interval }})
+                  module(load="immark" interval="{{ logging_mark_interval }}")
           - name: 'common-defaults'
             type: 'global'
             sections:
