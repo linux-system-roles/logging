@@ -9,6 +9,7 @@
     __test_files_conf2: /etc/rsyslog.d/30-output-files-files_output2.conf
     __test_files_conf3: /etc/rsyslog.d/30-output-files-files_output3.conf
     __test_files_conf4: /etc/rsyslog.d/30-output-files-files_output4.conf
+    __test_local_module: /etc/rsyslog.d/10-local-modules.conf
     __test_forwards_conf: >-
       /etc/rsyslog.d/30-output-forwards-forwards_severity_and_facility.conf
     __default_system_log: /var/log/messages
@@ -19,8 +20,10 @@
   tasks:
     # TEST CASE 0
     - name: "TEST CASE 0; Test the simplest configuration,
-      basics input and implicit files output"
+      basics input and implicit files output with logging_mark enabled"
       vars:
+        logging_mark: true
+        logging_mark_interval: "7200"
         logging_inputs:
           - name: basic_input
             type: basics
@@ -61,6 +64,15 @@
         __logging_index: 0
         __logging_file: "{{ __default_system_log }}"
       include_tasks: tasks/test_logger.yml
+
+    - name: Ensure immark interval value is in quotes
+      shell: |-
+        set -euo pipefail
+        grep "module.*immark.*interval" "{{ __test_local_module }}" | \
+        sed -e "s/module.*interval=\(.*\))/\1/"
+      register: __result
+      changed_when: false
+      failed_when: __result.stdout != "\"7200\""
 
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
