@@ -17,6 +17,15 @@ logging_flows: []
 # If logging_purge_confs is set to true, existing config files will be purged.
 logging_purge_confs: false
 
+# Variable to specify the directory to store backup file which contains pre-
+# logging system role run. The backup is used when logging_restore_confs is
+# set to true.
+# Default to '/var/lib/rsyslog' for rsyslog.
+logging_backup_dir: ""
+
+# If logging_restore_confs is set to true, backed up config files are restored.
+logging_restore_confs: false
+
 # Variable to specify the directory to put the local output files to store logs.
 logging_system_log_dir: /var/log
 
