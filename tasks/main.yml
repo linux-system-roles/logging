@@ -96,6 +96,7 @@
   vars:
     __rsyslog_enabled: "{{ logging_enabled }}"
     __rsyslog_purge_original_conf: "{{ logging_purge_confs }}"
+    __rsyslog_restore_original_conf: "{{ logging_restore_confs }}"
     __rsyslog_system_log_dir: "{{ logging_system_log_dir }}"
   include_role:
     name: "{{ role_path }}/roles/rsyslog"

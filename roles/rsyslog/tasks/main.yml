@@ -74,25 +74,42 @@
             state: directory
             path: '{{ __rsyslog_backup_dir }}'
             mode: '0700'
-          changed_when: false
 
-        - name: Archive the contents of {{ __rsyslog_config_dir }} to
-            the backup dir
+        - name: Get backup file stat
+          stat:
+            path: "{{ __rsyslog_backup_dir }}/backup.tgz"
+          register: __backup_stat
+
+        - name: Archive the original contents of {{ __rsyslog_config_dir }}
+            to the backup dir
           command: >
             tar -cvzPf "{{ __rsyslog_backup_dir }}/backup.tgz"
-                /etc/rsyslog.conf "{{ __rsyslog_config_dir }}"
-          args:
-            warn: false  # suppress 'unarchive' warning
-          changed_when: false
+              /etc/rsyslog.conf "{{ __rsyslog_config_dir }}"
+          when: not __backup_stat.stat.exists
 
         - name: Purge original conf
           file:
             state: absent
             path: "{{ __rsyslog_config_dir }}/*"
           when: __rsyslog_purge_original_conf | bool | d(false)
+
+        - block:
+            - name: Get backup file stat
+              stat:
+                path: "{{ __rsyslog_backup_dir }}/backup.tgz"
+              register: __backup_stat
+
+            - name: Restore original conf
+              command: >
+                tar -xvzPf "{{ __rsyslog_backup_dir }}/backup.tgz"
+              when: __backup_stat.stat.exists
+          when:
+            - __rsyslog_restore_original_conf | bool | d(false)
+
       vars:
-        __rsyslog_backup_dir: '{{ rsyslog_backup_dir |
-          d("/tmp") }}/rsyslog.d-{{ ansible_date_time.iso8601_basic_short }}'
+        __rsyslog_backup_dir: '{{ logging_backup_dir
+                               if logging_backup_dir|length > 0
+                               else "/var/lib/rsyslog" }}'
 
     - name: "Create logging directory if it does not exist or
       the ownership and/or modes are different."

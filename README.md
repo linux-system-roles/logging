@@ -404,6 +404,8 @@ These variables are set in the same level of the `logging_inputs`, `logging_outp
 - `logging_mark`: Mark message periodically by immark, if set to `true`. Default to `false`.
 - `logging_mark_interval`: Interval for `logging_mark` in seconds. Default to `3600`.
 - `logging_purge_confs`: `true` or `false`. If set to `true`, files in /etc/rsyslog.d are purged.
+- `logging_backup_dir`: Path to specify the directory to store backup file which contains pre-logging system role run. The backup is used when `logging_restore_confs` is set to `true`.
+- `logging_restore_confs`: `true` or `false`. If set to `true`, config files in the backup file are restored. This variable is to be used in the cleaning up.
 - `logging_system_log_dir`: Directory where the local log output files are placed. Default to `/var/log`.
 
 ### Update and Delete
