@@ -28,6 +28,7 @@
     path: "{{ item }}"
   register: __result
   loop: "{{ __conf_files }}"
+  when: __conf_files | d([])
   failed_when: not __result.stat.exists
 
 - name: Check rsyslog errors
