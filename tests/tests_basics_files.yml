@@ -386,7 +386,7 @@
 
     - name: END TEST CASE 3; Clean up the deployed config
       vars:
-        logging_restore_confs: true
+        logging_reset_confs: true
         logging_enabled: false
         logging_outputs:
           - name: files_output0

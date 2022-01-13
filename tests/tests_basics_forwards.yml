@@ -461,9 +461,22 @@
         state: absent
 
     # TEST CASE 2
+    - name: "Prep - Test logging_purge_confs, in case no config files
+      exist in rsyslog.d. Move files in /etc/rsyslog.d to a backup dir"
+      shell: |-
+        set -euo pipefail
+        if [ -e /tmp/rsyslog.d-backup ]; then
+          rm -rf /tmp/rsyslog.d-backup
+        fi
+        mkdir /tmp/rsyslog.d-backup
+        for conf in $( ls /etc/rsyslog.d ); do
+          mv /etc/rsyslog.d/$conf /tmp/rsyslog.d-backup
+        done
+
     - name: "TEST CASE 2; Test the configuration, basics input
       and a forwards output with logging_pki_files"
       vars:
+        logging_purge_confs: true
         logging_pki_files:
           - ca_cert_src: "{{ __test_ca_cert }}"
             cert_src: "{{ __test_cert }}"
@@ -556,6 +569,7 @@
 
     - name: END TEST CASE 2; Clean up the deployed config
       vars:
+        logging_reset_confs: true
         logging_enabled: false
         logging_pki_files:
           - ca_cert_src: "{{ __test_ca_cert }}"
@@ -591,6 +605,15 @@
         - "/etc/pki/tls/certs/{{ __test_ca_cert_name }}"
         - "/etc/pki/tls/certs/{{ __test_cert_name }}"
         - "/etc/pki/tls/private/{{ __test_key_name }}"
+
+    - name: "Post - move back files to /etc/rsyslog.d"
+      shell: |-
+        set -euo pipefail
+        mv /tmp/rsyslog.d-backup/* /etc/rsyslog.d
+        for conf in $( ls /tmp/rsyslog.d-backup ); do
+          mv /tmp/rsyslog.d-backup/$conf /tmp/rsyslog.d
+        done
+        rmdir /tmp/rsyslog.d-backup
 
     # TEST CASE 3
     - block:
