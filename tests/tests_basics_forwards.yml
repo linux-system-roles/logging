@@ -569,8 +569,8 @@
 
     - name: END TEST CASE 2; Clean up the deployed config
       vars:
-        logging_reset_confs: true
         logging_enabled: false
+        logging_purge_confs: true
         logging_pki_files:
           - ca_cert_src: "{{ __test_ca_cert }}"
             cert_src: "{{ __test_cert }}"

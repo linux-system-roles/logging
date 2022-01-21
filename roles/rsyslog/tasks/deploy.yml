@@ -31,6 +31,12 @@
     - inner_item.options | d() or inner_item.sections | d()
     - inner_item.state is undefined or inner_item.state != 'absent'
   notify: restart rsyslogd
+  register: __rsyslog_deploy_templates
+
+- name: add deployed templates to global list
+  set_fact:
+    __rsyslog_template_results: "{{
+      __rsyslog_template_results + [__rsyslog_deploy_templates] }}"
 
 - name: Remove role config files from rsyslog.d
   file:

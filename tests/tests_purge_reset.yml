@@ -1,14 +1,86 @@
 # Test to ensure the logging role successfully runs with
 # logging_purge_confs and logging_reset_confs set to true.
 #
-- name: Ensure that the role runs with default parameters
+- name: Test purge and reset functionality
   hosts: all
-
+  vars:
+    __test_default_files_conf: /etc/rsyslog.d/30-output-files-default_files.conf
   tasks:
-    - name: default run with purge and reset
+    - name: ensure rsyslog is installed
+      package:
+        name: rsyslog
+        state: present
+
+    - name: create some unowned config files
+      copy:
+        dest: "{{ item }}"
+        content: "# this is file {{ item }}"
+        mode: "0444"
+      loop:
+        - "/etc/rsyslog.d/unowned1.conf"
+        - "/etc/rsyslog.d/unowned2.conf"
+
+    - name: modify /etc/rsyslog.conf
+      lineinfile:
+        path: /etc/rsyslog.conf
+        insertafter: EOF
+        state: present
+        line: "# this is a modification"
+
+    - name: configure with basics + purge
       vars:
         logging_purge_confs: true
-        logging_reset_confs: true
+        logging_inputs:
+          - name: basic_input
+            type: basics
+      include_role:
+        name: linux-system-roles.logging
+
+    # notify restart rsyslogd is executed at the end of this test task.
+    # thus we have to force to invoke handlers
+    - name: "Force all notified handlers to run at this point,
+      not waiting for normal sync points"
+      meta: flush_handlers
+
+    - name: Ensure config file size and counts
+      vars:
+        __conf_count: 5
+        __conf_size: less
+        __conf_files:
+          - "{{ __test_default_files_conf }}"
+        __check_systemctl_status: true
+      include_tasks: tasks/check_daemon_config_files.yml
+
+    - name: Ensure previous test config files are removed
+      stat:
+        path: "{{ item }}"
+      register: __result
+      failed_when: __result.stat.exists
+      loop:
+        - "/etc/rsyslog.d/unowned1.conf"
+        - "/etc/rsyslog.d/unowned2.conf"
+
+    - name: check1 rsyslog config files
+      command: ls /etc/rsyslog.d
+      changed_when: false
+
+    - name: configure with basics + purge again - check for idempotency
+      vars:
+        logging_purge_confs: true
+        logging_inputs:
+          - name: basic_input
+            type: basics
+      include_role:
+        name: linux-system-roles.logging
+
+    - name: check11 rsyslog config files
+      command: ls /etc/rsyslog.d
+      changed_when: false
+
+    - name: run again with purge to erase all config
+      vars:
+        logging_purge_confs: true
+        logging_enabled: false
       include_role:
         name: linux-system-roles.logging
 
@@ -25,3 +97,26 @@
         __conf_size: more
         __check_systemctl_status: true
       include_tasks: tasks/check_daemon_config_files.yml
+
+    - name: Ensure test config files are removed
+      stat:
+        path: "{{ item }}"
+      register: __result
+      failed_when: __result.stat.exists
+      loop:
+        - "{{ __test_default_files_conf }}"
+
+    - name: check2 rsyslog config files
+      command: ls /etc/rsyslog.d
+      changed_when: false
+
+    - name: run again with purge and reset to test idempotency
+      vars:
+        logging_purge_confs: true
+        logging_enabled: false
+      include_role:
+        name: linux-system-roles.logging
+
+    - name: check3 rsyslog config files
+      command: ls /etc/rsyslog.d
+      changed_when: false

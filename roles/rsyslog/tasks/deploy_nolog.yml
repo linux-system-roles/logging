@@ -36,6 +36,12 @@
     - inner_item.filename | d() or inner_item.name | d()
     - inner_item.options | d() or inner_item.sections | d()
   notify: restart rsyslogd
+  register: __rsyslog_deploy_nolog_templates
+
+- name: add deployed templates to global list
+  set_fact:
+    __rsyslog_template_results: "{{
+      __rsyslog_template_results + [__rsyslog_deploy_nolog_templates] }}"
 
 - name: Remove role config files from rsyslog.d with no_log
   file:
