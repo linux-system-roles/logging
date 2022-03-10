@@ -22,6 +22,8 @@
 
   tasks:
     - name: default run
+      vars:
+        logging_purge_confs: true
       include_role:
         name: linux-system-roles.logging
 
