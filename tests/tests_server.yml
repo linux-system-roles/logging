@@ -81,7 +81,7 @@
 
     - name: Ensure config file size and counts
       vars:
-        __conf_count: 12
+        __conf_count: 11
         __conf_size: less
         __conf_files:
           - "{{ __test_server_ptcp }}"
@@ -129,32 +129,7 @@
 
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
-        logging_enabled: false
-        logging_inputs:
-          - name: system_input
-            type: basics
-            state: absent
-          - name: remote_tcp
-            type: remote
-            tcp_ports: [6514, 40000, 40001]
-            tls: true
-            pki_authmode: x509/name
-            permitted_clients:
-              - '*.client.com'
-              - '*.example.com'
-            state: absent
-          - name: remote_ptcp
-            type: remote
-            tcp_ports: [514, 40010, 40011, 40012]
-            state: absent
-          - name: remote_udp
-            type: remote
-            udp_ports: [514, 40020]
-            state: absent
-        logging_outputs:
-          - name: files_output
-            type: files
-            state: absent
+        logging_purge_confs: true
       include_role:
         name: linux-system-roles.logging
 
@@ -220,33 +195,7 @@
     - block:
         - name: END TEST CASE 1; Clean up the deployed config
           vars:
-            logging_enabled: false
-            logging_inputs:
-              - name: system_input
-                type: basics
-                state: absent
-              - name: remote_tcp_0
-                type: remote
-                tcp_ports: [6514, 40000, 40001]
-                tls: true
-                pki_authmode: x509/name
-                permitted_clients:
-                  - '*.client.com'
-                  - '*.example.com'
-                state: absent
-              - name: remote_tcp_1
-                type: remote
-                tcp_ports: [514, 40010, 40011]
-                tls: true
-                state: absent
-              - name: remote_udp
-                type: remote
-                udp_ports: [514, 40020]
-                state: absent
-            logging_outputs:
-              - name: files_output
-                type: files
-                state: absent
+            logging_purge_confs: true
           include_role:
             name: linux-system-roles.logging
 

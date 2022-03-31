@@ -21,6 +21,9 @@
   hosts: all
 
   tasks:
+    - name: Check /etc/rsyslog.d
+      command: ls /etc/rsyslog.d
+
     - name: default run
       vars:
         logging_purge_confs: true

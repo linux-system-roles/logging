@@ -76,15 +76,7 @@
 
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
-        logging_enabled: false
-        logging_inputs:
-          - name: basic_input
-            type: basics
-            state: absent
-        logging_outputs:
-          - name: default_files
-            type: files
-            state: absent
+        logging_purge_confs: true
       include_role:
         name: linux-system-roles.logging
 
@@ -156,20 +148,7 @@
 
     - name: END TEST CASE 1; Clean up the deployed config
       vars:
-        logging_enabled: false
-        logging_system_log_dir: "{{ __logging_system_log_dir }}"
-        logging_outputs:
-          - name: files_output0
-            type: files
-            state: absent
-        logging_inputs:
-          - name: basic_input
-            type: basics
-            state: absent
-        logging_flows:
-          - name: flows0
-            inputs: [basic_input]
-            outputs: [files_output]
+        logging_purge_confs: true
       include_role:
         name: linux-system-roles.logging
 
@@ -239,37 +218,7 @@
 
     - name: END TEST CASE 2; Clean up the deployed config
       vars:
-        logging_enabled: false
-        logging_outputs:
-          - name: files_output0
-            type: files
-            facility: authpriv,auth
-            path: /var/log/secure
-            state: absent
-          - name: files_output1
-            type: files
-            severity: info
-            exclude:
-              - authpriv.none
-              - auth.none
-              - cron.none
-              - mail.none
-            path: "{{ __default_system_log }}"
-            state: absent
-          - name: files_output2
-            type: files
-            severity: emerg
-            path: :omusrmsg:*
-            state: absent
-          - name: files_output3
-            type: files
-            facility: local7
-            path: /var/log/boot.log
-            state: absent
-        logging_inputs:
-          - name: basic_input
-            type: basics
-            state: absent
+        logging_purge_confs: true
       include_role:
         name: linux-system-roles.logging
 
@@ -386,40 +335,7 @@
 
     - name: END TEST CASE 3; Clean up the deployed config
       vars:
-        logging_enabled: false
-        logging_outputs:
-          - name: files_output0
-            type: files
-            severity: info
-            exclude:
-              - authpriv.none
-              - auth.none
-              - cron.none
-              - mail.none
-            path: "{{ __default_system_log }}"
-            state: absent
-          - name: files_output1
-            type: files
-            facility: authpriv,auth
-            path: /var/log/secure
-            state: absent
-          - name: forwards_severity_and_facility
-            type: forwards
-            facility: local1
-            severity: info
-            target: host.domain
-            tcp_port: 1514
-            state: absent
-          - name: forwards_facility_only
-            type: forwards
-            facility: local2
-            target: host.domain
-            tcp_port: 2514
-            state: absent
-        logging_inputs:
-          - name: basic_input0
-            type: basics
-            state: absent
+        logging_purge_confs: true
       include_role:
         name: linux-system-roles.logging
 

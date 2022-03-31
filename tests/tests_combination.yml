@@ -169,49 +169,7 @@
 
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
-        logging_enabled: false
-        logging_outputs:
-          - name: files_test0
-            type: files
-            severity: info
-            exclude:
-              - authpriv.none
-              - auth.none
-              - cron.none
-              - mail.none
-            path: "{{ __default_system_log }}"
-            state: absent
-          - name: files_test1
-            type: files
-            facility: authpriv,auth
-            path: /var/log/secure
-            state: absent
-          - name: forwards_severity_and_facility
-            type: forwards
-            facility: local1
-            severity: info
-            target: host.domain
-            tcp_port: 1514
-            state: absent
-          - name: forwards_facility_only
-            type: forwards
-            facility: local2
-            target: host.domain
-            tcp_port: 2514
-            state: absent
-        logging_inputs:
-          - name: "{{ __test_tag }}"
-            type: files
-            input_log_path: "{{ __test_inputfiles_dir }}/*.log"
-            state: absent
-          - name: basic_input
-            type: basics
-            ratelimit_burst: 33333
-            state: absent
-          - name: basic_input
-            type: basics
-            ratelimit_burst: 44444
-            state: absent
+        logging_purge_confs: true
       include_role:
         name: linux-system-roles.logging
 
@@ -376,45 +334,7 @@
 
     - name: END TEST CASE 1; Clean up the deployed config
       vars:
-        logging_enabled: false
-        logging_outputs:
-          - name: files_test0
-            type: files
-            severity: info
-            exclude:
-              - authpriv.none
-              - auth.none
-              - cron.none
-              - mail.none
-            path: "{{ __default_system_log }}"
-            state: absent
-          - name: files_test1
-            type: files
-            facility: authpriv,auth
-            path: /var/log/secure
-            state: absent
-          - name: forwards_severity_and_facility
-            type: forwards
-            facility: local1
-            severity: info
-            target: host.domain
-            tcp_port: 1514
-            state: absent
-          - name: forwards_facility_only
-            type: forwards
-            facility: local2
-            target: host.domain
-            tcp_port: 2514
-            state: absent
-        logging_inputs:
-          - name: basic_input
-            type: basics
-            ratelimit_burst: 33333
-            state: absent
-          - name: "{{ __test_tag }}"
-            type: files
-            input_log_path: "{{ __test_inputfiles_dir }}/*.log"
-            state: absent
+        logging_purge_confs: true
       include_role:
         name: linux-system-roles.logging
 
@@ -603,23 +523,7 @@
 
     - name: END TEST CASE 2; Clean up the deployed config
       vars:
-        logging_enabled: false
-        logging_outputs:
-          - name: files_test0
-            type: files
-            severity: info
-            exclude:
-              - authpriv.none
-              - auth.none
-              - cron.none
-              - mail.none
-            path: "{{ __default_system_log }}"
-            state: absent
-        logging_inputs:
-          - name: basic_input
-            type: basics
-            ratelimit_burst: 33333
-            state: absent
+        logging_purge_confs: true
       include_role:
         name: linux-system-roles.logging
 

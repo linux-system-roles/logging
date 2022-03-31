@@ -187,51 +187,7 @@
 
     - name: END TEST CASE 0; Ensure basic ovirt configuration works
       vars:
-        logging_enabled: false
-        logging_elasticsearch_password: password0
-        logging_outputs:
-          - name: default_files
-            type: files
-            state: absent
-          - name: elasticsearch_output
-            type: elasticsearch
-            server_host: logging-es
-            server_port: 9200
-            index_prefix: project.
-            input_type: ovirt
-            retryfailures: false
-            ca_cert: "/etc/rsyslog.d/es-ca.crt"
-            cert: "/etc/rsyslog.d/es-cert.pem"
-            private_key: "/etc/rsyslog.d/es-key.pem"
-            state: absent
-            uid: testuser0
-          - name: elasticsearch_output_ops
-            type: elasticsearch
-            server_host: logging-es-ops
-            server_port: 9200
-            index_prefix: .operations.
-            input_type: ovirt
-            retryfailures: false
-            ca_cert: "/etc/rsyslog.d/es-ca.crt"
-            cert: "/etc/rsyslog.d/es-cert.pem"
-            private_key: "/etc/rsyslog.d/es-key.pem"
-            state: absent
-        logging_inputs:
-          - name: basic_input
-            type: basics
-            state: absent
-          - name: "{{ __test_collectd_name }}"
-            type: ovirt
-            subtype: collectd
-            state: absent
-          - name: "{{ __test_engine_name }}"
-            type: ovirt
-            subtype: engine
-            state: absent
-          - name: "{{ __test_vdsm_name }}"
-            type: ovirt
-            subtype: vdsm
-            state: absent
+        logging_purge_confs: true
       include_role:
         name: linux-system-roles.logging
 
@@ -453,72 +409,7 @@
 
     - name: END TEST CASE 1; Ensure basic ovirt configuration works
       vars:
-        logging_enabled: false
-        logging_outputs:
-          - name: default_files
-            type: files
-            state: absent
-          - name: elasticsearch_output
-            type: elasticsearch
-            server_host: [logging-es0, logging-es1]
-            server_port: 9200
-            index_prefix: project.
-            input_type: ovirt
-            ca_cert: "/etc/rsyslog.d/es-ca.crt"
-            cert: "/etc/rsyslog.d/es-cert.pem"
-            private_key: "/etc/rsyslog.d/es-key.pem"
-            state: absent
-            uid: testuser0
-          - name: elasticsearch_output_ops
-            type: elasticsearch
-            server_host:
-              - logging-es-ops0
-              - logging-es-ops1
-            server_port: 9200
-            index_prefix: .operations.
-            input_type: ovirt
-            retryfailures: false
-            ca_cert: "/etc/rsyslog.d/es-ca.crt"
-            cert: "/etc/rsyslog.d/es-cert.pem"
-            private_key: "/etc/rsyslog.d/es-key.pem"
-            dynSearchIndex: false
-            bulkmode: false
-            dynbulkid: false
-            allowUnsignedCerts: true
-            usehttps: false
-            state: absent
-        logging_inputs:
-          - name: basic_input
-            type: basics
-            state: absent
-          - name: "{{ __test_collectd_name }}"
-            type: ovirt
-            subtype: collectd
-            ovirt_collectd_port: "{{ __test_collectd_port }}"
-            ovirt_elasticsearch_index_prefix: "{{ __test_metrics_index }}"
-            ovirt_env_name: test-engine
-            ovirt_env_uuid: 111-222-333
-            state: absent
-          - name: "{{ __test_engine_name }}"
-            type: ovirt
-            subtype: engine
-            ovirt_elasticsearch_index_prefix: "{{ __test_logs_index }}"
-            ovirt_env_name: test-engine
-            ovirt_env_uuid: 444-555-666
-            ovirt_vds_cluster_name: test_vds_cluster
-            ovirt_engine_fqdn: engine.ovirt.example.com
-            ovirt_input_file: "{{ __test_engine_input }}"
-            state: absent
-          - name: "{{ __test_vdsm_name }}"
-            type: ovirt
-            subtype: vdsm
-            ovirt_elasticsearch_index_prefix: "{{ __test_logs_index }}"
-            ovirt_env_name: test-engine
-            ovirt_env_uuid: 777-888-999
-            ovirt_vds_cluster_name: test_vds_cluster
-            ovirt_engine_fqdn: engine.ovirt.example.com
-            ovirt_input_file: "{{ __test_vdsm_input }}"
-            state: absent
+        logging_purge_confs: true
       include_role:
         name: linux-system-roles.logging
 
