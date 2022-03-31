@@ -138,35 +138,7 @@
 
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
-        logging_enabled: false
-        logging_outputs:
-          - name: files_output0
-            type: files
-            severity: info
-            exclude:
-              - authpriv.none
-              - auth.none
-              - cron.none
-              - mail.none
-            path: "{{ __default_system_log }}"
-            state: absent
-          - name: files_output1
-            type: files
-            facility: authpriv,auth
-            path: /var/log/secure
-            state: absent
-        logging_inputs:
-          - name: files_input0
-            type: files
-            input_log_path: "{{ __test_inputfiles_dir0 }}/*.log"
-            state: absent
-          - name: files_input1
-            type: files
-            input_log_path: "{{ __test_inputfiles_dir1 }}/*.log"
-            state: absent
-          - name: files_input2
-            type: files
-            state: absent
+        logging_purge_confs: true
       include_role:
         name: linux-system-roles.logging
 
