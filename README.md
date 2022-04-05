@@ -117,6 +117,8 @@ Available options:
 
 Available options:
 - `input_log_path`: File name to be read by the imfile plugin. The value should be full path. Wildcard '\*' is allowed in the path.  Default to `/var/log/containers/*.log`.
+`facility`: Facility to filter the inputs from the files.
+`severity`: Severity to filter the inputs from the files.
 
 #### ovirt type
 
@@ -246,6 +248,9 @@ Available options:
 - `property_value`: Value in property-based filter; default to `error`
 - `path`: Path to the output file.
 
+logging_files_template_format: Set default template for the files output.
+Allowed values are `traditional`, `syslog`, and `modern`. Default to `modern`.
+
 **Note:** Selector options and property-based filter options are exclusive. If Property-based filter options are defined, selector options will be ignored.
 
 **Note:** Unless the above options are given, these local file outputs are configured.
@@ -278,6 +283,10 @@ Available options:
 - `tls`: Set to `true` to encrypt the connection using the default TLS implementation used by the provider. Default to `false`.
 - `pki_authmode`: Specifying the default network driver authentication mode. `x509/name`, `x509/fingerprint`, or `anon` is accepted. Default to `x509/name`.
 - `permitted_server`: Hostname, IP address, fingerprint(sha1) or wildcard DNS domain of the server which this client will be allowed to connect and send logs over TLS. Default to `*.{{ logging_domain }}`
+- `template`: Template format for the particular forwards output. Allowed values are `traditional`, `syslog`, and `modern`. Default to `modern`.
+
+logging_forwards_template_format: Set default template for the forwards output.
+Allowed values are `traditional`, `syslog`, and `modern`. Default to `modern`.
 
 **Note:** Selector options and property-based filter options are exclusive. If Property-based filter options are defined, selector options will be ignored.
 

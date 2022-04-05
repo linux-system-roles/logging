@@ -5,6 +5,7 @@
   vars:
     __test_files_conf: >-
       /etc/rsyslog.d/30-output-files-default_files.conf
+    __test_forward_module_conf: /etc/rsyslog.d/10-output-forwards-modules.conf
     __test_forward_conf_s_f: >-
       /etc/rsyslog.d/30-output-forwards-forwards_severity_and_facility.conf
     __test_forward_conf_f: >-
@@ -27,12 +28,16 @@
     __expected_error: "Error: tls is enabled in forwards_severity_and_facility;
       you must specify logging_pki_files ca_cert_src and/or ca_cert in the
       playbook var section."
+    __test_template: RSYSLOG_ForwardFormat
+    __test_template_trad: RSYSLOG_TraditionalForwardFormat
+    __test_template_sys: RSYSLOG_SyslogProtocol23Format
 
   tasks:
     # TEST CASE 0
     - name: "TEST CASE 0; Ensure that the logs from basics inputs
       are sent to the forwards outputs and implicit files output"
       vars:
+        logging_forwards_template_format: traditional
         logging_outputs:
           - name: forwards_severity_and_facility
             type: forwards
@@ -40,6 +45,7 @@
             severity: info
             target: host.domain
             tcp_port: 1514
+            template: syslog
           - name: forwards_facility_only
             type: forwards
             facility: local2
@@ -112,6 +118,11 @@
           - ca-certificates
       include_tasks: tasks/check_packages.yml
 
+    - name: >-
+        Check the module param template is set to "{{ __test_template_trad }}"
+      command: >-
+        grep '{{ __test_template_trad }}' '{{ __test_forward_module_conf }}'
+
     - name: Generate a file to check severity_and_facility
       copy:
         dest: /tmp/__testfile__
@@ -125,6 +136,7 @@
                   Target="host.domain"
                   Port="1514"
                   Protocol="tcp"
+                  Template="{{ __test_template_sys }}"
               )
           }
         mode: '0600'
@@ -146,6 +158,7 @@
                   Target="host.domain"
                   Port="2514"
                   Protocol="tcp"
+                  Template="{{ __test_template }}"
               )
           }
         mode: '0600'
@@ -167,6 +180,7 @@
                   Target="host.domain"
                   Port="3514"
                   Protocol="tcp"
+                  Template="{{ __test_template }}"
               )
           }
         mode: '0600'
@@ -188,6 +202,7 @@
                   Target="host.domain"
                   Port="4514"
                   Protocol="tcp"
+                  Template="{{ __test_template }}"
               )
           }
         mode: '0600'
@@ -209,6 +224,7 @@
                   Target="host.domain"
                   Port="6514"
                   Protocol="udp"
+                  Template="{{ __test_template }}"
               )
           }
         mode: '0600'
@@ -228,6 +244,7 @@
               *.* action(name="forwards_no_severity_and_facility_protocol_port"
                   type="omfwd"
                   Target="host.domain"
+                  Template="{{ __test_template }}"
               )
           }
         mode: '0600'
@@ -356,6 +373,7 @@
                   StreamDriverPermittedPeers="*.example.com"
                   Port="1514"
                   Protocol="tcp"
+                  Template="{{ __test_template }}"
               )
           }
         mode: '0600'
@@ -479,6 +497,7 @@
                   StreamDriverPermittedPeers="*.example.com"
                   Port="1514"
                   Protocol="tcp"
+                  Template="{{ __test_template }}"
               )
           }
         mode: '0600'

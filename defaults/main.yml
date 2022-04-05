@@ -81,3 +81,11 @@ logging_domain: '{{ ansible_domain if ansible_domain else ansible_hostname }}'
 #
 # Password to pass to the elasticsearch output
 logging_elasticsearch_password: ""
+
+# Output file format
+# Allowed values: "traditional", "syslog", or "modern"; default to "modern"
+logging_files_template_format: ""
+
+# Output forward format
+# Allowed values: "traditional", "syslog",  or "modern"; default to "modern"
+logging_forwards_template_format: ""

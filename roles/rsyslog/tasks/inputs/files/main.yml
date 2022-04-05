@@ -18,9 +18,7 @@
         type: input
         state: "{{ __rsyslog_input.state | d('present') }}"
         sections:
-          - options: |-
-              input(type="imfile" file="{{ __rsyslog_input.input_log_path }}" tag="{{ __rsyslog_input.name }}")
-              {{ lookup("template", "input_template.j2") }}
+          - options: "{{ lookup('template', 'input_files.j2') }}"
   include_tasks:
     file: "{{ role_path }}/tasks/deploy.yml"
   when:
