@@ -324,6 +324,7 @@
                   Target="host.domain"
                   Port="1514"
                   Protocol="tcp"
+                  Template="RSYSLOG_ForwardFormat"
               )
           }
         mode: '0600'

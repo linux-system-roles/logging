@@ -130,6 +130,7 @@
                   Target="host.domain"
                   Port="1514"
                   Protocol="tcp"
+                  Template="RSYSLOG_ForwardFormat"
               )
           }
         mode: '0600'
@@ -145,13 +146,17 @@
       failed_when: not __result.stat.exists
 
     - name: Check the input call with tag={{ __test_tag }}
-      command: >-
-        /bin/grep
-        ' *input(type="imfile"
-        file="/var/log/inputdirectory/\*.log"
-        tag="{{ __test_tag }}"'
-        {{ __test_inputfiles_conf }}
-      changed_when: false
+      lineinfile:
+        path: "{{ __test_inputfiles_conf }}"
+        line: "  {{ item }}"
+        state: present
+      check_mode: yes
+      register: _result
+      failed_when: _result.changed
+      loop:
+        - type="imfile"
+        - file="/var/log/inputdirectory/*.log"
+        - tag="{{ __test_tag }}"
 
     # yamllint disable rule:line-length
     - name: "Create a test log file with a log message in
@@ -295,6 +300,7 @@
                   Target="host.domain"
                   Port="1514"
                   Protocol="tcp"
+                  Template="RSYSLOG_ForwardFormat"
               )
           }
         mode: '0600'
@@ -310,13 +316,17 @@
       failed_when: not __result.stat.exists
 
     - name: Check the input call with tag={{ __test_tag }}
-      command: >-
-        /bin/grep
-        ' *input(type="imfile"
-        file="/var/log/inputdirectory/\*.log"
-        tag="{{ __test_tag }}"'
-        {{ __test_inputfiles_conf }}
-      changed_when: false
+      lineinfile:
+        path: "{{ __test_inputfiles_conf }}"
+        line: "  {{ item }}"
+        state: present
+      check_mode: yes
+      register: _result
+      failed_when: _result.changed
+      loop:
+        - type="imfile"
+        - file="/var/log/inputdirectory/*.log"
+        - tag="{{ __test_tag }}"
 
     # yamllint disable rule:line-length
     - name: "Create a test log file with a log message in

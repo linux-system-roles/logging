@@ -19,11 +19,15 @@ __rsyslog_conf_files_output_modules:
     type: 'modules'
     sections:
 
-      - comment: 'Log messages into files with timestamp format either
-        traditional or default'
+      # yamllint disable rule:line-length
+      - comment: 'Log messages into files with traditional, syslog, or
+        default format'
         options: |-
-          {% if rsyslog_basics_use_traditional_timestamp_format | d(true) %}
+          {% if logging_files_template_format == "traditional" %}
           module(load="builtin:omfile" Template="RSYSLOG_TraditionalFileFormat")
+          {% elif logging_files_template_format == "syslog" %}
+          module(load="builtin:omfile" Template="RSYSLOG_SyslogProtocol23Format")
           {% else %}
           module(load="builtin:omfile")
           {% endif %}
+        # yamllint enable rule:line-length

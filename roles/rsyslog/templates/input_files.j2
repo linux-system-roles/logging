@@ -1,0 +1,12 @@
+input(
+  type="imfile"
+  file="{{ __rsyslog_input.input_log_path }}"
+  tag="{{ __rsyslog_input.name }}"
+{% if __rsyslog_input.severity is defined %}
+  severity="{{ __rsyslog_input.severity }}"
+{% endif %}
+{% if __rsyslog_input.facility is defined %}
+  facility="{{ __rsyslog_input.facility }}"
+{% endif %}
+)
+{{ lookup('template', 'input_template.j2') }}

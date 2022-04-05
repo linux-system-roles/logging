@@ -30,5 +30,12 @@ ruleset(name="{{ __rsyslog_output.name }}") {
 {% if __forwards_protocol != '' %}
         Protocol="{{ __forwards_protocol }}"
 {% endif %}
+{% if __rsyslog_output.template | d('') == 'traditional' %}
+        Template="RSYSLOG_TraditionalForwardFormat"
+{% elif __rsyslog_output.template | d('') == 'syslog' %}
+        Template="RSYSLOG_SyslogProtocol23Format"
+{% else %}
+        Template="RSYSLOG_ForwardFormat"
+{% endif %}
     )
 }

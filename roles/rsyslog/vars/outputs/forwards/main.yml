@@ -6,4 +6,28 @@
 
 # List of rpm packages for Forwards output.
 __rsyslog_forwards_output_packages: []
-__rsyslog_forwards_output_rules: []
+
+# Forwards Rsyslog output configuration rules
+# -------------------------------------------
+__rsyslog_forwards_output_rules:
+  - '{{ __rsyslog_conf_forwards_output_modules }}'
+
+# __rsyslog_conf_forwards_output_modules:
+__rsyslog_conf_forwards_output_modules:
+
+  - name: 'output-forwards-modules'
+    type: 'modules'
+    sections:
+
+      # yamllint disable rule:line-length
+      - comment: 'Log messages into files with traditional, syslog, or
+        default format'
+        options: |-
+          {% if logging_forwards_template_format == "traditional" %}
+          module(load="builtin:omfwd" Template="RSYSLOG_TraditionalForwardFormat")
+          {% elif logging_forwards_template_format == "syslog" %}
+          module(load="builtin:omfwd" Template="RSYSLOG_SyslogProtocol23Format")
+          {% else %}
+          module(load="builtin:omfwd")
+          {% endif %}
+        # yamllint enable rule:line-length

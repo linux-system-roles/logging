@@ -31,16 +31,19 @@
     __test_inputfiles_dir0: /var/log/inputdirectory0
     __test_inputfiles_dir1: /var/log/inputdirectory1
     __test_inputfiles_conf0: /etc/rsyslog.d/90-input-files-files_input0.conf
-    __test_inputfiles_conf1: /etc/rsyslog.d/90-input-files-files_input1.conf
+    __test_inputfiles_conf1: /etc/rsyslog.d/90-input-files-php:.conf
     __test_inputfiles_conf2: /etc/rsyslog.d/90-input-files-files_input2.conf
     __test_outputfiles_conf: /etc/rsyslog.d/30-output-files-files_output0.conf
     __default_system_log: /var/log/messages
+    __test_outputfiles_module_conf: /etc/rsyslog.d/10-output-files-modules.conf
+    __test_template: RSYSLOG_TraditionalFileFormat
 
   tasks:
     # TEST CASE 0
     - name: "TEST CASE 0; Ensure that the role runs with parameters
       from two files inputs to two files outputs"
       vars:
+        logging_files_template_format: traditional
         logging_outputs:
           - name: files_output0
             type: files
@@ -59,14 +62,16 @@
           - name: files_input0
             type: files
             input_log_path: "{{ __test_inputfiles_dir0 }}/*.log"
-          - name: files_input1
+            severity: err
+            facility: local6
+          - name: "php:"
             type: files
             input_log_path: "{{ __test_inputfiles_dir1 }}/*.log"
           - name: files_input2
             type: files
         logging_flows:
           - name: flow_0
-            inputs: [files_input0, files_input1]
+            inputs: [files_input0, "php:"]
             outputs: [files_output0, files_output1]
       include_role:
         name: linux-system-roles.logging
@@ -95,6 +100,10 @@
           - ca-certificates
       include_tasks: tasks/check_packages.yml
 
+    - name: "Check the module param template is set to {{ __test_template }}"
+      command: >-
+        grep '{{ __test_template }}' '{{ __test_outputfiles_module_conf }}'
+
     - name: Check if the input files config does not exist
       stat:
         path: "{{ __test_inputfiles_conf2 }}"
@@ -119,22 +128,32 @@
       failed_when: not __result.stat.exists
 
     - name: Check the filter 0
-      command: >-
-        /bin/grep
-        'input(type="imfile"
-        file="/var/log/inputdirectory0/\*.log"
-        tag="files_input0")'
-        {{ __test_inputfiles_conf0 }}
-      changed_when: false
+      lineinfile:
+        path: "{{ __test_inputfiles_conf0 }}"
+        line: "  {{ item }}"
+        state: present
+      check_mode: yes
+      register: _result
+      failed_when: _result.changed
+      loop:
+        - type="imfile"
+        - file="/var/log/inputdirectory0/*.log"
+        - tag="files_input0"
+        - severity="err"
+        - facility="local6"
 
     - name: Check the filter 1
-      command: >-
-        /bin/grep
-        'input(type="imfile"
-        file="/var/log/inputdirectory1/\*.log"
-        tag="files_input1")'
-        {{ __test_inputfiles_conf1 }}
-      changed_when: false
+      lineinfile:
+        path: "{{ __test_inputfiles_conf1 }}"
+        line: "  {{ item }}"
+        state: present
+      check_mode: yes
+      register: _result
+      failed_when: _result.changed
+      loop:
+        - type="imfile"
+        - file="/var/log/inputdirectory1/*.log"
+        - tag="php:"
 
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
