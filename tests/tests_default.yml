@@ -2,15 +2,9 @@
 #
 - name: Ensure that the role runs with default parameters
   hosts: all
+  gather_facts: false
 
   tasks:
     - name: default run (NOOP)
       include_role:
         name: linux-system-roles.logging
-
-    - name: Ensure installed packages
-      vars:
-        __expected:
-          - rsyslog
-          - ca-certificates
-      include_tasks: tasks/check_packages.yml

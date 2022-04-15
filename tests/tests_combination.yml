@@ -89,13 +89,6 @@
         __check_systemctl_status: true
       include_tasks: tasks/check_daemon_config_files.yml
 
-    - name: Ensure installed packages
-      vars:
-        __expected:
-          - rsyslog
-          - ca-certificates
-      include_tasks: tasks/check_packages.yml
-
     - name: Check if the files config exists
       stat:
         path: "{{ __test_files_conf }}"
@@ -252,13 +245,6 @@
           - "{{ __test_inputfiles_conf }}"
         __check_systemctl_status: true
       include_tasks: tasks/check_daemon_config_files.yml
-
-    - name: Ensure installed packages
-      vars:
-        __expected:
-          - rsyslog
-          - ca-certificates
-      include_tasks: tasks/check_packages.yml
 
     - name: Check the files config stat
       stat:
@@ -421,13 +407,6 @@
         __check_systemctl_status: true
       include_tasks: tasks/check_daemon_config_files.yml
 
-    - name: Ensure installed packages
-      vars:
-        __expected:
-          - rsyslog
-          - ca-certificates
-      include_tasks: tasks/check_packages.yml
-
     - name: Generate test config file to be overridden
       copy:
         dest: "{{ __test_basics_conf }}"
@@ -508,13 +487,6 @@
           - "{{ __test_basics_conf }}"
         __check_systemctl_status: true
       include_tasks: tasks/check_daemon_config_files.yml
-
-    - name: Ensure installed packages
-      vars:
-        __expected:
-          - rsyslog
-          - ca-certificates
-      include_tasks: tasks/check_packages.yml
 
     - name: Check {{ __test_basics_conf }} was updated
       command: >-

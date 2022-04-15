@@ -89,3 +89,11 @@ logging_files_template_format: ""
 # Output forward format
 # Allowed values: "traditional", "syslog",  or "modern"; default to "modern"
 logging_forwards_template_format: ""
+
+# ansible_facts required by the role
+__logging_required_facts:
+  - distribution
+  - distribution_major_version
+  - distribution_version
+  - os_family
+  - default_ipv4
