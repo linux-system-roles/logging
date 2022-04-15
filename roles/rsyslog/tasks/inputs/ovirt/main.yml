@@ -1,16 +1,7 @@
 ---
 # yamllint disable rule:line-length
-- name: Set platform/version specific variables
-  include_vars: "{{ item }}"
-  loop:
-    - "{{ role_path }}/vars/inputs/ovirt/default.yml"
-    - "{{ role_path }}/vars/inputs/ovirt/{{ ansible_facts['os_family'] }}.yml"
-    - "{{ role_path }}/vars/inputs/ovirt/{{ ansible_facts['distribution'] }}.yml"
-    - "{{ role_path }}/vars/inputs/ovirt/{{ ansible_facts['distribution'] }}_\
-      {{ ansible_facts['distribution_major_version'] }}.yml"
-    - "{{ role_path }}/vars/inputs/ovirt/{{ ansible_facts['distribution'] }}_\
-      {{ ansible_facts['distribution_version'] }}.yml"
-  when: item is file
+- name: Set ovirt platform/version specific variables
+  include_tasks: "{{ role_path }}/tasks/inputs/ovirt/set_vars.yml"
 
 # yamllint enable rule:line-length
 # Deploy configuration files

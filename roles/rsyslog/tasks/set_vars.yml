@@ -1,0 +1,28 @@
+---
+# SPDX-License-Identifier: GPL-3.0-only
+
+- name: Ensure ansible_facts used by role
+  setup:
+    gather_subset: min
+  when: not ansible_facts.keys() | list |
+    intersect(__logging_required_facts) == __logging_required_facts
+
+- name: Set platform/version specific variables
+  include_vars: "{{ item }}"
+  loop:
+    - "{{ role_path }}/vars/default.yml"
+    - "{{ role_path }}/vars/{{ ansible_facts['os_family'] }}.yml"
+    - "{{ role_path }}/vars/{{ ansible_facts['distribution'] }}.yml"
+    - "{{ role_path }}/vars/{{ ansible_facts['distribution'] }}_\
+      {{ ansible_facts['distribution_major_version'] }}.yml"
+    - "{{ role_path }}/vars/{{ ansible_facts['distribution'] }}_\
+      {{ ansible_facts['distribution_version'] }}.yml"
+  when: item is file
+
+- name: "Include {{ role_path }}/roles/rsyslog/vars/main.yml"
+  include_vars: "{{ item }}"
+  loop: "{{ ['{{ role_path }}/vars/main.yml'] +
+            lookup('lines',
+              '/bin/ls -1 {{ role_path }}/vars/*/*/main.yml').split(',') }}"
+  when: __snapshot_gather_vars is defined and
+        __snapshot_gather_vars | bool

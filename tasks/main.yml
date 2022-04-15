@@ -90,7 +90,10 @@
       when:
         - logging_debug | d(false)
 
-  when: logging_provider == 'rsyslog'
+  when:
+    - logging_provider == 'rsyslog'
+    - __snapshot_gather_vars is not defined or
+      not __snapshot_gather_vars | bool
 
 - name: Include Rsyslog role
   vars:

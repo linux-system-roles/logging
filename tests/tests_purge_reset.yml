@@ -84,13 +84,6 @@
       include_role:
         name: linux-system-roles.logging
 
-    - name: Ensure installed packages
-      vars:
-        __expected:
-          - rsyslog
-          - ca-certificates
-      include_tasks: tasks/check_packages.yml
-
     - name: Ensure config file size and counts
       vars:
         __conf_count: 0
