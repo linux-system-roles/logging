@@ -19,10 +19,10 @@
       {{ ansible_facts['distribution_version'] }}.yml"
   when: item is file
 
-- name: "Include {{ role_path }}/roles/rsyslog/vars/main.yml"
+- name: "Include {{ role_path }}/vars/main.yml"
   include_vars: "{{ item }}"
-  loop: "{{ ['{{ role_path }}/vars/main.yml'] +
-            lookup('lines',
-              '/bin/ls -1 {{ role_path }}/vars/*/*/main.yml').split(',') }}"
+  loop: "{{ lookup('lines',
+         '/bin/ls -1 {{ role_path }}/vars/main.yml
+          {{ role_path }}/vars/*/*/main.yml').split(',') }}"
   when: __snapshot_gather_vars is defined and
         __snapshot_gather_vars | bool
