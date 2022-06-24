@@ -16,10 +16,10 @@
 
     - name: Set rsyslog_outputs
       set_fact:
-        rsyslog_outputs: "{{ logging_outputs | d([]) |
+        rsyslog_outputs: "{{ (logging_outputs | d([]) |
           selectattr('name', 'defined') |
-          selectattr('type', 'defined') | list }} +
-          {{ __rsyslog_output_files | d([]) }}"
+          selectattr('type', 'defined') | list) +
+          (__rsyslog_output_files | d([])) }}"
 
     - name: Set rsyslog_inputs
       set_fact:
