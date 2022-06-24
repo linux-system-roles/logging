@@ -17,10 +17,10 @@
                               selectattr('tcp_ports', 'defined') | list }}"
     __logging_remote_tls: "{{ __logging_remote_tcp |
                               selectattr('tls', 'defined') | list }}"
-    __logging_remote_ptcp: "{{ __logging_remote_tcp |
-                               selectattr('tls', 'undefined') | list }} +
-                            {{ __logging_remote_tls | rejectattr('tls')
-                               | list }}"
+    __logging_remote_ptcp: "{{ (__logging_remote_tcp |
+                               selectattr('tls', 'undefined') | list) +
+                               (__logging_remote_tls | rejectattr('tls')
+                               | list) }}"
     __logging_remote_tlstcp: "{{ __logging_remote_tls | selectattr('tls')
                               | list }}"
 

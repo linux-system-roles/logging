@@ -11,10 +11,12 @@
 
         - name: Install test packages
           package:
-            name: "{{ lookup('vars',
-                             *lookup('varnames', '^__rsyslog_.*packages$',
-                                 wantlist=True)) | flatten | unique | sort }}
-                      + ['lsof', 'openssl']"
+            name: "{{ __base_packages + ['lsof', 'openssl'] }}"
             state: present
+          vars:
+            __varnames: "{{ lookup('varnames', '^__rsyslog_.*packages$',
+                            wantlist=True) }}"
+            __base_packages: "{{ lookup('vars', *__varnames, wantlist=True) |
+              flatten | unique | sort }}"
       vars:
         __snapshot_gather_vars: true

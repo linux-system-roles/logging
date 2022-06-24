@@ -32,9 +32,9 @@
 
 - name: Install/Update required packages
   package:
-    name: "{{ __rsyslog_base_packages }} + {{ __rsyslog_tls_packages
-      if (logging_pki_files | d([]) | length > 0) else [] }} +
-      {{ rsyslog_extra_packages | flatten }}"
+    name: "{{ __rsyslog_base_packages + (__rsyslog_tls_packages
+      if (logging_pki_files | d([]) | length > 0) else []) +
+      (rsyslog_extra_packages | flatten) }}"
     state: present
   when:
     - __rsyslog_enabled | bool or
