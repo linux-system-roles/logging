@@ -5,7 +5,7 @@ galaxy_info:
   galaxy_tags: ['logging', 'rsyslog', 'redhat', 'fedora', 'centos']
   company: Red Hat, Inc.
   license: GPL-3.0-only,MIT
-  min_ansible_version: 2.9
+  min_ansible_version: "2.9"
   platforms:
     - name: Fedora
       versions:
