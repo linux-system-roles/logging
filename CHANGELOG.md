@@ -1,6 +1,51 @@
 Changelog
 =========
 
+[1.9.4] - 2022-07-19
+--------------------
+
+### New Features
+
+- none
+
+### Bug Fixes
+
+- support ansible-core-2.13
+
+Looks like ansible-core-2.13 (or latest jinja3) does not support
+constructs like this:
+```
+var: "{{ [some list] }} + {{ [other list] }}"
+```
+instead, the entire thing has to be evaluated in the same jinja
+evaluation context:
+```
+var: "{{ [some list] + [other list] }}"
+```
+
+### Other Changes
+
+- use gather_facts: true in tests_include_vars_from_parent
+
+This test does not work with ANSIBLE_GATHERING=explicit - add
+explicit gather_facts: true
+
+- make min_ansible_version a string in meta/main.yml
+
+The Ansible developers say that `min_ansible_version` in meta/main.yml
+must be a `string` value like `"2.9"`, not a `float` value like `2.9`.
+
+- Add CHANGELOG.md
+
+- Modify CHANGELOG.md
+
+- Replace the ATX style with the setext style for the header H1 and H2.
+- Each changelog has 3 sections, "### New Features", "### Bug Fixes",
+  and "Other Changes".
+- If there is no items in a section, let it have "- none".
+
+- Add changelog_to_tag.yml to .github/workflows
+
 [1.9.3] - 2022-06-12
 --------------------
 
