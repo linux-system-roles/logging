@@ -119,6 +119,8 @@ Available options:
 - `input_log_path`: File name to be read by the imfile plugin. The value should be full path. Wildcard '\*' is allowed in the path.  Default to `/var/log/containers/*.log`.
 `facility`: Facility to filter the inputs from the files.
 `severity`: Severity to filter the inputs from the files.
+`startmsg_regex`: The regular expression that matches the start part of a message.
+`endmsg_regex`: The regular expression that matches the last part of a message.
 
 #### ovirt type
 
