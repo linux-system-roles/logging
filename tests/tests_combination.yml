@@ -52,6 +52,7 @@
           - name: "{{ __test_tag }}"
             type: files
             input_log_path: "{{ __test_inputfiles_dir }}/*.log"
+            endmsg_regex: xyz
           - name: basic_input
             type: basics
             ratelimit_burst: 33333
@@ -163,6 +164,23 @@
       command: >-
         /bin/grep '{{ __test_tag }} .*abcdefghijklmnopqrstuvwxyz$' {{ __default_system_log }}
       changed_when: false
+    # yamllint enable rule:line-length
+
+    # yamllint disable rule:line-length
+    - name: "Create a test log file with a log message in
+      {{ __test_inputfiles_dir }} which will not be logged
+      due to the regex condition"
+      shell: |-
+        set -euo pipefail
+        echo '<167>Jul 22 01:00:00 11.22.33.44 tag msgnum:00000000:24:test message 0123456789' > {{ __test_inputfiles_dir }}/test.log
+      changed_when: false
+
+    - name: Check the fake second test log message is not in {{ __default_system_log }}
+      command: >-
+        /bin/grep '{{ __test_tag }} .*test message 0123456789$' {{ __default_system_log }}
+      register: __result
+      changed_when: false
+      failed_when: __result.rc != 1
     # yamllint enable rule:line-length
 
     - name: END TEST CASE 0; Clean up the deployed config
