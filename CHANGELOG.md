@@ -1,6 +1,36 @@
 Changelog
 =========
 
+[1.10.0] - 2022-07-28
+--------------------
+
+### New Features
+
+- Support startmsg.regex and endmsg.regex in the files inputs.
+
+Adds startmsg_regex and endmsg_regex options:
+`startmsg_regex`: The regular expression that matches the start part of a message.
+`endmsg_regex`: The regular expression that matches the last part of a message.
+
+### Bug Fixes
+
+- none
+
+### Other Changes
+
+- Fix a bash bug in changelog_to_tag.yml, which unexpectedly expanded "*"
+
+- changelog_to_tag action - support other than "master" for the main branch name, as well
+
+- Use GITHUB_REF_NAME as name of push branch; fix error in branch detection [citest skip]
+
+We need to get the name of the branch to which CHANGELOG.md was pushed.
+For now, it looks as though `GITHUB_REF_NAME` is that name.  But don't
+trust it - first, check that it is `main` or `master`.  If not, then use
+a couple of other methods to determine what is the push branch.
+
+Signed-off-by: Rich Megginson <rmeggins@redhat.com>
+
 [1.9.4] - 2022-07-19
 --------------------
 
