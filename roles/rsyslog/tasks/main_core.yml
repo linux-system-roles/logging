@@ -292,6 +292,13 @@
       when: __rsyslog_enabled | bool
       notify: restart rsyslogd
 
+    - name: Manage firewall for specified ports
+      include_role:
+        name: fedora.linux_system_roles.firewall
+      vars:
+        firewall: "{{ logging_firewall }}"
+      when: logging_firewall | length > 0
+
     - block:
         # Check if tls is enabled in forwards output or remote input and
         #          logging_pki_files.{ca_cert_src,ca_cert} is defined

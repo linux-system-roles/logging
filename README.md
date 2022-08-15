@@ -36,7 +36,15 @@ To satisfy such requirements, logging role introduced 3 primary variables `loggi
 
 ## Requirements
 
-This role is supported on RHEL/CentOS-7, RHEL/CentOS-8 and Fedora distributions.
+This role is supported on CentOS-7, CentOS-8-Stream+ and Fedora distributions
+as well as on RHEL-7+.
+
+The role requires the following collections:
+* `fedora.linux_system_roles`
+Use this to install the collections:
+```
+ansible-galaxy collection install -vv -r meta/collection-requirements.yml
+```
 
 ## Definitions
 
@@ -422,6 +430,33 @@ These variables are set in the same level of the `logging_inputs`, `logging_outp
   will be uninstalled and reinstalled in order to revert back to the original
   system default configuration.
 - `logging_system_log_dir`: Directory where the local log output files are placed. Default to `/var/log`.
+- `logging_firewall`: This is a `list` of `dict` in the same format as used by the
+  `fedora.linux_system_role.firewall` role.  Use this to specify ports that you
+  want the role to manage in the firewall.
+```yaml
+    # Manage ports 514/tcp, 514/udp, 20514/tcp, and 20514/udp
+    logging_firewall:
+      - port: 514/tcp
+        state: enabled
+      - port: 514/udp
+        state: enabled
+      - port: 20514/tcp
+        state: enabled
+      - port: 20514/udp
+        state: enabled
+```
+```yaml
+    # Stop managing ports 514/tcp, 514/udp, 20514/tcp, and 20514/udp
+    logging_firewall:
+      - port: 514/tcp
+        state: disabled
+      - port: 514/udp
+        state: disabled
+      - port: 20514/tcp
+        state: disabled
+      - port: 20514/udp
+        state: disabled
+```
 
 ### Update and Delete
 
@@ -645,6 +680,11 @@ Deploying `basics input` reading logs from systemd journal and `forwards output`
   roles:
     - linux-system-roles.logging
   vars:
+    logging_firewall:
+      - port: 514/udp
+        state: enabled
+      - port: 514/tcp
+        state: enabled
     logging_inputs:
       - name: basic_input
         type: basics
@@ -706,6 +746,15 @@ Deploying `remote input` reading logs from remote rsyslog and `remote_files outp
   roles:
     - linux-system-roles.logging
   vars:
+    logging_firewall:
+      - port: 514/udp
+        state: enabled
+      - port: 1514/udp
+        state: enabled
+      - port: 514/tcp
+        state: enabled
+      - port: 1514/tcp
+        state: enabled
     logging_inputs:
       - name: remote_udp_input
         type: remote
@@ -731,6 +780,11 @@ Deploying `remote input` reading logs from remote rsyslog and `remote_files outp
   roles:
     - linux-system-roles.logging
   vars:
+    logging_firewall:
+      - port: 6514/tcp
+        state: enabled
+      - port: 7514/tcp
+        state: enabled
     logging_pki_files:
       - ca_cert_src: /local/path/to/ca_cert
         cert_src: /local/path/to/cert
@@ -767,6 +821,9 @@ Deploying `basics input` reading logs from systemd journal and `relp output` to 
   roles:
     - linux-system-roles.logging
   vars:
+    logging_firewall:
+      - port: 20514/tcp
+        state: enabled
     logging_inputs:
       - name: basic_input
         type: basics
@@ -799,6 +856,9 @@ Deploying `relp input` reading logs from remote rsyslog and `remote_files output
   roles:
     - linux-system-roles.logging
   vars:
+    logging_firewall:
+      - port: 20514/tcp
+        state: enabled
     logging_inputs:
       - name: relp_server
         type: relp

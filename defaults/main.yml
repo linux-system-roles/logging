@@ -90,6 +90,17 @@ logging_files_template_format: ""
 # Allowed values: "traditional", "syslog",  or "modern"; default to "modern"
 logging_forwards_template_format: ""
 
+# If you want the role to manage the firewall on the ports you are
+# using, specify the arguments to pass to the firewall system role.
+# For example, if you want the logging role to open tcp port 514
+# in the default zone:
+# logging_firewall:
+#   - port: 514/tcp
+# to open a range of ports:
+# logging_firewall:
+#   - port: 10514-10524/tcp
+logging_firewall: []
+
 # ansible_facts required by the role
 __logging_required_facts:
   - distribution

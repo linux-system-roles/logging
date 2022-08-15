@@ -219,6 +219,11 @@
       from imjournal input to two omfile and two omfwd outputs"
       vars:
         logging_purge_confs: true
+        logging_firewall:
+          - port: 1514/tcp
+            state: enabled
+          - port: 2514/tcp
+            state: enabled
         logging_outputs:
           - name: files_output0
             type: files
@@ -308,16 +313,36 @@
           }
         mode: '0600'
 
-
     - name: Check severity_and_facility
       command: diff -B /tmp/__testfile__ '{{ __test_forwards_conf }}'
       changed_when: false
 
+    - name: Check ports specified in logging_firewall
+      shell: |-
+        set -euo pipefail
+        firewall-cmd --query-port=1514/tcp
+      register: __result
+      changed_when: false
+      failed_when: __result.stdout != "yes"
+
     - name: END TEST CASE 3; Clean up the deployed config
       vars:
         logging_purge_confs: true
+        logging_firewall:
+          - port: 1514/tcp
+            state: disabled
+          - port: 2514/tcp
+            state: disabled
       include_role:
         name: linux-system-roles.logging
+
+    - name: Check ports specified in logging_firewall is cleaned up
+      shell: |-
+        set -euo pipefail
+        firewall-cmd --query-port=1514/tcp
+      register: __result
+      changed_when: false
+      failed_when: __result.stdout == "yes"
 
     - name: Cleaning up __testfile__
       file:
