@@ -109,6 +109,15 @@ logging_firewall: []
 #     setype: syslogd_port_t
 logging_selinux_ports: []
 
+# If you want the role to generate the certificates in the logging
+# configuration, specify the arguments to pass to the certificate
+# system role. Here's an example.
+# logging_certificates:
+#   - name: logging_cert
+#     dns: ['localhost', 'www.example.com']
+#     ca: self-sign
+logging_certificates: []
+
 # ansible_facts required by the role
 __logging_required_facts:
   - distribution

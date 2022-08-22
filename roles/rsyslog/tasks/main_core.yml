@@ -308,6 +308,14 @@
         selinux_ports: "{{ logging_selinux_ports }}"
       when: logging_selinux_ports | length > 0
 
+    # certificates
+    - name: Generate certificates
+      include_role:
+        name: fedora.linux_system_roles.certificate
+      vars:
+        certificate_requests: "{{ logging_certificates }}"
+      when: logging_certificates | length > 0
+
     - block:
         # Check if tls is enabled in forwards output or remote input and
         #          logging_pki_files.{ca_cert_src,ca_cert} is defined

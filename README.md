@@ -479,6 +479,16 @@ These variables are set in the same level of the `logging_inputs`, `logging_outp
         state: absent
         local: true
 ```
+- `logging_certificates`: This is a `list` of `dict` in the same format as used
+  by the `fedora.linux_system_roles.certificate` role.  Use this if you want the role
+  to generate the certificates used by the role. With this following example, self-
+  signed certificate logging_cert.crt is generated and located in /etc/pki/tls/certs.
+```yaml
+    logging_certificates:
+      - name: logging_cert
+        dns: ['localhost', 'www.example.com']
+        ca: self-sign
+```
 
 ### Update and Delete
 
