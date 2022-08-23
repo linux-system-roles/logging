@@ -292,12 +292,21 @@
       when: __rsyslog_enabled | bool
       notify: restart rsyslogd
 
+    # firewall role
     - name: Manage firewall for specified ports
       include_role:
         name: fedora.linux_system_roles.firewall
       vars:
         firewall: "{{ logging_firewall }}"
       when: logging_firewall | length > 0
+
+    # selinux role
+    - name: Manage selinux for specified ports
+      include_role:
+        name: fedora.linux_system_roles.selinux
+      vars:
+        selinux_ports: "{{ logging_selinux_ports }}"
+      when: logging_selinux_ports | length > 0
 
     - block:
         # Check if tls is enabled in forwards output or remote input and

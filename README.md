@@ -457,6 +457,28 @@ These variables are set in the same level of the `logging_inputs`, `logging_outp
       - port: 20514/udp
         state: disabled
 ```
+- `logging_selinux_ports`: This is a `list` of `dict` in the same format as used
+  by the `fedora.linux_system_roles.selinux` role.  Use this if you want the role
+  to manage the SELinux policy for ports used by the role. Note: To stop managing
+  the port, we recommend to add `local: true` to the parameter. It will prevent
+  the failure in the deletion if the port is in the selinux policy.
+```yaml
+    # Manage port 1514
+    logging_selinux_ports:
+      - ports: 1514
+        proto: tcp
+        setype: syslog_tls_port_t
+        state: present
+```
+```yaml
+    # Stop managing port 1514
+    logging_selinux_ports:
+      - ports: 1514
+        proto: tcp
+        setype: syslog_tls_port_t
+        state: absent
+        local: true
+```
 
 ### Update and Delete
 
@@ -885,11 +907,24 @@ Deploying `relp input` reading logs from remote rsyslog and `remote_files output
 SELinux is only configured to allow sending and receiving on the following ports by default:
 
 ```
-syslogd_port_t        tcp   514, 20514
-syslogd_port_t        udp   514, 20514
+syslog_tls_port_t     tcp   6514, 10514
+syslog_tls_port_t     udp   6514, 10514
+syslogd_port_t        tcp   601, 20514
+syslogd_port_t        udp   514, 601, 20514
 ```
 
-If other ports need to be configured, you can use [linux-system-roles/selinux](https://github.com/linux-system-roles/selinux) to manage SELinux contexts.
+If other ports need to be configured, it can be done by setting `logging_selinux_ports` as follows:
+```yaml
+    logging_selinux_ports:
+      - ports: 1514
+        proto: tcp
+        setype: syslogd_port_t
+        status: present
+      - ports: 11514
+        proto: tcp
+        setype: syslog_tls_port_t
+        status: present
+```
 
 ## Providers
 

@@ -222,8 +222,17 @@
         logging_firewall:
           - port: 1514/tcp
             state: enabled
-          - port: 2514/tcp
+          - port: 20514/tcp
             state: enabled
+        logging_selinux_ports:
+          - ports: 1514
+            proto: tcp
+            setype: syslogd_port_t
+            state: present
+          - ports: 20514
+            proto: tcp
+            setype: syslogd_port_t
+            state: present
         logging_outputs:
           - name: files_output0
             type: files
@@ -248,7 +257,7 @@
             type: forwards
             facility: local2
             target: host.domain
-            tcp_port: 2514
+            tcp_port: 20514
         logging_inputs:
           - name: basic_input0
             type: basics
@@ -325,14 +334,43 @@
       changed_when: false
       failed_when: __result.stdout != "yes"
 
+    - block:
+        - name: Install SELinux tool semanage
+          package:
+            name:
+              - policycoreutils-python-utils
+            state: present
+
+        - name: Check ports specified in logging_selinux_ports
+          shell: |-
+            set -euo pipefail
+            semanage port --list | grep syslogd_port_t | grep "\<1514\>"
+          register: __result
+          changed_when: false
+          failed_when: __result.rc != 0
+      when: ansible_distribution == "Fedora" or
+            ( ansible_distribution_major_version | int > 7 and
+            ansible_distribution in ["CentOS", "RedHat", "Rocky"] )
+
     - name: END TEST CASE 3; Clean up the deployed config
       vars:
         logging_purge_confs: true
         logging_firewall:
           - port: 1514/tcp
             state: disabled
-          - port: 2514/tcp
+          - port: 20514/tcp
             state: disabled
+        logging_selinux_ports:
+          - ports: 1514
+            proto: tcp
+            setype: syslogd_port_t
+            state: absent
+            local: true
+          - ports: 20514
+            proto: tcp
+            setype: syslogd_port_t
+            state: absent
+            local: true
       include_role:
         name: linux-system-roles.logging
 
@@ -343,6 +381,26 @@
       register: __result
       changed_when: false
       failed_when: __result.stdout == "yes"
+
+    - block:
+        - name: Check selinux default port is not cleaned up
+          shell: |-
+            set -euo pipefail
+            semanage port --list | grep syslogd_port_t | grep "\<20514\>"
+          register: __result
+          changed_when: false
+          failed_when: __result.rc != 0
+
+        - name: Check non-default port is cleaned up
+          shell: |-
+            set -euo pipefail
+            semanage port --list | grep syslogd_port_t | grep "\<1514\>" || :
+          register: __result
+          changed_when: false
+          failed_when: __result.stdout != ""
+      when: ansible_distribution == "Fedora" or
+            ( ansible_distribution_major_version | int > 7 and
+            ansible_distribution in ["CentOS", "RedHat", "Rocky"] )
 
     - name: Cleaning up __testfile__
       file:

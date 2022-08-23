@@ -101,6 +101,14 @@ logging_forwards_template_format: ""
 #   - port: 10514-10524/tcp
 logging_firewall: []
 
+# If you want the role to manage the selinux on the ports you are
+# using, specify the arguments to pass to the selinux system role.
+# For example, if you want the logging role to open tcp port 514:
+# logging_selinux_ports:
+#   - ports: 514/tcp
+#     setype: syslogd_port_t
+logging_selinux_ports: []
+
 # ansible_facts required by the role
 __logging_required_facts:
   - distribution

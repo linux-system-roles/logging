@@ -30,6 +30,15 @@
     - name: "TEST CASE 0; Test the server configuration containing tls tcp,
       plain tcp and udp connection"
       vars:
+        logging_selinux_ports:
+          - ports: 6514
+            proto: tcp
+            setype: syslog_tls_port_t
+            state: present
+          - ports: 16514
+            proto: tcp
+            setype: syslog_tls_port_t
+            state: present
         logging_inputs:
           - name: system_input
             type: basics
@@ -46,7 +55,7 @@
               - '*.example.com'
           - name: relp_server1
             type: relp
-            port: 20514
+            port: 16514
             tls: true
             ca_cert: "{{ __test_ca_cert }}"
             cert: "{{ __test_cert }}"
@@ -98,11 +107,11 @@
     - debug:
         msg: "lsof returned {{ __result.stdout }}"
 
-    - name: Check port 6514, 20514 are open for TCP
+    - name: Check port 6514, 16514 are open for TCP
       shell: |-
         set -euo pipefail
         lsof -i -nP | grep rsyslogd | grep TCP | grep {{ item }}
-      loop: [6514, 20514]
+      loop: [6514, 16514]
       changed_when: false
 
     # yamllint disable rule:line-length
@@ -176,9 +185,38 @@
       failed_when: __result.stdout != "1"
     # yamllint enable rule:line-length
 
+    - block:
+        - name: Install SELinux tool semanage
+          package:
+            name:
+              - policycoreutils-python-utils
+            state: present
+
+        - name: Check ports specified in logging_selinux_ports
+          shell: |-
+            set -euo pipefail
+            semanage port --list | grep syslog_tls_port_t | grep "\<6514\>"
+          register: __result
+          changed_when: false
+          failed_when: __result.rc != 0
+      when: ansible_distribution == "Fedora" or
+            ( ansible_distribution_major_version | int > 7 and
+            ansible_distribution in ["CentOS", "RedHat", "Rocky"] )
+
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
         logging_enabled: false
+        logging_selinux_ports:
+          - ports: 6514
+            proto: tcp
+            setype: syslog_tls_port_t
+            state: absent
+            local: true
+          - ports: 16514
+            proto: tcp
+            setype: syslog_tls_port_t
+            state: absent
+            local: true
         logging_inputs:
           - name: system_input
             type: basics
@@ -197,7 +235,7 @@
             state: absent
           - name: relp_server1
             type: relp
-            port: 20514
+            port: 16514
             tls: true
             ca_cert: "{{ __test_ca_cert }}"
             cert: "{{ __test_cert }}"
@@ -216,6 +254,27 @@
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points"
       meta: flush_handlers
+
+    - block:
+        - name: Check selinux default port is not cleaned up
+          shell: |-
+            set -euo pipefail
+            semanage port --list | grep syslog_tls_port_t | grep "\<6514\>"
+          register: __result
+          changed_when: false
+          failed_when: __result.rc != 0
+
+        - name: Check non-default port is cleaned up
+          shell: |-
+            set -euo pipefail
+            semanage port --list | grep syslog_tls_port_t | \
+              grep "\<16514\>" || :
+          register: __result
+          changed_when: false
+          failed_when: __result.stdout != ""
+      when: ansible_distribution == "Fedora" or
+            ( ansible_distribution_major_version | int > 7 and
+            ansible_distribution in ["CentOS", "RedHat", "Rocky"] )
 
     # TEST CASE 1
     - name: TEST CASE 1; Test the client configuration using tls relp
