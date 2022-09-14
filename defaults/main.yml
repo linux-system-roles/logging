@@ -90,6 +90,27 @@ logging_files_template_format: ""
 # Allowed values: "traditional", "syslog",  or "modern"; default to "modern"
 logging_forwards_template_format: ""
 
+# If set to `true` and ports are found in the logging role parameters,
+# configure the firewall for the ports using the firewall role.
+# If set to `false` and ports are found in the logging role parameters,
+# unset the firewall for the ports using the firewall role.
+logging_manage_firewall: true
+
+# If set to `true` and ports are found in the logging role parameters,
+# configure the selinux for the ports using the selinux role.
+# If set to `false` and ports are found in the logging role parameters,
+# unset the selinux for the ports using the selinux role.
+logging_manage_selinux: true
+
+# If you want the role to generate the certificates in the logging
+# configuration, specify the arguments to pass to the certificate
+# system role. Here's an example.
+# logging_certificates:
+#   - name: logging_cert
+#     dns: ['localhost', 'www.example.com']
+#     ca: self-sign
+logging_certificates: []
+
 # ansible_facts required by the role
 __logging_required_facts:
   - distribution

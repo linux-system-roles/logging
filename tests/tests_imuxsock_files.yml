@@ -42,6 +42,7 @@
             use_imuxsock: true
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -71,14 +72,26 @@
         __logging_file: "{{ __default_system_log }}"
       include_tasks: tasks/test_logger.yml
 
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
+
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
         logging_purge_confs: true
+        logging_manage_firewall: false
+        logging_manage_selinux: false
+        logging_inputs: []
+        logging_outputs: []
+        logging_flows: []
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points"
       meta: flush_handlers
+
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml

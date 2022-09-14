@@ -29,6 +29,7 @@
             type: basics
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -58,6 +59,9 @@
         __logging_file: "{{ __default_system_log }}"
       include_tasks: tasks/test_logger.yml
 
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
+
     - name: Ensure immark interval value is in quotes
       shell: |-
         set -euo pipefail
@@ -70,8 +74,17 @@
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
         logging_purge_confs: true
+        logging_manage_firewall: false
+        logging_manage_selinux: false
+        logging_inputs: []
+        logging_outputs: []
+        logging_flows: []
       include_role:
         name: linux-system-roles.logging
+        public: true
+
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -96,6 +109,7 @@
             outputs: [files_output0]
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -132,11 +146,23 @@
       changed_when: false
     # yamllint enable rule:line-length
 
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
+
     - name: END TEST CASE 1; Clean up the deployed config
       vars:
         logging_purge_confs: true
+        logging_manage_firewall: false
+        logging_manage_selinux: false
+        logging_inputs: []
+        logging_outputs: []
+        logging_flows: []
       include_role:
         name: linux-system-roles.logging
+        public: true
+
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -184,6 +210,7 @@
                   - files_output3
           include_role:
             name: linux-system-roles.logging
+            public: true
 
         - name: unreachable task
           fail:
@@ -205,8 +232,14 @@
     - name: END TEST CASE 2; Clean up the deployed config
       vars:
         logging_purge_confs: true
+        logging_manage_firewall: false
+        logging_manage_selinux: false
+        logging_inputs: []
+        logging_outputs: []
+        logging_flows: []
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -257,6 +290,7 @@
               - forwards_facility_only
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -308,16 +342,66 @@
           }
         mode: '0600'
 
-
     - name: Check severity_and_facility
       command: diff -B /tmp/__testfile__ '{{ __test_forwards_conf }}'
       changed_when: false
 
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
+
     - name: END TEST CASE 3; Clean up the deployed config
       vars:
         logging_purge_confs: true
+        logging_manage_firewall: false
+        logging_manage_selinux: false
+        logging_outputs:
+          - name: files_output0
+            type: files
+            severity: info
+            exclude:
+              - authpriv.none
+              - auth.none
+              - cron.none
+              - mail.none
+            path: "{{ __default_system_log }}"
+            state: absent
+          - name: files_output1
+            type: files
+            facility: authpriv,auth
+            path: /var/log/secure
+            state: absent
+          - name: forwards_severity_and_facility
+            type: forwards
+            facility: local1
+            severity: info
+            target: host.domain
+            tcp_port: 1514
+            state: absent
+          - name: forwards_facility_only
+            type: forwards
+            facility: local2
+            target: host.domain
+            tcp_port: 2514
+            state: absent
+        logging_inputs:
+          - name: basic_input0
+            type: basics
+            state: absent
+        logging_flows:
+          - name: flow_0
+            inputs: [basic_input0]
+            outputs:
+              - files_output0
+              - files_output1
+              - forwards_severity_and_facility
+              - forwards_facility_only
+            state: absent
       include_role:
         name: linux-system-roles.logging
+        public: true
+
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
 
     - name: Cleaning up __testfile__
       file:

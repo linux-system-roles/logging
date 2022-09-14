@@ -1,0 +1,55 @@
+---
+- block:
+    - name: Initialize logging_selinux_ports
+      set_fact:
+        logging_selinux_ports: []
+
+    - name: Add non tls tcp ports to logging_selinux_ports
+      set_fact:
+        logging_selinux_ports: "{{ logging_selinux_ports |
+          union([{'ports': item, 'proto': 'tcp',
+                  'setype': 'syslogd_port_t',
+                  'state': _state_value,
+                  'local': 'true'}]) }}"
+      loop: "{{ logging_tcp_ports }}"
+
+    - name: Add tls tcp ports to logging_selinux_ports
+      set_fact:
+        logging_selinux_ports: "{{ logging_selinux_ports |
+          union([{'ports': item, 'proto': 'tcp',
+                  'setype': 'syslog_tls_port_t',
+                  'state': _state_value,
+                  'local': 'true'}]) }}"
+      loop: "{{ logging_tls_tcp_ports }}"
+
+    - name: Add non tls udp ports to logging_selinux_ports
+      set_fact:
+        logging_selinux_ports: "{{ logging_selinux_ports |
+          union([{'ports': item, 'proto': 'udp',
+                  'setype': 'syslogd_port_t',
+                  'state': _state_value,
+                  'local': 'true'}]) }}"
+      loop: "{{ logging_udp_ports }}"
+
+    - name: Add tls udp ports to logging_selinux_ports
+      set_fact:
+        logging_selinux_ports: "{{ logging_selinux_ports |
+          union([{'ports': item, 'proto': 'udp',
+                  'setype': 'syslog_tls_port_t',
+                  'state': _state_value,
+                  'local': 'true'}]) }}"
+      loop: "{{ logging_tls_udp_ports }}"
+
+    - name: Manage selinux for specified ports
+      include_role:
+        name: fedora.linux_system_roles.selinux
+      vars:
+        selinux_ports: "{{ logging_selinux_ports }}"
+      when:
+        - logging_selinux_ports | d([])
+  vars:
+    _state_value: "{{ logging_manage_selinux |
+                      ternary('present', 'absent') }}"
+  when:
+    - logging_tcp_ports or logging_udp_ports or
+      logging_tls_tcp_ports or logging_tls_udp_ports

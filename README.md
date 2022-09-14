@@ -422,6 +422,27 @@ These variables are set in the same level of the `logging_inputs`, `logging_outp
   will be uninstalled and reinstalled in order to revert back to the original
   system default configuration.
 - `logging_system_log_dir`: Directory where the local log output files are placed. Default to `/var/log`.
+- `logging_manage_firewall`: If set to `true` and ports are found in the logging role parameters,
+  configure the firewall for the ports using the firewall role.
+  If set to `false` and ports are found in the logging role parameters, unset the firewall
+  for the ports using the firewall role.
+  Default to `true`.
+- `logging_manage_selinux`: If set to `true` and ports are found in the logging role parameters,
+  configure the selinux for the ports using the selinux role.
+  If set to `false` and ports are found in the logging role parameters, unset the selinux
+  for the ports using the selinux role.
+  Default to `true`.
+- `logging_certificates`: This is a `list` of `dict` in the same format as used
+  by the `fedora.linux_system_roles.certificate` role.  Specify this variable if
+  you want the certificate role to generate the certificates for the logging system
+  configured by the logging role. With this example, `self-signed` certificate
+  `logging_cert.crt` is generated in `/etc/pki/tls/certs`.
+```yaml
+    logging_certificates:
+      - name: logging_cert
+        dns: ['localhost', 'www.example.com']
+        ca: self-sign
+```
 
 ### Update and Delete
 
@@ -820,16 +841,34 @@ Deploying `relp input` reading logs from remote rsyslog and `remote_files output
         outputs: [remote_files_output]
 ```
 
-### Port and SELinux
+### Port Managed by Firewall and SELinux Role
 
-SELinux is only configured to allow sending and receiving on the following ports by default:
+When a port is specified in the logging role configuration,
+the firewall role is automatically included and the port
+is managed by the firewalld.
 
+The port is then configured by the selinux role and given
+an appropriate syslog selinux port type depending upon the
+associated tls value.
+
+You can verify the changes by the following command-line.
+
+For firewall,
 ```
-syslogd_port_t        tcp   514, 20514
-syslogd_port_t        udp   514, 20514
+firewall-cmd --list-port
 ```
 
-If other ports need to be configured, you can use [linux-system-roles/selinux](https://github.com/linux-system-roles/selinux) to manage SELinux contexts.
+For selinux,
+```
+semanage port --list | grep "syslog"
+```
+The newly specified port will be added to this default set.
+```
+syslog_tls_port_t     tcp   6514, 10514
+syslog_tls_port_t     udp   6514, 10514
+syslogd_port_t        tcp   601, 20514
+syslogd_port_t        udp   514, 601, 20514
+```
 
 ## Providers
 
