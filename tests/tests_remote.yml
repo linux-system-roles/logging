@@ -98,26 +98,6 @@
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
         logging_purge_confs: true
-        logging_manage_firewall: false
-        logging_manage_selinux: false
-        logging_outputs:
-          - name: remote_files_output0
-            type: remote_files
-            state: absent
-        logging_inputs:
-          - name: remote_tcp_input
-            type: remote
-            tcp_ports: [514, 40001]
-            state: absent
-          - name: remote_udp_input
-            type: remote
-            udp_ports: [514, 40002]
-            state: absent
-        logging_flows:
-          - name: flow_0
-            inputs: [remote_udp_input, remote_tcp_input]
-            outputs: [remote_files_output0]
-            state: absent
       include_role:
         name: linux-system-roles.logging
         public: true
@@ -223,41 +203,6 @@
     - name: END TEST CASE 1; Clean up the deployed config
       vars:
         logging_purge_confs: true
-        logging_manage_firewall: false
-        logging_manage_selinux: false
-        logging_outputs:
-          - name: remote_files_output0
-            type: remote_files
-            remote_log_path: >-
-              /var/log/remote/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log
-            comment: "This is a comment 0."
-            severity: info
-            exclude:
-              - authpriv.none
-            client_count: 20
-            io_buffer_size: 8192
-            async_writing: true
-            state: absent
-          - name: remote_files_output1
-            type: remote_files
-            remote_sub_path: >-
-              others/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log
-            facility: authpriv
-            state: absent
-        logging_inputs:
-          - name: remote_tcp_input
-            type: remote
-            tcp_ports: [514, 40001]
-            state: absent
-          - name: remote_udp_input
-            type: remote
-            udp_ports: [514, 40002]
-            state: absent
-        logging_flows:
-          - name: flow_0
-            inputs: [remote_udp_input, remote_tcp_input]
-            outputs: [remote_files_output0, remote_files_output1]
-            state: absent
       include_role:
         name: linux-system-roles.logging
         public: true

@@ -26,8 +26,9 @@
 # 4.2 Run logger command and check the log is in the local output file in
 #     {{ __default_system_log }}.
 #
-- name: "Ensure that the role runs with parameters with the simplest
-  configuration using imuxsock instead of imjournal"
+# TEST CASE 0
+- name: "TEST CASE 0; Ensure that the role runs with parameters with the
+         simplest configuration using imuxsock instead of imjournal"
   hosts: all
   vars:
     __test_files_conf: /etc/rsyslog.d/30-output-files-default_files.conf
@@ -78,11 +79,6 @@
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
         logging_purge_confs: true
-        logging_manage_firewall: false
-        logging_manage_selinux: false
-        logging_inputs: []
-        logging_outputs: []
-        logging_flows: []
       include_role:
         name: linux-system-roles.logging
         public: true

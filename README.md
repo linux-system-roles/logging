@@ -422,21 +422,28 @@ These variables are set in the same level of the `logging_inputs`, `logging_outp
   will be uninstalled and reinstalled in order to revert back to the original
   system default configuration.
 - `logging_system_log_dir`: Directory where the local log output files are placed. Default to `/var/log`.
-- `logging_manage_firewall`: If set to `true` and ports are found in the logging role parameters,
-  configure the firewall for the ports using the firewall role.
-  If set to `false` and ports are found in the logging role parameters, unset the firewall
-  for the ports using the firewall role.
-  Default to `true`.
-- `logging_manage_selinux`: If set to `true` and ports are found in the logging role parameters,
-  configure the selinux for the ports using the selinux role.
-  If set to `false` and ports are found in the logging role parameters, unset the selinux
-  for the ports using the selinux role.
-  Default to `true`.
+- `logging_manage_firewall`: If set to `true` and ports are found in the logging role
+  parameters, configure the firewall for the ports using the firewall role.
+  If set to `false`, the `logging role` does not manage the firewall.
+  Default to `false`.
+  NOTE: `logging_manage_firewall` is limited to *adding* ports.
+  It cannot be used for *removing* ports.
+  If you want to remove ports, you will need to use the firewall system
+  roles directly.
+- `logging_manage_selinux`: If set to `true` and ports are found in the logging role
+  parameters, configure the selinux for the ports using the selinux role.
+  If set to `false`, the `logging role` does not manage the selinux.
+  Default to `false`.
+  NOTE: `logging_manage_selinux` is limited to *adding* policy.
+  It cannot be used for *removing* policy.
+  If you want to remove policy, you will need to use the selinux system
+  roles directly.
 - `logging_certificates`: This is a `list` of `dict` in the same format as used
   by the `fedora.linux_system_roles.certificate` role.  Specify this variable if
   you want the certificate role to generate the certificates for the logging system
   configured by the logging role. With this example, `self-signed` certificate
   `logging_cert.crt` is generated in `/etc/pki/tls/certs`.
+  Default to `[]`.
 ```yaml
     logging_certificates:
       - name: logging_cert

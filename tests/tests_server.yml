@@ -114,42 +114,6 @@
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
         logging_purge_confs: true
-        logging_manage_firewall: false
-        logging_manage_selinux: false
-        logging_pki_files:
-          - ca_cert: "{{ __test_ca_cert }}"
-            cert: "{{ __test_cert }}"
-            private_key: "{{ __test_key }}"
-        logging_inputs:
-          - name: system_input
-            type: basics
-            state: absent
-          - name: remote_tcp
-            type: remote
-            tcp_ports: [6514, 40000, 40001]
-            tls: true
-            pki_authmode: x509/name
-            permitted_clients:
-              - '*.client.com'
-              - '*.example.com'
-            state: absent
-          - name: remote_ptcp
-            type: remote
-            tcp_ports: [514, 40010, 40011, 40012]
-            state: absent
-          - name: remote_udp
-            type: remote
-            udp_ports: [514, 40020]
-            state: absent
-        logging_outputs:
-          - name: files_output
-            type: files
-            state: absent
-        logging_flows:
-          - name: flows
-            inputs: [system_input, remote_tcp, remote_ptcp, remote_udp]
-            outputs: [files_output]
-            state: absent
       include_role:
         name: linux-system-roles.logging
         public: true

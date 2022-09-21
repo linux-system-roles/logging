@@ -282,67 +282,6 @@
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
         logging_purge_confs: true
-        logging_manage_firewall: false
-        logging_manage_selinux: false
-        logging_outputs:
-          - name: forwards_severity_and_facility
-            type: forwards
-            facility: local1
-            severity: info
-            target: host.domain
-            tcp_port: 1514
-            template: syslog
-            state: absent
-          - name: forwards_facility_only
-            type: forwards
-            facility: local2
-            target: host.domain
-            tcp_port: 2514
-            state: absent
-          - name: forwards_severity_only
-            type: forwards
-            severity: err
-            target: host.domain
-            tcp_port: 3514
-            state: absent
-          - name: forwards_no_severity_and_facility
-            type: forwards
-            target: host.domain
-            tcp_port: 4514
-            state: absent
-          - name: forwards_no_severity_and_facility_udp
-            type: forwards
-            target: host.domain
-            udp_port: 6514
-            state: absent
-          - name: forwards_no_severity_and_facility_protocol_port
-            type: forwards
-            target: host.domain
-            state: absent
-          - name: forwards_no_severity_and_facility_protocol_port_target
-            type: forwards
-            state: absent
-          - target: no_name.localdomain
-            type: forwards
-            state: absent
-        logging_inputs:
-          - name: basic_input
-            type: basics
-            state: absent
-        logging_flows:
-          - name: flows0
-            inputs:
-              - basic_input
-            outputs:
-              - forwards_severity_and_facility
-              - forwards_facility_only
-              - forwards_severity_only
-              - forwards_no_severity_and_facility
-              - forwards_no_severity_and_facility_udp
-              - forwards_no_severity_and_facility_protocol_port
-              - forwards_no_severity_and_facility_protocol_port_target
-              - default_files
-            state: absent
       include_role:
         name: linux-system-roles.logging
         public: true
@@ -455,30 +394,6 @@
     - name: END TEST CASE 1; Clean up the deployed config
       vars:
         logging_purge_confs: true
-        logging_manage_firewall: false
-        logging_manage_selinux: false
-        logging_pki_files:
-          - ca_cert_src: "{{ __test_ca_cert }}"
-        logging_outputs:
-          - name: forwards_severity_and_facility
-            type: forwards
-            facility: local1
-            severity: info
-            target: host.domain
-            tcp_port: 1514
-            tls: true
-            pki_authmode: anon
-            permitted_server: '*.example.com'
-            state: absent
-        logging_inputs:
-          - name: basic_input
-            type: basics
-            state: absent
-        logging_flows:
-          - name: flows0
-            inputs: [basic_input]
-            outputs: [forwards_severity_and_facility]
-            state: absent
       include_role:
         name: linux-system-roles.logging
         public: true
@@ -604,31 +519,6 @@
     - name: END TEST CASE 2; Clean up the deployed config
       vars:
         logging_purge_confs: true
-        logging_manage_firewall: false
-        logging_manage_selinux: false
-        logging_pki_files:
-          - ca_cert_src: "{{ __test_ca_cert }}"
-            cert_src: "{{ __test_cert }}"
-            private_key_src: "{{ __test_key }}"
-        logging_outputs:
-          - name: forwards_severity_and_facility
-            type: forwards
-            facility: local1
-            severity: info
-            target: host.domain
-            tcp_port: 1514
-            tls: true
-            permitted_server: '*.example.com'
-            state: absent
-        logging_inputs:
-          - name: basic_input
-            type: basics
-            state: absent
-        logging_flows:
-          - name: flows0
-            inputs: [basic_input]
-            outputs: [forwards_severity_and_facility]
-            state: absent
       include_role:
         name: linux-system-roles.logging
         public: true

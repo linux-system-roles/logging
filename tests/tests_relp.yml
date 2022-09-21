@@ -15,6 +15,8 @@
     - name: "TEST CASE 0; Test the server configuration containing tls tcp,
       plain tcp and udp connection"
       vars:
+        logging_manage_firewall: true
+        logging_manage_selinux: true
         logging_certificates:
           - name: logging_cert
             dns: ['localhost', 'www.example.com']
@@ -173,35 +175,6 @@
         logging_enabled: false
         logging_manage_firewall: false
         logging_manage_selinux: false
-        logging_inputs:
-          - name: system_input
-            type: basics
-            state: absent
-          - name: relp_server0
-            type: relp
-            port: 6514
-            tls: true
-            ca_cert: "{{ __test_ca_cert }}"
-            cert: "{{ __test_cert }}"
-            private_key: "{{ __test_key }}"
-            pki_authmode: name
-            permitted_clients:
-              - '*.client.com'
-              - '*.example.com'
-            state: absent
-          - name: relp_server1
-            type: relp
-            port: 20514
-            tls: true
-            ca_cert: "{{ __test_ca_cert }}"
-            cert: "{{ __test_cert }}"
-            private_key: "{{ __test_key }}"
-            pki_authmode: name
-            state: absent
-        logging_outputs:
-          - name: files_output
-            type: files
-            state: absent
       include_role:
         name: linux-system-roles.logging
         public: true
@@ -219,6 +192,8 @@
     - name: TEST CASE 1; Test the client configuration using tls relp
       vars:
         logging_enabled: true
+        logging_manage_firewall: true
+        logging_manage_selinux: false
         logging_certificates:
           - name: logging_cert
             dns: ['localhost', 'www.example.com']
@@ -343,34 +318,6 @@
         logging_enabled: false
         logging_manage_firewall: false
         logging_manage_selinux: false
-        logging_inputs:
-          - name: system_input
-            type: basics
-            state: absent
-        logging_outputs:
-          - name: relp_client0
-            type: relp
-            target: localhost
-            port: 6514
-            tls: true
-            ca_cert: "{{ __test_ca_cert }}"
-            cert: "{{ __test_cert }}"
-            private_key: "{{ __test_key }}"
-            pki_authmode: name
-            permitted_servers:
-              - '*.server.com'
-              - '*.example.com'
-            state: absent
-          - name: relp_client1
-            type: relp
-            target: localhost
-            port: 7514
-            tls: true
-            ca_cert: "{{ __test_ca_cert }}"
-            cert: "{{ __test_cert }}"
-            private_key: "{{ __test_key }}"
-            pki_authmode: name
-            state: absent
       include_role:
         name: linux-system-roles.logging
         public: true

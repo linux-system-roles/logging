@@ -92,15 +92,11 @@ logging_forwards_template_format: ""
 
 # If set to `true` and ports are found in the logging role parameters,
 # configure the firewall for the ports using the firewall role.
-# If set to `false` and ports are found in the logging role parameters,
-# unset the firewall for the ports using the firewall role.
-logging_manage_firewall: true
+logging_manage_firewall: false
 
 # If set to `true` and ports are found in the logging role parameters,
 # configure the selinux for the ports using the selinux role.
-# If set to `false` and ports are found in the logging role parameters,
-# unset the selinux for the ports using the selinux role.
-logging_manage_selinux: true
+logging_manage_selinux: false
 
 # If you want the role to generate the certificates in the logging
 # configuration, specify the arguments to pass to the certificate

@@ -9,7 +9,7 @@
         logging_selinux_ports: "{{ logging_selinux_ports |
           union([{'ports': item, 'proto': 'tcp',
                   'setype': 'syslogd_port_t',
-                  'state': _state_value,
+                  'state': 'present',
                   'local': 'true'}]) }}"
       loop: "{{ logging_tcp_ports }}"
 
@@ -18,7 +18,7 @@
         logging_selinux_ports: "{{ logging_selinux_ports |
           union([{'ports': item, 'proto': 'tcp',
                   'setype': 'syslog_tls_port_t',
-                  'state': _state_value,
+                  'state': 'present',
                   'local': 'true'}]) }}"
       loop: "{{ logging_tls_tcp_ports }}"
 
@@ -27,7 +27,7 @@
         logging_selinux_ports: "{{ logging_selinux_ports |
           union([{'ports': item, 'proto': 'udp',
                   'setype': 'syslogd_port_t',
-                  'state': _state_value,
+                  'state': 'present',
                   'local': 'true'}]) }}"
       loop: "{{ logging_udp_ports }}"
 
@@ -36,7 +36,7 @@
         logging_selinux_ports: "{{ logging_selinux_ports |
           union([{'ports': item, 'proto': 'udp',
                   'setype': 'syslog_tls_port_t',
-                  'state': _state_value,
+                  'state': 'present',
                   'local': 'true'}]) }}"
       loop: "{{ logging_tls_udp_ports }}"
 
@@ -47,9 +47,7 @@
         selinux_ports: "{{ logging_selinux_ports }}"
       when:
         - logging_selinux_ports | d([])
-  vars:
-    _state_value: "{{ logging_manage_selinux |
-                      ternary('present', 'absent') }}"
   when:
+    - logging_manage_selinux | bool
     - logging_tcp_ports or logging_udp_ports or
       logging_tls_tcp_ports or logging_tls_udp_ports

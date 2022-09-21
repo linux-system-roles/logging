@@ -3,7 +3,7 @@
     - name: Add tcp ports to logging_firewall_ports
       set_fact:
         logging_firewall_ports: "{{ logging_firewall_ports | d([]) |
-          union([{'port': item, 'state': _state_value}]) }}"
+          union([{'port': item, 'state': 'enabled'}]) }}"
       loop: "{{ (logging_tcp_ports + logging_tls_tcp_ports) |
                 map('regex_replace', '$', '/tcp') | list }}"
       when: (logging_tcp_ports + logging_tls_tcp_ports) | length > 0
@@ -11,10 +11,10 @@
     - name: Add udp ports to logging_firewall_ports
       set_fact:
         logging_firewall_ports: "{{ logging_firewall_ports | d([]) |
-          union([{'port': item, 'state': _state_value}]) }}"
+          union([{'port': item, 'state': 'enabled'}]) }}"
       loop: "{{ (logging_udp_ports + logging_tls_udp_ports) |
                 map('regex_replace', '$', '/udp') | list }}"
-      when: (logging_tcp_ports + logging_tls_tcp_ports) | length > 0
+      when: (logging_udp_ports + logging_tls_udp_ports) | length > 0
 
     - name: Manage firewall for specified ports
       include_role:
@@ -23,9 +23,7 @@
         firewall: "{{ logging_firewall_ports }}"
       when:
         - logging_firewall_ports | d([])
-  vars:
-    _state_value: "{{ logging_manage_firewall |
-                      ternary('enabled', 'disabled') }}"
   when:
+    - logging_manage_firewall | bool
     - logging_tcp_ports or logging_udp_ports or
       logging_tls_tcp_ports or logging_tls_udp_ports
