@@ -429,7 +429,7 @@ These variables are set in the same level of the `logging_inputs`, `logging_outp
   NOTE: `logging_manage_firewall` is limited to *adding* ports.
   It cannot be used for *removing* ports.
   If you want to remove ports, you will need to use the firewall system
-  roles directly.
+  role directly.
 - `logging_manage_selinux`: If set to `true` and ports are found in the logging role
   parameters, configure the selinux for the ports using the selinux role.
   If set to `false`, the `logging role` does not manage the selinux.
@@ -437,7 +437,7 @@ These variables are set in the same level of the `logging_inputs`, `logging_outp
   NOTE: `logging_manage_selinux` is limited to *adding* policy.
   It cannot be used for *removing* policy.
   If you want to remove policy, you will need to use the selinux system
-  roles directly.
+  role directly.
 - `logging_certificates`: This is a `list` of `dict` in the same format as used
   by the `fedora.linux_system_roles.certificate` role.  Specify this variable if
   you want the certificate role to generate the certificates for the logging system
@@ -856,7 +856,7 @@ is managed by the firewalld.
 
 The port is then configured by the selinux role and given
 an appropriate syslog selinux port type depending upon the
-associated tls value.
+associated TLS value.
 
 You can verify the changes by the following command-line.
 

@@ -1,8 +1,12 @@
 ---
 - block:
+    - name: Initialize logging_firewall_ports
+      set_fact:
+        logging_firewall_ports: []
+
     - name: Add tcp ports to logging_firewall_ports
       set_fact:
-        logging_firewall_ports: "{{ logging_firewall_ports | d([]) |
+        logging_firewall_ports: "{{ logging_firewall_ports |
           union([{'port': item, 'state': 'enabled'}]) }}"
       loop: "{{ (logging_tcp_ports + logging_tls_tcp_ports) |
                 map('regex_replace', '$', '/tcp') | list }}"
@@ -10,7 +14,7 @@
 
     - name: Add udp ports to logging_firewall_ports
       set_fact:
-        logging_firewall_ports: "{{ logging_firewall_ports | d([]) |
+        logging_firewall_ports: "{{ logging_firewall_ports |
           union([{'port': item, 'state': 'enabled'}]) }}"
       loop: "{{ (logging_udp_ports + logging_tls_udp_ports) |
                 map('regex_replace', '$', '/udp') | list }}"
