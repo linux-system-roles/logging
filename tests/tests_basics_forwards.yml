@@ -22,9 +22,6 @@
     __test_ca_cert_name: test-ca.crt
     __test_cert_name: test-cert.pem
     __test_key_name: test-key.pem
-    __test_ca_cert: /tmp/{{ __test_ca_cert_name }}
-    __test_cert: /tmp/{{ __test_cert_name }}
-    __test_key: /tmp/{{ __test_key_name }}
     __expected_error: "Error: tls is enabled in forwards_severity_and_facility;
       you must specify logging_pki_files ca_cert_src and/or ca_cert in the
       playbook var section."
@@ -33,536 +30,313 @@
     __test_template_sys: RSYSLOG_SyslogProtocol23Format
 
   tasks:
-    # TEST CASE 0
-    - name: "TEST CASE 0; Ensure that the logs from basics inputs
-      are sent to the forwards outputs and implicit files output"
-      vars:
-        logging_forwards_template_format: traditional
-        logging_outputs:
-          - name: forwards_severity_and_facility
-            type: forwards
-            facility: local1
-            severity: info
-            target: host.domain
-            tcp_port: 1514
-            template: syslog
-          - name: forwards_facility_only
-            type: forwards
-            facility: local2
-            target: host.domain
-            tcp_port: 2514
-          - name: forwards_severity_only
-            type: forwards
-            severity: err
-            target: host.domain
-            tcp_port: 3514
-          - name: forwards_no_severity_and_facility
-            type: forwards
-            target: host.domain
-            tcp_port: 4514
-          - name: forwards_no_severity_and_facility_udp
-            type: forwards
-            target: host.domain
-            udp_port: 6514
-          - name: forwards_no_severity_and_facility_protocol_port
-            type: forwards
-            target: host.domain
-          - name: forwards_no_severity_and_facility_protocol_port_target
-            type: forwards
-          - target: no_name.localdomain
-            type: forwards
-        logging_inputs:
-          - name: basic_input
-            type: basics
-        logging_flows:
-          - name: flows0
-            inputs:
-              - basic_input
-            outputs:
-              - forwards_severity_and_facility
-              - forwards_facility_only
-              - forwards_severity_only
-              - forwards_no_severity_and_facility
-              - forwards_no_severity_and_facility_udp
-              - forwards_no_severity_and_facility_protocol_port
-              - forwards_no_severity_and_facility_protocol_port_target
-              - default_files
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
-    # notify restart rsyslogd is executed at the end of this test task.
-    # thus we have to force to invoke handlers
-    - name: "Force all notified handlers to run at this point,
-      not waiting for normal sync points"
-      meta: flush_handlers
-
-    - name: Ensure config file size and counts
-      vars:
-        __conf_count: 11
-        __conf_size: less
-        __conf_files:
-          - "{{ __test_forward_conf_s_f }}"
-          - "{{ __test_forward_conf_f }}"
-          - "{{ __test_forward_conf_s }}"
-          - "{{ __test_forward_conf_no }}"
-          - "{{ __test_forward_conf_no_udp }}"
-          - "{{ __test_forward_conf_no_p_p }}"
-          - "{{ __test_files_conf }}"
-        __check_systemctl_status: true
-      include_tasks: tasks/check_daemon_config_files.yml
-
-    - name: >-
-        Check the module param template is set to "{{ __test_template_trad }}"
-      command: >-
-        grep '{{ __test_template_trad }}' '{{ __test_forward_module_conf }}'
-
-    - name: Generate a file to check severity_and_facility
-      copy:
-        dest: /tmp/__testfile__
-        content: |
-          #
-          # Ansible managed
-          #
-          ruleset(name="forwards_severity_and_facility") {
-              local1.info action(name="forwards_severity_and_facility"
-                  type="omfwd"
-                  Target="host.domain"
-                  Port="1514"
-                  Protocol="tcp"
-                  Template="{{ __test_template_sys }}"
-              )
-          }
-        mode: '0600'
-
-    - name: Check severity_and_facility
-      command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_s_f }}'
-      changed_when: false
-
-    - name: Generate a file to check facility_only
-      copy:
-        dest: /tmp/__testfile__
-        content: |
-          #
-          # Ansible managed
-          #
-          ruleset(name="forwards_facility_only") {
-              local2.* action(name="forwards_facility_only"
-                  type="omfwd"
-                  Target="host.domain"
-                  Port="2514"
-                  Protocol="tcp"
-                  Template="{{ __test_template }}"
-              )
-          }
-        mode: '0600'
-
-    - name: Check facility_only
-      command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_f }}'
-      changed_when: false
-
-    - name: Generate a file to check severity_only
-      copy:
-        dest: /tmp/__testfile__
-        content: |
-          #
-          # Ansible managed
-          #
-          ruleset(name="forwards_severity_only") {
-              *.err action(name="forwards_severity_only"
-                  type="omfwd"
-                  Target="host.domain"
-                  Port="3514"
-                  Protocol="tcp"
-                  Template="{{ __test_template }}"
-              )
-          }
-        mode: '0600'
-
-    - name: Check severity_only
-      command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_s }}'
-      changed_when: false
-
-    - name: Generate a file to check no_severity_and_facility
-      copy:
-        dest: /tmp/__testfile__
-        content: |
-          #
-          # Ansible managed
-          #
-          ruleset(name="forwards_no_severity_and_facility") {
-              *.* action(name="forwards_no_severity_and_facility"
-                  type="omfwd"
-                  Target="host.domain"
-                  Port="4514"
-                  Protocol="tcp"
-                  Template="{{ __test_template }}"
-              )
-          }
-        mode: '0600'
-
-    - name: Check no_severity_and_facility
-      command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_no }}'
-      changed_when: false
-
-    - name: Generate a file to check no_severity_and_facility_udp
-      copy:
-        dest: /tmp/__testfile__
-        content: |
-          #
-          # Ansible managed
-          #
-          ruleset(name="forwards_no_severity_and_facility_udp") {
-              *.* action(name="forwards_no_severity_and_facility_udp"
-                  type="omfwd"
-                  Target="host.domain"
-                  Port="6514"
-                  Protocol="udp"
-                  Template="{{ __test_template }}"
-              )
-          }
-        mode: '0600'
-
-    - name: Check no_severity_and_facility_udp
-      command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_no_udp }}'
-      changed_when: false
-
-    - name: Generate a file to check no_severity_and_facility_protocol_port
-      copy:
-        dest: /tmp/__testfile__
-        content: |
-          #
-          # Ansible managed
-          #
-          ruleset(name="forwards_no_severity_and_facility_protocol_port") {
-              *.* action(name="forwards_no_severity_and_facility_protocol_port"
-                  type="omfwd"
-                  Target="host.domain"
-                  Template="{{ __test_template }}"
-              )
-          }
-        mode: '0600'
-
-    - name: Check no_severity_and_facility_protocol_port
-      command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_no_p_p }}'
-      changed_when: false
-
-    # yamllint disable rule:line-length
-    - name: Grep no_severity_and_facility_protocol_port_target
-      shell: |-
-        set -euo pipefail
-        /bin/grep '<action.*forwards_no_severity_and_facility_protocol_port_target>' /etc/rsyslog.d/30-output-forwards*.conf
-      register: __result
-      changed_when: false
-      failed_when: "__result is not failed"
-
-    - name: Grep no_name
-      shell: |-
-        set -euo pipefail
-        /bin/grep '<action.*forwards_no_name\.localdomain>' /etc/rsyslog.d/30-output-forwards*.conf
-      register: __result
-      changed_when: false
-      failed_when: "__result is not failed"
-
-    - name: Check output to messages line
-      command: >-
-        /bin/grep '\*.info;mail.none;authpriv.none;cron.none.*{{ __default_system_log }}' '{{ __test_files_conf }}'
-      changed_when: false
-    # yamllint enable rule:line-length
-
-    - name: Ensure logger message is logged in a file
-      vars:
-        __logging_index: 0
-        __logging_file: "{{ __default_system_log }}"
-      include_tasks: tasks/test_logger.yml
-
-    - name: Check ports managed by firewall and selinux
-      include_tasks: tasks/check_firewall_selinux.yml
-
-    - name: END TEST CASE 0; Clean up the deployed config
-      vars:
-        logging_purge_confs: true
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
-    # notify restart rsyslogd is executed at the end of this test task.
-    # thus we have to force to invoke handlers
-    - name: "Force all notified handlers to run at this point,
-      not waiting for normal sync points"
-      meta: flush_handlers
-
-    - name: Creating fake key/certs files for the following test cases
-      copy:
-        dest: "{{ item }}"
-        content:
-          This is a fake {{ item }}.
-        mode: '0444'
-      delegate_to: localhost
-      loop:
-        - "{{ __test_ca_cert }}"
-        - "{{ __test_cert }}"
-        - "{{ __test_key }}"
-
-    - name: Check ports managed by firewall and selinux
-      include_tasks: tasks/check_firewall_selinux.yml
-
-    # TEST CASE 1
-    - name: "TEST CASE 1; Test the configuration, basics input
-      and a forwards output with ca_cert"
-      vars:
-        logging_pki_files:
-          - ca_cert_src: "{{ __test_ca_cert }}"
-        logging_outputs:
-          - name: forwards_severity_and_facility
-            type: forwards
-            facility: local1
-            severity: info
-            target: host.domain
-            tcp_port: 1514
-            tls: true
-            pki_authmode: anon
-            permitted_server: '*.example.com'
-        logging_inputs:
-          - name: basic_input
-            type: basics
-        logging_flows:
-          - name: flows0
-            inputs: [basic_input]
-            outputs: [forwards_severity_and_facility]
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
-    # notify restart rsyslogd is executed at the end of this test task.
-    # thus we have to force to invoke handlers
-    - name: "Force all notified handlers to run at this point,
-      not waiting for normal sync points"
-      meta: flush_handlers
-
-    - name: Ensure config file size and counts
-      vars:
-        __conf_count: 6
-        __conf_size: less
-        __conf_files:
-          - "{{ __test_forward_conf_s_f }}"
-          - "{{ __test_files_conf }}"
-        __check_systemctl_status: true
-      include_tasks: tasks/check_daemon_config_files.yml
-
-    - name: Generate a file to check severity_and_facility
-      copy:
-        dest: /tmp/__testfile__
-        content: |
-          #
-          # Ansible managed
-          #
-          ruleset(name="forwards_severity_and_facility") {
-              local1.info action(name="forwards_severity_and_facility"
-                  type="omfwd"
-                  Target="host.domain"
-                  StreamDriver="gtls"
-                  StreamDriverMode="1"
-                  StreamDriverAuthMode="anon"
-                  StreamDriverPermittedPeers="*.example.com"
-                  Port="1514"
-                  Protocol="tcp"
-                  Template="{{ __test_template }}"
-              )
-          }
-        mode: '0600'
-
-    - name: Check severity_and_facility
-      command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_s_f }}'
-      changed_when: false
-
-    - name: Check the fake ca cert is successfully copied
-      stat:
-        path: "/etc/pki/tls/certs/{{ __test_ca_cert_name }}"
-      register: __result
-      failed_when: not __result.stat.exists
-
-    - name: Check the fake key/certs paths are set in the global config.
-      command: >
-        /bin/grep "/etc/pki/tls/certs/{{ __test_ca_cert_name }}"
-        /etc/rsyslog.d/00-global.conf
-      changed_when: false
-
-    - name: Check ports managed by firewall and selinux
-      include_tasks: tasks/check_firewall_selinux.yml
-
-    - name: END TEST CASE 1; Clean up the deployed config
-      vars:
-        logging_purge_confs: true
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
-    # notify restart rsyslogd is executed at the end of this test task.
-    # thus we have to force to invoke handlers
-    - name: "Force all notified handlers to run at this point,
-      not waiting for normal sync points"
-      meta: flush_handlers
-
-    - name: clean up fake pki files
-      file: path="{{ item }}" state=absent
-      loop:
-        - "/etc/pki/tls/certs/{{ __test_ca_cert_name }}"
-
-    - name: Check ports managed by firewall and selinux
-      include_tasks: tasks/check_firewall_selinux.yml
-
-    # TEST CASE 2
-    - name: "Prep - Test logging_purge_confs, in case no config files
-      exist in rsyslog.d. Move files in /etc/rsyslog.d to a backup dir"
-      shell: |-
-        set -euo pipefail
-        if [ -e /tmp/rsyslog.d-backup ]; then
-          rm -rf /tmp/rsyslog.d-backup
-        fi
-        mkdir /tmp/rsyslog.d-backup
-        for conf in $( ls /etc/rsyslog.d ); do
-          mv /etc/rsyslog.d/$conf /tmp/rsyslog.d-backup
-        done
-
-    - name: "TEST CASE 2; Test the configuration, basics input
-      and a forwards output with logging_pki_files"
-      vars:
-        logging_purge_confs: true
-        logging_pki_files:
-          - ca_cert_src: "{{ __test_ca_cert }}"
-            cert_src: "{{ __test_cert }}"
-            private_key_src: "{{ __test_key }}"
-        logging_outputs:
-          - name: forwards_severity_and_facility
-            type: forwards
-            facility: local1
-            severity: info
-            target: host.domain
-            tcp_port: 1514
-            tls: true
-            permitted_server: '*.example.com'
-        logging_inputs:
-          - name: basic_input
-            type: basics
-        logging_flows:
-          - name: flows0
-            inputs: [basic_input]
-            outputs: [forwards_severity_and_facility]
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
-    # notify restart rsyslogd is executed at the end of this test task.
-    # thus we have to force to invoke handlers
-    - name: "Force all notified handlers to run at this point,
-      not waiting for normal sync points"
-      meta: flush_handlers
-
-    - name: Ensure config file size and counts
-      vars:
-        __conf_count: 6
-        __conf_size: less
-        __conf_files:
-          - "{{ __test_forward_conf_s_f }}"
-          - "{{ __test_files_conf }}"
-        __check_systemctl_status: true
-      include_tasks: tasks/check_daemon_config_files.yml
-
-    - name: Generate a file to check severity_and_facility
-      copy:
-        dest: /tmp/__testfile__
-        content: |
-          #
-          # Ansible managed
-          #
-          ruleset(name="forwards_severity_and_facility") {
-              local1.info action(name="forwards_severity_and_facility"
-                  type="omfwd"
-                  Target="host.domain"
-                  StreamDriver="gtls"
-                  StreamDriverMode="1"
-                  StreamDriverAuthMode="x509/name"
-                  StreamDriverPermittedPeers="*.example.com"
-                  Port="1514"
-                  Protocol="tcp"
-                  Template="{{ __test_template }}"
-              )
-          }
-        mode: '0600'
-
-    - name: Check severity_and_facility
-      command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_s_f }}'
-      changed_when: false
-
-    - name: Check the fake key/certs are successfully copied
-      stat:
-        path: "{{ item }}"
-      register: __result
-      loop:
-        - /etc/pki/tls/certs/{{ __test_ca_cert_name }}
-        - /etc/pki/tls/certs/{{ __test_cert_name }}
-        - /etc/pki/tls/private/{{ __test_key_name }}
-      failed_when: not __result.stat.exists
-
-    - name: Check the fake key/certs paths are set in the global config.
-      command: /bin/grep "{{ item }}" /etc/rsyslog.d/00-global.conf
-      loop:
-        - /etc/pki/tls/certs/{{ __test_ca_cert_name }}
-        - /etc/pki/tls/certs/{{ __test_cert_name }}
-        - /etc/pki/tls/private/{{ __test_key_name }}
-      changed_when: false
-
-    - name: Check ports managed by firewall and selinux
-      include_tasks: tasks/check_firewall_selinux.yml
-
-    - name: END TEST CASE 2; Clean up the deployed config
-      vars:
-        logging_purge_confs: true
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
-    # notify restart rsyslogd is executed at the end of this test task.
-    # thus we have to force to invoke handlers
-    - name: "Force all notified handlers to run at this point,
-      not waiting for normal sync points"
-      meta: flush_handlers
-
-    - name: clean up fake pki files
-      file: path="{{ item }}" state=absent
-      loop:
-        - "/etc/pki/tls/certs/{{ __test_ca_cert_name }}"
-        - "/etc/pki/tls/certs/{{ __test_cert_name }}"
-        - "/etc/pki/tls/private/{{ __test_key_name }}"
-
-    - name: "Post - move back files to /etc/rsyslog.d"
-      shell: |-
-        set -euo pipefail
-        mv /tmp/rsyslog.d-backup/* /etc/rsyslog.d
-        for conf in $( ls /tmp/rsyslog.d-backup ); do
-          mv /tmp/rsyslog.d-backup/$conf /tmp/rsyslog.d
-        done
-        rmdir /tmp/rsyslog.d-backup
-
-    - name: Check ports managed by firewall and selinux
-      include_tasks: tasks/check_firewall_selinux.yml
-
-    # TEST CASE 3
     - block:
-        - name: "TEST CASE 3; Error case for setting logging_pki_files
-          - missing cert_src"
+        - name: create tempdir for test files
+          tempfile:
+            state: directory
+            prefix: logging_test_
+          delegate_to: localhost
+          register: _tmpdir
+
+        - name: Set __test_ca_cert path
+          set_fact:
+            __test_ca_cert: "{{ _tmpdir.path }}/{{ __test_ca_cert_name }}"
+
+        - name: Set __test_cert path
+          set_fact:
+            __test_cert: "{{ _tmpdir.path }}/{{ __test_cert_name }}"
+
+        - name: Set __test_key path
+          set_fact:
+            __test_key: "{{ _tmpdir.path }}/{{ __test_key_name }}"
+
+        # TEST CASE 0
+        - name: "TEST CASE 0; Ensure that the logs from basics inputs
+          are sent to the forwards outputs and implicit files output"
           vars:
-            logging_pki_files:
-              - private_key_src: "{{ __test_key }}"
+            logging_forwards_template_format: traditional
             logging_outputs:
               - name: forwards_severity_and_facility
                 type: forwards
                 facility: local1
                 severity: info
                 target: host.domain
-                tls: true
                 tcp_port: 1514
+                template: syslog
+              - name: forwards_facility_only
+                type: forwards
+                facility: local2
+                target: host.domain
+                tcp_port: 2514
+              - name: forwards_severity_only
+                type: forwards
+                severity: err
+                target: host.domain
+                tcp_port: 3514
+              - name: forwards_no_severity_and_facility
+                type: forwards
+                target: host.domain
+                tcp_port: 4514
+              - name: forwards_no_severity_and_facility_udp
+                type: forwards
+                target: host.domain
+                udp_port: 6514
+              - name: forwards_no_severity_and_facility_protocol_port
+                type: forwards
+                target: host.domain
+              - name: forwards_no_severity_and_facility_protocol_port_target
+                type: forwards
+              - target: no_name.localdomain
+                type: forwards
+            logging_inputs:
+              - name: basic_input
+                type: basics
+            logging_flows:
+              - name: flows0
+                inputs:
+                  - basic_input
+                outputs:
+                  - forwards_severity_and_facility
+                  - forwards_facility_only
+                  - forwards_severity_only
+                  - forwards_no_severity_and_facility
+                  - forwards_no_severity_and_facility_udp
+                  - forwards_no_severity_and_facility_protocol_port
+                  - forwards_no_severity_and_facility_protocol_port_target
+                  - default_files
+          include_role:
+            name: linux-system-roles.logging
+            public: true
+
+        # notify restart rsyslogd is executed at the end of this test task.
+        # thus we have to force to invoke handlers
+        - name: "Force all notified handlers to run at this point,
+          not waiting for normal sync points"
+          meta: flush_handlers
+
+        - name: Ensure config file size and counts
+          vars:
+            __conf_count: 11
+            __conf_size: less
+            __conf_files:
+              - "{{ __test_forward_conf_s_f }}"
+              - "{{ __test_forward_conf_f }}"
+              - "{{ __test_forward_conf_s }}"
+              - "{{ __test_forward_conf_no }}"
+              - "{{ __test_forward_conf_no_udp }}"
+              - "{{ __test_forward_conf_no_p_p }}"
+              - "{{ __test_files_conf }}"
+            __check_systemctl_status: true
+          include_tasks: tasks/check_daemon_config_files.yml
+
+        - name: >-
+            Check the module param template is set to
+            "{{ __test_template_trad }}"
+          command: >-
+            grep '{{ __test_template_trad }}' '{{ __test_forward_module_conf }}'
+
+        - name: Generate a file to check severity_and_facility
+          copy:
+            dest: /tmp/__testfile__
+            content: |
+              #
+              # Ansible managed
+              #
+              ruleset(name="forwards_severity_and_facility") {
+                  local1.info action(name="forwards_severity_and_facility"
+                      type="omfwd"
+                      Target="host.domain"
+                      Port="1514"
+                      Protocol="tcp"
+                      Template="{{ __test_template_sys }}"
+                  )
+              }
+            mode: '0600'
+
+        - name: Check severity_and_facility
+          command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_s_f }}'
+          changed_when: false
+
+        - name: Generate a file to check facility_only
+          copy:
+            dest: /tmp/__testfile__
+            content: |
+              #
+              # Ansible managed
+              #
+              ruleset(name="forwards_facility_only") {
+                  local2.* action(name="forwards_facility_only"
+                      type="omfwd"
+                      Target="host.domain"
+                      Port="2514"
+                      Protocol="tcp"
+                      Template="{{ __test_template }}"
+                  )
+              }
+            mode: '0600'
+
+        - name: Check facility_only
+          command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_f }}'
+          changed_when: false
+
+        - name: Generate a file to check severity_only
+          copy:
+            dest: /tmp/__testfile__
+            content: |
+              #
+              # Ansible managed
+              #
+              ruleset(name="forwards_severity_only") {
+                  *.err action(name="forwards_severity_only"
+                      type="omfwd"
+                      Target="host.domain"
+                      Port="3514"
+                      Protocol="tcp"
+                      Template="{{ __test_template }}"
+                  )
+              }
+            mode: '0600'
+
+        - name: Check severity_only
+          command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_s }}'
+          changed_when: false
+
+        - name: Generate a file to check no_severity_and_facility
+          copy:
+            dest: /tmp/__testfile__
+            content: |
+              #
+              # Ansible managed
+              #
+              ruleset(name="forwards_no_severity_and_facility") {
+                  *.* action(name="forwards_no_severity_and_facility"
+                      type="omfwd"
+                      Target="host.domain"
+                      Port="4514"
+                      Protocol="tcp"
+                      Template="{{ __test_template }}"
+                  )
+              }
+            mode: '0600'
+
+        - name: Check no_severity_and_facility
+          command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_no }}'
+          changed_when: false
+
+        - name: Generate a file to check no_severity_and_facility_udp
+          copy:
+            dest: /tmp/__testfile__
+            content: |
+              #
+              # Ansible managed
+              #
+              ruleset(name="forwards_no_severity_and_facility_udp") {
+                  *.* action(name="forwards_no_severity_and_facility_udp"
+                      type="omfwd"
+                      Target="host.domain"
+                      Port="6514"
+                      Protocol="udp"
+                      Template="{{ __test_template }}"
+                  )
+              }
+            mode: '0600'
+
+        - name: Check no_severity_and_facility_udp
+          command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_no_udp }}'
+          changed_when: false
+
+        # yamllint disable rule:line-length
+        - name: Generate a file to check no_severity_and_facility_protocol_port
+          copy:
+            dest: /tmp/__testfile__
+            content: |
+              #
+              # Ansible managed
+              #
+              ruleset(name="forwards_no_severity_and_facility_protocol_port") {
+                  *.* action(name="forwards_no_severity_and_facility_protocol_port"
+                      type="omfwd"
+                      Target="host.domain"
+                      Template="{{ __test_template }}"
+                  )
+              }
+            mode: '0600'
+
+        - name: Check no_severity_and_facility_protocol_port
+          command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_no_p_p }}'
+          changed_when: false
+
+        - name: Grep no_severity_and_facility_protocol_port_target
+          shell: |-
+            set -euo pipefail
+            /bin/grep '<action.*forwards_no_severity_and_facility_protocol_port_target>' /etc/rsyslog.d/30-output-forwards*.conf
+          register: __result
+          changed_when: false
+          failed_when: "__result is not failed"
+
+        - name: Grep no_name
+          shell: |-
+            set -euo pipefail
+            /bin/grep '<action.*forwards_no_name\.localdomain>' /etc/rsyslog.d/30-output-forwards*.conf
+          register: __result
+          changed_when: false
+          failed_when: "__result is not failed"
+
+        - name: Check output to messages line
+          command: >-
+            /bin/grep '\*.info;mail.none;authpriv.none;cron.none.*{{ __default_system_log }}' '{{ __test_files_conf }}'
+          changed_when: false
+        # yamllint enable rule:line-length
+
+        - name: Ensure logger message is logged in a file
+          vars:
+            __logging_index: 0
+            __logging_file: "{{ __default_system_log }}"
+          include_tasks: tasks/test_logger.yml
+
+        - name: Check ports managed by firewall and selinux
+          include_tasks: tasks/check_firewall_selinux.yml
+
+        - name: END TEST CASE 0; Clean up the deployed config
+          vars:
+            logging_purge_confs: true
+          include_role:
+            name: linux-system-roles.logging
+
+        # notify restart rsyslogd is executed at the end of this test task.
+        # thus we have to force to invoke handlers
+        - name: "Force all notified handlers to run at this point,
+          not waiting for normal sync points"
+          meta: flush_handlers
+
+        - name: Creating fake key/certs files for the following test cases
+          copy:
+            dest: "{{ item }}"
+            content:
+              This is a fake {{ item }}.
+            mode: '0444'
+          delegate_to: localhost
+          loop:
+            - "{{ __test_ca_cert }}"
+            - "{{ __test_cert }}"
+            - "{{ __test_key }}"
+
+        # TEST CASE 1
+        - name: "TEST CASE 1; Test the configuration, basics input
+          and a forwards output with ca_cert"
+          vars:
+            logging_pki_files:
+              - ca_cert_src: "{{ __test_ca_cert }}"
+            logging_outputs:
+              - name: forwards_severity_and_facility
+                type: forwards
+                facility: local1
+                severity: info
+                target: host.domain
+                tcp_port: 1514
+                tls: true
+                pki_authmode: anon
+                permitted_server: '*.example.com'
             logging_inputs:
               - name: basic_input
                 type: basics
@@ -573,39 +347,267 @@
           include_role:
             name: linux-system-roles.logging
 
-        - name: unreachable task
-          fail:
-            msg: UNREACH
+        # notify restart rsyslogd is executed at the end of this test task.
+        # thus we have to force to invoke handlers
+        - name: "Force all notified handlers to run at this point,
+          not waiting for normal sync points"
+          meta: flush_handlers
 
-      rescue:
-        - debug:
-            msg: "Caught an expected error - {{ ansible_failed_result }}"
-        - name: assert...
-          assert:
-            that: ansible_failed_result.results.0.msg is match(__expected_error)
+        - name: Ensure config file size and counts
+          vars:
+            __conf_count: 6
+            __conf_size: less
+            __conf_files:
+              - "{{ __test_forward_conf_s_f }}"
+              - "{{ __test_files_conf }}"
+            __check_systemctl_status: true
+          include_tasks: tasks/check_daemon_config_files.yml
 
-    - name: END TEST CASE 3; Clean up the deployed config
-      vars:
-        logging_purge_confs: true
-      include_role:
-        name: linux-system-roles.logging
+        - name: Generate a file to check severity_and_facility
+          copy:
+            dest: /tmp/__testfile__
+            content: |
+              #
+              # Ansible managed
+              #
+              ruleset(name="forwards_severity_and_facility") {
+                  local1.info action(name="forwards_severity_and_facility"
+                      type="omfwd"
+                      Target="host.domain"
+                      StreamDriver="gtls"
+                      StreamDriverMode="1"
+                      StreamDriverAuthMode="anon"
+                      StreamDriverPermittedPeers="*.example.com"
+                      Port="1514"
+                      Protocol="tcp"
+                      Template="{{ __test_template }}"
+                  )
+              }
+            mode: '0600'
 
-    # notify restart rsyslogd is executed at the end of this test task.
-    # thus we have to force to invoke handlers
-    - name: "Force all notified handlers to run at this point,
-      not waiting for normal sync points"
-      meta: flush_handlers
+        - name: Check severity_and_facility
+          command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_s_f }}'
+          changed_when: false
 
-    - name: clean up fake pki files
-      file: path="{{ item }}" state=absent
-      loop:
-        - "/etc/pki/tls/private/{{ __test_key_name }}"
+        - name: Check the fake ca cert is successfully copied
+          stat:
+            path: "/etc/pki/tls/certs/{{ __test_ca_cert_name }}"
+          register: __result
+          failed_when: not __result.stat.exists
 
-    - name: clean up local files
-      file: path="{{ item }}" state=absent
-      loop:
-        - "{{ __test_ca_cert }}"
-        - "{{ __test_cert }}"
-        - "{{ __test_key }}"
-        - /tmp/__testfile__
-      delegate_to: localhost
+        - name: Check the fake key/certs paths are set in the global config.
+          command: >
+            /bin/grep "/etc/pki/tls/certs/{{ __test_ca_cert_name }}"
+            /etc/rsyslog.d/00-global.conf
+          changed_when: false
+
+        - name: END TEST CASE 1; Clean up the deployed config
+          vars:
+            logging_purge_confs: true
+          include_role:
+            name: linux-system-roles.logging
+
+        # notify restart rsyslogd is executed at the end of this test task.
+        # thus we have to force to invoke handlers
+        - name: "Force all notified handlers to run at this point,
+          not waiting for normal sync points"
+          meta: flush_handlers
+
+        - name: clean up fake pki files
+          file: path="{{ item }}" state=absent
+          loop:
+            - "/etc/pki/tls/certs/{{ __test_ca_cert_name }}"
+
+        # TEST CASE 2
+        - name: "Prep - Test logging_purge_confs, in case no config files
+          exist in rsyslog.d. Move files in /etc/rsyslog.d to a backup dir"
+          shell: |-
+            set -euo pipefail
+            if [ -e /tmp/rsyslog.d-backup ]; then
+              rm -rf /tmp/rsyslog.d-backup
+            fi
+            mkdir /tmp/rsyslog.d-backup
+            for conf in $( ls /etc/rsyslog.d ); do
+              mv /etc/rsyslog.d/$conf /tmp/rsyslog.d-backup
+            done
+
+        - name: "TEST CASE 2; Test the configuration, basics input
+          and a forwards output with logging_pki_files"
+          vars:
+            logging_purge_confs: true
+            logging_pki_files:
+              - ca_cert_src: "{{ __test_ca_cert }}"
+                cert_src: "{{ __test_cert }}"
+                private_key_src: "{{ __test_key }}"
+            logging_outputs:
+              - name: forwards_severity_and_facility
+                type: forwards
+                facility: local1
+                severity: info
+                target: host.domain
+                tcp_port: 1514
+                tls: true
+                permitted_server: '*.example.com'
+            logging_inputs:
+              - name: basic_input
+                type: basics
+            logging_flows:
+              - name: flows0
+                inputs: [basic_input]
+                outputs: [forwards_severity_and_facility]
+          include_role:
+            name: linux-system-roles.logging
+
+        # notify restart rsyslogd is executed at the end of this test task.
+        # thus we have to force to invoke handlers
+        - name: "Force all notified handlers to run at this point,
+          not waiting for normal sync points"
+          meta: flush_handlers
+
+        - name: Ensure config file size and counts
+          vars:
+            __conf_count: 6
+            __conf_size: less
+            __conf_files:
+              - "{{ __test_forward_conf_s_f }}"
+              - "{{ __test_files_conf }}"
+            __check_systemctl_status: true
+          include_tasks: tasks/check_daemon_config_files.yml
+
+        - name: Generate a file to check severity_and_facility
+          copy:
+            dest: /tmp/__testfile__
+            content: |
+              #
+              # Ansible managed
+              #
+              ruleset(name="forwards_severity_and_facility") {
+                  local1.info action(name="forwards_severity_and_facility"
+                      type="omfwd"
+                      Target="host.domain"
+                      StreamDriver="gtls"
+                      StreamDriverMode="1"
+                      StreamDriverAuthMode="x509/name"
+                      StreamDriverPermittedPeers="*.example.com"
+                      Port="1514"
+                      Protocol="tcp"
+                      Template="{{ __test_template }}"
+                  )
+              }
+            mode: '0600'
+
+        - name: Check severity_and_facility
+          command: diff -B /tmp/__testfile__ '{{ __test_forward_conf_s_f }}'
+          changed_when: false
+
+        - name: Check the fake key/certs are successfully copied
+          stat:
+            path: "{{ item }}"
+          register: __result
+          loop:
+            - /etc/pki/tls/certs/{{ __test_ca_cert_name }}
+            - /etc/pki/tls/certs/{{ __test_cert_name }}
+            - /etc/pki/tls/private/{{ __test_key_name }}
+          failed_when: not __result.stat.exists
+
+        - name: Check the fake key/certs paths are set in the global config.
+          command: /bin/grep "{{ item }}" /etc/rsyslog.d/00-global.conf
+          loop:
+            - /etc/pki/tls/certs/{{ __test_ca_cert_name }}
+            - /etc/pki/tls/certs/{{ __test_cert_name }}
+            - /etc/pki/tls/private/{{ __test_key_name }}
+          changed_when: false
+
+        - name: END TEST CASE 2; Clean up the deployed config
+          vars:
+            logging_purge_confs: true
+          include_role:
+            name: linux-system-roles.logging
+
+        # notify restart rsyslogd is executed at the end of this test task.
+        # thus we have to force to invoke handlers
+        - name: "Force all notified handlers to run at this point,
+          not waiting for normal sync points"
+          meta: flush_handlers
+
+        - name: clean up fake pki files
+          file: path="{{ item }}" state=absent
+          loop:
+            - "/etc/pki/tls/certs/{{ __test_ca_cert_name }}"
+            - "/etc/pki/tls/certs/{{ __test_cert_name }}"
+            - "/etc/pki/tls/private/{{ __test_key_name }}"
+
+        - name: "Post - move back files to /etc/rsyslog.d"
+          shell: |-
+            set -euo pipefail
+            mv /tmp/rsyslog.d-backup/* /etc/rsyslog.d
+            for conf in $( ls /tmp/rsyslog.d-backup ); do
+              mv /tmp/rsyslog.d-backup/$conf /tmp/rsyslog.d
+            done
+            rmdir /tmp/rsyslog.d-backup
+
+        # TEST CASE 3
+        - block:
+            - name: "TEST CASE 3; Error case for setting logging_pki_files
+              - missing cert_src"
+              vars:
+                logging_pki_files:
+                  - private_key_src: "{{ __test_key }}"
+                logging_outputs:
+                  - name: forwards_severity_and_facility
+                    type: forwards
+                    facility: local1
+                    severity: info
+                    target: host.domain
+                    tls: true
+                    tcp_port: 1514
+                logging_inputs:
+                  - name: basic_input
+                    type: basics
+                logging_flows:
+                  - name: flows0
+                    inputs: [basic_input]
+                    outputs: [forwards_severity_and_facility]
+              include_role:
+                name: linux-system-roles.logging
+
+            - name: unreachable task
+              fail:
+                msg: UNREACH
+
+          rescue:
+            - debug:
+                msg: "Caught an expected error - {{ ansible_failed_result }}"
+            - name: assert...
+              assert:
+                that: ansible_failed_result.results.0.msg is
+                      match(__expected_error)
+
+        - name: END TEST CASE 3; Clean up the deployed config
+          vars:
+            logging_purge_confs: true
+          include_role:
+            name: linux-system-roles.logging
+
+        # notify restart rsyslogd is executed at the end of this test task.
+        # thus we have to force to invoke handlers
+        - name: "Force all notified handlers to run at this point,
+          not waiting for normal sync points"
+          meta: flush_handlers
+
+        - name: clean up fake pki files
+          file: path="{{ item }}" state=absent
+          loop:
+            - "/etc/pki/tls/private/{{ __test_key_name }}"
+
+      always:
+        - name: remove tempdir
+          file:
+            path: "{{ _tmpdir.path }}"
+            state: absent
+          delegate_to: localhost
+
+        - name: remove test file
+          file:
+            path: /tmp/__testfile__
+            state: absent
