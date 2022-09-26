@@ -36,7 +36,21 @@ To satisfy such requirements, logging role introduced 3 primary variables `loggi
 
 ## Requirements
 
-This role is supported on RHEL/CentOS-7, RHEL/CentOS-8 and Fedora distributions.
+This role is supported on RHEL-7+, CentOS Stream-8+ and Fedora distributions.
+
+The role requires the `firewall` role and the `selinux` role from the
+`fedora.linux_system_roles` collection, if `logging_manage_firewall`
+and `logging_manage_selinux` is set to true, respectively.
+(Please see also the variables in the [`Other options`](#other-options) section.)
+
+If the `logging` is a role from the `fedora.linux_system_roles`
+collection or from the Fedora RPM package, the requirement is already
+satisfied.
+
+Otherwise, please run the following command line to install the collection.
+```
+ansible-galaxy collection install -r meta/collection-requirements.yml
+```
 
 ## Definitions
 
