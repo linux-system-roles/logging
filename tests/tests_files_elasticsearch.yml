@@ -59,6 +59,7 @@
             outputs: "[{{ __test_el }}]"
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -114,11 +115,15 @@
         /bin/grep 'retryruleset="{{ __test_el }}"' {{ __test_outputfiles_conf }}
       changed_when: false
 
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
+
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
         logging_purge_confs: true
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -132,6 +137,9 @@
         - /etc/pki/tls/private/es-key.pem
         - /etc/pki/tls/certs/es-cert.pem
         - /etc/pki/tls/certs/es-ca.crt
+
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
 
     # TEST CASE 1
     - name: "TEST CASE 1; Elasticsearch config -
@@ -161,6 +169,7 @@
             outputs: [elasticsearch_output]
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -200,11 +209,15 @@
         - myprivkey: "{{ __test_key_target }}"
       changed_when: false
 
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
+
     - name: END TEST CASE 1; Clean up the deployed config
       vars:
         logging_purge_confs: true
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -218,6 +231,9 @@
         - "{{ __test_ca_cert_target }}"
         - "{{ __test_cert_target }}"
         - "{{ __test_key_target }}"
+
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
 
     # TEST CASE 2
     - name: "TEST CASE 2; Elasticsearch config -
@@ -245,6 +261,7 @@
             outputs: [elasticsearch_output]
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -288,17 +305,24 @@
       changed_when: false
       failed_when: __result.rc != 1
 
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
+
     - name: END TEST CASE 2; Clean up the deployed config
       vars:
         logging_purge_confs: true
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points"
       meta: flush_handlers
+
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
 
     # TEST CASE 3
     - block:
@@ -398,6 +422,7 @@
         logging_purge_confs: true
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers

@@ -22,6 +22,8 @@
     - name: "TEST CASE 0; Test the simplest configuration,
       basics input and implicit files output with logging_mark enabled"
       vars:
+        logging_manage_firewall: true
+        logging_manage_selinux: true
         logging_mark: true
         logging_mark_interval: "7200"
         logging_inputs:
@@ -29,6 +31,7 @@
             type: basics
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -58,6 +61,9 @@
         __logging_file: "{{ __default_system_log }}"
       include_tasks: tasks/test_logger.yml
 
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
+
     - name: Ensure immark interval value is in quotes
       shell: |-
         set -euo pipefail
@@ -70,8 +76,14 @@
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
         logging_purge_confs: true
+        logging_manage_firewall: false
+        logging_manage_selinux: false
       include_role:
         name: linux-system-roles.logging
+        public: true
+
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -83,6 +95,8 @@
     - name: "TEST CASE 1; logging_system_log_dir -
       test switching the local log output file location"
       vars:
+        logging_manage_firewall: true
+        logging_manage_selinux: false
         logging_system_log_dir: "{{ __logging_system_log_dir }}"
         logging_outputs:
           - name: files_output0
@@ -96,6 +110,7 @@
             outputs: [files_output0]
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -132,11 +147,20 @@
       changed_when: false
     # yamllint enable rule:line-length
 
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
+
     - name: END TEST CASE 1; Clean up the deployed config
       vars:
         logging_purge_confs: true
+        logging_manage_firewall: false
+        logging_manage_selinux: false
       include_role:
         name: linux-system-roles.logging
+        public: true
+
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -218,6 +242,8 @@
     - name: "TEST CASE 3; Ensure that the role runs with parameters
       from imjournal input to two omfile and two omfwd outputs"
       vars:
+        logging_manage_firewall: false
+        logging_manage_selinux: true
         logging_purge_confs: true
         logging_outputs:
           - name: files_output0
@@ -257,6 +283,7 @@
               - forwards_facility_only
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -308,16 +335,24 @@
           }
         mode: '0600'
 
-
     - name: Check severity_and_facility
       command: diff -B /tmp/__testfile__ '{{ __test_forwards_conf }}'
       changed_when: false
 
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
+
     - name: END TEST CASE 3; Clean up the deployed config
       vars:
         logging_purge_confs: true
+        logging_manage_firewall: false
+        logging_manage_selinux: false
       include_role:
         name: linux-system-roles.logging
+        public: true
+
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
 
     - name: Cleaning up __testfile__
       file:

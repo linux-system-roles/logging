@@ -33,6 +33,7 @@
             outputs: [remote_files_output0]
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -91,17 +92,24 @@
       loop: [514, 40002]
       changed_when: false
 
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
+
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
         logging_purge_confs: true
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points"
       meta: flush_handlers
+
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
 
     # TEST CASE 1
     - name: "TEST CASE 1; Test configuration inputs from the remote rsyslog
@@ -140,6 +148,7 @@
             outputs: [remote_files_output0, remote_files_output1]
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -188,14 +197,21 @@
       loop: [514, 40002]
       changed_when: false
 
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
+
     - name: END TEST CASE 1; Clean up the deployed config
       vars:
         logging_purge_confs: true
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points"
       meta: flush_handlers
+
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml

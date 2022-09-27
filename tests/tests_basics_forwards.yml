@@ -89,6 +89,7 @@
               - default_files
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -275,11 +276,15 @@
         __logging_file: "{{ __default_system_log }}"
       include_tasks: tasks/test_logger.yml
 
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
+
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
         logging_purge_confs: true
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -298,6 +303,9 @@
         - "{{ __test_ca_cert }}"
         - "{{ __test_cert }}"
         - "{{ __test_key }}"
+
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
 
     # TEST CASE 1
     - name: "TEST CASE 1; Test the configuration, basics input
@@ -324,6 +332,7 @@
             outputs: [forwards_severity_and_facility]
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -379,11 +388,15 @@
         /etc/rsyslog.d/00-global.conf
       changed_when: false
 
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
+
     - name: END TEST CASE 1; Clean up the deployed config
       vars:
         logging_purge_confs: true
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -395,6 +408,9 @@
       file: path="{{ item }}" state=absent
       loop:
         - "/etc/pki/tls/certs/{{ __test_ca_cert_name }}"
+
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
 
     # TEST CASE 2
     - name: "Prep - Test logging_purge_confs, in case no config files
@@ -435,6 +451,7 @@
             outputs: [forwards_severity_and_facility]
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -496,11 +513,15 @@
         - /etc/pki/tls/private/{{ __test_key_name }}
       changed_when: false
 
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
+
     - name: END TEST CASE 2; Clean up the deployed config
       vars:
         logging_purge_confs: true
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -523,6 +544,9 @@
           mv /tmp/rsyslog.d-backup/$conf /tmp/rsyslog.d
         done
         rmdir /tmp/rsyslog.d-backup
+
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
 
     # TEST CASE 3
     - block:

@@ -1,0 +1,183 @@
+---
+# Initialize variables
+- name: Initialize logging_tls_tcp_ports
+  set_fact:
+    logging_tls_tcp_ports: []
+
+- name: Initialize logging_tcp_ports
+  set_fact:
+    logging_tcp_ports: []
+
+- name: Initialize logging_tls_udp_ports
+  set_fact:
+    logging_tls_udp_ports: []
+
+- name: Initialize logging_udp_ports
+  set_fact:
+    logging_udp_ports: []
+
+# Gather ports configured as logging role parameters
+- block:
+    - name: Parameter 'port' values
+      set_fact:
+        logging_tls_tcp_ports: "{{ (logging_inputs + logging_outputs) | d([]) |
+                                   selectattr('port', 'defined') |
+                                   map(attribute='port') | list }}"
+
+    - block:
+        - name: Parameter 'tcp_port' values (without tls)
+          set_fact:
+            logging_tcp_ports: "{{ logging_tcp_ports |
+                                   union(__tcp_ports[0] | list) }}"
+
+        - name: Parameter 'tcp_port' values (with tls)
+          set_fact:
+            logging_tls_tcp_ports: "{{ logging_tls_tcp_ports |
+                                       union(__tcp_ports[1] | list) }}"
+
+        - name: Parameter 'udp_port' values (without tls)
+          set_fact:
+            logging_udp_ports: "{{ logging_udp_ports |
+                                   union(__udp_ports[0] | list) }}"
+
+        - name: Parameter 'udp_port' values (with tls)
+          set_fact:
+            logging_tls_udp_ports: "{{ logging_tls_udp_ports |
+                                       union(__udp_ports[1] | list) }}"
+
+        - name: Parameter 'server_port' values (without tls)
+          set_fact:
+            logging_tcp_ports: "{{ logging_tcp_ports |
+                                   union(__server_ports[0] | list) }}"
+
+        - name: Parameter 'server_port' values (with tls)
+          set_fact:
+            logging_tls_tcp_ports: "{{ logging_tls_tcp_ports |
+                                       union(__server_ports[1] | list) }}"
+      vars:
+        __tcp_outputs: "{{ logging_outputs | d([]) |
+                        selectattr('tcp_port', 'defined') }}"
+        __tcp_ports: |
+          {% set tcp_ports = [] %}
+          {% set tls_tcp_ports = [] %}
+          {% for output in __tcp_outputs %}
+          {%   if output.tcp_port is defined %}
+          {%     if output.tls is defined %}
+          {%       if output.tls -%}
+          {%         set _ = tls_tcp_ports.append(output.tcp_port) %}
+          {%       else -%}
+          {%         set _ = tcp_ports.append(output.tcp_port) %}
+          {%-      endif %}
+          {%     else -%}
+          {%       set _ = tcp_ports.append(output.tcp_port) %}
+          {%-    endif %}
+          {%-  endif %}
+          {% endfor %}
+          {% set both = [tcp_ports, tls_tcp_ports] %}
+          {{ both }}
+        __udp_outputs: "{{ logging_outputs | d([]) |
+                        selectattr('udp_port', 'defined') }}"
+        __udp_ports: |
+          {% set udp_ports = [] %}
+          {% set tls_udp_ports = [] %}
+          {% for output in __udp_outputs %}
+          {%   if output.udp_port is defined %}
+          {%     if output.tls is defined %}
+          {%       if output.tls -%}
+          {%         set _ = tls_udp_ports.append(output.udp_port) %}
+          {%       else -%}
+          {%         set _ = udp_ports.append(output.udp_port) %}
+          {%-      endif %}
+          {%     else -%}
+          {%       set _ = udp_ports.append(output.udp_port) %}
+          {%-    endif %}
+          {%-  endif %}
+          {% endfor %}
+          {% set both = [udp_ports, tls_udp_ports] %}
+          {{ both }}
+        __server_outputs: "{{ logging_outputs | d([]) |
+                        selectattr('server_port', 'defined') }}"
+        __server_ports: |
+          {% set server_ports = [] %}
+          {% set server_tls_ports = [] %}
+          {% for output in __server_outputs %}
+          {%   if output.server_port is defined %}
+          {%     if output.tls is defined %}
+          {%       if output.tls -%}
+          {%         set _ = server_tls_ports.append(output.server_port) %}
+          {%       else -%}
+          {%         set _ = server_ports.append(output.server_port) %}
+          {%-      endif %}
+          {%     else -%}
+          {%       set _ = server_tls_ports.append(output.server_port) %}
+          {%-    endif %}
+          {%-  endif %}
+          {% endfor %}
+          {% set both = [server_ports, server_tls_ports] %}
+          {{ both }}
+
+    - block:
+        - name: Parameter 'tcp_ports' values (without tls)
+          set_fact:
+            logging_tcp_ports: "{{ logging_tcp_ports |
+                                   union(__tcp_ports[0]) | list | flatten }}"
+
+        - name: Parameter 'tcp_ports' values (with tls)
+          set_fact:
+            logging_tls_tcp_ports: "{{ logging_tls_tcp_ports |
+                                       union(__tcp_ports[1]) |
+                                       list | flatten }}"
+
+        - name: Parameter 'udp_ports' values (without tls)
+          set_fact:
+            logging_udp_ports: "{{ logging_udp_ports |
+                                   union(__udp_ports[0])| list | flatten }}"
+
+        - name: Parameter 'udp_ports' values (with tls)
+          set_fact:
+            logging_tls_udp_ports: "{{ logging_tls_udp_ports |
+                                       union(__udp_ports[1]) |
+                                       list | flatten }}"
+      vars:
+        __tcp_inputs: "{{ logging_inputs | d([]) |
+                        selectattr('tcp_ports', 'defined') }}"
+        __tcp_ports: |
+          {% set tcp_ports = [] %}
+          {% set tls_tcp_ports = [] %}
+          {% for input in __tcp_inputs %}
+          {%   if input.tcp_ports is defined %}
+          {%     if input.tls is defined %}
+          {%       if input.tls -%}
+          {%         set _ = tls_tcp_ports.append(input.tcp_ports) %}
+          {%       else -%}
+          {%         set _ = tcp_ports.append(input.tcp_ports) %}
+          {%-      endif %}
+          {%     else -%}
+          {%       set _ = tcp_ports.append(input.tcp_ports) %}
+          {%-    endif %}
+          {%-  endif %}
+          {% endfor %}
+          {% set both = [tcp_ports, tls_tcp_ports] %}
+          {{ both }}
+        __udp_inputs: "{{ logging_inputs | d([]) |
+                        selectattr('udp_port', 'defined') }}"
+        __udp_ports: |
+          {% set udp_ports = [] %}
+          {% set tls_udp_ports = [] %}
+          {% for input in __udp_inputs %}
+          {%   if input.udp_ports is defined %}
+          {%     if input.tls is defined %}
+          {%       if input.tls -%}
+          {%         set _ = tls_udp_ports.append(input.udp_ports) %}
+          {%       else -%}
+          {%         set _ = udp_ports.append(input.udp_ports) %}
+          {%-      endif %}
+          {%     else -%}
+          {%       set _ = udp_ports.append(input.udp_ports) %}
+          {%-    endif %}
+          {%-  endif %}
+          {% endfor %}
+          {% set both = [udp_ports, tls_udp_ports] %}
+          {{ both }}
+  when:
+    - (logging_manage_firewall | bool) or (logging_manage_selinux | bool)

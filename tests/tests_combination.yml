@@ -72,6 +72,7 @@
             outputs: [files_test0, files_test1]
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -183,17 +184,24 @@
       failed_when: __result.rc != 1
     # yamllint enable rule:line-length
 
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
+
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
         logging_purge_confs: true
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points"
       meta: flush_handlers
+
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
 
     # TEST CASE 1
     - name: "TEST CASE 1; Ensure that the role runs with complicated flows
@@ -246,6 +254,7 @@
             outputs: [forwards_facility_only]
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -346,17 +355,24 @@
       changed_when: false
     # yamllint enable rule:line-length
 
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
+
     - name: END TEST CASE 1; Clean up the deployed config
       vars:
         logging_purge_confs: true
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points"
       meta: flush_handlers
+
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
 
     # TEST CASE 2
     - name: "TEST CASE 2; Absent state test -
@@ -407,6 +423,7 @@
             outputs: [files_test0, files_test1]
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -445,6 +462,9 @@
               call files_test0
           }
         mode: '0644'
+
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
 
     - name: deploy reduced config to output into local files
       vars:
@@ -490,6 +510,7 @@
             outputs: [files_test0]
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -521,16 +542,23 @@
       changed_when: false
       failed_when: "'error' in __result.stdout or __result is failed"
 
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
+
     - name: END TEST CASE 2; Clean up the deployed config
       vars:
         logging_purge_confs: true
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     - name: Cleaning up __testfile__
       file:
         path: "/tmp/__testfile__"
         state: absent
+
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers

@@ -35,6 +35,7 @@
             type: basics
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -64,6 +65,9 @@
       command: ls /etc/rsyslog.d
       changed_when: false
 
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
+
     - name: configure with basics + purge again - check for idempotency
       vars:
         logging_purge_confs: true
@@ -72,17 +76,25 @@
             type: basics
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     - name: check11 rsyslog config files
       command: ls /etc/rsyslog.d
       changed_when: false
 
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
+
     - name: run again with purge to erase all config
       vars:
         logging_purge_confs: true
         logging_enabled: false
+        logging_inputs: []
+        logging_outputs: []
+        logging_flows: []
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     - name: Ensure config file size and counts
       vars:
@@ -103,13 +115,23 @@
       command: ls /etc/rsyslog.d
       changed_when: false
 
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
+
     - name: run again with purge and reset to test idempotency
       vars:
         logging_purge_confs: true
         logging_enabled: false
+        logging_inputs: []
+        logging_outputs: []
+        logging_flows: []
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     - name: check3 rsyslog config files
       command: ls /etc/rsyslog.d
       changed_when: false
+
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml

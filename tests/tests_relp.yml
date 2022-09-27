@@ -1,35 +1,26 @@
----
 - name: Test the server/client configuration using tls relp
   hosts: all
   vars:
-    __test_ca_key_name: test-ca-key.pem
-    __test_ca_cert_name: test-ca.crt
-    __test_key_name: test-key.pem
-    __test_csr_name: test-cert.csr
-    __test_cert_name: test-cert.pem
-    __test_ca_path: /etc/pki/CA
-    __test_ca_key_path: "{{ __test_ca_path }}/private"
-    __test_ca_cert_path: "{{ __test_ca_path }}/certs"
-    __test_key_path: /etc/pki/tls/private
-    __test_cert_path: /etc/pki/tls/certs
-    __test_csr_path: /etc/rsyslog.d
-    __test_ca_key: "{{ __test_ca_key_path }}/{{ __test_ca_key_name }}"
-    __test_ca_cert: "{{ __test_ca_cert_path }}/{{ __test_ca_cert_name }}"
-    __test_key: "{{ __test_key_path }}/{{ __test_key_name }}"
-    __test_cert_csr: "{{ __test_csr_path }}/{{ __test_csr_name }}"
-    __test_cert: "{{ __test_cert_path }}/{{ __test_cert_name }}"
+    __test_cert_name: logging_cert
+    __test_ca_cert: "/etc/pki/tls/certs/{{ __test_cert_name }}.crt"
+    __test_key: "/etc/pki/tls/private/{{ __test_cert_name }}.key"
+    __test_cert: "/etc/pki/tls/certs/{{ __test_cert_name }}.crt"
     __test_relp_server0: /etc/rsyslog.d/11-input-relp-relp_server0.conf
     __test_relp_server1: /etc/rsyslog.d/11-input-relp-relp_server1.conf
     __test_relp_client0: /etc/rsyslog.d/31-output-relp-relp_client0.conf
     __test_relp_client1: /etc/rsyslog.d/31-output-relp-relp_client1.conf
 
   tasks:
-    - include_tasks: tasks/create_tests_certs.yml
-
     # TEST CASE 0
     - name: "TEST CASE 0; Test the server configuration containing tls tcp,
       plain tcp and udp connection"
       vars:
+        logging_manage_firewall: true
+        logging_manage_selinux: true
+        logging_certificates:
+          - name: logging_cert
+            dns: ['localhost', 'www.example.com']
+            ca: self-sign
         logging_inputs:
           - name: system_input
             type: basics
@@ -65,7 +56,7 @@
             outputs: [files_output, forwards_output]
       include_role:
         name: linux-system-roles.logging
-        public: yes
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -176,40 +167,17 @@
       failed_when: __result.stdout != "1"
     # yamllint enable rule:line-length
 
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
+
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
         logging_enabled: false
-        logging_inputs:
-          - name: system_input
-            type: basics
-            state: absent
-          - name: relp_server0
-            type: relp
-            port: 6514
-            tls: true
-            ca_cert: "{{ __test_ca_cert }}"
-            cert: "{{ __test_cert }}"
-            private_key: "{{ __test_key }}"
-            pki_authmode: name
-            permitted_clients:
-              - '*.client.com'
-              - '*.example.com'
-            state: absent
-          - name: relp_server1
-            type: relp
-            port: 20514
-            tls: true
-            ca_cert: "{{ __test_ca_cert }}"
-            cert: "{{ __test_cert }}"
-            private_key: "{{ __test_key }}"
-            pki_authmode: name
-            state: absent
-        logging_outputs:
-          - name: files_output
-            type: files
-            state: absent
+        logging_manage_firewall: false
+        logging_manage_selinux: false
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -217,9 +185,19 @@
       not waiting for normal sync points"
       meta: flush_handlers
 
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
+
     # TEST CASE 1
     - name: TEST CASE 1; Test the client configuration using tls relp
       vars:
+        logging_enabled: true
+        logging_manage_firewall: true
+        logging_manage_selinux: false
+        logging_certificates:
+          - name: logging_cert
+            dns: ['localhost', 'www.example.com']
+            ca: self-sign
         logging_inputs:
           - name: system_input
             type: basics
@@ -251,7 +229,7 @@
             outputs: [relp_client0, relp_client1]
       include_role:
         name: linux-system-roles.logging
-        public: yes
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -332,39 +310,17 @@
       failed_when: __result.stdout != "1"
     # yamllint enable rule:line-length
 
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml
+
     - name: END TEST CASE 1; Clean up the deployed config
       vars:
         logging_enabled: false
-        logging_inputs:
-          - name: system_input
-            type: basics
-            state: absent
-        logging_outputs:
-          - name: relp_client0
-            type: relp
-            target: localhost
-            port: 6514
-            tls: true
-            ca_cert: "{{ __test_ca_cert }}"
-            cert: "{{ __test_cert }}"
-            private_key: "{{ __test_key }}"
-            pki_authmode: name
-            permitted_servers:
-              - '*.server.com'
-              - '*.example.com'
-            state: absent
-          - name: relp_client1
-            type: relp
-            target: localhost
-            port: 7514
-            tls: true
-            ca_cert: "{{ __test_ca_cert }}"
-            cert: "{{ __test_cert }}"
-            private_key: "{{ __test_key }}"
-            pki_authmode: name
-            state: absent
+        logging_manage_firewall: false
+        logging_manage_selinux: false
       include_role:
         name: linux-system-roles.logging
+        public: true
 
     # notify restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
@@ -375,8 +331,9 @@
     - name: clean up pki files
       file: path="{{ item }}" state=absent
       loop:
-        - "{{ __test_ca_key }}"
         - "{{ __test_ca_cert }}"
         - "{{ __test_key }}"
-        - "{{ __test_cert_csr }}"
         - "{{ __test_cert }}"
+
+    - name: Check ports managed by firewall and selinux
+      include_tasks: tasks/check_firewall_selinux.yml

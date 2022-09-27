@@ -1,0 +1,54 @@
+# SPDX-License-Identifier: MIT
+---
+- name: "Check ports are not retrieved if both logging_manage_firewall
+         and logging_manage_selinux are not true"
+  assert:
+    that: (logging_tls_tcp_ports + logging_tcp_ports +
+           logging_tls_udp_ports + logging_udp_ports) | length == 0
+  when:
+    - not logging_manage_firewall | bool
+    - not logging_manage_selinux | bool
+
+- block:
+    - name: Check firewall port status (manage - tcp)
+      shell: |
+        set -euo pipefail
+        firewall-cmd --list-ports | grep "{{ item }}/tcp"
+      changed_when: false
+      loop: "{{ logging_tls_tcp_ports + logging_tcp_ports }}"
+      when:
+        - (logging_tls_tcp_ports + logging_tcp_ports) | d([]) | length > 0
+
+    - name: Check firewall port status (manage - udp)
+      shell: |
+        set -euo pipefail
+        firewall-cmd --list-ports | grep "{{ item }}/udp"
+      changed_when: false
+      loop: "{{ logging_tls_udp_ports + logging_udp_ports }}"
+      when:
+        - (logging_tls_udp_ports + logging_udp_ports) | d([]) | length > 0
+  when:
+    - logging_manage_firewall | bool
+
+- block:
+    - name: Check associated selinux ports (manage - tcp)
+      shell: |-
+        set -euo pipefail
+        sudo semanage port -C --list | egrep "syslog.*_port_t" | \
+          grep "{{ item }}" | grep "tcp"
+      changed_when: false
+      loop: "{{ logging_tls_tcp_ports + logging_tcp_ports | d([]) }}"
+      when:
+        - (logging_tls_tcp_ports + logging_tcp_ports) | d([]) | length > 0
+
+    - name: Check associated selinux ports (manage - udp)
+      shell: |-
+        set -euo pipefail
+        sudo semanage port -C --list | egrep "syslog.*_port_t" | \
+          grep "{{ item }}" | grep "udp"
+      changed_when: false
+      loop: "{{ logging_tls_udp_ports + logging_udp_ports }}"
+      when:
+        - (logging_tls_udp_ports + logging_udp_ports) | d([]) | length > 0
+  when:
+    - logging_manage_selinux | bool
