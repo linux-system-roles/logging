@@ -445,25 +445,52 @@ These variables are set in the same level of the `logging_inputs`, `logging_outp
   If you want to remove ports, you will need to use the firewall system
   role directly.
 - `logging_manage_selinux`: If set to `true` and ports are found in the logging role
-  parameters, configure the selinux for the ports using the selinux role.
-  If set to `false`, the `logging role` does not manage the selinux.
+  parameters, configure the SELinux for the ports using the `selinux` role.
+  If set to `false`, the `logging` role does not manage SELinux.
   Default to `false`.
   NOTE: `logging_manage_selinux` is limited to *adding* policy.
   It cannot be used for *removing* policy.
-  If you want to remove policy, you will need to use the selinux system
-  role directly.
-- `logging_certificates`: This is a `list` of `dict` in the same format as used
-  by the `fedora.linux_system_roles.certificate` role.  Specify this variable if
-  you want the certificate role to generate the certificates for the logging system
-  configured by the logging role. With this example, `self-signed` certificate
-  `logging_cert.crt` is generated in `/etc/pki/tls/certs`.
+  If you want to remove policy, you will need to use the `selinux` role directly.
+- `logging_certificates`: Information used to generate a private key and certificate.
   Default to `[]`.
+  The value of `logging_certificates` is passed on to the `certificate_requests`
+  in the `certificate` role and used to create the private key and certificate.
+  For the supported parameters of `logging_certificates`,
+  see the [`certificate_requests` role documentation section](https://github.com/linux-system-roles/certificate/#certificate_requests).
+  Before running the `logging` role with `logging_certificates`, join the managed
+  hosts to an IPA domain to make CA available to sign the certificate to be created.
+
+  With this example, a private key `logging_cert.key` is generated in `/etc/pki/tls/private`
+  and a certificate `logging_cert.crt` is in `/etc/pki/tls/certs` signed by
+  the CA certificate managed by `ipa`.
 ```yaml
     logging_certificates:
       - name: logging_cert
         dns: ['localhost', 'www.example.com']
-        ca: self-sign
+        ca: ipa
 ```
+  The created private key and certificate are set with the ca certificate, e.g.,
+  in `logging_pki_files` as follows:
+```yaml
+  logging_pki_files:
+    - ca_cert: /etc/ipa/ca.crt
+      cert: /etc/pki/tls/certs/logging_cert.crt
+      private_key: /etc/pki/tls/private/logging_cert.key
+```
+  or in the `relp` parameters as follows:
+```yaml
+   logging_inputs:
+     - name: relp_server
+       type: relp
+       tls: true
+       ca_cert: /etc/ipa/ca.crt
+       cert: /etc/pki/tls/certs/logging_cert.crt
+       private_key: /etc/pki/tls/private/logging_cert.key
+       [snip]
+```
+  NOTE: The `certificate` role, unless using IPA and joining the systems to an
+  IPA domain, creates self-signed certificates, so you will need to explicitly
+  configure trust, which is not currently supported by the system roles.
 
 ### Update and Delete
 
@@ -868,8 +895,8 @@ When a port is specified in the logging role configuration,
 the firewall role is automatically included and the port
 is managed by the firewalld.
 
-The port is then configured by the selinux role and given
-an appropriate syslog selinux port type depending upon the
+The port is then configured by the `selinux` role and given
+an appropriate syslog SELinux port type depending upon the
 associated TLS value.
 
 You can verify the changes by the following command-line.
@@ -879,7 +906,7 @@ For firewall,
 firewall-cmd --list-port
 ```
 
-For selinux,
+For SELinux,
 ```
 semanage port --list | grep "syslog"
 ```
