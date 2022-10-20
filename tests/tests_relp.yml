@@ -12,6 +12,8 @@
 
   tasks:
     # TEST CASE 0
+    # Note: Create a self-signed cert just for the "unit" test.
+    #       In the real configuration, CA cert managed by IPA is required.
     - name: "TEST CASE 0; Test the server configuration containing tls tcp,
       plain tcp and udp connection"
       vars:
@@ -189,6 +191,8 @@
       include_tasks: tasks/check_firewall_selinux.yml
 
     # TEST CASE 1
+    # Note: Create a self-signed cert just for the "unit" test.
+    #       In the real configuration, CA cert managed by IPA is required.
     - name: TEST CASE 1; Test the client configuration using tls relp
       vars:
         logging_enabled: true

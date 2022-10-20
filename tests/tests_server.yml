@@ -23,6 +23,8 @@
 
   tasks:
     # TEST CASE 0
+    # Note: Create a self-signed cert just for the "unit" test.
+    #       In the real configuration, CA cert managed by IPA is required.
     - name: "TEST CASE 0; Test the server configuration containing tls tcp,
       plain tcp and udp connection"
       vars:
@@ -131,6 +133,8 @@
         # TEST CASE 1
         # remote inputs - both remote_tcp_0 and remote_tcp_1 configure
         # the tls connection.
+        # Note: Create a self-signed cert just for the "unit" test.
+        #       In the real configuration, CA cert managed by IPA is required.
         - name: "TEST CASE 1; Test the server configuration containing
           conflicted tls inputs in the remote input"
           vars:
