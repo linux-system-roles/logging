@@ -1,6 +1,49 @@
 Changelog
 =========
 
+[1.11.0] - 2022-11-01
+--------------------
+
+### New Features
+
+- Use the firewall role, the selinux role, and the certificate role from the logging role (#293)
+
+- Introduce logging_manage_firewall to use the firewall role to manage
+  the syslog ports. logging_manage_firewall is set to true, by default.
+  If the variable is set to false, the firewall configuration is
+  disabled.
+
+- Introduce logging_manage_selinux to use the selinux role to manage
+  the ports specified in the logging configuration. logging_manage_
+  selinux is set to true, by default.  If the variable is set to false,
+  the selinux configuration is disabled except the ports defined in the
+  selinux policy.
+
+- Add the test check task check_firewall_selinux.yml for verify the
+  ports status.
+
+- Use the certificate role to generate certificates in the logging role
+
+- Introduce logging_certificates variable to specify parameters for
+  using the certificate role.
+
+When logging_manage_firewall and logging_manage_selinux are
+set to false, it does not call the firewall role and the selinux
+role, respectively.
+
+The default value of logging_manage_firewall and logging_
+manage_selinux are changed to false.
+
+### Bug Fixes
+
+- none
+
+### Other Changes
+
+- To avoid the CI conflicts on the control host when running tests
+in parallel, create a temporary directory by tempfile to store
+files used in the test.
+
 [1.10.0] - 2022-07-28
 --------------------
 
