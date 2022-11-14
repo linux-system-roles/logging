@@ -1,5 +1,10 @@
 ---
-- block:
+- name: Manage firewall
+  when:
+    - logging_manage_firewall | bool
+    - logging_tcp_ports or logging_udp_ports or
+      logging_tls_tcp_ports or logging_tls_udp_ports
+  block:
     - name: Initialize logging_firewall_ports
       set_fact:
         logging_firewall_ports: []
@@ -27,7 +32,3 @@
         firewall: "{{ logging_firewall_ports }}"
       when:
         - logging_firewall_ports | d([])
-  when:
-    - logging_manage_firewall | bool
-    - logging_tcp_ports or logging_udp_ports or
-      logging_tls_tcp_ports or logging_tls_udp_ports

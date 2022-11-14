@@ -1,10 +1,10 @@
 ---
-- name: restart rsyslogd
+- name: Restart rsyslogd
   service:
     name: rsyslog
     state: restarted
 
-- name: stop rsyslogd
+- name: Stop rsyslogd
   service:
     name: rsyslog
     state: stopped

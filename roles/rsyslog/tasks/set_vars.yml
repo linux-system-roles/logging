@@ -19,7 +19,7 @@
       {{ ansible_facts['distribution_version'] }}.yml"
   when: item is file
 
-- name: "Include {{ role_path }}/vars/main.yml"
+- name: "Include /vars/main.yml from {{ role_path }}"
   include_vars: "{{ item }}"
   loop: "{{ lookup('lines',
          '/bin/ls -1 {{ role_path }}/vars/main.yml

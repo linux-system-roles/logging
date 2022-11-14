@@ -8,7 +8,7 @@
     file: "{{ role_path }}/tasks/deploy.yml"
 
 - name: "Create basics input configuration file
-  input-basics-{{ __rsyslog_input.name }} in /etc/rsyslog.d"
+    /etc/rsyslog.d/input-basics-{{ __rsyslog_input.name }}"
   vars:
     __rsyslog_packages: []
     __rsyslog_rules:

@@ -1,7 +1,7 @@
 ---
 # Deploy configuration files
 - name: "Install/Update files input packages and generate
-  configuration files in /etc/rsyslog.d"
+    configuration files in /etc/rsyslog.d"
   vars:
     __rsyslog_packages: "{{ __rsyslog_files_input_packages }}"
     __rsyslog_rules: "{{ __rsyslog_files_input_rules }}"
@@ -10,7 +10,7 @@
 
 # yamllint disable rule:line-length
 - name: "Create files input configuration file
-  input-files-{{ __rsyslog_input.name }} in /etc/rsyslog.d"
+    /etc/rsyslog.d/input-files-{{ __rsyslog_input.name }}"
   vars:
     __rsyslog_packages: []
     __rsyslog_rules:

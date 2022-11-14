@@ -1,9 +1,12 @@
 ---
 - name: Set Rsyslog facts then include rsyslog role
+  when:
+    - logging_provider == 'rsyslog'
+    - __snapshot_gather_vars is not defined or
+      not __snapshot_gather_vars | bool
   block:
-
     - name: "Set files output if files output is not defined
-      and logging_inputs is not empty"
+        and logging_inputs is not empty"
       set_fact:
         __rsyslog_output_files: [ {"name": "default_files", "type": "files"} ]
       when:
@@ -35,7 +38,11 @@
         - item.type | d('') == 'custom'
         - logging_enabled | d(true)
 
-    - block:
+    - name: Check logging inputs
+      vars:
+        __logging_input_names: "{{ logging_inputs |
+            map(attribute='name') | list }}"
+      block:
         - name: Check logging_inputs item in logging_flows.inputs
           fail:
             msg: >
@@ -45,9 +52,6 @@
             - logging_enabled | d(true)
             - item.inputs | intersect(__logging_input_names) |
               length != item.inputs | length
-      vars:
-        __logging_input_names: "{{ logging_inputs |
-            map(attribute='name') | list }}"
 
     # Manage firewall for the ports configured as logging role parameters
     - name: Gather ports specified in the logging_inputs and outputs vars
@@ -63,7 +67,9 @@
     - name: Generate certificates
       include_tasks: certificate.yml
 
-    - block:
+    - name: Manage debugging the logging role
+      when: logging_debug | d(false)
+      block:
         - name: Re-read facts after adding custom fact
           setup:
             filter: ansible_local
@@ -78,13 +84,13 @@
           file:
             path: "{{ role_path }}/debug/main.yml"
             state: absent
-          ignore_errors: true
 
         - name: Create rsyslog debug file
           lineinfile:
             path: "{{ role_path }}/debug/main.yml"
             create: yes
             line: "#ANSIBLE MANAGED VARIABLES FILE"
+            mode: 0600
 
         - name: Use a debug var to avoid an empty dict in with_dict
           set_fact:
@@ -99,15 +105,8 @@
             create: yes
             line: "{{ item.key }}: {{ item.value | d() |
               to_nice_json(indent=2) }}"
+            mode: 0600
           with_dict: "{{ __logging_debug_hostname }}"
-
-      when:
-        - logging_debug | d(false)
-
-  when:
-    - logging_provider == 'rsyslog'
-    - __snapshot_gather_vars is not defined or
-      not __snapshot_gather_vars | bool
 
 - name: Include Rsyslog role
   vars:
