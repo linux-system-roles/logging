@@ -6,7 +6,7 @@
 # yamllint enable rule:line-length
 # Deploy configuration files
 - name: "Install/Update oVirt input packages and generate
-  configuration files in /etc/rsyslog.d"
+    configuration files in /etc/rsyslog.d"
   vars:
     __rsyslog_packages: "{{ __rsyslog_ovirt_prereq_packages +
                             __rsyslog_ovirt_packages }}"
@@ -15,7 +15,7 @@
     file: "{{ role_path }}/tasks/deploy.yml"
 
 - name: "Create oVirt input configuration file
-  input-ovirt-{{ __rsyslog_input.name }} in /etc/rsyslog.d"
+    /etc/rsyslog.d/input-ovirt-{{ __rsyslog_input.name }}"
   vars:
     __rsyslog_packages: []
     __rsyslog_rules:
@@ -51,4 +51,4 @@
   when:
     - __rsyslog_input.type | d() == 'ovirt'
     - ansible_selinux.mode in ["enforcing", "permissive"]
-  notify: restart rsyslogd
+  notify: Restart rsyslogd

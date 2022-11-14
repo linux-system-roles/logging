@@ -79,7 +79,7 @@
       include_role:
         name: linux-system-roles.logging
 
-    # notify restart rsyslogd is executed at the end of this test task.
+    # notify Restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points"
@@ -178,7 +178,7 @@
       include_role:
         name: linux-system-roles.logging
 
-    # notify restart rsyslogd is executed at the end of this test task.
+    # notify Restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points"
@@ -260,7 +260,7 @@
       include_role:
         name: linux-system-roles.logging
 
-    # notify restart rsyslogd is executed at the end of this test task.
+    # notify Restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points"
@@ -375,7 +375,7 @@
       include_role:
         name: linux-system-roles.logging
 
-    # notify restart rsyslogd is executed at the end of this test task.
+    # notify Restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points"

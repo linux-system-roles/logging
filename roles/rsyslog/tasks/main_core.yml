@@ -12,13 +12,11 @@
     # be modified are the base packages - if this is not so, then additional
     # packages will need to be added to this check
     - name: Get status of rsyslog packages
-      command: rpm -V {{ item }}
+      command: rpm -V {{ item }}  # noqa command-instead-of-module
       loop: "{{ __rsyslog_base_packages }}"
       register: __rsyslog_package_status
       failed_when: false
       changed_when: false
-      args:
-        warn: false
 
     - name: Reset original confs - logging package is absent
       package:
@@ -69,14 +67,17 @@
       which is newer than \"8.37.0-7.2\"."
   when: __rsyslog_version is version('8.37.0-7.2', '>')
 
-- block:
+- name: Set failed validation flag
+  when: rsyslog_in_image | bool
+  block:
     - name: Set __rsyslog_failed_validation
       set_fact:
         __rsyslog_failed_validation: true
       when: __rsyslog_version is version('8.37.0-7.2', '<')
-  when: rsyslog_in_image | bool
 
-- block:
+- name: Deploy rsyslog
+  when: not __rsyslog_failed_validation | d(false)
+  block:
     - name: Create the config directory if it does not exist
       file:
         state: directory
@@ -91,7 +92,7 @@
         mode: '0700'
 
     - name: "Create logging directory if it does not exist or
-      the ownership and/or modes are different."
+        the ownership and/or modes are different."
       file:
         state: directory
         path: '{{ __rsyslog_system_log_dir }}'
@@ -112,7 +113,7 @@
       when:
         - __rsyslog_enabled | bool
         - rsyslog_inputs | d([])
-      notify: restart rsyslogd
+      notify: Restart rsyslogd
 
     - name: Generate global rule to add to __rsyslog_common_rules
       vars:
@@ -158,7 +159,7 @@
         - inner_item.filename | d() or inner_item.name | d()
         - inner_item.state is undefined or inner_item.state != 'absent'
         - inner_item.options | d() or inner_item.sections | d()
-      notify: restart rsyslogd
+      notify: Restart rsyslogd
       register: __rsyslog_templates
 
     - name: Initialize list of template results
@@ -181,7 +182,7 @@
         - not __rsyslog_enabled | bool
         - inner_item.filename | d() or inner_item.name | d()
         - inner_item.options | d() or inner_item.sections | d()
-      notify: stop rsyslogd
+      notify: Stop rsyslogd
 
     - name: Include input sub-vars
       include_vars:
@@ -259,7 +260,7 @@
         path: "{{ item }}"
         state: absent
       loop: "{{ __rsyslog_files_to_remove }}"
-      notify: "{{ 'restart rsyslogd' if logging_enabled else 'stop rsyslogd' }}"
+      notify: "{{ 'Restart rsyslogd' if logging_enabled else 'Stop rsyslogd' }}"
       when:
         - logging_purge_confs | bool | d(false)
         - __rsyslog_files_to_remove | length > 0
@@ -267,11 +268,9 @@
         __rsyslog_current_files: "{{ __rsyslog_template_results |
           selectattr('results', 'defined') | map(attribute='results') |
           flatten | selectattr('dest', 'defined') | map(attribute='dest') |
-          list | to_nice_json
-        }}"
+          list | to_nice_json }}"
         __rsyslog_files_to_remove: "{{
-          __rsyslog_confs.stdout_lines | difference(__rsyslog_current_files)
-        }}"
+          __rsyslog_confs.stdout_lines | difference(__rsyslog_current_files) }}"
 
     # How to set rsyslog_custom_config_files:
     # rsyslog_custom_config_files:
@@ -281,7 +280,7 @@
     # If the array contains non-existing file, the deployment stops
     # there with an error.
     - name: "Copy custom config files if they are specified in
-      rsyslog_custom_config_files variable array."
+        rsyslog_custom_config_files variable array."
       copy:
         src: '{{ item }}'
         dest: '{{ __rsyslog_config_dir }}'
@@ -290,14 +289,28 @@
         mode: '{{ item.mode | d("0644") }}'
       loop: '{{ rsyslog_custom_config_files | flatten }}'
       when: __rsyslog_enabled | bool
-      notify: restart rsyslogd
+      notify: Restart rsyslogd
 
-    - block:
+    - name: Configure rsyslog for TLS
+      vars:
+        __logging_forwards_tls: "{{ rsyslog_outputs |
+                                  selectattr('target', 'defined') |
+                                  selectattr('type', 'match', '^forwards$') |
+                                  selectattr('tls', 'defined') |
+                                  selectattr('tls') | list }}"
+        __logging_remote_tls: "{{ rsyslog_inputs |
+                                  selectattr('type', 'match', '^remote$') |
+                                  selectattr('tcp_ports', 'defined') |
+                                  selectattr('tls', 'defined') |
+                                  selectattr('tls') | list }}"
+      when:
+        - __rsyslog_enabled | bool
+      block:
         # Check if tls is enabled in forwards output or remote input and
         #          logging_pki_files.{ca_cert_src,ca_cert} is defined
         # Otherwise it fails.
         - name: "Check tls is enabled in forwards output or
-          remote input and logging_pki_files"
+            remote input and logging_pki_files"
           fail:
             msg: "Error: tls is enabled in {{ item.0.name }};
               you must specify logging_pki_files ca_cert_src and/or
@@ -322,7 +335,7 @@
             - __logging_forwards_tls | length > 0 or
               __logging_remote_tls | length > 0
             - logging_pki_files.0.ca_cert_src | d("")
-          notify: restart rsyslogd
+          notify: Restart rsyslogd
 
         - name: Copy local cert file to the target if needed
           vars:
@@ -338,7 +351,7 @@
             - __logging_forwards_tls | length > 0 or
               __logging_remote_tls | length > 0
             - logging_pki_files.0.cert_src | d("")
-          notify: restart rsyslogd
+          notify: Restart rsyslogd
 
         - name: Copy local key file to the target if needed
           vars:
@@ -354,22 +367,7 @@
             - __logging_forwards_tls | length > 0 or
               __logging_remote_tls | length > 0
             - logging_pki_files.0.private_key_src | d("")
-          notify: restart rsyslogd
-
-      vars:
-        __logging_forwards_tls: "{{ rsyslog_outputs |
-                                  selectattr('target', 'defined') |
-                                  selectattr('type', 'match', '^forwards$') |
-                                  selectattr('tls', 'defined') |
-                                  selectattr('tls') | list }}"
-        __logging_remote_tls: "{{ rsyslog_inputs |
-                                  selectattr('type', 'match', '^remote$') |
-                                  selectattr('tcp_ports', 'defined') |
-                                  selectattr('tls', 'defined') |
-                                  selectattr('tls') | list }}"
-
-      when:
-        - __rsyslog_enabled | bool
+          notify: Restart rsyslogd
 
     - name: Enable rsyslog service
       service:
@@ -388,8 +386,6 @@
       when:
         - not __rsyslog_enabled | bool
         - not rsyslog_in_image | default(false) | bool
-
-  when: not __rsyslog_failed_validation | d(false)
 
 - name: Check rsyslog version
   debug:

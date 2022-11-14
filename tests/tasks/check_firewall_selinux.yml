@@ -9,7 +9,9 @@
     - not logging_manage_firewall | bool
     - not logging_manage_selinux | bool
 
-- block:
+- name: Check firewall port status
+  when: logging_manage_firewall | bool
+  block:
     - name: Check firewall port status (manage - tcp)
       shell: |
         set -euo pipefail
@@ -27,10 +29,10 @@
       loop: "{{ logging_tls_udp_ports + logging_udp_ports }}"
       when:
         - (logging_tls_udp_ports + logging_udp_ports) | d([]) | length > 0
-  when:
-    - logging_manage_firewall | bool
 
-- block:
+- name: Check SELinux port status
+  when: logging_manage_selinux | bool
+  block:
     - name: Check associated selinux ports (manage - tcp)
       shell: |-
         set -euo pipefail
@@ -50,5 +52,3 @@
       loop: "{{ logging_tls_udp_ports + logging_udp_ports }}"
       when:
         - (logging_tls_udp_ports + logging_udp_ports) | d([]) | length > 0
-  when:
-    - logging_manage_selinux | bool

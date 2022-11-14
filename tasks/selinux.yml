@@ -1,5 +1,10 @@
 ---
-- block:
+- name: Manage SELinux settings
+  when:
+    - logging_manage_selinux | bool
+    - logging_tcp_ports or logging_udp_ports or
+      logging_tls_tcp_ports or logging_tls_udp_ports
+  block:
     - name: Initialize logging_selinux_ports
       set_fact:
         logging_selinux_ports: []
@@ -47,7 +52,3 @@
         selinux_ports: "{{ logging_selinux_ports }}"
       when:
         - logging_selinux_ports | d([])
-  when:
-    - logging_manage_selinux | bool
-    - logging_tcp_ports or logging_udp_ports or
-      logging_tls_tcp_ports or logging_tls_udp_ports

@@ -7,7 +7,7 @@
 
 # Deploy configuration files
 - name: "Install/Update relp logging packages and generate
-  configuration files in /etc/rsyslog.d"
+    configuration files in /etc/rsyslog.d"
   vars:
     __rsyslog_packages: "{{ __rsyslog_output_relp_packages }}"
     __rsyslog_rules: "{{ __rsyslog_output_relp_rules }}"
@@ -15,7 +15,7 @@
     file: "{{ role_path }}/tasks/deploy.yml"
 
 - name: "Create relp output configuration file
-  output-relp-{{ __rsyslog_output.name }} in /etc/rsyslog.d"
+    /etc/rsyslog.d/output-relp-{{ __rsyslog_output.name }}"
   vars:
     __rsyslog_packages: []
     __rsyslog_rules:

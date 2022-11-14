@@ -17,43 +17,17 @@
     logging_udp_ports: []
 
 # Gather ports configured as logging role parameters
-- block:
+- name: Get information about ports
+  when:
+    - (logging_manage_firewall | bool) or (logging_manage_selinux | bool)
+  block:
     - name: Parameter 'port' values
       set_fact:
         logging_tls_tcp_ports: "{{ (logging_inputs + logging_outputs) | d([]) |
                                    selectattr('port', 'defined') |
                                    map(attribute='port') | list }}"
 
-    - block:
-        - name: Parameter 'tcp_port' values (without tls)
-          set_fact:
-            logging_tcp_ports: "{{ logging_tcp_ports |
-                                   union(__tcp_ports[0] | list) }}"
-
-        - name: Parameter 'tcp_port' values (with tls)
-          set_fact:
-            logging_tls_tcp_ports: "{{ logging_tls_tcp_ports |
-                                       union(__tcp_ports[1] | list) }}"
-
-        - name: Parameter 'udp_port' values (without tls)
-          set_fact:
-            logging_udp_ports: "{{ logging_udp_ports |
-                                   union(__udp_ports[0] | list) }}"
-
-        - name: Parameter 'udp_port' values (with tls)
-          set_fact:
-            logging_tls_udp_ports: "{{ logging_tls_udp_ports |
-                                       union(__udp_ports[1] | list) }}"
-
-        - name: Parameter 'server_port' values (without tls)
-          set_fact:
-            logging_tcp_ports: "{{ logging_tcp_ports |
-                                   union(__server_ports[0] | list) }}"
-
-        - name: Parameter 'server_port' values (with tls)
-          set_fact:
-            logging_tls_tcp_ports: "{{ logging_tls_tcp_ports |
-                                       union(__server_ports[1] | list) }}"
+    - name: Gather port values
       vars:
         __tcp_outputs: "{{ logging_outputs | d([]) |
                         selectattr('tcp_port', 'defined') }}"
@@ -115,29 +89,38 @@
           {% endfor %}
           {% set both = [server_ports, server_tls_ports] %}
           {{ both }}
-
-    - block:
-        - name: Parameter 'tcp_ports' values (without tls)
+      block:
+        - name: Parameter 'tcp_port' values (without tls)
           set_fact:
             logging_tcp_ports: "{{ logging_tcp_ports |
-                                   union(__tcp_ports[0]) | list | flatten }}"
+                                   union(__tcp_ports[0] | list) }}"
 
-        - name: Parameter 'tcp_ports' values (with tls)
+        - name: Parameter 'tcp_port' values (with tls)
           set_fact:
             logging_tls_tcp_ports: "{{ logging_tls_tcp_ports |
-                                       union(__tcp_ports[1]) |
-                                       list | flatten }}"
+                                       union(__tcp_ports[1] | list) }}"
 
-        - name: Parameter 'udp_ports' values (without tls)
+        - name: Parameter 'udp_port' values (without tls)
           set_fact:
             logging_udp_ports: "{{ logging_udp_ports |
-                                   union(__udp_ports[0])| list | flatten }}"
+                                   union(__udp_ports[0] | list) }}"
 
-        - name: Parameter 'udp_ports' values (with tls)
+        - name: Parameter 'udp_port' values (with tls)
           set_fact:
             logging_tls_udp_ports: "{{ logging_tls_udp_ports |
-                                       union(__udp_ports[1]) |
-                                       list | flatten }}"
+                                       union(__udp_ports[1] | list) }}"
+
+        - name: Parameter 'server_port' values (without tls)
+          set_fact:
+            logging_tcp_ports: "{{ logging_tcp_ports |
+                                   union(__server_ports[0] | list) }}"
+
+        - name: Parameter 'server_port' values (with tls)
+          set_fact:
+            logging_tls_tcp_ports: "{{ logging_tls_tcp_ports |
+                                       union(__server_ports[1] | list) }}"
+
+    - name: Gather additional ports
       vars:
         __tcp_inputs: "{{ logging_inputs | d([]) |
                         selectattr('tcp_ports', 'defined') }}"
@@ -179,5 +162,25 @@
           {% endfor %}
           {% set both = [udp_ports, tls_udp_ports] %}
           {{ both }}
-  when:
-    - (logging_manage_firewall | bool) or (logging_manage_selinux | bool)
+      block:
+        - name: Parameter 'tcp_ports' values (without tls)
+          set_fact:
+            logging_tcp_ports: "{{ logging_tcp_ports |
+                                   union(__tcp_ports[0]) | list | flatten }}"
+
+        - name: Parameter 'tcp_ports' values (with tls)
+          set_fact:
+            logging_tls_tcp_ports: "{{ logging_tls_tcp_ports |
+                                       union(__tcp_ports[1]) |
+                                       list | flatten }}"
+
+        - name: Parameter 'udp_ports' values (without tls)
+          set_fact:
+            logging_udp_ports: "{{ logging_udp_ports |
+                                   union(__udp_ports[0]) | list | flatten }}"
+
+        - name: Parameter 'udp_ports' values (with tls)
+          set_fact:
+            logging_tls_udp_ports: "{{ logging_tls_udp_ports |
+                                       union(__udp_ports[1]) |
+                                       list | flatten }}"

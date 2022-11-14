@@ -1,6 +1,6 @@
 ---
 - name: "Create remote files output configuration file
-  output-files-{{ __rsyslog_output.name }} in /etc/rsyslog.d"
+    /etc/rsyslog.d/output-files-{{ __rsyslog_output.name }}"
   vars:
     __rsyslog_packages: "{{ __rsyslog_remote_files_output_packages }}"
     __rsyslog_rules:
