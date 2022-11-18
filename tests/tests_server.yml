@@ -199,6 +199,10 @@
         - debug:
             msg: Caught an expected error - {{ ansible_failed_result }}
 
+    - name: stop tracking certificate
+      command: getcert stop-tracking -f {{ __test_ca_cert }}
+      changed_when: false
+
     - name: clean up pki files
       file: path="{{ item }}" state=absent
       loop:
