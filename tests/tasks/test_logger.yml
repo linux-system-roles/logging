@@ -22,3 +22,7 @@
     - name: See what's in logging file if the test fails
       command: tail -100 {{ __logging_file }}
       changed_when: false
+
+    - name: Fail if the message was not printed
+      fail:
+        msg: Missing log message "{{ __logging_message }}" in "{{ __logging_file }}"
