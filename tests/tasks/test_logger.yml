@@ -25,4 +25,6 @@
 
     - name: Fail if the message was not printed
       fail:
-        msg: Missing log message "{{ __logging_message }}" in "{{ __logging_file }}"
+        msg: >
+          Missing log message "{{ __logging_message }}" in
+          "{{ __logging_file }}"
