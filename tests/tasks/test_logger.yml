@@ -7,12 +7,24 @@
     {{ __logging_message }}"
   changed_when: false
 
-- name: Check the test log message in {{ __default_system_log }}
-  vars:
-    __logging_message: "testMessage{{ __logging_index }}"
-  command: /bin/grep "{{ __logging_message }}" "{{ __logging_file }}"
-  register: __result
-  until: __result is success
-  retries: 5
-  delay: 1
-  changed_when: false
+- name: Check test log and check for errors
+  block:
+    - name: Check the test log message in {{ __default_system_log }}
+      vars:
+        __logging_message: "testMessage{{ __logging_index }}"
+      command: /bin/grep "{{ __logging_message }}" "{{ __logging_file }}"
+      register: __result
+      until: __result is success
+      retries: 60
+      delay: 1
+      changed_when: false
+  rescue:
+    - name: See what's in logging file if the test fails
+      command: tail -100 {{ __logging_file }}
+      changed_when: false
+
+    - name: Fail if the message was not printed
+      fail:
+        msg: >
+          Missing log message "{{ __logging_message }}" in
+          "{{ __logging_file }}"
