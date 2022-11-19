@@ -1,6 +1,25 @@
 Changelog
 =========
 
+[1.11.2] - 2022-11-19
+--------------------
+
+### New Features
+
+- none
+
+### Bug Fixes
+
+- cert cleanup needs to use getcert stop-tracking (#300)
+
+Need to use `getcert stop-tracking` when removing the cert, otherwise,
+subsequent requests will hang if certmonger is tracking a non-existent
+cert.
+
+### Other Changes
+
+- increase test log timeout; show log if failed
+
 [1.11.1] - 2022-11-14
 --------------------
 
