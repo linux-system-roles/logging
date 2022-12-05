@@ -68,7 +68,7 @@
 
     - name: Ensure config file size and counts
       vars:
-        __conf_count: 9
+        __conf_count: 10
         __conf_size: less
         __conf_files:
           - "{{ __test_relp_server0 }}"
@@ -174,7 +174,7 @@
 
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
-        logging_enabled: false
+        logging_purge_confs: true
         logging_manage_firewall: false
         logging_manage_selinux: false
       include_role:
@@ -243,7 +243,7 @@
 
     - name: Ensure config file size and counts
       vars:
-        __conf_count: 9
+        __conf_count: 8
         __conf_size: less
         __conf_files:
           - "{{ __test_relp_client0 }}"
@@ -319,7 +319,7 @@
 
     - name: END TEST CASE 1; Clean up the deployed config
       vars:
-        logging_enabled: false
+        logging_purge_confs: true
         logging_manage_firewall: false
         logging_manage_selinux: false
       include_role:
