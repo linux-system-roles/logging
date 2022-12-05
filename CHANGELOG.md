@@ -1,6 +1,30 @@
 Changelog
 =========
 
+[1.11.3] - 2022-12-05
+--------------------
+
+### New Features
+
+- none
+
+### Bug Fixes
+
+- use logging_purge_confs in relp test (#303)
+
+On some platforms, there are no packages that put config files in
+/etc/rsyslog.d - using `logging_enabled: false` after a test leaves
+no files in /etc/rsyslog.d and the `$IncludeConfig /etc/rsyslog.d/*.conf`
+then leaves rsyslogd in a state that it will not start and cause test
+failures.
+The solution is to use `logging_purge_confs: true` which "does the right
+thing" when /etc/rsyslog.d is empty.
+Fix the expected number of config files check.
+
+### Other Changes
+
+- none
+
 [1.11.2] - 2022-11-19
 --------------------
 
