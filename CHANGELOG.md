@@ -146,13 +146,13 @@ Adds startmsg_regex and endmsg_regex options:
 
 - Fix a bash bug in changelog_to_tag.yml, which unexpectedly expanded "*"
 
-- changelog_to_tag action - support other than "master" for the main branch name, as well
+- changelog_to_tag action - support other than "master" for the main branch name, as well // wokeignore:rule=master
 
 - Use GITHUB_REF_NAME as name of push branch; fix error in branch detection [citest skip]
 
 We need to get the name of the branch to which CHANGELOG.md was pushed.
 For now, it looks as though `GITHUB_REF_NAME` is that name.  But don't
-trust it - first, check that it is `main` or `master`.  If not, then use
+trust it - first, check that it is `main` or `master`.  If not, then use // wokeignore:rule=master
 a couple of other methods to determine what is the push branch.
 
 Signed-off-by: Rich Megginson <rmeggins@redhat.com>
@@ -445,7 +445,7 @@ must be a `string` value like `"2.9"`, not a `float` value like `2.9`.
 ### Other Changes
 
 - Remove python-26 environment from tox testing
-- update to tox-lsr 2.4.0 - add support for ansible-test sanity with docker
+- update to tox-lsr 2.4.0 - add support for ansible-test sanity with docker // wokeignore:rule=sanity
 - use tox-lsr 2.3.0 and enable ansible-test
 - CI: Add support for RHEL-9
 
