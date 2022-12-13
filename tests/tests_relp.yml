@@ -177,6 +177,9 @@
         logging_purge_confs: true
         logging_manage_firewall: false
         logging_manage_selinux: false
+        logging_inputs: []
+        logging_outputs: []
+        logging_flows: []
       include_role:
         name: linux-system-roles.logging
         public: true
@@ -322,6 +325,9 @@
         logging_purge_confs: true
         logging_manage_firewall: false
         logging_manage_selinux: false
+        logging_inputs: []
+        logging_outputs: []
+        logging_flows: []
       include_role:
         name: linux-system-roles.logging
         public: true

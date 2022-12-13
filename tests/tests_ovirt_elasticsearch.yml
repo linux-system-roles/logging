@@ -175,6 +175,9 @@
     - name: END TEST CASE 0; Ensure basic ovirt configuration works
       vars:
         logging_purge_confs: true
+        logging_inputs: []
+        logging_outputs: []
+        logging_flows: []
       include_role:
         name: linux-system-roles.logging
 
@@ -372,6 +375,9 @@
     - name: END TEST CASE 1; Ensure basic ovirt configuration works
       vars:
         logging_purge_confs: true
+        logging_inputs: []
+        logging_outputs: []
+        logging_flows: []
       include_role:
         name: linux-system-roles.logging
 
