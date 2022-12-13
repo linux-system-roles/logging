@@ -1,6 +1,28 @@
 Changelog
 =========
 
+[1.11.4] - 2022-12-13
+--------------------
+
+### New Features
+
+- none
+
+### Bug Fixes
+
+- tests: specify empty inputs, outputs, flows with purge (#308)
+
+If there are any leftover defined variables that specify inputs, outputs, or flows,
+purge will not remove those files since they are referred to.  This typically
+happens when using `public: true` which leaves all of those role variables
+defined in the public namespace.  The solution when cleaning up is to ensure
+that none of the inputs, outputs, or flows is defined when using purge, to
+guarantee that all of the config files are removed and none are leftover.
+
+### Other Changes
+
+- none
+
 [1.11.3] - 2022-12-05
 --------------------
 
