@@ -300,6 +300,9 @@
         - name: END TEST CASE 0; Clean up the deployed config
           vars:
             logging_purge_confs: true
+            logging_inputs: []
+            logging_outputs: []
+            logging_flows: []
           include_role:
             name: linux-system-roles.logging
 
@@ -404,6 +407,9 @@
         - name: END TEST CASE 1; Clean up the deployed config
           vars:
             logging_purge_confs: true
+            logging_inputs: []
+            logging_outputs: []
+            logging_flows: []
           include_role:
             name: linux-system-roles.logging
 
@@ -521,6 +527,9 @@
         - name: END TEST CASE 2; Clean up the deployed config
           vars:
             logging_purge_confs: true
+            logging_inputs: []
+            logging_outputs: []
+            logging_flows: []
           include_role:
             name: linux-system-roles.logging
 
@@ -586,6 +595,9 @@
         - name: END TEST CASE 3; Clean up the deployed config
           vars:
             logging_purge_confs: true
+            logging_inputs: []
+            logging_outputs: []
+            logging_flows: []
           include_role:
             name: linux-system-roles.logging
 
