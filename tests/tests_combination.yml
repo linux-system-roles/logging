@@ -145,7 +145,7 @@
         path: "{{ __test_inputfiles_conf }}"
         line: "  {{ item }}"
         state: present
-      check_mode: yes
+      check_mode: true
       register: _result
       failed_when: _result.changed
       loop:
@@ -336,7 +336,7 @@
         path: "{{ __test_inputfiles_conf }}"
         line: "  {{ item }}"
         state: present
-      check_mode: yes
+      check_mode: true
       register: _result
       failed_when: _result.changed
       loop:

@@ -1,3 +1,4 @@
+---
 - name: Gather the package facts
   package_facts:
     manager: auto

@@ -1,3 +1,4 @@
+---
 # Ensure that the role runs with parameters from files inputs to files outputs
 #
 # [Configuration]
@@ -126,7 +127,7 @@
         path: "{{ __test_inputfiles_conf0 }}"
         line: "  {{ item }}"
         state: present
-      check_mode: yes
+      check_mode: true
       register: _result
       failed_when: _result.changed
       loop:
@@ -141,7 +142,7 @@
         path: "{{ __test_inputfiles_conf1 }}"
         line: "  {{ item }}"
         state: present
-      check_mode: yes
+      check_mode: true
       register: _result
       failed_when: _result.changed
       loop:

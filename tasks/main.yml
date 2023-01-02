@@ -8,7 +8,7 @@
     - name: "Set files output if files output is not defined
         and logging_inputs is not empty"
       set_fact:
-        __rsyslog_output_files: [ {"name": "default_files", "type": "files"} ]
+        __rsyslog_output_files: [{"name": "default_files", "type": "files"}]
       when:
         - logging_outputs | d([]) |
           selectattr('name', 'defined') |
@@ -88,7 +88,7 @@
         - name: Create rsyslog debug file
           lineinfile:
             path: "{{ role_path }}/debug/main.yml"
-            create: yes
+            create: true
             line: "#ANSIBLE MANAGED VARIABLES FILE"
             mode: 0600
 
@@ -102,7 +102,7 @@
             - item.key is match("rsyslog*")
           lineinfile:
             path: "{{ role_path }}/debug/main.yml"
-            create: yes
+            create: true
             line: "{{ item.key }}: {{ item.value | d() |
               to_nice_json(indent=2) }}"
             mode: 0600
@@ -113,5 +113,5 @@
     __rsyslog_enabled: "{{ logging_enabled }}"
     __rsyslog_system_log_dir: "{{ logging_system_log_dir }}"
   include_role:
-    name: "{{ role_path }}/roles/rsyslog"
+    name: "{{ role_path }}/roles/rsyslog"  # noqa role-name[path]
   when: logging_provider == 'rsyslog'

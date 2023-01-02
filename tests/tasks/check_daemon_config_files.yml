@@ -1,3 +1,4 @@
+---
 - name: Get info of /etc/rsyslog.conf
   stat:
     path: /etc/rsyslog.conf
