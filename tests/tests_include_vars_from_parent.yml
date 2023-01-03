@@ -1,3 +1,4 @@
+---
 - hosts: all
   gather_facts: true
   tasks:
@@ -24,7 +25,7 @@
         versions:
           - "{{ facts['distribution_version'] }}"
           - "{{ facts['distribution_major_version'] }}"
-        separators: [ "-", "_" ]
+        separators: ["-", "_"]
         # create all variants like CentOS, CentOS_8.1, CentOS-8.1,
         # CentOS-8, CentOS-8.1
         # more formally:

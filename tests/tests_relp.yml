@@ -1,3 +1,4 @@
+---
 - name: Test the server/client configuration using tls relp
   hosts: all
   vars:

@@ -203,7 +203,7 @@
         __rsyslog_input: "{{ input_item }}"
       loop: '{{ rsyslog_inputs | sort(attribute="type") }}'
       loop_control:
-        extended: yes
+        extended: true
         loop_var: input_item
       when:
         - input_item | d([])
@@ -372,7 +372,7 @@
     - name: Enable rsyslog service
       service:
         name: rsyslog
-        enabled: yes
+        enabled: true
         state: started
       when:
         - __rsyslog_enabled | bool
@@ -381,7 +381,7 @@
     - name: Disable rsyslog service
       systemd:
         name: rsyslog.service
-        enabled: no
+        enabled: false
         state: stopped
       when:
         - not __rsyslog_enabled | bool

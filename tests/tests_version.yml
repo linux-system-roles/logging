@@ -1,3 +1,4 @@
+---
 # Ensure internal var __rsyslog_version is set correctly
 #
 # [Test scenario]
