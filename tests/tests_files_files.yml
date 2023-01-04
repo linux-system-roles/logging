@@ -98,6 +98,7 @@
     - name: "Check the module param template is set to {{ __test_template }}"
       command: >-
         grep '{{ __test_template }}' '{{ __test_outputfiles_module_conf }}'
+      changed_when: false
 
     - name: Check if the input files config does not exist
       stat:

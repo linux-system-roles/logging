@@ -137,8 +137,8 @@
       include_tasks: tasks/test_logger.yml
 
     # yamllint disable rule:line-length
-    - name: "Check the files output config that the path is
-      {{ __logging_system_log_dir }}/messages"
+    - name: "Check the files output config that the messages path is
+      {{ __logging_system_log_dir }}"
       command: >-
         /bin/grep
         '\*.info;mail.none;authpriv.none;cron.none.*{{ __logging_system_log_dir }}/messages'
@@ -175,7 +175,13 @@
       meta: flush_handlers
 
     # TEST CASE 2
-    - block:
+    - name: Test case 2
+      vars:
+        __expected_error: >
+          Error: ['bogus_basic_input'] includes undefined logging_inputs item.
+        __expected_error2: >
+          Error: [u'bogus_basic_input'] includes undefined logging_inputs item.
+      block:
         - name: "TEST CASE 2; Test the configuration, which flow
           contains a undefined input bogus_basic_input"
           vars:
@@ -215,14 +221,9 @@
           include_role:
             name: linux-system-roles.logging
 
-        - name: unreachable task
+        - name: Unreachable task
           fail:
             msg: UNREACH
-      vars:
-        __expected_error: >
-          Error: ['bogus_basic_input'] includes undefined logging_inputs item.
-        __expected_error2: >
-          Error: [u'bogus_basic_input'] includes undefined logging_inputs item.
       rescue:
         - name: Expected error
           debug:

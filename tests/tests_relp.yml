@@ -82,14 +82,15 @@
         name: lsof
         state: present
 
-    - name: lsof outputs for rsyslogd
+    - name: Check lsof outputs for rsyslogd
       shell: |-
         set -euo pipefail
         lsof -i -nP | grep rsyslogd
       register: __result
       changed_when: false
 
-    - debug:
+    - name: Show lsof output
+      debug:
         msg: "lsof returned {{ __result.stdout }}"
 
     - name: Check port 6514, 20514 are open for TCP
@@ -339,12 +340,14 @@
       not waiting for normal sync points"
       meta: flush_handlers
 
-    - name: stop tracking certificate
+    - name: Stop tracking certificate
       command: getcert stop-tracking -f {{ __test_ca_cert }}
       changed_when: false
 
-    - name: clean up pki files
-      file: path="{{ item }}" state=absent
+    - name: Clean up pki files
+      file:
+        path: "{{ item }}"
+        state: absent
       loop:
         - "{{ __test_ca_cert }}"
         - "{{ __test_key }}"

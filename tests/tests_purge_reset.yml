@@ -7,12 +7,12 @@
   vars:
     __test_default_files_conf: /etc/rsyslog.d/30-output-files-default_files.conf
   tasks:
-    - name: ensure rsyslog is installed
+    - name: Ensure rsyslog is installed
       package:
         name: rsyslog
         state: present
 
-    - name: create some unowned config files
+    - name: Create some unowned config files
       copy:
         dest: "{{ item }}"
         content: "# this is file {{ item }}"
@@ -21,14 +21,14 @@
         - "/etc/rsyslog.d/unowned1.conf"
         - "/etc/rsyslog.d/unowned2.conf"
 
-    - name: modify /etc/rsyslog.conf
+    - name: Modify /etc/rsyslog.conf
       lineinfile:
         path: /etc/rsyslog.conf
         insertafter: EOF
         state: present
         line: "# this is a modification"
 
-    - name: configure with basics + purge
+    - name: Configure with basics + purge
       vars:
         logging_purge_confs: true
         logging_inputs:
@@ -62,14 +62,14 @@
         - "/etc/rsyslog.d/unowned1.conf"
         - "/etc/rsyslog.d/unowned2.conf"
 
-    - name: check1 rsyslog config files
+    - name: Check1 rsyslog config files
       command: ls /etc/rsyslog.d
       changed_when: false
 
     - name: Check ports managed by firewall and selinux
       include_tasks: tasks/check_firewall_selinux.yml
 
-    - name: configure with basics + purge again - check for idempotency
+    - name: Configure with basics + purge again - check for idempotency
       vars:
         logging_purge_confs: true
         logging_inputs:
@@ -79,14 +79,14 @@
         name: linux-system-roles.logging
         public: true
 
-    - name: check11 rsyslog config files
+    - name: Check11 rsyslog config files
       command: ls /etc/rsyslog.d
       changed_when: false
 
     - name: Check ports managed by firewall and selinux
       include_tasks: tasks/check_firewall_selinux.yml
 
-    - name: run again with purge to erase all config
+    - name: Run again with purge to erase all config
       vars:
         logging_purge_confs: true
         logging_enabled: false
@@ -112,14 +112,14 @@
       loop:
         - "{{ __test_default_files_conf }}"
 
-    - name: check2 rsyslog config files
+    - name: Check2 rsyslog config files
       command: ls /etc/rsyslog.d
       changed_when: false
 
     - name: Check ports managed by firewall and selinux
       include_tasks: tasks/check_firewall_selinux.yml
 
-    - name: run again with purge and reset to test idempotency
+    - name: Run again with purge and reset to test idempotency
       vars:
         logging_purge_confs: true
         logging_enabled: false
@@ -130,7 +130,7 @@
         name: linux-system-roles.logging
         public: true
 
-    - name: check3 rsyslog config files
+    - name: Check3 rsyslog config files
       command: ls /etc/rsyslog.d
       changed_when: false
 

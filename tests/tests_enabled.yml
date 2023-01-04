@@ -24,8 +24,9 @@
   tasks:
     - name: Check /etc/rsyslog.d
       command: ls /etc/rsyslog.d
+      changed_when: false
 
-    - name: default run
+    - name: Default run
       vars:
         logging_purge_confs: true
       include_role:

@@ -36,7 +36,7 @@
     __default_system_log: /var/log/messages
 
   tasks:
-    - name: deploy config to output into local files
+    - name: Deploy config to output into local files
       vars:
         logging_inputs:
           - name: basic_input
