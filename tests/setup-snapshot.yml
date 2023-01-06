@@ -1,22 +1,22 @@
 ---
 # SPDX-License-Identifier: GPL-3.0-only
 
-- hosts: all
+- name: Setup snapshot
+  hosts: all
+  vars:
+    __snapshot_gather_vars: true
   tasks:
-    - block:
-        - name: Set platform/version specific variables
-          include_role:
-            name: linux-system-roles.logging
-            public: true
+    - name: Set platform/version specific variables
+      include_role:
+        name: linux-system-roles.logging
+        public: true
 
-        - name: Install test packages
-          package:
-            name: "{{ __base_packages + ['lsof', 'openssl'] }}"
-            state: present
-          vars:
-            __varnames: "{{ lookup('varnames', '^__rsyslog_.*packages$',
-                            wantlist=True) }}"
-            __base_packages: "{{ lookup('vars', *__varnames, wantlist=True) |
-              flatten | unique | sort }}"
+    - name: Install test packages
+      package:
+        name: "{{ __base_packages + ['lsof', 'openssl'] }}"
+        state: present
       vars:
-        __snapshot_gather_vars: true
+        __varnames: "{{ lookup('varnames', '^__rsyslog_.*packages$',
+                        wantlist=True) }}"
+        __base_packages: "{{ lookup('vars', *__varnames, wantlist=True) |
+          flatten | unique | sort }}"

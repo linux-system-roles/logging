@@ -168,9 +168,10 @@
     # yamllint enable rule:line-length
 
     # yamllint disable rule:line-length
-    - name: "Create a test log file with a log message in
-      {{ __test_inputfiles_dir }} which will not be logged
-      due to the regex condition"
+    - name: >-
+        Create a test log file with a log message in the input
+        which will not be logged due to the regex condition - input
+        {{ __test_inputfiles_dir }}
       shell: |-
         set -euo pipefail
         echo '<167>Jul 22 01:00:00 11.22.33.44 tag msgnum:00000000:24:test message 0123456789' > {{ __test_inputfiles_dir }}/test.log
@@ -472,7 +473,7 @@
     - name: Check ports managed by firewall and selinux
       include_tasks: tasks/check_firewall_selinux.yml
 
-    - name: deploy reduced config to output into local files
+    - name: Deploy reduced config to output into local files
       vars:
         logging_outputs:
           - name: files_test0
@@ -533,7 +534,7 @@
         __check_systemctl_status: true
       include_tasks: tasks/check_daemon_config_files.yml
 
-    - name: Check {{ __test_basics_conf }} was updated
+    - name: Check conf was updated {{ __test_basics_conf }}
       command: >-
         /bin/grep
         "# GENERATED BASICS CONFIG FILE"

@@ -23,8 +23,9 @@
     __keydir: /etc/pki/tls/private/
 
   tasks:
-    - block:
-        - name: create tempdir for test files
+    - name: Run test
+      block:
+        - name: Create tempdir for test files
           tempfile:
             state: directory
             prefix: logging_test_
@@ -43,7 +44,7 @@
           set_fact:
             __test_key: "{{ _tmpdir.path }}/{{ __test_key_name }}"
 
-        - name: "local certs are copied to the target host with
+        - name: "Local certs are copied to the target host with
           the default configuration path."
           copy:
             dest: "{{ item }}"
@@ -156,8 +157,10 @@
           not waiting for normal sync points"
           meta: flush_handlers
 
-        - name: clean up fake pki files
-          file: path="{{ item }}" state=absent
+        - name: Clean up fake pki files
+          file:
+            path: "{{ item }}"
+            state: absent
           loop:
             - "{{ __keydir }}es-key.pem"
             - "{{ __certdir }}es-cert.pem"
@@ -245,8 +248,10 @@
           not waiting for normal sync points"
           meta: flush_handlers
 
-        - name: clean up fake pki files
-          file: path="{{ item }}" state=absent
+        - name: Clean up fake pki files
+          file:
+            path: "{{ item }}"
+            state: absent
           loop:
             - "{{ __test_ca_cert_target }}"
             - "{{ __test_cert_target }}"
@@ -337,7 +342,8 @@
           meta: flush_handlers
 
         # TEST CASE 3
-        - block:
+        - name: Test case 3
+          block:
             - name: "TEST CASE 3; Error case for Elasticsearch config -
               cert and ca_cert_src are missing"
               vars:
@@ -364,14 +370,15 @@
               include_role:
                 name: linux-system-roles.logging
 
-            - name: unreachable task
+            - name: Unreachable task
               fail:
                 msg: UNREACH
 
           rescue:
-            - debug:
+            - name: Report error
+              debug:
                 msg: "Caught an expected error - {{ ansible_failed_result }}"
-            - name: assert...
+            - name: Assert...
               assert:
                 that: ansible_failed_result.msg is match(__expected_err1)
 
@@ -390,14 +397,17 @@
           not waiting for normal sync points"
           meta: flush_handlers
 
-        - name: clean up fake pki files
-          file: path="{{ item }}" state=absent
+        - name: Clean up fake pki files
+          file:
+            path: "{{ item }}"
+            state: absent
           loop:
             - /etc/rsyslog.d/ca_cert.crt
             - /etc/rsyslog.d/key.pem
 
         # TEST CASE 4
-        - block:
+        - name: Test case 4
+          block:
             - name: "TEST CASE 4; Error case for Elasticsearch config -
               although tls is true, no cert data are given."
               vars:
@@ -421,14 +431,15 @@
               include_role:
                 name: linux-system-roles.logging
 
-            - name: unreachable task
+            - name: Unreachable task
               fail:
                 msg: UNREACH
 
           rescue:
-            - debug:
+            - name: Report error
+              debug:
                 msg: "Caught an expected error - {{ ansible_failed_result }}"
-            - name: assert...
+            - name: Assert...
               assert:
                 that: ansible_failed_result.msg is match(__expected_err1)
 
@@ -448,7 +459,7 @@
           meta: flush_handlers
 
       always:
-        - name: remove tempdir
+        - name: Remove tempdir
           file:
             path: "{{ _tmpdir.path }}"
             state: absent

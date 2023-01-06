@@ -68,14 +68,15 @@
         name: lsof
         state: present
 
-    - name: lsof outputs for rsyslogd
+    - name: Check lsof outputs for rsyslogd
       shell: |-
         set -euo pipefail
         lsof -i -nP | grep rsyslogd
       register: __result
       changed_when: false
 
-    - debug:
+    - name: Show lsof output
+      debug:
         msg: "lsof returned {{ __result.stdout }}"
 
     - name: Check port 514 and 40001 are open for TCP
@@ -176,14 +177,15 @@
         name: lsof
         state: present
 
-    - name: lsof outputs for rsyslogd
+    - name: Check lsof outputs for rsyslogd
       shell: |-
         set -euo pipefail
         lsof -i -nP | grep rsyslogd
       register: __result
       changed_when: false
 
-    - debug:
+    - name: Show lsof output
+      debug:
         msg: "lsof returned {{ __result.stdout }}"
 
     - name: Check port 514 and 40001 is open for TCP

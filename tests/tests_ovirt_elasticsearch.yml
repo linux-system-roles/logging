@@ -96,8 +96,7 @@
         __check_systemctl_status: false
       include_tasks: tasks/check_daemon_config_files.yml
 
-    - name: "Check {{ __test_ovirt_collectd_conf }},
-      {{ __test_ovirt_engine_conf }}, {{ __test_ovirt_vdsm_conf }}"
+    - name: Check ovirt config files
       stat:
         path: "{{ item }}"
       register: __result
@@ -107,48 +106,43 @@
         - "{{ __test_ovirt_vdsm_conf }}"
       failed_when: not __result.stat.exists
 
-    - name: Check "{{ __test_ovirt_bogus_conf }} does not exist"
+    - name: Check bogus conf does not exist - {{ __test_ovirt_bogus_conf }}
       stat:
         path: "{{ __test_ovirt_bogus_conf }}"
       register: __result
       failed_when: __result.stat.exists
 
-    - name: Check ovirt_collectd_port is "{{ __test_collectd_port }}"
+    - name: Check ovirt_collectd_port is {{ __test_collectd_port }}
       command: >-
         /bin/grep 'input(name="{{ __test_collectd_name }}" type="imtcp"
         port="{{ __test_collectd_port }}"' {{ __test_ovirt_collectd_conf }}
       changed_when: false
 
-    - name: "Check index_prefix is {{ __test_metrics_index }} in
-      {{ __test_ovirt_collectd_conf }}"
+    - name: Check index_prefix is in {{ __test_ovirt_collectd_conf }}
       command: >-
         /bin/grep 'set $.index_prefix = "{{ __test_metrics_index }}"'
         {{ __test_ovirt_collectd_conf }}
       changed_when: false
 
-    - name: "Check input file is {{ __test_engine_input }} in
-      {{ __test_ovirt_engine_conf }}"
+    - name: Check input file is configured in {{ __test_ovirt_engine_conf }}
       command: >-
         /bin/grep 'input(type="imfile" file="{{ __test_engine_input }}"
         tag="{{ __test_engine_name }}"' {{ __test_ovirt_engine_conf }}
       changed_when: false
 
-    - name: "Check index_prefix is {{ __test_logs_index }} in
-      {{ __test_ovirt_engine_conf }}"
+    - name: Check index_prefix is configured in {{ __test_ovirt_engine_conf }}
       command: >-
         /bin/grep 'set $.index_prefix = "{{ __test_logs_index }}"'
         {{ __test_ovirt_engine_conf }}
       changed_when: false
 
-    - name: "Check input file is {{ __test_vdsm_input }} in
-      {{ __test_ovirt_vdsm_conf }}"
+    - name: Check input file is configured in {{ __test_ovirt_vdsm_conf }}
       command: >-
         /bin/grep 'input(type="imfile" file="{{ __test_vdsm_input }}"
         tag="{{ __test_vdsm_name }}"' {{ __test_ovirt_vdsm_conf }}
       changed_when: false
 
-    - name: "Check index_prefix is {{ __test_logs_index }} in
-      {{ __test_ovirt_vdsm_conf }}"
+    - name: Check index_prefix is configured in {{ __test_ovirt_vdsm_conf }}
       command: >-
         /bin/grep 'set $.index_prefix = "{{ __test_logs_index }}"'
         {{ __test_ovirt_vdsm_conf }}
@@ -280,8 +274,7 @@
         __check_systemctl_status: false
       include_tasks: tasks/check_daemon_config_files.yml
 
-    - name: "Check {{ __test_ovirt_collectd_conf }},
-      {{ __test_ovirt_engine_conf }}, {{ __test_ovirt_vdsm_conf }}"
+    - name: Check ovirt config files
       stat:
         path: "{{ item }}"
       register: __result
@@ -291,7 +284,7 @@
         - "{{ __test_ovirt_vdsm_conf }}"
       failed_when: not __result.stat.exists
 
-    - name: Check "{{ __test_ovirt_bogus_conf }} does not exist"
+    - name: Check bogus config does not exist -  {{ __test_ovirt_bogus_conf }}
       stat:
         path: "{{ __test_ovirt_bogus_conf }}"
       register: __result
@@ -303,36 +296,31 @@
         port="{{ __test_collectd_port }}"' {{ __test_ovirt_collectd_conf }}
       changed_when: false
 
-    - name: "Check index_prefix is {{ __test_metrics_index }} in
-      {{ __test_ovirt_collectd_conf }}"
+    - name: Check index_prefix is configured in {{ __test_ovirt_collectd_conf }}
       command: >-
         /bin/grep 'set $.index_prefix = "{{ __test_metrics_index }}"'
         {{ __test_ovirt_collectd_conf }}
       changed_when: false
 
-    - name: "Check input file is {{ __test_engine_input }} in
-      {{ __test_ovirt_engine_conf }}"
+    - name: Check input file is configured in {{ __test_ovirt_engine_conf }}
       command: >-
         /bin/grep 'input(type="imfile" file="{{ __test_engine_input }}"
         tag="{{ __test_engine_name }}"' {{ __test_ovirt_engine_conf }}
       changed_when: false
 
-    - name: "Check index_prefix is {{ __test_logs_index }} in
-      {{ __test_ovirt_engine_conf }}"
+    - name: Check index_prefix is configured in {{ __test_ovirt_engine_conf }}
       command: >-
         /bin/grep 'set $.index_prefix = "{{ __test_logs_index }}"'
         {{ __test_ovirt_engine_conf }}
       changed_when: false
 
-    - name: "Check input file is {{ __test_vdsm_input }} in
-      {{ __test_ovirt_vdsm_conf }}"
+    - name: Check input file is configured in {{ __test_ovirt_vdsm_conf }}
       command: >-
         /bin/grep 'input(type="imfile" file="{{ __test_vdsm_input }}"
         tag="{{ __test_vdsm_name }}"' {{ __test_ovirt_vdsm_conf }}
       changed_when: false
 
-    - name: "Check index_prefix is {{ __test_logs_index }} in
-      {{ __test_ovirt_vdsm_conf }}"
+    - name: Check index_prefix is configured in {{ __test_ovirt_vdsm_conf }}
       command: >-
         /bin/grep 'set $.index_prefix = "{{ __test_logs_index }}"'
         {{ __test_ovirt_vdsm_conf }}

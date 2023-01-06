@@ -86,14 +86,15 @@
         name: lsof
         state: present
 
-    - name: lsof outputs for rsyslogd
+    - name: Check lsof outputs for rsyslogd
       shell: |-
         set -o pipefail
         lsof -i -nP | grep rsyslogd
       register: __result
       changed_when: false
 
-    - debug:
+    - name: Show lsof output
+      debug:
         msg: "lsof returned {{ __result.stdout }}"
 
     - name: Check port 514, 6514, 40010 and 40011 is open for TCP
@@ -132,7 +133,8 @@
     - name: Check ports managed by firewall and selinux
       include_tasks: tasks/check_firewall_selinux.yml
 
-    - block:
+    - name: Test case 1
+      block:
         # TEST CASE 1
         # remote inputs - both remote_tcp_0 and remote_tcp_1 configure
         # the tls connection.
@@ -177,7 +179,7 @@
           include_role:
             name: linux-system-roles.logging
 
-        - name: unreachable task
+        - name: Unreachable task
           fail:
             msg: UNREACH
 
@@ -191,7 +193,8 @@
               item.msg == __expected_error
           loop: "{{ ansible_failed_result.results }}"
 
-    - block:
+    - name: End test case 1
+      block:
         - name: END TEST CASE 1; Clean up the deployed config
           vars:
             logging_purge_confs: true
@@ -202,15 +205,18 @@
             name: linux-system-roles.logging
 
       rescue:
-        - debug:
+        - name: Check error
+          debug:
             msg: Caught an expected error - {{ ansible_failed_result }}
 
-    - name: stop tracking certificate
+    - name: Stop tracking certificate
       command: getcert stop-tracking -f {{ __test_ca_cert }}
       changed_when: false
 
-    - name: clean up pki files
-      file: path="{{ item }}" state=absent
+    - name: Clean up pki files
+      file:
+        path: "{{ item }}"
+        state: absent
       loop:
         - "{{ __test_ca_cert }}"
         - "{{ __test_key }}"

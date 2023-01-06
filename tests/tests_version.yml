@@ -13,7 +13,7 @@
     __rsyslog_version: "0.0.0"
 
   tasks:
-    - name: default run
+    - name: Default run
       include_role:
         name: linux-system-roles.logging
 
