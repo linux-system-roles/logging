@@ -1,6 +1,7 @@
 {# SPDX-License-Identifier: GPL-3.0-only #}
 {% if not inner_item.nocomment | d(false) %}
 {{ ansible_managed | comment }}
+{{ "system_role:logging" | comment(prefix="", postfix="") }}
 {% endif %}
 {% macro print_config(element) %}
 {%   if element is mapping %}
