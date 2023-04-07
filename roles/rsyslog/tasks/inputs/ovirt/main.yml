@@ -51,4 +51,5 @@
   when:
     - __rsyslog_input.type | d() == 'ovirt'
     - ansible_selinux.mode in ["enforcing", "permissive"]
+  changed_when: true
   notify: Restart rsyslogd

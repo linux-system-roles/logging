@@ -38,3 +38,4 @@
   when: __check_systemctl_status == "true"
   failed_when: "'error' in __result.stdout or 'a RainerScript command'
     in __result.stdout or __result is failed"
+  changed_when: false
