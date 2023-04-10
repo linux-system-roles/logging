@@ -334,6 +334,7 @@
           #
           # Ansible managed
           #
+          # system_role:logging
           ruleset(name="forwards_severity_and_facility") {
               local1.info action(name="forwards_severity_and_facility"
                   type="omfwd"
