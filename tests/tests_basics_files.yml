@@ -19,11 +19,14 @@
 
   tasks:
     # TEST CASE 0
+    - name: Set firewall and selinux to true
+      set_fact:
+        logging_manage_firewall: true
+        logging_manage_selinux: true
+
     - name: "TEST CASE 0; Test the simplest configuration,
       basics input and implicit files output with logging_mark enabled"
       vars:
-        logging_manage_firewall: true
-        logging_manage_selinux: true
         logging_mark: true
         logging_mark_interval: "7200"
         logging_inputs:
@@ -73,11 +76,14 @@
       changed_when: false
       failed_when: __result.stdout != "\"7200\""
 
+    - name: Set firewall and selinux to false for cleanup
+      set_fact:
+        logging_manage_firewall: false
+        logging_manage_selinux: false
+
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
         logging_purge_confs: true
-        logging_manage_firewall: false
-        logging_manage_selinux: false
         logging_inputs: []
         logging_outputs: []
         logging_flows: []
@@ -95,11 +101,14 @@
       meta: flush_handlers
 
     # TEST CASE 1
+    - name: Set firewall true and selinux false
+      set_fact:
+        logging_manage_firewall: true
+        logging_manage_selinux: false
+
     - name: "TEST CASE 1; logging_system_log_dir -
       test switching the local log output file location"
       vars:
-        logging_manage_firewall: true
-        logging_manage_selinux: false
         logging_system_log_dir: "{{ __logging_system_log_dir }}"
         logging_outputs:
           - name: files_output0
@@ -153,11 +162,14 @@
     - name: Check ports managed by firewall and selinux
       include_tasks: tasks/check_firewall_selinux.yml
 
+    - name: Set firewall and selinux to false for cleanup
+      set_fact:
+        logging_manage_firewall: false
+        logging_manage_selinux: false
+
     - name: END TEST CASE 1; Clean up the deployed config
       vars:
         logging_purge_confs: true
-        logging_manage_firewall: false
-        logging_manage_selinux: false
         logging_inputs: []
         logging_outputs: []
         logging_flows: []
@@ -249,11 +261,14 @@
       meta: flush_handlers
 
     # TEST CASE 3
+    - name: Set firewall false and selinux true
+      set_fact:
+        logging_manage_firewall: false
+        logging_manage_selinux: true
+
     - name: "TEST CASE 3; Ensure that the role runs with parameters
       from imjournal input to two omfile and two omfwd outputs"
       vars:
-        logging_manage_firewall: false
-        logging_manage_selinux: true
         logging_purge_confs: true
         logging_outputs:
           - name: files_output0
@@ -353,11 +368,14 @@
     - name: Check ports managed by firewall and selinux
       include_tasks: tasks/check_firewall_selinux.yml
 
+    - name: Set firewall and selinux to false for cleanup
+      set_fact:
+        logging_manage_firewall: false
+        logging_manage_selinux: false
+
     - name: END TEST CASE 3; Clean up the deployed config
       vars:
         logging_purge_confs: true
-        logging_manage_firewall: false
-        logging_manage_selinux: false
         logging_inputs: []
         logging_outputs: []
         logging_flows: []

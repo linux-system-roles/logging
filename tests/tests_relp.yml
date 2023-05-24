@@ -15,11 +15,14 @@
     # TEST CASE 0
     # Note: Create a self-signed cert just for the "unit" test.
     #       In the real configuration, CA cert managed by IPA is required.
+    - name: Set firewall and selinux to true
+      set_fact:
+        logging_manage_firewall: true
+        logging_manage_selinux: true
+
     - name: "TEST CASE 0; Test the server configuration containing tls tcp,
       plain tcp and udp connection"
       vars:
-        logging_manage_firewall: true
-        logging_manage_selinux: true
         logging_certificates:
           - name: logging_cert
             dns: ['localhost', 'www.example.com']
@@ -174,11 +177,14 @@
     - name: Check ports managed by firewall and selinux
       include_tasks: tasks/check_firewall_selinux.yml
 
+    - name: Set firewall and selinux to false for cleanup
+      set_fact:
+        logging_manage_firewall: false
+        logging_manage_selinux: false
+
     - name: END TEST CASE 0; Clean up the deployed config
       vars:
         logging_purge_confs: true
-        logging_manage_firewall: false
-        logging_manage_selinux: false
         logging_inputs: []
         logging_outputs: []
         logging_flows: []
@@ -198,11 +204,14 @@
     # TEST CASE 1
     # Note: Create a self-signed cert just for the "unit" test.
     #       In the real configuration, CA cert managed by IPA is required.
+    - name: Set firewall true and selinux false
+      set_fact:
+        logging_manage_firewall: true
+        logging_manage_selinux: false
+
     - name: TEST CASE 1; Test the client configuration using tls relp
       vars:
         logging_enabled: true
-        logging_manage_firewall: true
-        logging_manage_selinux: false
         logging_certificates:
           - name: logging_cert
             dns: ['localhost', 'www.example.com']
@@ -322,11 +331,14 @@
     - name: Check ports managed by firewall and selinux
       include_tasks: tasks/check_firewall_selinux.yml
 
+    - name: Set firewall and selinux to false for cleanup
+      set_fact:
+        logging_manage_firewall: false
+        logging_manage_selinux: false
+
     - name: END TEST CASE 1; Clean up the deployed config
       vars:
         logging_purge_confs: true
-        logging_manage_firewall: false
-        logging_manage_selinux: false
         logging_inputs: []
         logging_outputs: []
         logging_flows: []
