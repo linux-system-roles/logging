@@ -1,6 +1,18 @@
 Changelog
 =========
 
+[1.11.8] - 2023-05-26
+--------------------
+
+### Bug Fixes
+
+- fix: work with ansible-core 2.15
+
+### Other Changes
+
+- docs: Consistent contributing.md for all roles - allow role specific contributing.md section
+- docs: add Collection requirements section
+
 [1.11.7] - 2023-04-13
 --------------------
 
