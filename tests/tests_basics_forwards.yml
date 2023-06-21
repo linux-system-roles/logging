@@ -39,17 +39,17 @@
           delegate_to: localhost
           register: _tmpdir
 
-        - name: Set __test_ca_cert path
+        - name: Set __tmp_ca_cert path
           set_fact:
-            __test_ca_cert: "{{ _tmpdir.path }}/{{ __test_ca_cert_name }}"
+            __tmp_ca_cert: "{{ _tmpdir.path }}/{{ __test_ca_cert_name }}"
 
-        - name: Set __test_cert path
+        - name: Set __tmp_cert path
           set_fact:
-            __test_cert: "{{ _tmpdir.path }}/{{ __test_cert_name }}"
+            __tmp_cert: "{{ _tmpdir.path }}/{{ __test_cert_name }}"
 
-        - name: Set __test_key path
+        - name: Set __tmp_key path
           set_fact:
-            __test_key: "{{ _tmpdir.path }}/{{ __test_key_name }}"
+            __tmp_key: "{{ _tmpdir.path }}/{{ __test_key_name }}"
 
         # TEST CASE 0
         - name: "TEST CASE 0; Ensure that the logs from basics inputs
@@ -328,16 +328,16 @@
             mode: '0444'
           delegate_to: localhost
           loop:
-            - "{{ __test_ca_cert }}"
-            - "{{ __test_cert }}"
-            - "{{ __test_key }}"
+            - "{{ __tmp_ca_cert }}"
+            - "{{ __tmp_cert }}"
+            - "{{ __tmp_key }}"
 
         # TEST CASE 1
         - name: "TEST CASE 1; Test the configuration, basics input
           and a forwards output with ca_cert"
           vars:
             logging_pki_files:
-              - ca_cert_src: "{{ __test_ca_cert }}"
+              - ca_cert_src: "{{ __tmp_ca_cert }}"
             logging_outputs:
               - name: forwards_severity_and_facility
                 type: forwards
@@ -454,9 +454,9 @@
           vars:
             logging_purge_confs: true
             logging_pki_files:
-              - ca_cert_src: "{{ __test_ca_cert }}"
-                cert_src: "{{ __test_cert }}"
-                private_key_src: "{{ __test_key }}"
+              - ca_cert_src: "{{ __tmp_ca_cert }}"
+                cert_src: "{{ __tmp_cert }}"
+                private_key_src: "{{ __tmp_key }}"
             logging_outputs:
               - name: forwards_severity_and_facility
                 type: forwards
@@ -578,7 +578,7 @@
               - missing cert_src"
               vars:
                 logging_pki_files:
-                  - private_key_src: "{{ __test_key }}"
+                  - private_key_src: "{{ __tmp_key }}"
                 logging_outputs:
                   - name: forwards_severity_and_facility
                     type: forwards

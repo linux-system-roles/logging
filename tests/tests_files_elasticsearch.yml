@@ -32,17 +32,17 @@
           delegate_to: localhost
           register: _tmpdir
 
-        - name: Set __test_ca_cert path
+        - name: Set __tmp_ca_cert path
           set_fact:
-            __test_ca_cert: "{{ _tmpdir.path }}/{{ __test_ca_cert_name }}"
+            __tmp_ca_cert: "{{ _tmpdir.path }}/{{ __test_ca_cert_name }}"
 
-        - name: Set __test_cert path
+        - name: Set __tmp_cert path
           set_fact:
-            __test_cert: "{{ _tmpdir.path }}/{{ __test_cert_name }}"
+            __tmp_cert: "{{ _tmpdir.path }}/{{ __test_cert_name }}"
 
-        - name: Set __test_key path
+        - name: Set __tmp_key path
           set_fact:
-            __test_key: "{{ _tmpdir.path }}/{{ __test_key_name }}"
+            __tmp_key: "{{ _tmpdir.path }}/{{ __test_key_name }}"
 
         - name: "Local certs are copied to the target host with
           the default configuration path."
@@ -53,9 +53,9 @@
             mode: '0400'
           delegate_to: localhost
           loop:
-            - "{{ __test_ca_cert }}"
-            - "{{ __test_cert }}"
-            - "{{ __test_key }}"
+            - "{{ __tmp_ca_cert }}"
+            - "{{ __tmp_cert }}"
+            - "{{ __tmp_key }}"
 
         # TEST CASE 0
         - name: "TEST CASE 0; local certs are copied to the target host
@@ -69,9 +69,9 @@
                 index_prefix: project.
                 input_type: ovirt
                 retryfailures: true
-                ca_cert_src: "{{ __test_ca_cert }}"
-                cert_src: "{{ __test_cert }}"
-                private_key_src: "{{ __test_key }}"
+                ca_cert_src: "{{ __tmp_ca_cert }}"
+                cert_src: "{{ __tmp_cert }}"
+                private_key_src: "{{ __tmp_key }}"
             logging_inputs:
               - name: files_input
                 type: files
@@ -108,9 +108,9 @@
           stat:
             path: "{{ item }}"
           loop:
-            - "/etc/rsyslog.d/{{ __test_ca_cert | basename }}"
-            - "/etc/rsyslog.d/{{ __test_cert | basename }}"
-            - "/etc/rsyslog.d/{{ __test_key | basename }}"
+            - "/etc/rsyslog.d/{{ __tmp_ca_cert | basename }}"
+            - "/etc/rsyslog.d/{{ __tmp_cert | basename }}"
+            - "/etc/rsyslog.d/{{ __tmp_key | basename }}"
 
         - name: Check certs in {{ __test_outputfiles_conf }}
           command: >-
@@ -118,14 +118,14 @@
             'tls.{{ item.key }}="{{ __certdir }}{{ item.value | basename }}"'
             {{ __test_outputfiles_conf }}
           with_dict:
-            - cacert: "{{ __test_ca_cert }}"
-            - mycert: "{{ __test_cert }}"
+            - cacert: "{{ __tmp_ca_cert }}"
+            - mycert: "{{ __tmp_cert }}"
           changed_when: false
 
         - name: Check key in {{ __test_outputfiles_conf }}
           command: >-
             /bin/grep
-            'tls.myprivkey="{{ __keydir }}{{ __test_key | basename }}"'
+            'tls.myprivkey="{{ __keydir }}{{ __tmp_key | basename }}"'
             {{ __test_outputfiles_conf }}
           changed_when: false
 
@@ -178,9 +178,9 @@
                 index_prefix: project.
                 input_type: ovirt
                 retryfailures: false
-                ca_cert_src: "{{ __test_ca_cert }}"
-                cert_src: "{{ __test_cert }}"
-                private_key_src: "{{ __test_key }}"
+                ca_cert_src: "{{ __tmp_ca_cert }}"
+                cert_src: "{{ __tmp_cert }}"
+                private_key_src: "{{ __tmp_key }}"
                 ca_cert: "{{ __test_ca_cert_target }}"
                 cert: "{{ __test_cert_target }}"
                 private_key: "{{ __test_key_target }}"
@@ -270,9 +270,9 @@
                 input_type: ovirt
                 retryfailures: false
                 tls: false
-                ca_cert_src: "{{ __test_ca_cert }}"
-                cert_src: "{{ __test_cert }}"
-                private_key_src: "{{ __test_key }}"
+                ca_cert_src: "{{ __tmp_ca_cert }}"
+                cert_src: "{{ __tmp_cert }}"
+                private_key_src: "{{ __tmp_key }}"
             logging_inputs:
               - name: files_input
                 type: files
@@ -357,8 +357,8 @@
                     retryfailures: false
                     ca_cert: /etc/rsyslog.d/ca_cert.crt
                     private_key: /etc/rsyslog.d/key.pem
-                    cert_src: "{{ __test_cert }}"
-                    private_key_src: "{{ __test_key }}"
+                    cert_src: "{{ __tmp_cert }}"
+                    private_key_src: "{{ __tmp_key }}"
                 logging_inputs:
                   - name: files_input
                     type: files
