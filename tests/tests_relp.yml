@@ -1,6 +1,8 @@
 ---
 - name: Test the server/client configuration using tls relp
   hosts: all
+  tags:
+    - tests::uses_selinux
   vars:
     __test_cert_name: logging_cert
     __test_ca_cert: "/etc/pki/tls/certs/{{ __test_cert_name }}.crt"
