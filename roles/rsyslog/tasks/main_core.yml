@@ -197,9 +197,9 @@
 
     - name: Run input sub-tasks
       include_tasks:
-        file: "{{ tasks }}"
+        file: "{{ task_file }}"
       vars:
-        tasks: "{{ role_path }}/tasks/inputs/{{ input_item.type }}/main.yml"
+        task_file: "{{ role_path }}/tasks/inputs/{{ input_item.type }}/main.yml"
         __rsyslog_input: "{{ input_item }}"
       loop: '{{ rsyslog_inputs | sort(attribute="type") }}'
       loop_control:
@@ -228,9 +228,10 @@
 
     - name: Run output sub-tasks
       include_tasks:
-        file: "{{ tasks }}"
+        file: "{{ task_file }}"
       vars:
-        tasks: "{{ role_path }}/tasks/outputs/{{ output_item.type }}/main.yml"
+        task_file: >-
+          {{ role_path }}/tasks/outputs/{{ output_item.type }}/main.yml
         __rsyslog_output: "{{ output_item }}"
       loop: "{{ rsyslog_outputs }}"
       loop_control:
