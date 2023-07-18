@@ -31,25 +31,19 @@
     - __rsyslog_input.subtype | d('') in ['collectd','engine','vdsm']
 
 - name: Ensure collectd port is allowed for rsyslogd to listen to
-  shell: |-
-    set -euo pipefail
-    sport={{ __rsyslog_input.rsyslog_read_collectd_port | d(44514) }}
-    plist=$( semanage port -l | grep "$sport" || : )
-    if [ "$plist" = "" ]; then
-      semanage port -a -t syslogd_port_t -p tcp "$sport"
-    else
-      elems=()
-      for pl in "$plist"
-      do
-        elems+=($pl)
-      done
-      if [ "${elems[0]}" != "syslogd_port_t" -o \
-           "${elems[1]}" != "tcp" ]; then
-        semanage port -a -t syslogd_port_t -p tcp "$sport"
-      fi
-    fi
-  when:
-    - __rsyslog_input.type | d() == 'ovirt'
-    - ansible_selinux.mode in ["enforcing", "permissive"]
-  changed_when: true
+  include_role:
+    name: fedora.linux_system_roles.selinux
+  vars:
+    selinux_ports:
+      - ports: "{{ __rsyslog_input.rsyslog_read_collectd_port | d(44514) }}"
+        proto: tcp
+        setype: syslogd_port_t
+        state: present
+        local: true
+  when: __rsyslog_input.type | d('') == 'ovirt'
+
+- name: Notify rsyslogd restart
+  debug:
+    msg: Notify rsyslogd restart
   notify: Restart rsyslogd
+  when: __rsyslog_input.type | d('') == 'ovirt'
