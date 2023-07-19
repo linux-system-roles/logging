@@ -1,6 +1,22 @@
 Changelog
 =========
 
+[1.11.9] - 2023-07-19
+--------------------
+
+### Bug Fixes
+
+- fix: facts being gathered unnecessarily (#341)
+
+### Other Changes
+
+- ci: Add pull request template and run commitlint on PR title only (#335)
+- ci: Rename commitlint to PR title Lint, echo PR titles from env var (#336)
+- ci: Add tests::uses_selinux tag (#338)
+- ci: ansible-lint - ignore var-naming[no-role-prefix] (#339)
+- refactor: ansible-lint - vars cannot be reserved names (#340)
+- refactor: Use selinux role instead of selinux cli (#342)
+
 [1.11.8] - 2023-05-26
 --------------------
 
