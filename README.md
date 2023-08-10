@@ -384,17 +384,13 @@ When TLS connection is configured, `ca_cert_src` and/or `ca_cert` is required.
 To configure the certificate of the logging system, `cert_src` and/or `cert` is required.
 To configure the private key of the logging system, `private_key_src` and/or `private_key` is required.
 
-```yaml
-  ca_cert_src:     location of the ca_cert on the control host; if given, the file is copied to the managed host.
-  cert_src:        location of the cert on the control host; if given, the file is copied to the managed host.
-  private_key_src: location of the key on the control host; if given, the file is copied to the managed host.
-  ca_cert:     path to be deployed on the managed host; the path is also used in the rsyslog config.
-               default to /etc/pki/tls/certs/<ca_cert_src basename>
-  cert:        ditto
-               default to /etc/pki/tls/certs/<cert_src basename>
-  private_key: ditto
-               default to /etc/pki/tls/private/<private_key_src basename>
-```
+* `ca_cert_src`: location of the ca_cert on the control host; if given, the file is copied to the managed host.
+* `cert_src`: location of the cert on the control host; if given, the file is copied to the managed host.
+* `private_key_src`: location of the key on the control host; if given, the file is copied to the managed host.
+* `ca_cert`: path to be deployed on the managed host; the path is also used in the rsyslog config.
+  default to /etc/pki/tls/certs/<ca_cert_src basename>
+* `cert`: ditto - default to /etc/pki/tls/certs/<cert_src basename>
+* `private_key`: ditto - default to /etc/pki/tls/private/<private_key_src basename>
 
 #### logging_domain
 
