@@ -1,4 +1,4 @@
-## Rsyslog Provider
+# Rsyslog Provider
 
 This sub-tree contains the rsyslog implementation.
 
