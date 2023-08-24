@@ -1,6 +1,8 @@
 # logging
 
-![CI Testing](https://github.com/linux-system-roles/logging/workflows/tox/badge.svg)
+[![ansible-lint.yml](https://github.com/linux-system-roles/logging/actions/workflows/ansible-lint.yml/badge.svg)](https://github.com/linux-system-roles/logging/actions/workflows/ansible-lint.yml) [![ansible-test.yml](https://github.com/linux-system-roles/logging/actions/workflows/ansible-test.yml/badge.svg)](https://github.com/linux-system-roles/logging/actions/workflows/ansible-test.yml) [![markdownlint.yml](https://github.com/linux-system-roles/logging/actions/workflows/markdownlint.yml/badge.svg)](https://github.com/linux-system-roles/logging/actions/workflows/markdownlint.yml) [![woke.yml](https://github.com/linux-system-roles/logging/actions/workflows/woke.yml/badge.svg)](https://github.com/linux-system-roles/logging/actions/workflows/woke.yml)
+
+---
 
 ## Background
 
