@@ -2,8 +2,6 @@
 
 [![ansible-lint.yml](https://github.com/linux-system-roles/logging/actions/workflows/ansible-lint.yml/badge.svg)](https://github.com/linux-system-roles/logging/actions/workflows/ansible-lint.yml) [![ansible-test.yml](https://github.com/linux-system-roles/logging/actions/workflows/ansible-test.yml/badge.svg)](https://github.com/linux-system-roles/logging/actions/workflows/ansible-test.yml) [![markdownlint.yml](https://github.com/linux-system-roles/logging/actions/workflows/markdownlint.yml/badge.svg)](https://github.com/linux-system-roles/logging/actions/workflows/markdownlint.yml) [![woke.yml](https://github.com/linux-system-roles/logging/actions/workflows/woke.yml/badge.svg)](https://github.com/linux-system-roles/logging/actions/workflows/woke.yml)
 
----
-
 ## Background
 
 Logging role is an abstract layer for provisioning and configuring the logging system. Currently, rsyslog is the only supported provider.
