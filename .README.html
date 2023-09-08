@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<!--
+==============================================================================
+           "GitHub HTML5 Pandoc Template" v2.2 — by Tristano Ajmone
+==============================================================================
+Copyright © Tristano Ajmone, 2017-2020, MIT License (MIT). Project's home:
+
+- https://github.com/tajmone/pandoc-goodies
+
+The CSS in this template reuses source code taken from the following projects:
+
+- GitHub Markdown CSS: Copyright © Sindre Sorhus, MIT License (MIT):
+  https://github.com/sindresorhus/github-markdown-css
+
+- Primer CSS: Copyright © 2016-2017 GitHub Inc., MIT License (MIT):
+  http://primercss.io/
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The MIT License
+
+Copyright (c) Tristano Ajmone, 2017-2020 (github.com/tajmone/pandoc-goodies)
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
+Copyright (c) 2017 GitHub Inc.
+
+"GitHub Pandoc HTML5 Template" is Copyright (c) Tristano Ajmone, 2017-2020,
+released under the MIT License (MIT); it contains readaptations of substantial
+portions of the following third party softwares:
+
+(1) "GitHub Markdown CSS", Copyright (c) Sindre Sorhus, MIT License (MIT).
+(2) "Primer CSS", Copyright (c) 2016 GitHub Inc., MIT License (MIT).
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+==============================================================================-->
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>logging</title>
+  <style type="text/css">
+@charset "UTF-8";.markdown-body{-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%;color:#24292e;font-family:-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";font-size:16px;line-height:1.5;word-wrap:break-word;box-sizing:border-box;min-width:200px;margin:0 auto;padding:45px}.markdown-body a{color:#0366d6;background-color:transparent;text-decoration:none;-webkit-text-decoration-skip:objects}.markdown-body a:active,.markdown-body a:hover{outline-width:0}.markdown-body a:hover{text-decoration:underline}.markdown-body a:not([href]){color:inherit;text-decoration:none}.markdown-body strong{font-weight:600}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{margin-top:24px;margin-bottom:16px;font-weight:600;line-height:1.25}.markdown-body h1{font-size:2em;margin:.67em 0;padding-bottom:.3em;border-bottom:1px solid #eaecef}.markdown-body h2{padding-bottom:.3em;font-size:1.5em;border-bottom:1px solid #eaecef}.markdown-body h3{font-size:1.25em}.markdown-body h4{font-size:1em}.markdown-body h5{font-size:.875em}.markdown-body h6{font-size:.85em;color:#6a737d}.markdown-body img{border-style:none}.markdown-body svg:not(:root){overflow:hidden}.markdown-body hr{box-sizing:content-box;height:.25em;margin:24px 0;padding:0;overflow:hidden;background-color:#e1e4e8;border:0}.markdown-body hr::before{display:table;content:""}.markdown-body hr::after{display:table;clear:both;content:""}.markdown-body input{margin:0;overflow:visible;font:inherit;font-family:inherit;font-size:inherit;line-height:inherit}.markdown-body [type=checkbox]{box-sizing:border-box;padding:0}.markdown-body *{box-sizing:border-box}.markdown-body blockquote{margin:0}.markdown-body ol,.markdown-body ul{padding-left:2em}.markdown-body ol ol,.markdown-body ul ol{list-style-type:lower-roman}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:0;margin-bottom:0}.markdown-body ol ol ol,.markdown-body ol ul ol,.markdown-body ul ol ol,.markdown-body ul ul ol{list-style-type:lower-alpha}.markdown-body li>p{margin-top:16px}.markdown-body li+li{margin-top:.25em}.markdown-body dd{margin-left:0}.markdown-body dl{padding:0}.markdown-body dl dt{padding:0;margin-top:16px;font-size:1em;font-style:italic;font-weight:600}.markdown-body dl dd{padding:0 16px;margin-bottom:16px}.markdown-body code{font-family:SFMono-Regular,Consolas,"Liberation Mono",Menlo,Courier,monospace}.markdown-body pre{font:12px SFMono-Regular,Consolas,"Liberation Mono",Menlo,Courier,monospace;word-wrap:normal}.markdown-body blockquote,.markdown-body dl,.markdown-body ol,.markdown-body p,.markdown-body pre,.markdown-body table,.markdown-body ul{margin-top:0;margin-bottom:16px}.markdown-body blockquote{padding:0 1em;color:#6a737d;border-left:.25em solid #dfe2e5}.markdown-body blockquote>:first-child{margin-top:0}.markdown-body blockquote>:last-child{margin-bottom:0}.markdown-body table{display:block;width:100%;overflow:auto;border-spacing:0;border-collapse:collapse}.markdown-body table th{font-weight:600}.markdown-body table td,.markdown-body table th{padding:6px 13px;border:1px solid #dfe2e5}.markdown-body table tr{background-color:#fff;border-top:1px solid #c6cbd1}.markdown-body table tr:nth-child(2n){background-color:#f6f8fa}.markdown-body img{max-width:100%;box-sizing:content-box;background-color:#fff}.markdown-body code{padding:.2em 0;margin:0;font-size:85%;background-color:rgba(27,31,35,.05);border-radius:3px}.markdown-body code::after,.markdown-body code::before{letter-spacing:-.2em;content:" "}.markdown-body pre>code{padding:0;margin:0;font-size:100%;word-break:normal;white-space:pre;background:0 0;border:0}.markdown-body .highlight{margin-bottom:16px}.markdown-body .highlight pre{margin-bottom:0;word-break:normal}.markdown-body .highlight pre,.markdown-body pre{padding:16px;overflow:auto;font-size:85%;line-height:1.45;background-color:#f6f8fa;border-radius:3px}.markdown-body pre code{display:inline;max-width:auto;padding:0;margin:0;overflow:visible;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}.markdown-body pre code::after,.markdown-body pre code::before{content:normal}.markdown-body .full-commit .btn-outline:not(:disabled):hover{color:#005cc5;border-color:#005cc5}.markdown-body kbd{box-shadow:inset 0 -1px 0 #959da5;display:inline-block;padding:3px 5px;font:11px/10px SFMono-Regular,Consolas,"Liberation Mono",Menlo,Courier,monospace;color:#444d56;vertical-align:middle;background-color:#fcfcfc;border:1px solid #c6cbd1;border-bottom-color:#959da5;border-radius:3px;box-shadow:inset 0 -1px 0 #959da5}.markdown-body :checked+.radio-label{position:relative;z-index:1;border-color:#0366d6}.markdown-body .task-list-item{list-style-type:none}.markdown-body .task-list-item+.task-list-item{margin-top:3px}.markdown-body .task-list-item input{margin:0 .2em .25em -1.6em;vertical-align:middle}.markdown-body::before{display:table;content:""}.markdown-body::after{display:table;clear:both;content:""}.markdown-body>:first-child{margin-top:0!important}.markdown-body>:last-child{margin-bottom:0!important}.Alert,.Error,.Note,.Success,.Warning{padding:11px;margin-bottom:24px;border-style:solid;border-width:1px;border-radius:4px}.Alert p,.Error p,.Note p,.Success p,.Warning p{margin-top:0}.Alert p:last-child,.Error p:last-child,.Note p:last-child,.Success p:last-child,.Warning p:last-child{margin-bottom:0}.Alert{color:#246;background-color:#e2eef9;border-color:#bac6d3}.Warning{color:#4c4a42;background-color:#fff9ea;border-color:#dfd8c2}.Error{color:#911;background-color:#fcdede;border-color:#d2b2b2}.Success{color:#22662c;background-color:#e2f9e5;border-color:#bad3be}.Note{color:#2f363d;background-color:#f6f8fa;border-color:#d5d8da}.Alert h1,.Alert h2,.Alert h3,.Alert h4,.Alert h5,.Alert h6{color:#246;margin-bottom:0}.Warning h1,.Warning h2,.Warning h3,.Warning h4,.Warning h5,.Warning h6{color:#4c4a42;margin-bottom:0}.Error h1,.Error h2,.Error h3,.Error h4,.Error h5,.Error h6{color:#911;margin-bottom:0}.Success h1,.Success h2,.Success h3,.Success h4,.Success h5,.Success h6{color:#22662c;margin-bottom:0}.Note h1,.Note h2,.Note h3,.Note h4,.Note h5,.Note h6{color:#2f363d;margin-bottom:0}.Alert h1:first-child,.Alert h2:first-child,.Alert h3:first-child,.Alert h4:first-child,.Alert h5:first-child,.Alert h6:first-child,.Error h1:first-child,.Error h2:first-child,.Error h3:first-child,.Error h4:first-child,.Error h5:first-child,.Error h6:first-child,.Note h1:first-child,.Note h2:first-child,.Note h3:first-child,.Note h4:first-child,.Note h5:first-child,.Note h6:first-child,.Success h1:first-child,.Success h2:first-child,.Success h3:first-child,.Success h4:first-child,.Success h5:first-child,.Success h6:first-child,.Warning h1:first-child,.Warning h2:first-child,.Warning h3:first-child,.Warning h4:first-child,.Warning h5:first-child,.Warning h6:first-child{margin-top:0}h1.title,p.subtitle{text-align:center}h1.title.followed-by-subtitle{margin-bottom:0}p.subtitle{font-size:1.5em;font-weight:600;line-height:1.25;margin-top:0;margin-bottom:16px;padding-bottom:.3em}div.line-block{white-space:pre-line}
+  </style>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<article class="markdown-body">
+<header>
+<h1 class="title">logging</h1>
+</header>
+<hr>
+<nav id="TOC">
+<h1 class="toc-title">Contents</h1>
+<ul>
+<li><a href="#background" id="toc-background">Background</a></li>
+<li><a href="#requirements" id="toc-requirements">Requirements</a>
+<ul>
+<li><a href="#collection-requirements"
+id="toc-collection-requirements">Collection requirements</a></li>
+</ul></li>
+<li><a href="#definitions" id="toc-definitions">Definitions</a></li>
+<li><a href="#logging-configuration-overview"
+id="toc-logging-configuration-overview">Logging Configuration
+Overview</a></li>
+<li><a href="#variables" id="toc-variables">Variables</a>
+<ul>
+<li><a href="#logging_inputs-options"
+id="toc-logging_inputs-options">Logging_inputs options</a>
+<ul>
+<li><a href="#logging_inputs-common-keys"
+id="toc-logging_inputs-common-keys">logging_inputs common keys</a></li>
+<li><a href="#logging_inputs-basics-type"
+id="toc-logging_inputs-basics-type">logging_inputs basics type</a></li>
+<li><a href="#logging_inputs-files-type"
+id="toc-logging_inputs-files-type">logging_inputs files type</a></li>
+<li><a href="#logging_inputs-ovirt-type"
+id="toc-logging_inputs-ovirt-type">logging_inputs ovirt type</a></li>
+<li><a href="#logging_inputs-relp-type"
+id="toc-logging_inputs-relp-type">logging_inputs relp type</a></li>
+<li><a href="#logging_inputs-remote-type"
+id="toc-logging_inputs-remote-type">logging_inputs remote type</a></li>
+</ul></li>
+<li><a href="#logging_outputs-options"
+id="toc-logging_outputs-options">Logging_outputs options</a>
+<ul>
+<li><a href="#logging_outputs-common-keys"
+id="toc-logging_outputs-common-keys">logging_outputs common
+keys</a></li>
+<li><a href="#logging_outputs-elasticsearch-type"
+id="toc-logging_outputs-elasticsearch-type">logging_outputs
+elasticsearch type</a></li>
+<li><a href="#logging_outputs-files-type"
+id="toc-logging_outputs-files-type">logging_outputs files type</a></li>
+<li><a href="#logging_outputs-forwards-type"
+id="toc-logging_outputs-forwards-type">logging_outputs forwards
+type</a></li>
+<li><a href="#logging_outputs-relp-type"
+id="toc-logging_outputs-relp-type">logging_outputs relp type</a></li>
+<li><a href="#logging_outputs-remote_files-type"
+id="toc-logging_outputs-remote_files-type">logging_outputs remote_files
+type</a></li>
+</ul></li>
+<li><a href="#logging_flows-options"
+id="toc-logging_flows-options">Logging_flows options</a></li>
+<li><a href="#security-options" id="toc-security-options">Security
+options</a>
+<ul>
+<li><a href="#logging_pki_files"
+id="toc-logging_pki_files">logging_pki_files</a></li>
+<li><a href="#logging_domain"
+id="toc-logging_domain">logging_domain</a></li>
+</ul></li>
+<li><a href="#server-performance-optimization-options"
+id="toc-server-performance-optimization-options">Server performance
+optimization options</a></li>
+<li><a href="#other-options" id="toc-other-options">Other
+options</a></li>
+<li><a href="#update-and-delete" id="toc-update-and-delete">Update and
+Delete</a></li>
+</ul></li>
+<li><a href="#configuration-examples"
+id="toc-configuration-examples">Configuration Examples</a>
+<ul>
+<li><a href="#standalone-configuration"
+id="toc-standalone-configuration">Standalone configuration</a></li>
+<li><a href="#client-configuration" id="toc-client-configuration">Client
+configuration</a></li>
+<li><a href="#server-configuration" id="toc-server-configuration">Server
+configuration</a></li>
+<li><a href="#client-configuration-with-relp"
+id="toc-client-configuration-with-relp">Client configuration with
+Relp</a></li>
+<li><a href="#server-configuration-with-relp"
+id="toc-server-configuration-with-relp">Server configuration with
+Relp</a></li>
+<li><a href="#port-managed-by-firewall-and-selinux-role"
+id="toc-port-managed-by-firewall-and-selinux-role">Port Managed by
+Firewall and SELinux Role</a></li>
+</ul></li>
+<li><a href="#providers" id="toc-providers">Providers</a></li>
+<li><a href="#tests" id="toc-tests">Tests</a></li>
+</ul>
+</nav>
+<hr>
+<h1 id="background">Background</h1>
+<p>Logging role is an abstract layer for provisioning and configuring
+the logging system. Currently, rsyslog is the only supported
+provider.</p>
+<p>In the nature of logging, there are multiple ways to read logs and
+multiple ways to output them. For instance, the logging system may read
+logs from local files, or read them from systemd/journal, or receive
+them from the other logging system over the network. Then, the logs may
+be stored in the local files in the /var/log directory, or sent to
+Elasticsearch, or forwarded to other logging system. The combination
+between the inputs and the outputs needs to be flexible. For instance,
+you may want to inputs from journal stored just in the local file, while
+inputs read from files stored in the local log files as well as
+forwarded to the other logging system.</p>
+<p>To satisfy such requirements, logging role introduced 3 primary
+variables <code>logging_inputs</code>, <code>logging_outputs</code>, and
+<code>logging_flows</code>. The inputs are represented in the list of
+<code>logging_inputs</code> dictionary, the outputs are in the list of
+<code>logging_outputs</code> dictionary, and the relationship between
+them are defined as a list of <code>logging_flows</code> dictionary. The
+details are described in <a
+href="#logging-configuration-overview">Logging Configuration
+Overview</a>.</p>
+<h1 id="requirements">Requirements</h1>
+<p>This role is supported on RHEL-7+, CentOS Stream-8+ and Fedora
+distributions.</p>
+<h2 id="collection-requirements">Collection requirements</h2>
+<p>The role requires the <code>firewall</code> role and the
+<code>selinux</code> role from the
+<code>fedora.linux_system_roles</code> collection, if
+<code>logging_manage_firewall</code> and
+<code>logging_manage_selinux</code> is set to true, respectively.
+(Please see also the variables in the <a
+href="#other-options"><code>Other options</code></a> section.)</p>
+<p>If the <code>logging</code> is a role from the
+<code>fedora.linux_system_roles</code> collection or from the Fedora RPM
+package, the requirement is already satisfied.</p>
+<p>Otherwise, please run the following command line to install the
+collection.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ansible-galaxy</span> collection install <span class="at">-r</span> meta/collection-requirements.yml</span></code></pre></div>
+<h1 id="definitions">Definitions</h1>
+<ul>
+<li><code>logging_inputs</code> - List of logging inputs dictionary to
+specify input types.
+<ul>
+<li><code>basics</code> - basic inputs configuring inputs from systemd
+journal or unix socket.</li>
+<li><code>files</code> - files inputs configuring inputs from local
+files.</li>
+<li><code>remote</code> - remote inputs configuring inputs from the
+other logging system over network.</li>
+<li><code>ovirt</code> - ovirt inputs configuring inputs from the oVirt
+system.</li>
+</ul></li>
+<li><code>logging_outputs</code> - List of logging outputs dictionary to
+specify output types.
+<ul>
+<li><code>elasticsearch</code> - elasticsearch outputs configuring
+outputs to elasticsearch. It is available only when the input is
+<code>ovirt</code>.</li>
+<li><code>files</code> - files outputs configuring outputs to the local
+files.</li>
+<li><code>forwards</code> - forwards outputs configuring outputs to the
+other logging system.</li>
+<li><code>remote_files</code> - remote files outputs configuring outputs
+from the other logging system to the local files.</li>
+</ul></li>
+<li><code>logging_flows</code> - List of logging flows dictionary to
+define relationships between logging inputs and outputs.</li>
+<li><a href="https://www.rsyslog.com/"><code>Rsyslog</code></a> - The
+logging role default log provider used for log processing.</li>
+<li><a href="https://www.elastic.co/"><code>Elasticsearch</code></a> -
+Elasticsearch is a distributed, search and analytic engine for all types
+of data. One of the supported outputs in the logging role.</li>
+</ul>
+<h1 id="logging-configuration-overview">Logging Configuration
+Overview</h1>
+<p>Logging role allows to have variables <code>logging_inputs</code>,
+<code>logging_outputs</code>, and <code>logging_flows</code> with
+additional options to configure logging system such as
+<code>rsyslog</code>.</p>
+<p>Currently, the logging role supports four types of logging inputs:
+<code>basics</code>, <code>files</code>, <code>ovirt</code>, and
+<code>remote</code>. And four types of outputs:
+<code>elasticsearch</code>, <code>files</code>, <code>forwards</code>,
+and <code>remote_files</code>. To deploy configuration files with these
+inputs and outputs, specify the inputs as <code>logging_inputs</code>
+and the outputs as <code>logging_outputs</code>. To define the flows
+from inputs to outputs, use <code>logging_flows</code>. The
+<code>logging_flows</code> has three keys <code>name</code>,
+<code>inputs</code>, and <code>outputs</code>, where <code>inputs</code>
+is a list of <code>logging_inputs name</code> values and
+<code>outputs</code> is a list of <code>logging_outputs name</code>
+values.</p>
+<p>This is a schematic logging configuration to show log messages from
+input_nameA are passed to output_name0 and output_name1; log messages
+from input_nameB are passed only to output_name1.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> a schematic logging configuration</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">hosts</span><span class="kw">:</span><span class="at"> all</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">roles</span><span class="kw">:</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> linux-system-roles.logging</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">vars</span><span class="kw">:</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_inputs</span><span class="kw">:</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> input_nameA</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> input_typeA</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> input_nameB</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> input_typeB</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_outputs</span><span class="kw">:</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> output_name0</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> output_type0</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> output_name1</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> output_type1</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_flows</span><span class="kw">:</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> flow_nameX</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">inputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">input_nameA</span><span class="kw">]</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">outputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">output_name0</span><span class="kw">,</span><span class="at"> output_name1</span><span class="kw">]</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> flow_nameY</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">inputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">input_nameB</span><span class="kw">]</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">outputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">output_name1</span><span class="kw">]</span></span></code></pre></div>
+<h1 id="variables">Variables</h1>
+<h2 id="logging_inputs-options">Logging_inputs options</h2>
+<p><code>logging_inputs</code>: A list of the following dictionaries to
+configure inputs.</p>
+<h3 id="logging_inputs-common-keys">logging_inputs common keys</h3>
+<ul>
+<li><code>name</code>: Unique name of the input. Used in the
+<code>logging_flows</code> inputs list and a part of the generated
+config filename.</li>
+<li><code>type</code>: Type of the input element. Currently,
+<code>basics</code>, <code>files</code>, <code>ovirt</code>, and
+<code>remote</code> are supported. The <code>type</code> is used to
+specify a task type which corresponds to a directory name in
+roles/rsyslog/{tasks,vars}/inputs/.</li>
+<li><code>state</code>: State of the configuration file.
+<code>present</code> or <code>absent</code>. Default to
+<code>present</code>.</li>
+</ul>
+<h3 id="logging_inputs-basics-type">logging_inputs basics type</h3>
+<p><code>basics</code> input supports reading logs from systemd journal
+or systemd unix socket.</p>
+<p>Available options:</p>
+<ul>
+<li><code>kernel_message</code>: Load <code>imklog</code> if set to
+<code>true</code>. Default to <code>false</code>.</li>
+<li><code>use_imuxsock</code>: Use <code>imuxsock</code> instead of
+<code>imjournal</code>. Default to <code>false</code>.</li>
+<li><code>ratelimit_burst</code>: Maximum number of messages that can be
+emitted within ratelimit_interval. Default to <code>20000</code> if
+use_imuxsock is false. Default to <code>200</code> if use_imuxsock is
+true.</li>
+<li><code>ratelimit_interval</code>: Interval to evaluate
+ratelimit_burst. Default to <code>600</code> seconds if use_imuxsock is
+false. Default to <code>0</code> if use_imuxsock is true. 0 indicates
+ratelimiting is turned off.</li>
+<li><code>persist_state_interval</code>: Journal state is persisted
+every value messages. Default to <code>10</code>. Effective only when
+use_imuxsock is false.</li>
+</ul>
+<h3 id="logging_inputs-files-type">logging_inputs files type</h3>
+<p><code>files</code> input supports reading logs from the local
+files.</p>
+<p>Available options:</p>
+<ul>
+<li><code>input_log_path</code>: File name to be read by the imfile
+plugin. The value should be full path. Wildcard '*' is allowed in the
+path. Default to <code>/var/log/containers/*.log</code>.
+<code>facility</code>: Facility to filter the inputs from the files.
+<code>severity</code>: Severity to filter the inputs from the files.
+<code>startmsg_regex</code>: The regular expression that matches the
+start part of a message. <code>endmsg_regex</code>: The regular
+expression that matches the last part of a message.</li>
+</ul>
+<h3 id="logging_inputs-ovirt-type">logging_inputs ovirt type</h3>
+<p><code>ovirt</code> input supports oVirt specific inputs.</p>
+<p>Available options:</p>
+<ul>
+<li><code>subtype</code>: ovirt input subtype. Value is one of
+<code>engine</code>, <code>collectd</code>, and <code>vdsm</code>.</li>
+<li><code>ovirt_env_name</code>: ovirt environment name. Default to
+<code>engine</code>.</li>
+<li><code>ovirt_env_uuid</code>: ovirt uuid. Default to none.</li>
+</ul>
+<p>Available options for engine and vdsm:</p>
+<ul>
+<li><code>ovirt_elasticsearch_index_prefix</code>: Index prefix for
+elasticsearch. Default to <code>project.ovirt-logs</code>.</li>
+<li><code>ovirt_engine_fqdn</code>: ovirt engine fqdn. Default to
+none.</li>
+<li><code>ovirt_input_file</code>: ovirt input file. Default to
+<code>/var/log/ovirt-engine/test-engine.log</code> for
+<code>engine</code>; default to <code>/var/log/vdsm/vdsm.log</code> for
+<code>vdsm</code>.</li>
+<li><code>ovirt_vds_cluster_name</code>: vds cluster name. Default to
+none.</li>
+</ul>
+<p>Available options for collectd:</p>
+<ul>
+<li><code>ovirt_collectd_port</code>: collectd port number. Default to
+<code>44514</code>.</li>
+<li><code>ovirt_elasticsearch_index_prefix</code>: Index prefix for
+elasticsearch. Default to <code>project.ovirt-metrics</code>.</li>
+</ul>
+<h3 id="logging_inputs-relp-type">logging_inputs relp type</h3>
+<p><code>relp</code> input supports receiving logs from the remote
+logging system over the network using relp.</p>
+<p>Available options:</p>
+<ul>
+<li><code>port</code>: Port number Relp is listening to. Default to
+<code>20514</code>. See also <a
+href="#port-managed-by-firewall-and-selinux-role">Port Managed by
+Firewall and SELinux Role</a>.</li>
+<li><code>tls</code>: If true, encrypt the connection with TLS. You must
+provide key/certificates and triplets {<code>ca_cert</code>,
+<code>cert</code>, <code>private_key</code>} and/or
+{<code>ca_cert_src</code>, <code>cert_src</code>,
+<code>private_key_src</code>}. Default to <code>true</code>.</li>
+<li><code>ca_cert</code>: Path to CA cert to configure Relp with tls.
+Default to <code>/etc/pki/tls/certs/basename of ca_cert_src</code>.</li>
+<li><code>cert</code>: Path to cert to configure Relp with tls. Default
+to <code>/etc/pki/tls/certs/basename of cert_src</code>.</li>
+<li><code>private_key</code>: Path to key to configure Relp with tls.
+Default to
+<code>/etc/pki/tls/private/basename of private_key_src</code>.</li>
+<li><code>ca_cert_src</code>: Local CA cert file path which is copied to
+the target host. If <code>ca_cert</code> is specified, it is copied to
+the location. Otherwise, to logging_config_dir.</li>
+<li><code>cert_src</code>: Local cert file path which is copied to the
+target host. If <code>cert</code> is specified, it is copied to the
+location. Otherwise, to logging_config_dir.</li>
+<li><code>private_key_src</code>: Local key file path which is copied to
+the target host. If <code>private_key</code> is specified, it is copied
+to the location. Otherwise, to logging_config_dir.</li>
+<li><code>pki_authmode</code>: Specifying the authentication mode.
+<code>name</code> or <code>fingerprint</code> is accepted. Default to
+<code>name</code>.</li>
+<li><code>permitted_clients</code>: List of hostnames, IP addresses,
+fingerprints(sha1), and wildcard DNS domains which will be allowed by
+the <code>logging</code> server to connect and send logs over TLS.
+Default to <code>['*.{{ logging_domain }}']</code></li>
+</ul>
+<h3 id="logging_inputs-remote-type">logging_inputs remote type</h3>
+<p><code>remote</code> input supports receiving logs from the remote
+logging system over the network.</p>
+<p>Available options:</p>
+<ul>
+<li><code>udp_ports</code>: List of UDP port numbers to listen. If set,
+the <code>remote</code> input listens on the UDP ports. No defaults. If
+both <code>udp_ports</code> and <code>tcp_ports</code> are set in a
+<code>remote</code> input item, <code>udp_ports</code> is used and
+<code>tcp_ports</code> is dropped. See also <a
+href="#port-managed-by-firewall-and-selinux-role">Port Managed by
+Firewall and SELinux Role</a>.</li>
+<li><code>tcp_ports</code>: List of TCP port numbers to listen. If set,
+the <code>remote</code> input listens on the TCP ports. Default to
+<code>[514]</code>. If both <code>udp_ports</code> and
+<code>tcp_ports</code> are set in a <code>remote</code> input item,
+<code>udp_ports</code> is used and <code>tcp_ports</code> is dropped. If
+both <code>udp_ports</code> and <code>tcp_ports</code> are not set in a
+<code>remote</code> input item, <code>tcp_ports: [514]</code> is added
+to the item. See also <a
+href="#port-managed-by-firewall-and-selinux-role">Port Managed by
+Firewall and SELinux Role</a>.</li>
+<li><code>tls</code>: Set to <code>true</code> to encrypt the connection
+using the default TLS implementation used by the provider. Default to
+<code>false</code>.</li>
+<li><code>pki_authmode</code>: Specifying the default network driver
+authentication mode. <code>x509/name</code>,
+<code>x509/fingerprint</code>, or <code>anon</code> is accepted. Default
+to <code>x509/name</code>.</li>
+<li><code>permitted_clients</code>: List of hostnames, IP addresses,
+fingerprints(sha1), and wildcard DNS domains which will be allowed by
+the <code>logging</code> server to connect and send logs over TLS.
+Default to <code>['*.{{ logging_domain }}']</code></li>
+</ul>
+<p><strong>Note:</strong> There are 3 types of items in the remote type
+- udp, plain tcp and tls tcp. The udp type configured using
+<code>udp_ports</code>; the plain tcp type is configured using
+<code>tcp_ports</code> without <code>tls</code> or with
+<code>tls: false</code>; the tls tcp type is configured using
+<code>tcp_ports</code> with <code>tls: true</code> at the same time.
+Please note there might be only one instance of each of the three types.
+E.g., if there are 2 <code>udp</code> type items, it fails to
+deploy.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">  # Valid configuration example</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> remote_udp</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">type</span><span class="kw">:</span><span class="at"> remote</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">udp_ports</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="dv">514</span><span class="kw">,</span><span class="at"> ...</span><span class="kw">]</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> remote_ptcp</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">type</span><span class="kw">:</span><span class="at"> remote</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tcp_ports</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="dv">514</span><span class="kw">,</span><span class="at"> ...</span><span class="kw">]</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> remote_tcp</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">type</span><span class="kw">:</span><span class="at"> remote</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tcp_ports</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="dv">6514</span><span class="kw">,</span><span class="at"> ...</span><span class="kw">]</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tls</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">pki_authmode</span><span class="kw">:</span><span class="at"> x509/name</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">permitted_clients</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&#39;*.example.com&#39;</span><span class="kw">]</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">  # Invalid configuration example 1; duplicated udp</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> remote_udp0</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">type</span><span class="kw">:</span><span class="at"> remote</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">udp_ports</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="dv">514</span><span class="kw">]</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> remote_udp1</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">type</span><span class="kw">:</span><span class="at"> remote</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">udp_ports</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="dv">1514</span><span class="kw">]</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">  # Invalid configuration example 2; duplicated tcp</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> remote_implicit_tcp</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">type</span><span class="kw">:</span><span class="at"> remote</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> remote_tcp</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">type</span><span class="kw">:</span><span class="at"> remote</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">tcp_ports</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="dv">1514</span><span class="kw">]</span></span></code></pre></div>
+<h2 id="logging_outputs-options">Logging_outputs options</h2>
+<p><code>logging_outputs</code>: A list of following dictionary to
+configure outputs.</p>
+<h3 id="logging_outputs-common-keys">logging_outputs common keys</h3>
+<ul>
+<li><code>name</code>: Unique name of the output. Used in the
+<code>logging_flows</code> outputs list and a part of the generated
+config filename.</li>
+<li><code>type</code>: Type of the output element. Currently,
+<code>elasticsearch</code>, <code>files</code>, <code>forwards</code>,
+and <code>remote_files</code> are supported. The <code>type</code> is
+used to specify a task type which corresponds to a directory name in
+roles/rsyslog/{tasks,vars}/outputs/.</li>
+<li><code>state</code>: State of the configuration file.
+<code>present</code> or <code>absent</code>. Default to
+<code>present</code>.</li>
+</ul>
+<h3 id="logging_outputs-elasticsearch-type">logging_outputs
+elasticsearch type</h3>
+<p><code>elasticsearch</code> output supports sending logs to
+Elasticsearch. It is available only when the input is
+<code>ovirt</code>. Assuming Elasticsearch is already configured and
+running.</p>
+<p>Available options:</p>
+<ul>
+<li><code>server_host</code>: Host name Elasticsearch is running on. The
+value is a single host or list of hosts. <strong>Required</strong>.</li>
+<li><code>server_port</code>: Port number Elasticsearch is listening to.
+Default to <code>9200</code>.</li>
+<li><code>index_prefix</code>: Elasticsearch index prefix the particular
+log will be indexed to. <strong>Required</strong>.</li>
+<li><code>input_type</code>: Specifying the input type. Currently only
+type <code>ovirt</code> is supported. Default to
+<code>ovirt</code>.</li>
+<li><code>retryfailures</code>: Specifying whether retries or not in
+case of failure. Allowed value is <code>true</code> or
+<code>false</code>. Default to <code>true</code>.</li>
+<li><code>tls</code>: If true, encrypt the connection with TLS. You must
+provide key/certificates and triplets {<code>ca_cert</code>,
+<code>cert</code>, <code>private_key</code>} and/or
+{<code>ca_cert_src</code>, <code>cert_src</code>,
+<code>private_key_src</code>}. Default to <code>true</code>.</li>
+<li><code>use_cert</code>: [DEPRECATED] If true, encrypt the connection
+with TLS. You must provide key/certificates and triplets
+{<code>ca_cert</code>, <code>cert</code>, <code>private_key</code>}
+and/or {<code>ca_cert_src</code>, <code>cert_src</code>,
+<code>private_key_src</code>}. Default to <code>true</code>. Option
+<code>use_cert</code> is deprecated in favor of <code>tls</code> and
+<code>use_cert</code> will be removed in the next minor release.</li>
+<li><code>ca_cert</code>: Path to CA cert for Elasticsearch. Default to
+<code>/etc/pki/tls/certs/basename of ca_cert_src</code>.</li>
+<li><code>cert</code>: Path to cert to connect to Elasticsearch. Default
+to <code>/etc/pki/tls/certs/basename of cert_src</code>.</li>
+<li><code>private_key</code>: Path to key to connect to Elasticsearch.
+Default to
+<code>/etc/pki/tls/private/basename of private_key_src</code>.</li>
+<li><code>ca_cert_src</code>: Local CA cert file path which is copied to
+the target host. If <code>ca_cert</code> is specified, it is copied to
+the location. Otherwise, to logging_config_dir.</li>
+<li><code>cert_src</code>: Local cert file path which is copied to the
+target host. If <code>cert</code> is specified, it is copied to the
+location. Otherwise, to logging_config_dir.</li>
+<li><code>private_key_src</code>: Local key file path which is copied to
+the target host. If <code>private_key</code> is specified, it is copied
+to the location. Otherwise, to logging_config_dir.</li>
+<li><code>uid</code>: If basic HTTP authentication is deployed, the user
+name is specified with this key.</li>
+</ul>
+<p>logging_elasticsearch_password: If basic HTTP authentication is
+deployed, the password is specified with this global variable. Please be
+careful that this <code>logging_elasticsearch_password</code> is a
+global variable to be placed at the same level as
+<code>logging_output</code>, <code>logging_input</code>, and
+<code>logging_flows</code> are. Another things to be aware of are this
+<code>logging_elasticsearch_password</code> is shared among all the
+elasticsearch outputs. That is, the elasticsearch servers should share
+one password if there are multiple of servers. Plus, the uid and
+password are configured if both of them are found in the playbook. For
+instance, if there are multiple elasticsearch outputs and one of them is
+missing the <code>uid</code> key, then the configured output does not
+have the uid and password.</p>
+<h3 id="logging_outputs-files-type">logging_outputs files type</h3>
+<p><code>files</code> output supports storing logs in the local files
+usually in /var/log.</p>
+<p>Available options:</p>
+<ul>
+<li><code>facility</code>: Facility in selector; default to
+<code>*</code>.</li>
+<li><code>severity</code>: Severity in selector; default to
+<code>*</code>.</li>
+<li><code>exclude</code>: Exclude list used in selector; default to
+none.</li>
+<li><code>property</code>: Property in property-based filter; no
+default</li>
+<li><code>property_op</code>: Operation in property-based filter; In
+case of not <code>!</code>, put the <code>property_op</code> value in
+quotes; default to <code>contains</code></li>
+<li><code>property_value</code>: Value in property-based filter; default
+to <code>error</code></li>
+<li><code>path</code>: Path to the output file.</li>
+</ul>
+<p>logging_files_template_format: Set default template for the files
+output. Allowed values are <code>traditional</code>,
+<code>syslog</code>, and <code>modern</code>. Default to
+<code>modern</code>.</p>
+<p><strong>Note:</strong> Selector options and property-based filter
+options are exclusive. If Property-based filter options are defined,
+selector options will be ignored.</p>
+<p><strong>Note:</strong> Unless the above options are given, these
+local file outputs are configured.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>  <span class="ex">kern.*</span>                                      /dev/console</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="ex">*.info</span><span class="kw">;</span><span class="ex">mail.none</span><span class="kw">;</span><span class="ex">authpriv.none</span><span class="kw">;</span><span class="ex">cron.none</span>    /var/log/messages</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="ex">authpriv.*</span>                                  /var/log/secure</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="ex">mail.*</span>                                      <span class="at">-</span>/var/log/maillog</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="ex">cron.*</span>                                      <span class="at">-</span>/var/log/cron</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="ex">*.emerg</span>                                     :omusrmsg:<span class="pp">*</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="ex">uucp,news.crit</span>                              /var/log/spooler</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="ex">local7.*</span></span></code></pre></div>
+<h3 id="logging_outputs-forwards-type">logging_outputs forwards
+type</h3>
+<p><code>forwards</code> output sends logs to the remote logging system
+over the network.</p>
+<p>Available options:</p>
+<ul>
+<li><code>facility</code>: Facility in selector; default to
+<code>*</code>.</li>
+<li><code>severity</code>: Severity in selector; default to
+<code>*</code>.</li>
+<li><code>exclude</code>: Exclude list used in selector; default to
+none.</li>
+<li><code>property</code>: Property in property-based filter; no
+default</li>
+<li><code>property_op</code>: Operation in property-based filter; In
+case of not <code>!</code>, put the <code>property_op</code> value in
+quotes; default to <code>contains</code></li>
+<li><code>property_value</code>: Value in property-based filter; default
+to <code>error</code></li>
+<li><code>target</code>: Target host (fqdn).
+<strong>Required</strong>.</li>
+<li><code>udp_port</code>: UDP port number. Default to
+<code>514</code>.</li>
+<li><code>tcp_port</code>: TCP port number. Default to
+<code>514</code>.</li>
+<li><code>tls</code>: Set to <code>true</code> to encrypt the connection
+using the default TLS implementation used by the provider. Default to
+<code>false</code>.</li>
+<li><code>pki_authmode</code>: Specifying the default network driver
+authentication mode. <code>x509/name</code>,
+<code>x509/fingerprint</code>, or <code>anon</code> is accepted. Default
+to <code>x509/name</code>.</li>
+<li><code>permitted_server</code>: Hostname, IP address,
+fingerprint(sha1) or wildcard DNS domain of the server which this client
+will be allowed to connect and send logs over TLS. Default to
+<code>*.{{ logging_domain }}</code></li>
+<li><code>template</code>: Template format for the particular forwards
+output. Allowed values are <code>traditional</code>,
+<code>syslog</code>, and <code>modern</code>. Default to
+<code>modern</code>.</li>
+</ul>
+<p>logging_forwards_template_format: Set default template for the
+forwards output. Allowed values are <code>traditional</code>,
+<code>syslog</code>, and <code>modern</code>. Default to
+<code>modern</code>.</p>
+<p><strong>Note:</strong> Selector options and property-based filter
+options are exclusive. If Property-based filter options are defined,
+selector options will be ignored.</p>
+<h3 id="logging_outputs-relp-type">logging_outputs relp type</h3>
+<p><code>relp</code> output sends logs to the remote logging system over
+the network using relp.</p>
+<p>Available options:</p>
+<ul>
+<li><code>target</code>: Host name the remote logging system is running
+on. <strong>Required</strong>.</li>
+<li><code>port</code>: Port number the remote logging system is
+listening to. Default to <code>20514</code>.</li>
+<li><code>tls</code>: If true, encrypt the connection with TLS. You must
+provide key/certificates and triplets {<code>ca_cert</code>,
+<code>cert</code>, <code>private_key</code>} and/or
+{<code>ca_cert_src</code>, <code>cert_src</code>,
+<code>private_key_src</code>}. Default to <code>true</code>.</li>
+<li><code>ca_cert</code>: Path to CA cert to configure Relp with tls.
+Default to <code>/etc/pki/tls/certs/basename of ca_cert_src</code>.</li>
+<li><code>cert</code>: Path to cert to configure Relp with tls. Default
+to <code>/etc/pki/tls/certs/basename of cert_src</code>.</li>
+<li><code>private_key</code>: Path to key to configure Relp with tls.
+Default to
+<code>/etc/pki/tls/private/basename of private_key_src</code>.</li>
+<li><code>ca_cert_src</code>: Local CA cert file path which is copied to
+the target host. If <code>ca_cert</code> is specified, it is copied to
+the location. Otherwise, to logging_config_dir.</li>
+<li><code>cert_src</code>: Local cert file path which is copied to the
+target host. If <code>cert</code> is specified, it is copied to the
+location. Otherwise, to logging_config_dir.</li>
+<li><code>private_key_src</code>: Local key file path which is copied to
+the target host. If <code>private_key</code> is specified, it is copied
+to the location. Otherwise, to logging_config_dir.</li>
+<li><code>pki_authmode</code>: Specifying the authentication mode.
+<code>name</code> or <code>fingerprint</code> is accepted. Default to
+<code>name</code>.</li>
+<li><code>permitted_servers</code>: List of hostnames, IP addresses,
+fingerprints(sha1), and wildcard DNS domains which will be allowed by
+the <code>logging</code> client to connect and send logs over TLS.
+Default to <code>['*.{{ logging_domain }}']</code></li>
+</ul>
+<h3 id="logging_outputs-remote_files-type">logging_outputs remote_files
+type</h3>
+<p><code>remote_files</code> output stores logs to the local files per
+remote host and program name originated the logs.</p>
+<p>Available options:</p>
+<ul>
+<li><code>facility</code>: Facility in selector; default to
+<code>*</code>.</li>
+<li><code>severity</code>: Severity in selector; default to
+<code>*</code>.</li>
+<li><code>exclude</code>: Exclude list used in selector; default to
+none.</li>
+<li><code>property</code>: Property in property-based filter; no
+default</li>
+<li><code>property_op</code>: Operation in property-based filter; In
+case of not <code>!</code>, put the <code>property_op</code> value in
+quotes; default to <code>contains</code></li>
+<li><code>property_value</code>: Value in property-based filter; default
+to <code>error</code></li>
+<li><code>async_writing</code>: If set to <code>true</code>, the files
+are written asynchronously. Allowed value is <code>true</code> or
+<code>false</code>. Default to <code>false</code>.</li>
+<li><code>client_count</code>: Count of client logging system supported
+this rsyslog server. Default to <code>10</code>.</li>
+<li><code>io_buffer_size</code>: Buffer size used to write output data.
+Default to <code>65536</code> bytes.</li>
+<li><code>remote_log_path</code>: Full path to store the filtered logs.
+This is an example to support the per host output log files
+<code>/path/to/output/dir/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log</code></li>
+<li><code>remote_sub_path</code>: Relative path to
+logging_system_log_dir to store the filtered logs.</li>
+</ul>
+<p><strong>Note:</strong> Selector options and property-based filter
+options are exclusive. If Property-based filter options are defined,
+selector options will be ignored.</p>
+<p><strong>Note:</strong> If both <code>remote_log_path</code> and
+<code>remote_sub_path</code> are <em>not</em> specified, the remote_file
+output configured with the following settings.</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">template</span><span class="op">(</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">&quot;RemoteMessage&quot;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    type<span class="op">=</span><span class="st">&quot;string&quot;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    string<span class="op">=</span><span class="st">&quot;/var/log/remote/msg/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log&quot;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">)</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">template</span><span class="op">(</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">&quot;RemoteHostAuthLog&quot;</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    type<span class="op">=</span><span class="st">&quot;string&quot;</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    string<span class="op">=</span><span class="st">&quot;/var/log/remote/auth/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log&quot;</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="op">)</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">template</span><span class="op">(</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">&quot;RemoteHostCronLog&quot;</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    type<span class="op">=</span><span class="st">&quot;string&quot;</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    string<span class="op">=</span><span class="st">&quot;/var/log/remote/cron/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log&quot;</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="op">)</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">template</span><span class="op">(</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    name<span class="op">=</span><span class="st">&quot;RemoteHostMailLog&quot;</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    type<span class="op">=</span><span class="st">&quot;string&quot;</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    string<span class="op">=</span><span class="st">&quot;/var/log/remote/mail/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log&quot;</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  <span class="op">)</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ruleset</span><span class="op">(</span>name<span class="op">=</span><span class="st">&quot;unique_remote_files_output_name&quot;</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    authpriv<span class="op">.*</span>   <span class="fu">action</span><span class="op">(</span>name<span class="op">=</span><span class="st">&quot;remote_authpriv_host_log&quot;</span> type<span class="op">=</span><span class="st">&quot;omfile&quot;</span> DynaFile<span class="op">=</span><span class="st">&quot;RemoteHostAuthLog&quot;</span><span class="op">)</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">*.</span><span class="fu">info</span><span class="op">;</span>mail<span class="op">.</span><span class="fu">none</span><span class="op">;</span>authpriv<span class="op">.</span><span class="fu">none</span><span class="op">;</span>cron<span class="op">.</span><span class="fu">none</span> <span class="fu">action</span><span class="op">(</span>name<span class="op">=</span><span class="st">&quot;remote_message&quot;</span> type<span class="op">=</span><span class="st">&quot;omfile&quot;</span> DynaFile<span class="op">=</span><span class="st">&quot;RemoteMessage&quot;</span><span class="op">)</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    cron<span class="op">.*</span>       <span class="fu">action</span><span class="op">(</span>name<span class="op">=</span><span class="st">&quot;remote_cron_log&quot;</span> type<span class="op">=</span><span class="st">&quot;omfile&quot;</span> DynaFile<span class="op">=</span><span class="st">&quot;RemoteHostCronLog&quot;</span><span class="op">)</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    mail<span class="op">.*</span>       <span class="fu">action</span><span class="op">(</span>name<span class="op">=</span><span class="st">&quot;remote_mail_service_log&quot;</span> type<span class="op">=</span><span class="st">&quot;omfile&quot;</span> DynaFile<span class="op">=</span><span class="st">&quot;RemoteHostMailLog&quot;</span><span class="op">)</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span></code></pre></div>
+<h2 id="logging_flows-options">Logging_flows options</h2>
+<ul>
+<li><code>name</code>: Unique name of the flow.</li>
+<li><code>inputs</code>: A list of inputs, from which processing log
+messages starts.</li>
+<li><code>outputs</code>: A list of outputs. to which the log messages
+are sent.</li>
+</ul>
+<h2 id="security-options">Security options</h2>
+<p>These variables are set in the same level of the
+<code>logging_inputs</code>, <code>logging_output</code>, and
+<code>logging_flows</code>.</p>
+<h3 id="logging_pki_files">logging_pki_files</h3>
+<p>Specifying either of the paths of the ca_cert, cert, and key on the
+control host or the paths of theirs on the managed host or both of them.
+When TLS connection is configured, <code>ca_cert_src</code> and/or
+<code>ca_cert</code> is required. To configure the certificate of the
+logging system, <code>cert_src</code> and/or <code>cert</code> is
+required. To configure the private key of the logging system,
+<code>private_key_src</code> and/or <code>private_key</code> is
+required.</p>
+<ul>
+<li><code>ca_cert_src</code>: location of the ca_cert on the control
+host; if given, the file is copied to the managed host.</li>
+<li><code>cert_src</code>: location of the cert on the control host; if
+given, the file is copied to the managed host.</li>
+<li><code>private_key_src</code>: location of the key on the control
+host; if given, the file is copied to the managed host.</li>
+<li><code>ca_cert</code>: path to be deployed on the managed host; the
+path is also used in the rsyslog config. default to
+/etc/pki/tls/certs/&lt;ca_cert_src basename&gt;</li>
+<li><code>cert</code>: ditto - default to
+/etc/pki/tls/certs/&lt;cert_src basename&gt;</li>
+<li><code>private_key</code>: ditto - default to
+/etc/pki/tls/private/&lt;private_key_src basename&gt;</li>
+</ul>
+<h3 id="logging_domain">logging_domain</h3>
+<p>The default DNS domain used to accept remote incoming logs from
+remote hosts. Default to "{{ ansible_domain if ansible_domain else
+ansible_hostname }}"</p>
+<h2 id="server-performance-optimization-options">Server performance
+optimization options</h2>
+<p>These variables are set in the same level of the
+<code>logging_inputs</code>, <code>logging_output</code>, and
+<code>logging_flows</code>.</p>
+<ul>
+<li><code>logging_tcp_threads</code>: Input thread count listening on
+the plain tcp (ptcp) port. Default to <code>1</code>.</li>
+<li><code>logging_udp_threads</code>: Input thread count listening on
+the udp port. Default to <code>1</code>.</li>
+<li><code>logging_udp_system_time_requery</code>: Every
+<code>value</code> OS system calls, get the system time. Recommend not
+to set above 10. Default to <code>2</code> times.</li>
+<li><code>logging_udp_batch_size</code>: Maximum number of udp messages
+per OS system call. Recommend not to set above 128. Default to
+<code>32</code>.</li>
+<li><code>logging_server_queue_type</code>: Type of queue.
+<code>FixedArray</code> is available. Default to
+<code>LinkedList</code>.</li>
+<li><code>logging_server_queue_size</code>: Maximum number of messages
+in the queue. Default to <code>50000</code>.</li>
+<li><code>logging_server_threads</code>: Number of worker threads.
+Default to <code>logging_tcp_threads</code> +
+<code>logging_udp_threads</code>.</li>
+</ul>
+<h2 id="other-options">Other options</h2>
+<p>These variables are set in the same level of the
+<code>logging_inputs</code>, <code>logging_output</code>, and
+<code>logging_flows</code>.</p>
+<ul>
+<li><p><code>logging_enabled</code>: When 'true', logging role will
+deploy specified configuration file set. Default to 'true'.</p></li>
+<li><p><code>logging_mark</code>: Mark message periodically by immark,
+if set to <code>true</code>. Default to <code>false</code>.</p></li>
+<li><p><code>logging_mark_interval</code>: Interval for
+<code>logging_mark</code> in seconds. Default to
+<code>3600</code>.</p></li>
+<li><p><code>logging_purge_confs</code>: <code>true</code> or
+<code>false</code>. If <code>logging_purge_confs</code> is set to
+<code>true</code>, remove files in rsyslog.d which do not belong to any
+rpm packages. That includes config files generated by the previous
+logging role run. NOTE: If <code>/etc/rsyslog.conf</code> was modified,
+and you use <code>logging_purge_confs: true</code>, and you are not
+providing any <code>logging_inputs</code>, then the <code>rsyslog</code>
+package will be uninstalled and reinstalled in order to revert back to
+the original system default configuration.</p></li>
+<li><p><code>logging_system_log_dir</code>: Directory where the local
+log output files are placed. Default to <code>/var/log</code>.</p></li>
+<li><p><code>logging_manage_firewall</code>: If set to <code>true</code>
+and ports are found in the logging role parameters, configure the
+firewall for the ports using the firewall role. If set to
+<code>false</code>, the <code>logging role</code> does not manage the
+firewall. Default to <code>false</code>. NOTE:
+<code>logging_manage_firewall</code> is limited to <em>adding</em>
+ports. It cannot be used for <em>removing</em> ports. If you want to
+remove ports, you will need to use the firewall system role
+directly.</p></li>
+<li><p><code>logging_manage_selinux</code>: If set to <code>true</code>
+and ports are found in the logging role parameters, configure the
+SELinux for the ports using the <code>selinux</code> role. If set to
+<code>false</code>, the <code>logging</code> role does not manage
+SELinux. Default to <code>false</code>. NOTE:
+<code>logging_manage_selinux</code> is limited to <em>adding</em>
+policy. It cannot be used for <em>removing</em> policy. If you want to
+remove policy, you will need to use the <code>selinux</code> role
+directly.</p></li>
+<li><p><code>logging_certificates</code>: Information used to generate a
+private key and certificate. Default to <code>[]</code>. The value of
+<code>logging_certificates</code> is passed on to the
+<code>certificate_requests</code> in the <code>certificate</code> role
+and used to create the private key and certificate. For the supported
+parameters of <code>logging_certificates</code>, see the <a
+href="https://github.com/linux-system-roles/certificate/#certificate_requests"><code>certificate_requests</code>
+role documentation section</a>. Before running the <code>logging</code>
+role with <code>logging_certificates</code>, join the managed hosts to
+an IPA domain to make CA available to sign the certificate to be
+created.</p>
+<p>With this example, a private key <code>logging_cert.key</code> is
+generated in <code>/etc/pki/tls/private</code> and a certificate
+<code>logging_cert.crt</code> is in <code>/etc/pki/tls/certs</code>
+signed by the CA certificate managed by <code>ipa</code>.</p></li>
+</ul>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_certificates</span><span class="kw">:</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> logging_cert</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">dns</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&#39;localhost&#39;</span><span class="kw">,</span><span class="at"> </span><span class="st">&#39;www.example.com&#39;</span><span class="kw">]</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">ca</span><span class="kw">:</span><span class="at"> ipa</span></span></code></pre></div>
+<p>The created private key and certificate are set with the ca
+certificate, e.g., in <code>logging_pki_files</code> as follows:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">logging_pki_files</span><span class="kw">:</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> </span><span class="fu">ca_cert</span><span class="kw">:</span><span class="at"> /etc/ipa/ca.crt</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">cert</span><span class="kw">:</span><span class="at"> /etc/pki/tls/certs/logging_cert.crt</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">private_key</span><span class="kw">:</span><span class="at"> /etc/pki/tls/private/logging_cert.key</span></span></code></pre></div>
+<p>or in the <code>relp</code> parameters as follows:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="at">   </span><span class="fu">logging_inputs</span><span class="kw">:</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="at">     </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> relp_server</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="at">       </span><span class="fu">type</span><span class="kw">:</span><span class="at"> relp</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="at">       </span><span class="fu">tls</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="at">       </span><span class="fu">ca_cert</span><span class="kw">:</span><span class="at"> /etc/ipa/ca.crt</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="at">       </span><span class="fu">cert</span><span class="kw">:</span><span class="at"> /etc/pki/tls/certs/logging_cert.crt</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="at">       </span><span class="fu">private_key</span><span class="kw">:</span><span class="at"> /etc/pki/tls/private/logging_cert.key</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="at">       </span><span class="kw">[</span><span class="at">snip</span><span class="kw">]</span></span></code></pre></div>
+<p>NOTE: The <code>certificate</code> role, unless using IPA and joining
+the systems to an IPA domain, creates self-signed certificates, so you
+will need to explicitly configure trust, which is not currently
+supported by the system roles.</p>
+<h2 id="update-and-delete">Update and Delete</h2>
+<p>Due to the nature of ansible idempotency, if you run ansible-playbook
+multiple times without changing any variables and options, no changes
+are made from the second time. If some changes are made, only the
+rsyslog configuration files affected by the changes are recreated. To
+delete any existing rsyslog input or output config files generated by
+the previous ansible-playbook run, you need to add "state: absent" to
+the dictionary to be deleted (in this case, input_nameA and
+output_name0). And remove the flow dictionary related to the input and
+output as follows.</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">logging_inputs</span><span class="kw">:</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> input_nameA</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">type</span><span class="kw">:</span><span class="at"> input_typeA</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">state</span><span class="kw">:</span><span class="at"> absent</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> input_nameB</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">type</span><span class="kw">:</span><span class="at"> input_typeB</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="fu">logging_outputs</span><span class="kw">:</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> output_name0</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">type</span><span class="kw">:</span><span class="at"> output_type0</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">state</span><span class="kw">:</span><span class="at"> absent</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> output_name1</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">type</span><span class="kw">:</span><span class="at"> output_type1</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="fu">logging_flows</span><span class="kw">:</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> flow_nameY</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">inputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">input_nameB</span><span class="kw">]</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">outputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">output_name1</span><span class="kw">]</span></span></code></pre></div>
+<p>If you want to remove all the configuration files previously
+configured, in addition to setting <code>state: absent</code> to each
+logging_inputs and logging_outputs item, add
+<code>logging_enabled: false</code> to the configuration variables as
+follows. It will eliminate the global and common configuration files, as
+well. Or, use <code>logging_purge_confs: true</code> to wipe out all
+previous configuration and replace it with your given configuration.</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">logging_enabled</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">logging_inputs</span><span class="kw">:</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> input_nameA</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">type</span><span class="kw">:</span><span class="at"> input_typeA</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">state</span><span class="kw">:</span><span class="at"> absent</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> input_nameB</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">type</span><span class="kw">:</span><span class="at"> input_typeB</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">state</span><span class="kw">:</span><span class="at"> absent</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="fu">logging_outputs</span><span class="kw">:</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> output_name0</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">type</span><span class="kw">:</span><span class="at"> output_type0</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">state</span><span class="kw">:</span><span class="at"> absent</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> output_name1</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">type</span><span class="kw">:</span><span class="at"> output_type1</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">state</span><span class="kw">:</span><span class="at"> absent</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="fu">logging_flows</span><span class="kw">:</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> flow_nameY</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">inputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">input_nameB</span><span class="kw">]</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">outputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">output_name1</span><span class="kw">]</span></span></code></pre></div>
+<h1 id="configuration-examples">Configuration Examples</h1>
+<h2 id="standalone-configuration">Standalone configuration</h2>
+<p>Deploying <code>basics input</code> reading logs from systemd journal
+and implicit <code>files output</code> to write to the local files.</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Deploying basics input and implicit files output</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">hosts</span><span class="kw">:</span><span class="at"> all</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">roles</span><span class="kw">:</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> linux-system-roles.logging</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">vars</span><span class="kw">:</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_inputs</span><span class="kw">:</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> system_input</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> basics</span></span></code></pre></div>
+<p>The following playbook generates the same logging configuration
+files.</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Deploying basics input and files output</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">hosts</span><span class="kw">:</span><span class="at"> all</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">roles</span><span class="kw">:</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> linux-system-roles.logging</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">vars</span><span class="kw">:</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_inputs</span><span class="kw">:</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> system_input</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> basics</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_outputs</span><span class="kw">:</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> files_output</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> files</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_flows</span><span class="kw">:</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> flow0</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">inputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">system_input</span><span class="kw">]</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">outputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">files_output</span><span class="kw">]</span></span></code></pre></div>
+<p>Deploying <code>basics input</code> reading logs from systemd unix
+socket and <code>files output</code> to write to the local files.</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Deploying basics input using systemd unix socket and files output</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">hosts</span><span class="kw">:</span><span class="at"> all</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">roles</span><span class="kw">:</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> linux-system-roles.logging</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">vars</span><span class="kw">:</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_inputs</span><span class="kw">:</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> system_input</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> basics</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">use_imuxsock</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_outputs</span><span class="kw">:</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> files_output</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> files</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_flows</span><span class="kw">:</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> flow0</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">inputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">system_input</span><span class="kw">]</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">outputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">files_output</span><span class="kw">]</span></span></code></pre></div>
+<p>Deploying <code>basics input</code> reading logs from systemd journal
+and <code>files output</code> to write to the individually configured
+local files.</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Deploying basic input and configured files output</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">hosts</span><span class="kw">:</span><span class="at"> all</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">roles</span><span class="kw">:</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> linux-system-roles.logging</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">vars</span><span class="kw">:</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_inputs</span><span class="kw">:</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> system_input</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> basics</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_outputs</span><span class="kw">:</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> files_output0</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> files</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">severity</span><span class="kw">:</span><span class="at"> info</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">exclude</span><span class="kw">:</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="kw">-</span><span class="at"> authpriv.none</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="kw">-</span><span class="at"> auth.none</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="kw">-</span><span class="at"> cron.none</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="kw">-</span><span class="at"> mail.none</span></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">path</span><span class="kw">:</span><span class="at"> /var/log/messages</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> files_output1</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> files</span></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">facility</span><span class="kw">:</span><span class="at"> authpriv,auth</span></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">path</span><span class="kw">:</span><span class="at"> /var/log/secure</span></span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_flows</span><span class="kw">:</span></span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> flow0</span></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">inputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">system_input</span><span class="kw">]</span></span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">outputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">files_output0</span><span class="kw">,</span><span class="at"> files_output1</span><span class="kw">]</span></span></code></pre></div>
+<p>Deploying <code>files input</code> reading logs from local files and
+<code>files output</code> to write to the individually configured local
+files.</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Deploying files input and configured files output</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">hosts</span><span class="kw">:</span><span class="at"> all</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">roles</span><span class="kw">:</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> linux-system-roles.logging</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">vars</span><span class="kw">:</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_inputs</span><span class="kw">:</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> files_input0</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> files</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">input_log_path</span><span class="kw">:</span><span class="at"> /var/log/containerA/*.log</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> files_input1</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> files</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">input_log_path</span><span class="kw">:</span><span class="at"> /var/log/containerB/*.log</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_outputs</span><span class="kw">:</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> files_output0</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> files</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">severity</span><span class="kw">:</span><span class="at"> info</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">exclude</span><span class="kw">:</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="kw">-</span><span class="at"> authpriv.none</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="kw">-</span><span class="at"> auth.none</span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="kw">-</span><span class="at"> cron.none</span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="kw">-</span><span class="at"> mail.none</span></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">path</span><span class="kw">:</span><span class="at"> /var/log/messages</span></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> files_output1</span></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> files</span></span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">facility</span><span class="kw">:</span><span class="at"> authpriv,auth</span></span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">path</span><span class="kw">:</span><span class="at"> /var/log/secure</span></span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_flows</span><span class="kw">:</span></span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> flow0</span></span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">inputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">files_input0</span><span class="kw">,</span><span class="at"> files_input1</span><span class="kw">]</span></span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">outputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">files_output0</span><span class="kw">,</span><span class="at"> files_output1</span><span class="kw">]</span></span></code></pre></div>
+<p>Deploying <code>files input</code> reading logs from local files and
+<code>files output</code> to write to the local files based on the
+property-based filters.</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Deploying files input and configured files output</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">hosts</span><span class="kw">:</span><span class="at"> all</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">roles</span><span class="kw">:</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> linux-system-roles.logging</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">vars</span><span class="kw">:</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_inputs</span><span class="kw">:</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> files_input0</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> files</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">input_log_path</span><span class="kw">:</span><span class="at"> /var/log/containerA/*.log</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> files_input1</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> files</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">input_log_path</span><span class="kw">:</span><span class="at"> /var/log/containerB/*.log</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_outputs</span><span class="kw">:</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> files_output0</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> files</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">property</span><span class="kw">:</span><span class="at"> msg</span></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">property_op</span><span class="kw">:</span><span class="at"> contains</span></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">property_value</span><span class="kw">:</span><span class="at"> error</span></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">path</span><span class="kw">:</span><span class="at"> /var/log/errors.log</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> files_output1</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> files</span></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">property</span><span class="kw">:</span><span class="at"> msg</span></span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">property_op</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;!contains&quot;</span></span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">property_value</span><span class="kw">:</span><span class="at"> error</span></span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">path</span><span class="kw">:</span><span class="at"> /var/log/others.log</span></span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_flows</span><span class="kw">:</span></span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> flow0</span></span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">inputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">files_input0</span><span class="kw">,</span><span class="at"> files_input1</span><span class="kw">]</span></span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">outputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">files_output0</span><span class="kw">,</span><span class="at"> files_output1</span><span class="kw">]</span></span></code></pre></div>
+<h2 id="client-configuration">Client configuration</h2>
+<p>Deploying <code>basics input</code> reading logs from systemd journal
+and <code>forwards output</code> to forward the logs to the remote
+rsyslog.</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Deploying basics input and forwards output</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">hosts</span><span class="kw">:</span><span class="at"> clients</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">roles</span><span class="kw">:</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> linux-system-roles.logging</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">vars</span><span class="kw">:</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_inputs</span><span class="kw">:</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> basic_input</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> basics</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_outputs</span><span class="kw">:</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> forward_output0</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> forwards</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">severity</span><span class="kw">:</span><span class="at"> info</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">target</span><span class="kw">:</span><span class="at"> your_target_hostname</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">udp_port</span><span class="kw">:</span><span class="at"> </span><span class="dv">514</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> forward_output1</span></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> forwards</span></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">facility</span><span class="kw">:</span><span class="at"> mail</span></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">target</span><span class="kw">:</span><span class="at"> your_target_hostname</span></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">tcp_port</span><span class="kw">:</span><span class="at"> </span><span class="dv">514</span></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_flows</span><span class="kw">:</span></span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> flows0</span></span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">inputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">basic_input</span><span class="kw">]</span></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">outputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">forward_output0</span><span class="kw">,</span><span class="at"> forward_output1</span><span class="kw">]</span></span></code></pre></div>
+<p>Deploying <code>files input</code> reading logs from a local file and
+<code>forwards output</code> to forward the logs to the remote rsyslog
+over tls. Assuming the ca_cert, cert and key files are prepared at the
+specified paths on the control host. The files are deployed to the
+default location <code>/etc/pki/tls/certs/</code>,
+<code>/etc/pki/tls/certs/</code>, and <code>/etc/pki/tls/private</code>,
+respectively.</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Deploying files input and forwards output with certs</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">hosts</span><span class="kw">:</span><span class="at"> clients</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">roles</span><span class="kw">:</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> linux-system-roles.logging</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">vars</span><span class="kw">:</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_pki_files</span><span class="kw">:</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">ca_cert_src</span><span class="kw">:</span><span class="at"> /local/path/to/ca_cert</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">cert_src</span><span class="kw">:</span><span class="at"> /local/path/to/cert</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">private_key_src</span><span class="kw">:</span><span class="at"> /local/path/to/key</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_inputs</span><span class="kw">:</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> files_input</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> files</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">input_log_path</span><span class="kw">:</span><span class="at"> /var/log/containers/*.log</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_outputs</span><span class="kw">:</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> forwards_output</span></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> forwards</span></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">target</span><span class="kw">:</span><span class="at"> your_target_host</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">tcp_port</span><span class="kw">:</span><span class="at"> your_target_port</span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">pki_authmode</span><span class="kw">:</span><span class="at"> x509/name</span></span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">permitted_server</span><span class="kw">:</span><span class="at"> </span><span class="st">&#39;*.example.com&#39;</span></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_flows</span><span class="kw">:</span></span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> flows0</span></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">inputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">basic_input</span><span class="kw">]</span></span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">outputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">forwards-severity_and_facility</span><span class="kw">]</span></span></code></pre></div>
+<h2 id="server-configuration">Server configuration</h2>
+<p>Deploying <code>remote input</code> reading logs from remote rsyslog
+and <code>remote_files output</code> to write the logs to the local
+files under the directory named by the remote host name.</p>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Deploying remote input and remote_files output</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">hosts</span><span class="kw">:</span><span class="at"> server</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">roles</span><span class="kw">:</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> linux-system-roles.logging</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">vars</span><span class="kw">:</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_inputs</span><span class="kw">:</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> remote_udp_input</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> remote</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">udp_ports</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="dv">514</span><span class="kw">,</span><span class="at"> </span><span class="dv">1514</span><span class="kw">]</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> remote_tcp_input</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> remote</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">tcp_ports</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="dv">514</span><span class="kw">,</span><span class="at"> </span><span class="dv">1514</span><span class="kw">]</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_outputs</span><span class="kw">:</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> remote_files_output</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> remote_files</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_flows</span><span class="kw">:</span></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> flow_0</span></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">inputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">remote_udp_input</span><span class="kw">,</span><span class="at"> remote_tcp_input</span><span class="kw">]</span></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">outputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">remote_files_output</span><span class="kw">]</span></span></code></pre></div>
+<p>Deploying <code>remote input</code> reading logs from remote rsyslog
+and <code>remote_files output</code> to write the logs to the configured
+local files with the tls setup supporting 20 clients. Assuming the
+ca_cert, cert and key files are prepared at the specified paths on the
+control host. The files are deployed to the default location
+<code>/etc/pki/tls/certs/</code>, <code>/etc/pki/tls/certs/</code>, and
+<code>/etc/pki/tls/private</code>, respectively.</p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Deploying remote input and remote_files output with certs</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">hosts</span><span class="kw">:</span><span class="at"> server</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">roles</span><span class="kw">:</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> linux-system-roles.logging</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">vars</span><span class="kw">:</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_pki_files</span><span class="kw">:</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">ca_cert_src</span><span class="kw">:</span><span class="at"> /local/path/to/ca_cert</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">cert_src</span><span class="kw">:</span><span class="at"> /local/path/to/cert</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">private_key_src</span><span class="kw">:</span><span class="at"> /local/path/to/key</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_inputs</span><span class="kw">:</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> remote_tcp_input</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> remote</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">tcp_ports</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="dv">6514</span><span class="kw">,</span><span class="at"> </span><span class="dv">7514</span><span class="kw">]</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">permitted_clients</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&#39;*.example.com&#39;</span><span class="kw">,</span><span class="at"> </span><span class="st">&#39;*.test.com&#39;</span><span class="kw">]</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_outputs</span><span class="kw">:</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> remote_files_output0</span></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> remote_files</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">remote_log_path</span><span class="kw">:</span><span class="at"> /var/log/remote/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">async_writing</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">client_count</span><span class="kw">:</span><span class="at"> </span><span class="dv">20</span></span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">io_buffer_size</span><span class="kw">:</span><span class="at"> </span><span class="dv">8192</span></span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> remote_files_output1</span></span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> remote_files</span></span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">remote_sub_path</span><span class="kw">:</span><span class="at"> others/%FROMHOST%/%PROGRAMNAME:::secpath-replace%.log</span></span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_flows</span><span class="kw">:</span></span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> flow_0</span></span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">inputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">remote_udp_input</span><span class="kw">,</span><span class="at"> remote_tcp_input</span><span class="kw">]</span></span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">outputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">remote_files_output0</span><span class="kw">,</span><span class="at"> remote_files_output1</span><span class="kw">]</span></span></code></pre></div>
+<h2 id="client-configuration-with-relp">Client configuration with
+Relp</h2>
+<p>Deploying <code>basics input</code> reading logs from systemd journal
+and <code>relp output</code> to send the logs to the remote rsyslog over
+relp.</p>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Deploying basics input and relp output</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">hosts</span><span class="kw">:</span><span class="at"> clients</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">roles</span><span class="kw">:</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> linux-system-roles.logging</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">vars</span><span class="kw">:</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_inputs</span><span class="kw">:</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> basic_input</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> basics</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_outputs</span><span class="kw">:</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> relp_client</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> relp</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">target</span><span class="kw">:</span><span class="at"> logging.server.com</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">port</span><span class="kw">:</span><span class="at"> </span><span class="dv">20514</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">tls</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">ca_cert_src</span><span class="kw">:</span><span class="at"> /path/to/ca.pem</span></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">cert_src</span><span class="kw">:</span><span class="at"> /path/to/client-cert.pem</span></span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">private_key_src</span><span class="kw">:</span><span class="at"> /path/to/client-key.pem</span></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">pki_authmode</span><span class="kw">:</span><span class="at"> name</span></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">permitted_servers</span><span class="kw">:</span></span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="kw">-</span><span class="at"> </span><span class="st">&#39;*.server.com&#39;</span></span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_flows</span><span class="kw">:</span></span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> flow</span></span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">inputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">basic_input</span><span class="kw">]</span></span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">outputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">relp_client</span><span class="kw">]</span></span></code></pre></div>
+<h2 id="server-configuration-with-relp">Server configuration with
+Relp</h2>
+<p>Deploying <code>relp input</code> reading logs from remote rsyslog
+and <code>remote_files output</code> to write the logs to the local
+files under the directory named by the remote host name.</p>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Deploying remote input and remote_files output</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">hosts</span><span class="kw">:</span><span class="at"> server</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">roles</span><span class="kw">:</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> linux-system-roles.logging</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">vars</span><span class="kw">:</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_inputs</span><span class="kw">:</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> relp_server</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> relp</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">port</span><span class="kw">:</span><span class="at"> </span><span class="dv">20514</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">tls</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">ca_cert_src</span><span class="kw">:</span><span class="at"> /path/to/ca.pem</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">cert_src</span><span class="kw">:</span><span class="at"> /path/to/server-cert.pem</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">private_key_src</span><span class="kw">:</span><span class="at"> /path/to/server-key.pem</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">pki_authmode</span><span class="kw">:</span><span class="at"> name</span></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">permitted_clients</span><span class="kw">:</span></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="kw">-</span><span class="at"> </span><span class="st">&#39;*.client.com&#39;</span></span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a><span class="at">          </span><span class="kw">-</span><span class="at"> </span><span class="st">&#39;*.example.com&#39;</span></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_outputs</span><span class="kw">:</span></span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> remote_files_output</span></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> remote_files</span></span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_flows</span><span class="kw">:</span></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> flow</span></span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">inputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">relp_server</span><span class="kw">]</span></span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">outputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">remote_files_output</span><span class="kw">]</span></span></code></pre></div>
+<h2 id="port-managed-by-firewall-and-selinux-role">Port Managed by
+Firewall and SELinux Role</h2>
+<p>When a port is specified in the logging role configuration, the
+firewall role is automatically included and the port is managed by the
+firewalld.</p>
+<p>The port is then configured by the <code>selinux</code> role and
+given an appropriate syslog SELinux port type depending upon the
+associated TLS value.</p>
+<p>You can verify the changes by the following command-line.</p>
+<p>For firewall,</p>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="ex">firewall-cmd</span> <span class="at">--list-port</span></span></code></pre></div>
+<p>For SELinux,</p>
+<div class="sourceCode" id="cb26"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="ex">semanage</span> port <span class="at">--list</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="st">&quot;syslog&quot;</span></span></code></pre></div>
+<p>The newly specified port will be added to this default set.</p>
+<div class="sourceCode" id="cb27"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="ex">syslog_tls_port_t</span>     tcp   6514, 10514</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="ex">syslog_tls_port_t</span>     udp   6514, 10514</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="ex">syslogd_port_t</span>        tcp   601, 20514</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="ex">syslogd_port_t</span>        udp   514, 601, 20514</span></code></pre></div>
+<h1 id="providers">Providers</h1>
+<ul>
+<li>Rsyslog</li>
+</ul>
+<h1 id="tests">Tests</h1>
+<p>tests/README.md - This documentation shows how to execute CI tests in
+the tests directory as well as how to debug when the test fails.</p>
+</article>
+</body>
+</html>
