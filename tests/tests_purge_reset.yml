@@ -6,7 +6,25 @@
   hosts: all
   vars:
     __test_default_files_conf: /etc/rsyslog.d/30-output-files-default_files.conf
+    ostree_pkg_mgr: ansible.posix.rhel_rpm_ostree
   tasks:
+    - name: Ensure correct package manager for ostree systems
+      vars:
+        ostree_booted_file: /run/ostree-booted
+      when: ansible_facts.pkg_mgr | d("") != ostree_pkg_mgr
+      block:
+        - name: Check if system is ostree
+          stat:
+            path: "{{ ostree_booted_file }}"
+          register: __ostree_booted_stat
+
+        - name: Set package manager to use for ostree
+          ansible.utils.update_fact:
+            updates:
+              - path: ansible_facts.pkg_mgr
+                value: "{{ ostree_pkg_mgr }}"
+          when: __ostree_booted_stat.stat.exists
+
     - name: Ensure rsyslog is installed
       package:
         name: rsyslog
@@ -100,7 +118,8 @@
     - name: Ensure config file size and counts
       vars:
         __conf_count: 0
-        __conf_size: more
+        __conf_size: "{{ 'less' if ansible_facts.pkg_mgr | d() == ostree_pkg_mgr
+          else 'more' }}"
         __check_systemctl_status: true
       include_tasks: tasks/check_daemon_config_files.yml
 
