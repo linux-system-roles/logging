@@ -25,7 +25,11 @@ If the `logging` is a role from the `fedora.linux_system_roles`
 collection or from the Fedora RPM package, the requirement is already
 satisfied.
 
-Otherwise, please run the following command line to install the collection.
+The role requires external collections for management of `rpm-ostree` nodes.
+These are listed in the `meta/collection-requirements.yml`.  You do not need
+them if you do not want to manage `rpm-ostree` systems.
+
+If you need to install additional collections based on the above, please run:
 
 ```bash
 ansible-galaxy collection install -r meta/collection-requirements.yml
@@ -421,7 +425,9 @@ These variables are set in the same level of the `logging_inputs`, `logging_outp
   If `/etc/rsyslog.conf` was modified, and you use `logging_purge_confs: true`,
   and you are not providing any `logging_inputs`, then the `rsyslog` package
   will be uninstalled and reinstalled in order to revert back to the original
-  system default configuration.
+  system default configuration.  On `ostree` systems, this does not work, so a minimal
+  rsyslog.conf will be used, which is *not* the same as the default rsyslog.conf provided
+  by the rpm package.  So please use caution if you use this option on `ostree` systems.
 * `logging_system_log_dir`: Directory where the local log output files are placed. Default to `/var/log`.
 * `logging_manage_firewall`: If set to `true` and ports are found in the logging role
   parameters, configure the firewall for the ports using the firewall role.
@@ -922,3 +928,7 @@ syslogd_port_t        udp   514, 601, 20514
 ## Tests
 
 tests/README.md - This documentation shows how to execute CI tests in the tests directory as well as how to debug when the test fails.
+
+## rpm-ostree
+
+See README-ostree.md

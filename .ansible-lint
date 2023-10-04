@@ -22,3 +22,5 @@ exclude_paths:
   - examples/roles/
 mock_roles:
   - linux-system-roles.logging
+mock_modules:
+  - ansible.utils.update_fact

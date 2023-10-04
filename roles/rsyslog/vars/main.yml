@@ -3,7 +3,9 @@
 # __rsyslog_base_packages
 #
 # List of default rpm packages to install.
-__rsyslog_base_packages: ['rsyslog']
+# NOTE: iproute is needed for the ip command which
+# is needed for the default_ipv4 fact
+__rsyslog_base_packages: ['iproute', 'rsyslog']
 
 # rsyslog configuration directory
 __rsyslog_config_dir: /etc/rsyslog.d

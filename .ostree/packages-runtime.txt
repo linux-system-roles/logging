@@ -1,0 +1,12 @@
+ca-certificates
+iproute
+libestr
+libfastjson
+liblognorm
+librelp
+rsyslog
+rsyslog-elasticsearch
+rsyslog-gnutls
+rsyslog-mmjsonparse
+rsyslog-mmnormalize
+rsyslog-relp

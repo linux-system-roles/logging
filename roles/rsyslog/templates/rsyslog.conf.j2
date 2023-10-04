@@ -3,4 +3,13 @@
 #
 # Include all config files in {{ __rsyslog_config_dir }}
 #
+{# it is an error to include files if the directory is empty #}
+{% if __rsyslog_has_config_files %}
 $IncludeConfig {{ __rsyslog_config_dir }}/*.conf
+{% else %}
+{# must have something or rsyslog will fail to start #}
+{# this will be overwritten the next time rsyslog is configured #}
+{# with actual files #}
+# Everybody gets emergency messages
+*.emerg                                                 :omusrmsg:*
+{% endif %}

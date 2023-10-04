@@ -4,9 +4,12 @@
 # if inputs are given and rsyslog_enabled is true, rsyslog.conf will be
 # overwritten, so no need to reinstall package
 - name: Reinstall package to restore rsyslog config if purging
+  vars:
+    ostree_pkg_mgr: ansible.posix.rhel_rpm_ostree
   when:
     - logging_purge_confs | bool | d(false)
     - not (rsyslog_inputs and __rsyslog_enabled | bool)
+    - not ansible_facts.pkg_mgr | d() == ostree_pkg_mgr
   block:
     # it is assumed that the only packages providing config files that might
     # be modified are the base packages - if this is not so, then additional
@@ -99,21 +102,6 @@
         owner: 'root'
         group: 'root'
         mode: '0755'
-
-    - name: Get mode of rsyslog.conf if it exists
-      stat:
-        path: /etc/rsyslog.conf
-      register: __rsyslog_register_stat_conf
-
-    - name: Generate main rsyslog configuration
-      template:
-        src: 'rsyslog.conf.j2'
-        dest: '/etc/rsyslog.conf'
-        mode: "{{ __rsyslog_register_stat_conf.stat.mode | d('0700') }}"
-      when:
-        - __rsyslog_enabled | bool
-        - rsyslog_inputs | d([])
-      notify: Restart rsyslogd
 
     - name: Generate global rule to add to __rsyslog_common_rules
       vars:
@@ -394,3 +382,36 @@
   when:
     - __rsyslog_failed_validation | d(false)
     - rsyslog_in_image | default(false) | bool
+
+- name: Create or recreate main config file
+  vars:
+    ostree_pkg_mgr: ansible.posix.rhel_rpm_ostree
+    is_ostree: "{{ ansible_facts.pkg_mgr | d() == ostree_pkg_mgr }}"
+    __rsyslog_generate_conf: "{{ is_ostree |
+      ternary(true,
+              __rsyslog_enabled and rsyslog_inputs | d([]) | length > 0) }}"
+  when: __rsyslog_generate_conf | bool
+  block:
+    - name: See if there are any config files
+      find:
+        paths: "{{ __rsyslog_config_dir }}"
+        patterns: "*.conf"
+      register: __rsyslog_find_result
+      when: is_ostree | bool
+
+    - name: Get mode of rsyslog.conf if it exists
+      stat:
+        path: /etc/rsyslog.conf
+      register: __rsyslog_register_stat_conf
+      when: __rsyslog_generate_conf | bool
+
+    - name: Generate main rsyslog configuration
+      template:
+        src: 'rsyslog.conf.j2'
+        dest: '/etc/rsyslog.conf'
+        mode: "{{ __rsyslog_register_stat_conf.stat.mode | d('0700') }}"
+      notify: Restart rsyslogd
+      when: __rsyslog_generate_conf | bool
+      vars:
+        __rsyslog_has_config_files: "{{ __rsyslog_find_result.matched > 0
+          if is_ostree else true }}"
