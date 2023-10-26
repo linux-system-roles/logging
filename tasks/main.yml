@@ -78,7 +78,7 @@
           file:
             path: "{{ role_path }}/debug"
             state: directory
-            mode: 0700
+            mode: "0700"
 
         - name: Delete debug file
           file:
@@ -90,7 +90,7 @@
             path: "{{ role_path }}/debug/main.yml"
             create: true
             line: "#ANSIBLE MANAGED VARIABLES FILE"
-            mode: 0600
+            mode: "0600"
 
         - name: Use a debug var to avoid an empty dict in with_dict
           set_fact:
@@ -105,7 +105,7 @@
             create: true
             line: "{{ item.key }}: {{ item.value | d() |
               to_nice_json(indent=2) }}"
-            mode: 0600
+            mode: "0600"
           with_dict: "{{ __logging_debug_hostname }}"
 
 - name: Include Rsyslog role
