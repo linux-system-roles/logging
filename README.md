@@ -423,7 +423,7 @@ These variables are set in the same level of the `logging_inputs`, `logging_outp
   will be uninstalled and reinstalled in order to revert back to the original
   system default configuration.
 * `logging_system_log_dir`: Directory where the local log output files are placed. Default to `/var/log`.
-* `logging_preserve_fqdn`: If set to `on`, rsyslog will use the fully qualified domain name (FQDN, ex. server1.example.com) instead of the short hostname (ex. server1)
+* `logging_preserve_fqdn`: If set to `true`, rsyslog will use the fully qualified domain name (FQDN, ex. server1.example.com) instead of the short hostname (ex. server1). Default to `false`.
 * `logging_manage_firewall`: If set to `true` and ports are found in the logging role
   parameters, configure the firewall for the ports using the firewall role.
   If set to `false`, the `logging role` does not manage the firewall.
