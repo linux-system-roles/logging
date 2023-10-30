@@ -27,7 +27,7 @@ global(
   defaultNetstreamDriverKeyFile="{{ key_path }}"
 {%   endif %}
 {% endif %}
-{% if rsyslog_max_message_size is defined %}
+{% if logging_max_message_size is defined %}
   maxMessageSize="{{ logging_max_message_size }}"
 {% endif %}
 )
