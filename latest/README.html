@@ -222,6 +222,7 @@ Firewall and SELinux Role</a></li>
 </ul></li>
 <li><a href="#providers" id="toc-providers">Providers</a></li>
 <li><a href="#tests" id="toc-tests">Tests</a></li>
+<li><a href="#rpm-ostree" id="toc-rpm-ostree">rpm-ostree</a></li>
 </ul>
 </nav>
 <hr>
@@ -262,8 +263,12 @@ href="#other-options"><code>Other options</code></a> section.)</p>
 <p>If the <code>logging</code> is a role from the
 <code>fedora.linux_system_roles</code> collection or from the Fedora RPM
 package, the requirement is already satisfied.</p>
-<p>Otherwise, please run the following command line to install the
-collection.</p>
+<p>The role requires external collections for management of
+<code>rpm-ostree</code> nodes. These are listed in the
+<code>meta/collection-requirements.yml</code>. You do not need them if
+you do not want to manage <code>rpm-ostree</code> systems.</p>
+<p>If you need to install additional collections based on the above,
+please run:</p>
 <div class="sourceCode" id="cb1"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ansible-galaxy</span> collection install <span class="at">-r</span> meta/collection-requirements.yml</span></code></pre></div>
 <h1 id="definitions">Definitions</h1>
@@ -895,7 +900,11 @@ logging role run. NOTE: If <code>/etc/rsyslog.conf</code> was modified,
 and you use <code>logging_purge_confs: true</code>, and you are not
 providing any <code>logging_inputs</code>, then the <code>rsyslog</code>
 package will be uninstalled and reinstalled in order to revert back to
-the original system default configuration.</p></li>
+the original system default configuration. On <code>ostree</code>
+systems, this does not work, so a minimal rsyslog.conf will be used,
+which is <em>not</em> the same as the default rsyslog.conf provided by
+the rpm package. So please use caution if you use this option on
+<code>ostree</code> systems.</p></li>
 <li><p><code>logging_system_log_dir</code>: Directory where the local
 log output files are placed. Default to <code>/var/log</code>.</p></li>
 <li><p><code>logging_manage_firewall</code>: If set to <code>true</code>
@@ -1379,6 +1388,8 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb27-1"><a href=
 <h1 id="tests">Tests</h1>
 <p>tests/README.md - This documentation shows how to execute CI tests in
 the tests directory as well as how to debug when the test fails.</p>
+<h1 id="rpm-ostree">rpm-ostree</h1>
+<p>See README-ostree.md</p>
 </article>
 </body>
 </html>
