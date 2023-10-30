@@ -30,7 +30,7 @@ global(
 {% if logging_max_message_size is defined %}
   maxMessageSize="{{ logging_max_message_size }}"
 {% endif %}
-{% if logging_preserve_fqdn is defined and logging_preserve_fqdn is sameas true %}
+{% if logging_preserve_fqdn | d() %}
   preserveFQDN="on"
 {% endif %}
 )
