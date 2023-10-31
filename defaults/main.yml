@@ -25,7 +25,7 @@ logging_purge_confs: false
 logging_system_log_dir: /var/log
 
 # If set to `true`, the full FQDN will be used in log entries.
-# Default and recommended is to use the short hostname. 
+# Default and recommended is to use the short hostname.
 logging_preserve_fqdn: false
 
 # Performance optimization parameters for the server.
