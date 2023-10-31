@@ -24,6 +24,10 @@ logging_purge_confs: false
 # Variable to specify the directory to put the local output files to store logs.
 logging_system_log_dir: /var/log
 
+# If set to `true`, the full FQDN will be used in log entries.
+# Default and recommended is to use the short hostname. 
+logging_preserve_fqdn: false
+
 # Performance optimization parameters for the server.
 # Input thread count listening on the udp port.
 logging_udp_threads: 1
