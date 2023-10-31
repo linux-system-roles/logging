@@ -907,6 +907,10 @@ the rpm package. So please use caution if you use this option on
 <code>ostree</code> systems.</p></li>
 <li><p><code>logging_system_log_dir</code>: Directory where the local
 log output files are placed. Default to <code>/var/log</code>.</p></li>
+<li><p><code>logging_preserve_fqdn</code>: If set to <code>true</code>,
+rsyslog will use the fully qualified domain name (FQDN, ex.
+server1.example.com) instead of the short hostname (ex. server1).
+Default to <code>false</code>.</p></li>
 <li><p><code>logging_manage_firewall</code>: If set to <code>true</code>
 and ports are found in the logging role parameters, configure the
 firewall for the ports using the firewall role. If set to
