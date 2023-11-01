@@ -134,6 +134,9 @@
             client_count: 20
             io_buffer_size: 8192
             async_writing: true
+            action:
+              reportsuspension: "on"
+              reportsuspensioncontinuation: "off"
           - name: remote_files_output1
             type: remote_files
             remote_sub_path: >-
@@ -171,6 +174,12 @@
           - "{{ __test_output_remote1 }}"
         __check_systemctl_status: true
       include_tasks: tasks/check_daemon_config_files.yml
+
+    - name: Check action parameters in remote0 output
+      command: >-
+        grep 'authpriv.none action.* action.reportsuspension="on"
+        action.reportsuspensioncontinuation="off"' {{ __test_output_remote0 }}
+      changed_when: false
 
     - name: Install lsof
       package:

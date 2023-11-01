@@ -64,6 +64,13 @@
                 target: host.domain
                 tcp_port: 1514
                 template: syslog
+                queue:
+                  spooldirectory: /var/spool/rsyslog
+                  filename: forwards
+                  saveonshutdown: "on"
+                action:
+                  resumecount: 50
+                  resumeinterval: 300
               - name: forwards_facility_only
                 type: forwards
                 facility: local2
@@ -152,6 +159,10 @@
                       Port="1514"
                       Protocol="tcp"
                       Template="{{ __test_template_sys }}"
+                      action.resumeinterval="300"
+                      queue.spooldirectory="/var/spool/rsyslog"
+                      queue.filename="forwards"
+                      queue.saveonshutdown="on"
                   )
               }
             mode: '0600'
