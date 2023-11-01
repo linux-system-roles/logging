@@ -1,0 +1,7 @@
+{% if __rsyslog_output.queue is defined and __rsyslog_output.queue is mapping %}
+{%   for option, value in __rsyslog_output.queue.items() %}
+{%     if option | lower in rsyslog_valid_general_queue_params %}
+queue.{{ option }}="{{ value }}"
+{%     endif %}
+{%   endfor %}
+{% endif %}

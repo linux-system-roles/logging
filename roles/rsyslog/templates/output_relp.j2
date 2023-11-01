@@ -3,6 +3,12 @@ ruleset(name="{{ __rsyslog_output.name }}") {
            type="omrelp"
            target="{{ __rsyslog_output.target }}"
            port="{{ __rsyslog_output.port | d(20514) | int }}"
+{% if __rsyslog_output.action is defined %}
+           {{ lookup('template', 'general_action_params.j2') | indent(11) | trim }}
+{% endif %}
+{% if __rsyslog_output.queue is defined %}
+           {{ lookup('template', 'general_queue_params.j2') | indent(11) | trim }}
+{% endif %}
 {% if __rsyslog_output.tls | default(true) %}
 {%   if __rsyslog_output.ca_cert is defined %}
 {%     set __cacert = __rsyslog_output.ca_cert %}

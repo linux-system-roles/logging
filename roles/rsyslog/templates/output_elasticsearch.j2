@@ -91,6 +91,12 @@ ruleset(name="{{ __rsyslog_output.name }}") {
             uid="{{ __rsyslog_output.uid }}"
             pwd="{{ logging_elasticsearch_password }}"
 {% endif %}
+{% if __rsyslog_output.action is defined %}
+            {{ lookup('template', 'general_action_params.j2') | indent(12) | trim }}
+{% endif %}
+{% if __rsyslog_output.queue is defined %}
+            {{ lookup('template', 'general_queue_params.j2') | indent(12) | trim }}
+{% endif %}
         )
     }
 }

@@ -219,6 +219,31 @@ Available options:
 * `type`: Type of the output element. Currently, `elasticsearch`, `files`, `forwards`, and `remote_files` are supported. The `type` is used to specify a task type which corresponds to a directory name in roles/rsyslog/{tasks,vars}/outputs/.
 * `state`: State of the configuration file. `present` or `absent`. Default to `present`.
 
+#### logging_outputs general queue parameters
+
+* `queue`: A dict containing general queue paramters that can be used by all output module types, see the official rsyslog documentation for full list of parameters and their function.
+
+```yaml
+logging_outputs:
+  - name: files_output
+    type: files
+    queue:
+      size: 100
+```
+
+#### logging_outputs general action parameters
+
+* `action`: A dict containing general action paramters, see the official rsyslog documentation for full list of parameters and their function.
+
+```yaml
+logging_outputs:
+  - name: forwards_output
+    type: forwards
+    target: your_target_host
+    action:
+      writeallmarkmessages: "on"
+```
+
 #### logging_outputs elasticsearch type
 
 `elasticsearch` output supports sending logs to Elasticsearch. It is available only when the input is `ovirt`. Assuming Elasticsearch is already configured and running.

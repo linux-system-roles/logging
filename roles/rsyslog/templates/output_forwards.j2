@@ -37,5 +37,11 @@ ruleset(name="{{ __rsyslog_output.name }}") {
 {% else %}
         Template="RSYSLOG_ForwardFormat"
 {% endif %}
+{% if __rsyslog_output.action is defined %}
+        {{ lookup('template', 'general_action_params.j2') | indent(8) | trim }}
+{% endif %}
+{% if __rsyslog_output.queue is defined %}
+        {{ lookup('template', 'general_queue_params.j2') | indent(8) | trim }}
+{% endif %}
     )
 }
