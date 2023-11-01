@@ -1,0 +1,7 @@
+{% if __rsyslog_output.action is defined and __rsyslog_output.action is mapping %}
+{%   for option, value in __rsyslog_output.action.items() %}
+{%     if option | lower in rsyslog_valid_general_action_params %}
+action.{{ option }}="{{ value }}"
+{%     endif %}
+{%   endfor %}
+{% endif %}

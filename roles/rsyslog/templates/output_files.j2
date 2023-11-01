@@ -1,5 +1,10 @@
 {% if __rsyslog_output.path is defined %}
+{%   if __rsyslog_output.queue is defined %}
+ruleset(name="{{ __rsyslog_output.name }}"
+        {{ lookup('template', 'general_queue_params.j2') | indent(8) | trim }}) {
+{%   else %}
 ruleset(name="{{ __rsyslog_output.name }}") {
+{%   endif %}
 {%   if __rsyslog_output.property | d() %}
     :{{ __rsyslog_output.property }}, {{ __rsyslog_output.property_op | d('contains') }}, "{{ __rsyslog_output.property_value | d('error') }}" {{ __rsyslog_output.path }}
 {%   elif __rsyslog_output.exclude | d([]) %}
@@ -9,7 +14,12 @@ ruleset(name="{{ __rsyslog_output.name }}") {
 {%   endif %}
 }
 {% else %}
+{%   if __rsyslog_output.queue is defined %}
+ruleset(name="{{ __rsyslog_output.name }}"
+        {{ lookup('template', 'general_queue_params.j2') | indent(8) | trim }}) {
+{%   else %}
 ruleset(name="{{ __rsyslog_output.name }}") {
+{%   endif %}
     # Log all kernel messages to the console.
     # Logging much else clutters up the screen.
     kern.*                                                 /dev/console
