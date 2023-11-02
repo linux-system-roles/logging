@@ -180,6 +180,10 @@
         grep 'authpriv.none action.* action.reportsuspension="on"
         action.reportsuspensioncontinuation="off"' {{ __test_output_remote0 }}
       changed_when: false
+    - name: Check queue parameters in remote0 output
+      command: >-
+        grep ' queue.Size="49999"' {{ __test_output_remote0 }}
+      changed_when: false
 
     - name: Install lsof
       package:
