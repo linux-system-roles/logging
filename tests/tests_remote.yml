@@ -137,6 +137,8 @@
             action:
               reportsuspension: "on"
               reportsuspensioncontinuation: "off"
+            queue:
+              Size: 49999
           - name: remote_files_output1
             type: remote_files
             remote_sub_path: >-
