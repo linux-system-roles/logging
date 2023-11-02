@@ -12,14 +12,20 @@ template(
   type="string"
   string="{{ __remote_log_path }}"
 )
+{%   if __rsyslog_output.queue is defined %}
+{%     set __queue_options = dict() %}
+{%     for option in __rsyslog_output.queue.keys() %}
+{%       set _none = __queue_options.update({ option | lower : true }) %}
+{%     endfor %}
+{%   endif %}
 ruleset(name="{{ __rsyslog_output.name }}"
-{%   if __rsyslog_output.queue.type is not defined %}
+{%   if __queue_options.type is not defined %}
         queue.type="{{ logging_server_queue_type }}"
 {%   endif %}
-{%   if __rsyslog_output.queue.size is not defined %}
+{%   if __queue_options.size is not defined %}
         queue.size="{{ logging_server_queue_size }}"
 {%   endif %}
-{%   if __rsyslog_output.queue.workerthreads is not defined %}
+{%   if __queue_options.workerthreads is not defined %}
         queue.workerThreads="{{ logging_server_threads }}"
 {%   endif %}
 {%   if __rsyslog_output.queue is defined %}
