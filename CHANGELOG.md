@@ -1,6 +1,27 @@
 Changelog
 =========
 
+[1.12.0] - 2023-11-06
+--------------------
+
+### New Features
+
+- feat: support for ostree systems (#360)
+- feat: Add support for the global config option preserveFQDN with a new logg… (#362)
+- feat: Add support for general queue and general action parameters (#364)
+
+### Bug Fixes
+
+- fix: check that logging_max_message_size is set, not rsyslog_max_message_size (#361)
+
+### Other Changes
+
+- Bump actions/checkout from 3 to 4 (#350)
+- ci: add dump_packages to weekly_ci (#351)
+- ci: use dump_packages.py callback to get packages used by role (#357)
+- ci: tox-lsr version 3.1.1 (#359)
+- ci: Fix implicit octal values in main.yml (#363)
+
 [1.11.10] - 2023-09-08
 --------------------
 
