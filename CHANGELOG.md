@@ -1,6 +1,13 @@
 Changelog
 =========
 
+[1.12.1] - 2023-11-07
+--------------------
+
+### Other Changes
+
+- test: add tests for preserveFQDN, max_message_size (#366)
+
 [1.12.0] - 2023-11-06
 --------------------
 
