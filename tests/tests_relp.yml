@@ -12,6 +12,9 @@
     __test_relp_server1: /etc/rsyslog.d/11-input-relp-relp_server1.conf
     __test_relp_client0: /etc/rsyslog.d/31-output-relp-relp_client0.conf
     __test_relp_client1: /etc/rsyslog.d/31-output-relp-relp_client1.conf
+    __test_relp_global: /etc/rsyslog.d/00-global.conf
+    logging_max_message_size: 16384
+    logging_preserve_fqdn: true
 
   tasks:
     # TEST CASE 0
@@ -175,6 +178,20 @@
       changed_when: false
       failed_when: __result.stdout != "1"
     # yamllint enable rule:line-length
+
+    - name: Check maxDataSize is logging_max_message_size
+      command: >-
+        grep -c 'maxDataSize="{{ logging_max_message_size }}"'
+        {{ __test_relp_server0 }}
+      changed_when: false
+      register: __result
+      failed_when: __result.stdout != "1"
+
+    - name: Check preserveFQDN is on
+      command: grep -c 'preserveFQDN="on"' {{ __test_relp_global }}
+      changed_when: false
+      register: __result
+      failed_when: __result.stdout != "1"
 
     - name: Check ports managed by firewall and selinux
       include_tasks: tasks/check_firewall_selinux.yml
