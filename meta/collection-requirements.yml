@@ -2,5 +2,4 @@
 ---
 collections:
   - ansible.posix
-  - ansible.utils
   - fedora.linux_system_roles

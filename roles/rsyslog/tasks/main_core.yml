@@ -4,12 +4,10 @@
 # if inputs are given and rsyslog_enabled is true, rsyslog.conf will be
 # overwritten, so no need to reinstall package
 - name: Reinstall package to restore rsyslog config if purging
-  vars:
-    ostree_pkg_mgr: ansible.posix.rhel_rpm_ostree
   when:
     - logging_purge_confs | bool | d(false)
     - not (rsyslog_inputs and __rsyslog_enabled | bool)
-    - not ansible_facts.pkg_mgr | d() == ostree_pkg_mgr
+    - not __logging_is_ostree | d(false)
   block:
     # it is assumed that the only packages providing config files that might
     # be modified are the base packages - if this is not so, then additional
@@ -25,6 +23,8 @@
       package:
         name: "{{ __rsyslog_base_packages }}"
         state: absent
+        use: "{{ (__logging_is_ostree | d(false)) |
+                 ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
       register: __rsyslog_erased
       when: __rsyslog_package_status.results |
         rejectattr('stdout', 'match', '^package .* is not installed') |
@@ -37,6 +37,8 @@
       if (logging_pki_files | d([]) | length > 0) else []) +
       (rsyslog_extra_packages | flatten) }}"
     state: present
+    use: "{{ (__logging_is_ostree | d(false)) |
+             ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
   when:
     - __rsyslog_enabled | bool or
       (__rsyslog_erased is success and __rsyslog_erased is changed)
@@ -385,9 +387,7 @@
 
 - name: Create or recreate main config file
   vars:
-    ostree_pkg_mgr: ansible.posix.rhel_rpm_ostree
-    is_ostree: "{{ ansible_facts.pkg_mgr | d() == ostree_pkg_mgr }}"
-    __rsyslog_generate_conf: "{{ is_ostree |
+    __rsyslog_generate_conf: "{{ (__logging_is_ostree | d(false)) |
       ternary(true,
               __rsyslog_enabled and rsyslog_inputs | d([]) | length > 0) }}"
   when: __rsyslog_generate_conf | bool
@@ -397,7 +397,7 @@
         paths: "{{ __rsyslog_config_dir }}"
         patterns: "*.conf"
       register: __rsyslog_find_result
-      when: is_ostree | bool
+      when: __logging_is_ostree | d(false)
 
     - name: Get mode of rsyslog.conf if it exists
       stat:
@@ -414,4 +414,4 @@
       when: __rsyslog_generate_conf | bool
       vars:
         __rsyslog_has_config_files: "{{ __rsyslog_find_result.matched > 0
-          if is_ostree else true }}"
+          if __logging_is_ostree | d(false) else true }}"

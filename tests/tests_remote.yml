@@ -67,6 +67,8 @@
       package:
         name: lsof
         state: present
+        use: "{{ (__logging_is_ostree | d(false)) |
+                 ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
 
     - name: Check lsof outputs for rsyslogd
       shell: |-
@@ -191,6 +193,8 @@
       package:
         name: lsof
         state: present
+        use: "{{ (__logging_is_ostree | d(false)) |
+                 ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
 
     - name: Check lsof outputs for rsyslogd
       shell: |-
