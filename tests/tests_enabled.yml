@@ -40,9 +40,8 @@
 
     - name: Ensure config file size and counts
       vars:
-        ostree_pkg_mgr: ansible.posix.rhel_rpm_ostree
         __conf_count: 0
-        __conf_size: "{{ 'less' if ansible_facts.pkg_mgr | d() == ostree_pkg_mgr
+        __conf_size: "{{ 'less' if __logging_is_ostree | d(false)
           else 'more' }}"
         __conf_files: []
         __check_systemctl_status: true

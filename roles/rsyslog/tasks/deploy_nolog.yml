@@ -9,6 +9,8 @@
   package:
     name: "{{ __rsyslog_packages }}"
     state: present
+    use: "{{ (__logging_is_ostree | d(false)) |
+             ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
   when:
     - __rsyslog_packages | length > 0
     - not rsyslog_in_image | bool
