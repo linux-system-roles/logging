@@ -107,7 +107,7 @@ Available options:
 * `use_imuxsock`: Use `imuxsock` instead of `imjournal`. Default to `false`.
 * `ratelimit_burst`: Maximum number of messages that can be emitted within ratelimit_interval. Default to `20000` if use_imuxsock is false. Default to `200` if use_imuxsock is true.
 * `ratelimit_interval`: Interval to evaluate ratelimit_burst. Default to `600` seconds if use_imuxsock is false. Default to `0` if use_imuxsock is true. 0 indicates ratelimiting is turned off.
-* `persist_state_interval`: Journal state is persisted every value messages. Default to `10`. Effective only when use_imuxsock is false.
+* `journal_persist_state_interval`: Journal state is persisted every value messages. Default to `10`. Effective only when use_imuxsock is false.
 
 #### logging_inputs files type
 
