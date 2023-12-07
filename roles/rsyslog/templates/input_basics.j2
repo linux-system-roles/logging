@@ -4,7 +4,7 @@ module(load="imklog" permitnonkernelfacility="on")
 {% if __rsyslog_input.use_imuxsock | d(false) | bool %}
 module(load="imuxsock"    # provides support for local system logging (e.g. via logger command)
        SysSock.RateLimit.Interval="{{ __rsyslog_input.ratelimit_interval | d(0) }}"
-{% if __rsyslog_input.ratelimit_interval is defined and __rsyslog_input.ratelimit_interval > 0 %}
+{% if __rsyslog_input.ratelimit_interval | d(0) > 0 %}
        SysSock.RateLimit.Burst="{{ __rsyslog_input.ratelimit_burst | d(200) }}"
 {% endif %}
        SysSock.Use="on")  # Turn on message reception via local log socket.
