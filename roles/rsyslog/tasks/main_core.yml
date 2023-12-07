@@ -259,7 +259,7 @@
         __rsyslog_current_files: "{{ __rsyslog_template_results |
           selectattr('results', 'defined') | map(attribute='results') |
           flatten | selectattr('dest', 'defined') | map(attribute='dest') |
-          list | to_nice_json }}"
+          list }}"
         __rsyslog_files_to_remove: "{{
           __rsyslog_confs.stdout_lines | difference(__rsyslog_current_files) }}"
 
