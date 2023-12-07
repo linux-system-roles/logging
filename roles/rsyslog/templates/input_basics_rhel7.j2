@@ -10,7 +10,7 @@ $ModLoad imjournal # provides access to the systemd journal
 # File to store the position in the journal
 $IMJournalStateFile imjournal.state
 $imjournalRatelimitInterval {{ __rsyslog_input.ratelimit_interval | d(600) }}
-{% if __rsyslog_input.ratelimit_interval is defined and __rsyslog_input.ratelimit_interval > 0 %}
+{% if __rsyslog_input.ratelimit_interval | d(0) > 0 %}
 $imjournalRatelimitBurst {{ __rsyslog_input.ratelimit_burst | d(20000) }}
 {% endif %}
 $imjournalPersistStateInterval {{ __rsyslog_input.journal_persist_state_interval | d(10) }}
