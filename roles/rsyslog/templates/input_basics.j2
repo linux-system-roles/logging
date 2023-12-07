@@ -15,7 +15,7 @@ module(load="imuxsock"    # provides support for local system logging (e.g. via 
 module(load="imjournal"
        StateFile="{{ __rsyslog_work_dir }}/imjournal.state"
        RateLimit.Interval="{{ __rsyslog_input.ratelimit_interval | d(600) }}"
-{% if __rsyslog_input.ratelimit_interval is defined and __rsyslog_input.ratelimit_interval > 0 %}
+{% if __rsyslog_input.ratelimit_interval | d(0) > 0 %}
        RateLimit.Burst="{{ __rsyslog_input.ratelimit_burst | d(20000) }}"
 {% endif %}
        PersistStateInterval="{{ __rsyslog_input.journal_persist_state_interval | d(10) }}")
