@@ -1,6 +1,20 @@
 Changelog
 =========
 
+[1.12.3] - 2023-12-08
+--------------------
+
+### Bug Fixes
+
+- fix: avoid conf of RatelimitBurst when RatelimitInterval is zero (#373)
+- fix: ansible-core-2.16 - only use to_nice_json for output formatting (#374)
+
+### Other Changes
+
+- ci: Bump actions/github-script from 6 to 7 (#370)
+- refactor: get_ostree_data.sh use env shebang - remove from .sanity* (#371)
+- docs: README.md: correct variable name journal_persist_state_interval (#372)
+
 [1.12.2] - 2023-11-29
 --------------------
 
