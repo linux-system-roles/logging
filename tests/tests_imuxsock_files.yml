@@ -95,3 +95,50 @@
 
     - name: Check ports managed by firewall and selinux
       include_tasks: tasks/check_firewall_selinux.yml
+
+    - name: Check if /dev/log is present
+      stat:
+        path: /dev/log
+      register: __dev_log
+
+    - name: Restore /dev/log by restarting journald units
+      when: not __dev_log.stat.exists
+      block:
+        # This is really hacky - but I could not find a reliable way to do this
+        # that works on older rhel8, newer rhel9, and fedora - each platform has
+        # odd idiosyncrasies
+        - name: Restart journald units
+          shell: |
+            for service in {{ __journald_units | join(" ") }}; do
+              if systemctl is-active "$service"; then
+                systemctl stop "$service" || :
+                sleep 1
+              fi
+            done
+            for service in {{ __journald_units | join(" ") }}; do
+              if ! systemctl is-active "$service"; then
+                systemctl start "$service"
+                sleep 1
+              fi
+            done
+          changed_when: true
+          vars:
+            __journald_units:
+              - systemd-journald.service
+              - systemd-journald-dev-log.socket
+              - systemd-journald.socket
+
+        - name: Ensure /dev/log is present
+          stat:
+            path: /dev/log
+          register: __dev_log
+          failed_when: __dev_log.stat.lnk_target != "/run/systemd/journal/dev-log"
+
+      rescue:
+        - name: Check journal for errors
+          command: journalctl -ex
+          changed_when: false
+
+        - name: Fail
+          fail:
+            msg: "{{ ansible_failed_result }}"
