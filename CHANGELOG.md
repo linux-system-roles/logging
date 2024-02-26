@@ -1,6 +1,14 @@
 Changelog
 =========
 
+[1.12.5] - 2024-02-26
+--------------------
+
+### Other Changes
+
+- ci: fix python unit test - copy pytest config to tests/unit (#379)
+- test: restore journald /dev/log after imuxsock test (#380)
+
 [1.12.4] - 2024-01-16
 --------------------
 
