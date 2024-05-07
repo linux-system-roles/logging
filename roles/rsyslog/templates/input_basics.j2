@@ -4,20 +4,20 @@ module(load="imklog" permitnonkernelfacility="on")
 {% if __rsyslog_input.use_imuxsock | d(false) | bool %}
 module(load="imuxsock"    # provides support for local system logging (e.g. via logger command)
        SysSock.RateLimit.Interval="{{ __rsyslog_input.ratelimit_interval | d(0) }}"
-{% if __rsyslog_input.ratelimit_interval | d(0) > 0 %}
+{%   if __rsyslog_input.ratelimit_interval | d(0) > 0 %}
        SysSock.RateLimit.Burst="{{ __rsyslog_input.ratelimit_burst | d(200) }}"
-{% endif %}
+{%   endif %}
        SysSock.Use="on")  # Turn on message reception via local log socket.
-input(name="basics_imuxsock" type="imuxsock" socket="/dev/log")
+input(type="imuxsock" socket="/dev/log")
 {% else %}
 module(load="imuxsock"    # provides support for local system logging (e.g. via logger command)
        SysSock.Use="off") # Turn off message reception via local log socket.
 module(load="imjournal"
        StateFile="{{ __rsyslog_work_dir }}/imjournal.state"
        RateLimit.Interval="{{ __rsyslog_input.ratelimit_interval | d(600) }}"
-{% if __rsyslog_input.ratelimit_interval | d(0) > 0 %}
+{%   if __rsyslog_input.ratelimit_interval | d(0) > 0 %}
        RateLimit.Burst="{{ __rsyslog_input.ratelimit_burst | d(20000) }}"
-{% endif %}
+{%   endif %}
        PersistStateInterval="{{ __rsyslog_input.journal_persist_state_interval | d(10) }}")
 {% endif %}
 {{ lookup('template', 'input_template.j2') }}
