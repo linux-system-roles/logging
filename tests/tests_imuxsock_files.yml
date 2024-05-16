@@ -74,6 +74,15 @@
         __logging_file: "{{ __default_system_log }}"
       include_tasks: tasks/test_logger.yml
 
+    - name: Get content of {{ __default_system_log }}
+      command: cat {{ __default_system_log }}
+      register: __default_system_log_content
+      changed_when: false
+
+    - name: Ensure no errors in {{ __default_system_log }}
+      assert:
+        that: "'rsyslogd: error' not in __default_system_log_content.stdout"
+
     - name: Check ports managed by firewall and selinux
       include_tasks: tasks/check_firewall_selinux.yml
 
@@ -137,6 +146,12 @@
       rescue:
         - name: Check journal for errors
           command: journalctl -ex
+          changed_when: false
+
+        # When imuxsock is configured, errors are not visible in journalctl
+        - name: Print errors in {{ __default_system_log }}
+          command: >-
+            grep "rsyslogd: error" {{ __default_system_log }}
           changed_when: false
 
         - name: Fail
