@@ -1,6 +1,17 @@
 Changelog
 =========
 
+[1.12.7] - 2024-05-21
+--------------------
+
+### Bug Fixes
+
+- fix: Remove name="basics_imuxsock" parameter from imuxsock type input (#385)
+
+### Other Changes
+
+- tests: Fail when rsyslog errors in __default_system_log (#386)
+
 [1.12.6] - 2024-04-04
 --------------------
 
