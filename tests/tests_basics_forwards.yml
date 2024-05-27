@@ -94,6 +94,7 @@
                 target: host.domain
               - name: forwards_no_severity_and_facility_protocol_port_target
                 type: forwards
+                target: host.domain
               - target: no_name.localdomain
                 type: forwards
             logging_inputs:

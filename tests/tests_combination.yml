@@ -52,7 +52,6 @@
           - name: "{{ __test_tag }}"
             type: files
             input_log_path: "{{ __test_inputfiles_dir }}/*.log"
-            endmsg_regex: xyz
           - name: basic_input
             type: basics
             ratelimit_burst: 33333
