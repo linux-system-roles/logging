@@ -392,3 +392,6 @@
       file:
         path: /tmp/__testfile__
         state: absent
+
+    - name: Assert {{ __default_system_log }}
+      include_tasks: tasks/assert_varlogmessages.yml

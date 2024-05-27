@@ -6,6 +6,7 @@
   hosts: all
   vars:
     __test_default_files_conf: /etc/rsyslog.d/30-output-files-default_files.conf
+    __default_system_log: /var/log/messages
   tasks:
     - name: Determine if system is ostree and set flag
       when: not __logging_is_ostree is defined
@@ -151,3 +152,6 @@
 
     - name: Check ports managed by firewall and selinux
       include_tasks: tasks/check_firewall_selinux.yml
+
+    - name: Assert {{ __default_system_log }}
+      include_tasks: tasks/assert_varlogmessages.yml

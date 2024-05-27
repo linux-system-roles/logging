@@ -11,7 +11,7 @@
       /etc/rsyslog.d/30-output-files-remote_files_output0.conf
     __test_output_remote1: >-
       /etc/rsyslog.d/30-output-files-remote_files_output1.conf
-
+    __default_system_log: /var/log/messages
   tasks:
     # TEST CASE 0
     - name: "TEST CASE 0; Test configuration inputs from the remote rsyslog
@@ -242,3 +242,6 @@
 
     - name: Check ports managed by firewall and selinux
       include_tasks: tasks/check_firewall_selinux.yml
+
+    - name: Assert {{ __default_system_log }}
+      include_tasks: tasks/assert_varlogmessages.yml

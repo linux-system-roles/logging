@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: MIT
+---
+- name: Get content of {{ __default_system_log }}
+  command: cat {{ __default_system_log }}
+  register: __default_system_log_content
+  changed_when: false
+  no_log: true
+
+# /var/log/messages sometimes contains errors not visible in journalctl
+- name: Ensure no errors in {{ __default_system_log }}
+  assert:
+    that: "'rsyslogd: error' not in __default_system_log_content.stdout"
+
+- name: Remove {{ __default_system_log }}
+  file:
+    path: "{{ __default_system_log }}"
+    state: absent

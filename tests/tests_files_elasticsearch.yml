@@ -21,7 +21,7 @@
       false in the configuration named elasticsearch_output"
     __certdir: /etc/pki/tls/certs/
     __keydir: /etc/pki/tls/private/
-
+    __default_system_log: /var/log/messages
   tasks:
     - name: Run test
       block:
@@ -458,6 +458,8 @@
           not waiting for normal sync points"
           meta: flush_handlers
 
+        - name: Assert {{ __default_system_log }}
+          include_tasks: tasks/assert_varlogmessages.yml
       always:
         - name: Remove tempdir
           file:
