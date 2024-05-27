@@ -582,6 +582,9 @@
             rmdir /tmp/rsyslog.d-backup
           changed_when: false
 
+        - name: Assert {{ __default_system_log }}
+          include_tasks: tasks/assert_varlogmessages.yml
+
         # TEST CASE 3
         - name: Test case 3
           block:

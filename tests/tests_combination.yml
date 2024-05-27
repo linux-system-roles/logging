@@ -577,3 +577,6 @@
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points"
       meta: flush_handlers
+
+    - name: Assert {{ __default_system_log }}
+      include_tasks: tasks/assert_varlogmessages.yml

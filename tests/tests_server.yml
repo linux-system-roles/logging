@@ -20,7 +20,7 @@
     __test_server_tcp: /etc/rsyslog.d/11-input-remote-remote_tcp.conf
     __test_server_udp: /etc/rsyslog.d/11-input-remote-remote_udp.conf
     __expected_error: "Error: remote_tcp_0 and remote_tcp_1 conflict."
-
+    __default_system_log: /var/log/messages
   tasks:
     # TEST CASE 0
     # Note: Create a self-signed cert just for the "unit" test.
@@ -223,3 +223,6 @@
         - "{{ __test_ca_cert }}"
         - "{{ __test_key }}"
         - "{{ __test_cert }}"
+
+    - name: Assert {{ __default_system_log }}
+      include_tasks: tasks/assert_varlogmessages.yml

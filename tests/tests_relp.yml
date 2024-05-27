@@ -15,7 +15,7 @@
     __test_relp_global: /etc/rsyslog.d/00-global.conf
     logging_max_message_size: 16384
     logging_preserve_fqdn: true
-
+    __default_system_log: /var/log/messages
   tasks:
     # TEST CASE 0
     # Note: Create a self-signed cert just for the "unit" test.
@@ -388,3 +388,6 @@
 
     - name: Check ports managed by firewall and selinux
       include_tasks: tasks/check_firewall_selinux.yml
+
+    - name: Assert {{ __default_system_log }}
+      include_tasks: tasks/assert_varlogmessages.yml
