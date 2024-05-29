@@ -364,7 +364,6 @@
       service:
         name: rsyslog
         enabled: true
-        state: started
       when:
         - __rsyslog_enabled | bool
         - not rsyslog_in_image | default(false) | bool
