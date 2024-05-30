@@ -52,6 +52,11 @@
           - name: "{{ __test_tag }}"
             type: files
             input_log_path: "{{ __test_inputfiles_dir }}/*.log"
+            # Not supported on EL 7
+            endmsg_regex: "{{ omit
+              if ansible_distribution in ['CentOS', 'RedHat'] and
+              ansible_distribution_major_version is version('7', '==')
+              else 'xyz' }}"
           - name: basic_input
             type: basics
             ratelimit_burst: 33333
