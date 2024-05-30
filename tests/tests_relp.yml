@@ -181,6 +181,7 @@
       failed_when: __result.stdout != "1"
     # yamllint enable rule:line-length
 
+    # maxDataSize is not supported on EL 7
     - name: Check maxDataSize is logging_max_message_size
       command: >-
         grep -c 'maxDataSize="{{ logging_max_message_size }}"'
@@ -190,7 +191,7 @@
       failed_when: __result.stdout != "1"
       when:
         - ansible_distribution in ['CentOS', 'RedHat']
-        - ansible_distribution_version is version('7', '=')
+        - ansible_distribution_major_version is version('7', '=')
 
     - name: Check preserveFQDN is on
       command: grep -c 'preserveFQDN="on"' {{ __test_relp_global }}
