@@ -17,7 +17,7 @@
       file:
         path: "{{ __test_inputfiles_dir }}"
         state: directory
-        mode: 0700
+        mode: "0700"
 
     # TEST CASE 0
     - name: "TEST CASE 0; Ensure that the role runs with complicated flows
@@ -129,7 +129,7 @@
                   Template="RSYSLOG_ForwardFormat"
               )
           }
-        mode: '0600'
+        mode: "0600"
 
     - name: Check severity_and_facility
       command: diff -B /tmp/__testfile__ '{{ __test_forwards_conf_s_f }}'
@@ -322,7 +322,7 @@
                   Template="RSYSLOG_ForwardFormat"
               )
           }
-        mode: '0600'
+        mode: "0600"
 
     - name: Check severity_and_facility
       command: diff -B /tmp/__testfile__ '{{ __test_forwards_conf_s_f }}'
@@ -470,7 +470,7 @@
             then {
               call files_test0
           }
-        mode: '0644'
+        mode: "0644"
 
     - name: Check ports managed by firewall and selinux
       include_tasks: tasks/check_firewall_selinux.yml
