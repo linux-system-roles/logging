@@ -1,10 +1,19 @@
 # SPDX-License-Identifier: MIT
 ---
 - name: Get content of {{ __default_system_log }}
-  command: cat {{ __default_system_log }}
+  shell: cat {{ __default_system_log }} || true
   register: __default_system_log_content
   changed_when: false
   no_log: true
+
+- name: Print possible errors in {{ __default_system_log }}
+  vars:
+    errors: >-
+      {{ __default_system_log_content.stdout
+      | regex_search('rsyslogd: error.*') }}
+  debug:
+    var: errors
+  when: errors | length > 0
 
 # /var/log/messages sometimes contains errors not visible in journalctl
 - name: Ensure no errors in {{ __default_system_log }}
