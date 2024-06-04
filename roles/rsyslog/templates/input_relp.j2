@@ -2,7 +2,7 @@ input(name="{{ __rsyslog_input.name }}"
       type="imrelp"
       port="{{ __rsyslog_input.port | d(20514) | int }}"
 {% if ansible_distribution in ['CentOS', 'RedHat'] and
-   ansible_distribution_major_version is version('7', '==') %}
+   ansible_distribution_major_version is version('7', '>') %}
       maxDataSize="{{ __rsyslog_input.max_data_size | d(logging_max_message_size) | int }}"
 {% endif %}
 {% if __rsyslog_input.tls | default(true) %}
