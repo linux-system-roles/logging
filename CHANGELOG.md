@@ -1,6 +1,19 @@
 Changelog
 =========
 
+[1.12.8] - 2024-06-11
+--------------------
+
+### Bug Fixes
+
+- fix: Add check for "rsyslogd: error" in /var/log/messages in all tests (#388)
+
+### Other Changes
+
+- ci: use tox-lsr 3.3.0 which uses ansible-test 2.17 (#389)
+- ci: tox-lsr 3.4.0 - fix py27 tests; move other checks to py310 (#391)
+- ci: Add supported_ansible_also to .ansible-lint (#392)
+
 [1.12.7] - 2024-05-21
 --------------------
 
