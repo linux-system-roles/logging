@@ -232,7 +232,7 @@
     - name: Set firewall true and selinux false
       set_fact:
         logging_manage_firewall: true
-        logging_manage_selinux: false
+        logging_manage_selinux: true
 
     - name: TEST CASE 1; Test the client configuration using tls relp
       vars:
