@@ -1,3 +1,39 @@
+{% macro print_file_attrs(__rsyslog_output) %}
+{%   if __rsyslog_output.mode is defined %}
+    $FileCreateMode {{ __rsyslog_output.mode }}
+{%   endif %}
+{%   if __rsyslog_output.dir_mode is defined %}
+    $DirCreateMode {{ __rsyslog_output.dir_mode }}
+{%   endif %}
+{%   if __rsyslog_output.owner is defined %}
+{%     if __rsyslog_output.owner is match("^[0-9]+$") %}
+    $fileOwnerNum {{ __rsyslog_output.owner }}
+{%     else %}
+    $fileOwner {{ __rsyslog_output.owner }}
+{%     endif %}
+{%   endif %}
+{%   if __rsyslog_output.dir_owner is defined %}
+{%     if __rsyslog_output.dir_owner is match("^[0-9]+$") %}
+    $dirOwnerNum {{ __rsyslog_output.dir_owner }}
+{%     else %}
+    $dirOwner {{ __rsyslog_output.dir_owner }}
+{%     endif %}
+{%   endif %}
+{%   if __rsyslog_output.group is defined %}
+{%     if __rsyslog_output.group is match("^[0-9]+$") %}
+    $fileGroupNum {{ __rsyslog_output.group }}
+{%     else %}
+    $fileGroup {{ __rsyslog_output.group }}
+{%     endif %}
+{%   endif %}
+{%   if __rsyslog_output.dir_group is defined %}
+{%     if __rsyslog_output.dir_group is match("^[0-9]+$") %}
+    $dirGroupNum {{ __rsyslog_output.dir_group }}
+{%     else %}
+    $dirGroup {{ __rsyslog_output.dir_group }}
+{%     endif %}
+{%   endif %}
+{% endmacro %}
 {% if __rsyslog_output.path is defined %}
 {%   if __rsyslog_output.queue is defined %}
 ruleset(name="{{ __rsyslog_output.name }}"
@@ -5,6 +41,7 @@ ruleset(name="{{ __rsyslog_output.name }}"
 {%   else %}
 ruleset(name="{{ __rsyslog_output.name }}") {
 {%   endif %}
+{{ print_file_attrs(__rsyslog_output) -}}
 {%   if __rsyslog_output.property | d() %}
     :{{ __rsyslog_output.property }}, {{ __rsyslog_output.property_op | d('contains') }}, "{{ __rsyslog_output.property_value | d('error') }}" {{ __rsyslog_output.path }}
 {%   elif __rsyslog_output.exclude | d([]) %}
@@ -25,6 +62,7 @@ ruleset(name="{{ __rsyslog_output.name }}") {
     kern.*                                                 /dev/console
     # Log anything (except mail) of level info or higher.
     # Don't log private authentication messages!
+{{ print_file_attrs(__rsyslog_output) -}}
     *.info;mail.none;authpriv.none;cron.none                {{ __rsyslog_system_log_dir }}/messages
     # The authpriv file has restricted access.
     authpriv.*                                              {{ __rsyslog_system_log_dir }}/secure

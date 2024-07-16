@@ -285,9 +285,19 @@ Available options:
 * `property_op`: Operation in property-based filter; In case of not `!`, put the `property_op` value in quotes; default to `contains`
 * `property_value`: Value in property-based filter; default to `error`
 * `path`: Path to the output file.
-
-logging_files_template_format: Set default template for the files output.
-Allowed values are `traditional`, `syslog`, and `modern`. Default to `modern`.
+* `logging_files_template_format`: Set default template for the files output.
+  Allowed values are `traditional`, `syslog`, and `modern`. Default to `modern`.
+* File/Directory properties - same as corresponding variables of the Ansible `file` module:
+  * `mode` - sets the rsyslog `omfile` module `FileCreateMode` parameter
+  * `owner` - sets the rsyslog `omfile` module `fileOwner` or `fileOwnerNum` parameter.  If the value
+    is an integer, set `fileOwnerNum`, otherwise, set `fileOwner`.
+  * `group` - sets the rsyslog `omfile` module `fileGroup` or `fileGroupNum` parameter.  If the value
+    is an integer, set `fileGroupNum`, otherwise, set `fileGroup`.
+  * `dir_mode` - sets the rsyslog `omfile` module `DirCreateMode` parameter
+  * `dir_owner` - sets the rsyslog `omfile` module `dirOwner` or `dirOwnerNum` parameter.  If the value
+    is an integer, set `dirOwnerNum`, otherwise, set `dirOwner`.
+  * `dir_group` - sets the rsyslog `omfile` module `dirGroup` or `dirGroupNum` parameter.  If the value
+    is an integer, set `dirGroupNum`, otherwise, set `dirGroup`.
 
 **Note:** Selector options and property-based filter options are exclusive. If Property-based filter options are defined, selector options will be ignored.
 
@@ -645,6 +655,7 @@ Deploying `basics input` reading logs from systemd unix socket and `files output
 ```
 
 Deploying `basics input` reading logs from systemd journal and `files output` to write to the individually configured local files.
+This also shows how to specify ownership/permission for log files/directories created by the logger.
 
 ```yaml
 ---
@@ -670,6 +681,16 @@ Deploying `basics input` reading logs from systemd journal and `files output` to
         type: files
         facility: authpriv,auth
         path: /var/log/secure
+      - name: files_output2
+        type: files
+        severity: info
+        path: /var/log/myapp/my_app.log
+        mode: "0600"
+        owner: logowner
+        group: loggroup
+        dir_mode: "0700"
+        dir_owner: logowner
+        dir_group: loggroup
     logging_flows:
       - name: flow0
         inputs: [system_input]
