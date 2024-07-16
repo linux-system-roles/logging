@@ -31,6 +31,8 @@
       vars:
         logging_mark: true
         logging_mark_interval: "7200"
+        logging_custom_config_files:
+          - files/90-custom-output.conf
         logging_inputs:
           - name: basic_input
             type: basics
@@ -46,10 +48,11 @@
 
     - name: Ensure config file size and counts
       vars:
-        __conf_count: 5
+        __conf_count: 6
         __conf_size: less
         __conf_files:
           - "{{ __test_default_files_conf }}"
+          - /etc/rsyslog.d/90-custom-output.conf
         __check_systemctl_status: true
       include_tasks: tasks/check_daemon_config_files.yml
 

@@ -30,13 +30,25 @@
           selectattr('name', 'defined') |
           selectattr('type', 'defined') | list }}"
 
-    - name: Set custom_config_files fact
-      set_fact:
-        rsyslog_custom_config_files: "{{ item.custom_config_files }}"
-      with_items: "{{ logging_outputs }}"
-      when:
-        - item.type | d('') == 'custom'
-        - logging_enabled | d(true)
+    - name: Use of rsyslog_custom_config_files is deprecated
+      debug:
+        msg: >-
+          WARNING: The use of rsyslog_custom_config_files is deprecated -
+          use logging_custom_config_files instead
+      when: rsyslog_custom_config_files is defined
+
+    - name: Use of type custom is deprecated
+      debug:
+        msg: >-
+          WARNING: The use of type custom is deprecated -
+          use logging_custom_config_files instead
+      when: __custom_output_files | length > 0
+      vars:
+        __custom_output_files: "{{ logging_outputs | d([]) |
+          selectattr('type', 'defined') |
+          selectattr('type', 'match', 'custom$') |
+          selectattr('custom_config_files', 'defined') |
+          map(attribute='custom_config_files') | flatten | list }}"
 
     - name: Check logging inputs
       vars:
@@ -112,6 +124,12 @@
   vars:
     __rsyslog_enabled: "{{ logging_enabled }}"
     __rsyslog_system_log_dir: "{{ logging_system_log_dir }}"
+    rsyslog_custom_config_files: "{{ __custom_config_files +
+      logging_custom_config_files }}"
+    __custom_config_files: "{{ logging_outputs | d([]) |
+      selectattr('type', 'defined') | selectattr('type', 'match', 'custom$') |
+      selectattr('custom_config_files', 'defined') |
+      map(attribute='custom_config_files') | flatten | list }}"
   include_role:
     name: "{{ role_path }}/roles/rsyslog"  # noqa role-name[path]
   when: logging_provider == 'rsyslog'
