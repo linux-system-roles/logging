@@ -65,9 +65,11 @@
             input_log_path: "{{ __test_inputfiles_dir0 }}/*.log"
             severity: err
             facility: local6
+            reopen_on_truncate: true
           - name: "php:"
             type: files
             input_log_path: "{{ __test_inputfiles_dir1 }}/*.log"
+            reopen_on_truncate: false
           - name: files_input2
             type: files
         logging_flows:
@@ -137,6 +139,7 @@
         - tag="files_input0"
         - severity="err"
         - facility="local6"
+        - reopenOnTruncate="on"
 
     - name: Check the filter 1
       lineinfile:
@@ -150,6 +153,7 @@
         - type="imfile"
         - file="/var/log/inputdirectory1/*.log"
         - tag="php:"
+        - reopenOnTruncate="off"
 
     - name: Check ports managed by firewall and selinux
       include_tasks: tasks/check_firewall_selinux.yml

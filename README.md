@@ -115,11 +115,16 @@ Available options:
 
 Available options:
 
-* `input_log_path`: File name to be read by the imfile plugin. The value should be full path. Wildcard '\*' is allowed in the path.  Default to `/var/log/containers/*.log`.
-`facility`: Facility to filter the inputs from the files.
-`severity`: Severity to filter the inputs from the files.
-`startmsg_regex`: The regular expression that matches the start part of a message.
-`endmsg_regex`: The regular expression that matches the last part of a message.
+* `input_log_path`: File name to be read by the imfile plugin. The value should
+  be full path. Wildcard '\*' is allowed in the path.  No default - this parameter
+  is mandatory.
+* `facility`: Facility to filter the inputs from the files.
+* `severity`: Severity to filter the inputs from the files.
+* `startmsg_regex`: The regular expression that matches the start part of a message.
+* `endmsg_regex`: The regular expression that matches the last part of a message.
+* `reopen_on_truncate`: Tells rsyslog to reopen input file when it was truncated
+  (inode unchanged but file size on disk is less than current offset in memory).
+  Default is `false`
 
 #### logging_inputs ovirt type
 
