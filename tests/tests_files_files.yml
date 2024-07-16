@@ -35,11 +35,20 @@
     __test_inputfiles_conf1: /etc/rsyslog.d/90-input-files-php:.conf
     __test_inputfiles_conf2: /etc/rsyslog.d/90-input-files-files_input2.conf
     __test_outputfiles_conf: /etc/rsyslog.d/30-output-files-files_output0.conf
+    __test_outputfiles1_conf: /etc/rsyslog.d/30-output-files-files_output1.conf
+    __test_outputfiles2_conf: /etc/rsyslog.d/30-output-files-files_output2.conf
     __default_system_log: /var/log/messages
     __test_outputfiles_module_conf: /etc/rsyslog.d/10-output-files-modules.conf
     __test_template: RSYSLOG_TraditionalFileFormat
 
   tasks:
+    - name: Create tempdir for tests
+      tempfile:
+        prefix: logging_
+        suffix: _lsr
+        state: directory
+      register: __logging_tmpdir
+
     # TEST CASE 0
     - name: "TEST CASE 0; Ensure that the role runs with parameters
       from two files inputs to two files outputs"
@@ -59,6 +68,16 @@
             type: files
             facility: authpriv,auth
             path: /var/log/secure
+          - name: files_output2
+            type: files
+            severity: info
+            path: "{{ __logging_tmpdir.path }}/test2/test.log"
+            mode: "0660"
+            owner: 0
+            group: root
+            dir_mode: "0770"
+            dir_owner: root
+            dir_group: 0
         logging_inputs:
           - name: files_input0
             type: files
@@ -88,12 +107,14 @@
 
     - name: Ensure config file size and counts
       vars:
-        __conf_count: 8
+        __conf_count: 9
         __conf_size: less
         __conf_files:
           - "{{ __test_inputfiles_conf0 }}"
           - "{{ __test_inputfiles_conf1 }}"
           - "{{ __test_outputfiles_conf }}"
+          - "{{ __test_outputfiles1_conf }}"
+          - "{{ __test_outputfiles2_conf }}"
         __check_systemctl_status: true
       include_tasks: tasks/check_daemon_config_files.yml
 
@@ -155,6 +176,22 @@
         - tag="php:"
         - reopenOnTruncate="off"
 
+    - name: Check files_output2
+      lineinfile:
+        path: "{{ __test_outputfiles2_conf }}"
+        line: "    {{ item }}"
+        state: present
+      check_mode: true
+      register: _result
+      failed_when: _result.changed
+      loop:
+        - "$FileCreateMode 0660"
+        - "$DirCreateMode 0770"
+        - "$fileOwnerNum 0"
+        - "$dirOwner root"
+        - "$fileGroup root"
+        - "$dirGroupNum 0"
+
     - name: Check ports managed by firewall and selinux
       include_tasks: tasks/check_firewall_selinux.yml
 
@@ -167,6 +204,11 @@
       include_role:
         name: linux-system-roles.logging
         public: true
+
+    - name: Remove tempdir
+      file:
+        path: "{{ __logging_tmpdir.path }}"
+        state: absent
 
     # notify Restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
