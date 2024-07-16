@@ -102,6 +102,10 @@ logging_manage_firewall: false
 # configure the selinux for the ports using the selinux role.
 logging_manage_selinux: false
 
+# A list of custom config files to copy to the default logging
+# configuration directory
+logging_custom_config_files: []
+
 # If you want the role to generate the certificates in the logging
 # configuration, specify the arguments to pass to the certificate
 # system role. Here's an example.

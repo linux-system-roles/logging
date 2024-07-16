@@ -475,6 +475,12 @@ These variables are set in the same level of the `logging_inputs`, `logging_outp
   NOTE: `logging_manage_selinux` is limited to _adding_ policy.
   It cannot be used for _removing_ policy.
   If you want to remove policy, you will need to use the `selinux` role directly.
+* `logging_custom_config_files`: A list of files to copy to the remote logging configuration
+  directory.  For `rsyslog`, this will be `/etc/rsyslog.d/`.  This assumes the
+  default logging configuration will load and process the configuration files in
+  that directory.  For example, the default `rsyslog` configuration has a directive
+  like `$IncludeConfig /etc/rsyslog.d/*.conf`.  WARNING: The use of
+  `rsyslog_custom_config_files` or using `type: custom` is deprecated.
 * `logging_certificates`: Information used to generate a private key and certificate.
   Default to `[]`.
   The value of `logging_certificates` is passed on to the `certificate_requests`
@@ -573,7 +579,9 @@ logging_flows:
 
 ### Standalone configuration
 
-Deploying `basics input` reading logs from systemd journal and implicit `files output` to write to the local files.
+Deploying `basics input` reading logs from systemd journal and implicit `files output`
+to write to the local files. This also deploys two custom files to the
+`/etc/rsyslog.d/` directory.
 
 ```yaml
 ---
@@ -582,6 +590,9 @@ Deploying `basics input` reading logs from systemd journal and implicit `files o
   roles:
     - linux-system-roles.logging
   vars:
+    logging_custom_config_files:
+      - files/90-my-custom-file.conf
+      - files/my-custom-file.rulebase
     logging_inputs:
       - name: system_input
         type: basics
@@ -596,6 +607,9 @@ The following playbook generates the same logging configuration files.
   roles:
     - linux-system-roles.logging
   vars:
+    logging_custom_config_files:
+      - files/90-my-custom-file.conf
+      - files/my-custom-file.rulebase
     logging_inputs:
       - name: system_input
         type: basics
