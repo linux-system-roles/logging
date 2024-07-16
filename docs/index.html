@@ -59,7 +59,7 @@ SOFTWARE.
   <style type="text/css">code{white-space: pre;}</style>
   <style type="text/css">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -70,7 +70,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -404,12 +404,18 @@ files.</p>
 <ul>
 <li><code>input_log_path</code>: File name to be read by the imfile
 plugin. The value should be full path. Wildcard '*' is allowed in the
-path. Default to <code>/var/log/containers/*.log</code>.
-<code>facility</code>: Facility to filter the inputs from the files.
-<code>severity</code>: Severity to filter the inputs from the files.
-<code>startmsg_regex</code>: The regular expression that matches the
-start part of a message. <code>endmsg_regex</code>: The regular
-expression that matches the last part of a message.</li>
+path. No default - this parameter is mandatory.</li>
+<li><code>facility</code>: Facility to filter the inputs from the
+files.</li>
+<li><code>severity</code>: Severity to filter the inputs from the
+files.</li>
+<li><code>startmsg_regex</code>: The regular expression that matches the
+start part of a message.</li>
+<li><code>endmsg_regex</code>: The regular expression that matches the
+last part of a message.</li>
+<li><code>reopen_on_truncate</code>: Tells rsyslog to reopen input file
+when it was truncated (inode unchanged but file size on disk is less
+than current offset in memory). Default is <code>false</code></li>
 </ul>
 <h3 id="logging_inputs-ovirt-type">logging_inputs ovirt type</h3>
 <p><code>ovirt</code> input supports oVirt specific inputs.</p>
