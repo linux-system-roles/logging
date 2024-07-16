@@ -14,5 +14,8 @@ input(
 {% if __rsyslog_input.endmsg_regex is defined %}
   endmsg.regex="{{ __rsyslog_input.endmsg_regex }}"
 {% endif %}
+{% if __rsyslog_input.reopen_on_truncate is defined %}
+  reopenOnTruncate="{{ __rsyslog_input.reopen_on_truncate | ternary('on', 'off') }}"
+{% endif %}
 )
 {{ lookup('template', 'input_template.j2') }}
