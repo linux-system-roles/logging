@@ -684,11 +684,35 @@ quotes; default to <code>contains</code></li>
 <li><code>property_value</code>: Value in property-based filter; default
 to <code>error</code></li>
 <li><code>path</code>: Path to the output file.</li>
-</ul>
-<p>logging_files_template_format: Set default template for the files
-output. Allowed values are <code>traditional</code>,
+<li><code>logging_files_template_format</code>: Set default template for
+the files output. Allowed values are <code>traditional</code>,
 <code>syslog</code>, and <code>modern</code>. Default to
-<code>modern</code>.</p>
+<code>modern</code>.</li>
+<li>File/Directory properties - same as corresponding variables of the
+Ansible <code>file</code> module:
+<ul>
+<li><code>mode</code> - sets the rsyslog <code>omfile</code> module
+<code>FileCreateMode</code> parameter</li>
+<li><code>owner</code> - sets the rsyslog <code>omfile</code> module
+<code>fileOwner</code> or <code>fileOwnerNum</code> parameter. If the
+value is an integer, set <code>fileOwnerNum</code>, otherwise, set
+<code>fileOwner</code>.</li>
+<li><code>group</code> - sets the rsyslog <code>omfile</code> module
+<code>fileGroup</code> or <code>fileGroupNum</code> parameter. If the
+value is an integer, set <code>fileGroupNum</code>, otherwise, set
+<code>fileGroup</code>.</li>
+<li><code>dir_mode</code> - sets the rsyslog <code>omfile</code> module
+<code>DirCreateMode</code> parameter</li>
+<li><code>dir_owner</code> - sets the rsyslog <code>omfile</code> module
+<code>dirOwner</code> or <code>dirOwnerNum</code> parameter. If the
+value is an integer, set <code>dirOwnerNum</code>, otherwise, set
+<code>dirOwner</code>.</li>
+<li><code>dir_group</code> - sets the rsyslog <code>omfile</code> module
+<code>dirGroup</code> or <code>dirGroupNum</code> parameter. If the
+value is an integer, set <code>dirGroupNum</code>, otherwise, set
+<code>dirGroup</code>.</li>
+</ul></li>
+</ul>
 <p><strong>Note:</strong> Selector options and property-based filter
 options are exclusive. If Property-based filter options are defined,
 selector options will be ignored.</p>
@@ -1136,7 +1160,8 @@ class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb17-1"><a href=
 <span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">outputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">files_output</span><span class="kw">]</span></span></code></pre></div>
 <p>Deploying <code>basics input</code> reading logs from systemd journal
 and <code>files output</code> to write to the individually configured
-local files.</p>
+local files. This also shows how to specify ownership/permission for log
+files/directories created by the logger.</p>
 <div class="sourceCode" id="cb18"><pre
 class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Deploying basic input and configured files output</span></span>
@@ -1161,10 +1186,20 @@ class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb18-1"><a href=
 <span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> files</span></span>
 <span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">facility</span><span class="kw">:</span><span class="at"> authpriv,auth</span></span>
 <span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">path</span><span class="kw">:</span><span class="at"> /var/log/secure</span></span>
-<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_flows</span><span class="kw">:</span></span>
-<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> flow0</span></span>
-<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">inputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">system_input</span><span class="kw">]</span></span>
-<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">outputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">files_output0</span><span class="kw">,</span><span class="at"> files_output1</span><span class="kw">]</span></span></code></pre></div>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> files_output2</span></span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> files</span></span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">severity</span><span class="kw">:</span><span class="at"> info</span></span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">path</span><span class="kw">:</span><span class="at"> /var/log/myapp/my_app.log</span></span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">mode</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;0600&quot;</span></span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">owner</span><span class="kw">:</span><span class="at"> logowner</span></span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">group</span><span class="kw">:</span><span class="at"> loggroup</span></span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">dir_mode</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;0700&quot;</span></span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">dir_owner</span><span class="kw">:</span><span class="at"> logowner</span></span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">dir_group</span><span class="kw">:</span><span class="at"> loggroup</span></span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_flows</span><span class="kw">:</span></span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> flow0</span></span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">inputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">system_input</span><span class="kw">]</span></span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">outputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">files_output0</span><span class="kw">,</span><span class="at"> files_output1</span><span class="kw">]</span></span></code></pre></div>
 <p>Deploying <code>files input</code> reading logs from local files and
 <code>files output</code> to write to the individually configured local
 files.</p>
