@@ -1,6 +1,19 @@
 Changelog
 =========
 
+[1.13.0] - 2024-07-23
+--------------------
+
+### New Features
+
+- feat: add support for reopen_on_truncate for files input (#398)
+- feat: support custom config files with logging_custom_config_files (#399)
+- feat: add support for file and directory mode/owner/group for output files (#400)
+
+### Other Changes
+
+- test: use selinux for relp to fix test AVC (#401)
+
 [1.12.9] - 2024-07-02
 --------------------
 
