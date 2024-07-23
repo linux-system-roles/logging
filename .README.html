@@ -59,7 +59,7 @@ SOFTWARE.
   <style type="text/css">code{white-space: pre;}</style>
   <style type="text/css">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -70,7 +70,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -404,12 +404,18 @@ files.</p>
 <ul>
 <li><code>input_log_path</code>: File name to be read by the imfile
 plugin. The value should be full path. Wildcard '*' is allowed in the
-path. Default to <code>/var/log/containers/*.log</code>.
-<code>facility</code>: Facility to filter the inputs from the files.
-<code>severity</code>: Severity to filter the inputs from the files.
-<code>startmsg_regex</code>: The regular expression that matches the
-start part of a message. <code>endmsg_regex</code>: The regular
-expression that matches the last part of a message.</li>
+path. No default - this parameter is mandatory.</li>
+<li><code>facility</code>: Facility to filter the inputs from the
+files.</li>
+<li><code>severity</code>: Severity to filter the inputs from the
+files.</li>
+<li><code>startmsg_regex</code>: The regular expression that matches the
+start part of a message.</li>
+<li><code>endmsg_regex</code>: The regular expression that matches the
+last part of a message.</li>
+<li><code>reopen_on_truncate</code>: Tells rsyslog to reopen input file
+when it was truncated (inode unchanged but file size on disk is less
+than current offset in memory). Default is <code>false</code></li>
 </ul>
 <h3 id="logging_inputs-ovirt-type">logging_inputs ovirt type</h3>
 <p><code>ovirt</code> input supports oVirt specific inputs.</p>
@@ -678,11 +684,35 @@ quotes; default to <code>contains</code></li>
 <li><code>property_value</code>: Value in property-based filter; default
 to <code>error</code></li>
 <li><code>path</code>: Path to the output file.</li>
-</ul>
-<p>logging_files_template_format: Set default template for the files
-output. Allowed values are <code>traditional</code>,
+<li><code>logging_files_template_format</code>: Set default template for
+the files output. Allowed values are <code>traditional</code>,
 <code>syslog</code>, and <code>modern</code>. Default to
-<code>modern</code>.</p>
+<code>modern</code>.</li>
+<li>File/Directory properties - same as corresponding variables of the
+Ansible <code>file</code> module:
+<ul>
+<li><code>mode</code> - sets the rsyslog <code>omfile</code> module
+<code>FileCreateMode</code> parameter</li>
+<li><code>owner</code> - sets the rsyslog <code>omfile</code> module
+<code>fileOwner</code> or <code>fileOwnerNum</code> parameter. If the
+value is an integer, set <code>fileOwnerNum</code>, otherwise, set
+<code>fileOwner</code>.</li>
+<li><code>group</code> - sets the rsyslog <code>omfile</code> module
+<code>fileGroup</code> or <code>fileGroupNum</code> parameter. If the
+value is an integer, set <code>fileGroupNum</code>, otherwise, set
+<code>fileGroup</code>.</li>
+<li><code>dir_mode</code> - sets the rsyslog <code>omfile</code> module
+<code>DirCreateMode</code> parameter</li>
+<li><code>dir_owner</code> - sets the rsyslog <code>omfile</code> module
+<code>dirOwner</code> or <code>dirOwnerNum</code> parameter. If the
+value is an integer, set <code>dirOwnerNum</code>, otherwise, set
+<code>dirOwner</code>.</li>
+<li><code>dir_group</code> - sets the rsyslog <code>omfile</code> module
+<code>dirGroup</code> or <code>dirGroupNum</code> parameter. If the
+value is an integer, set <code>dirGroupNum</code>, otherwise, set
+<code>dirGroup</code>.</li>
+</ul></li>
+</ul>
 <p><strong>Note:</strong> Selector options and property-based filter
 options are exclusive. If Property-based filter options are defined,
 selector options will be ignored.</p>
@@ -962,6 +992,15 @@ SELinux. Default to <code>false</code>. NOTE:
 policy. It cannot be used for <em>removing</em> policy. If you want to
 remove policy, you will need to use the <code>selinux</code> role
 directly.</p></li>
+<li><p><code>logging_custom_config_files</code>: A list of files to copy
+to the remote logging configuration directory. For <code>rsyslog</code>,
+this will be <code>/etc/rsyslog.d/</code>. This assumes the default
+logging configuration will load and process the configuration files in
+that directory. For example, the default <code>rsyslog</code>
+configuration has a directive like
+<code>$IncludeConfig /etc/rsyslog.d/*.conf</code>. WARNING: The use of
+<code>rsyslog_custom_config_files</code> or using
+<code>type: custom</code> is deprecated.</p></li>
 <li><p><code>logging_certificates</code>: Information used to generate a
 private key and certificate. Default to <code>[]</code>. The value of
 <code>logging_certificates</code> is passed on to the
@@ -1061,7 +1100,9 @@ class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb14-1"><a href=
 <h1 id="configuration-examples">Configuration Examples</h1>
 <h2 id="standalone-configuration">Standalone configuration</h2>
 <p>Deploying <code>basics input</code> reading logs from systemd journal
-and implicit <code>files output</code> to write to the local files.</p>
+and implicit <code>files output</code> to write to the local files. This
+also deploys two custom files to the <code>/etc/rsyslog.d/</code>
+directory.</p>
 <div class="sourceCode" id="cb15"><pre
 class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Deploying basics input and implicit files output</span></span>
@@ -1069,9 +1110,12 @@ class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb15-1"><a href=
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">roles</span><span class="kw">:</span></span>
 <span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> linux-system-roles.logging</span></span>
 <span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">vars</span><span class="kw">:</span></span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_inputs</span><span class="kw">:</span></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> system_input</span></span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> basics</span></span></code></pre></div>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_custom_config_files</span><span class="kw">:</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> files/90-my-custom-file.conf</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> files/my-custom-file.rulebase</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_inputs</span><span class="kw">:</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> system_input</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> basics</span></span></code></pre></div>
 <p>The following playbook generates the same logging configuration
 files.</p>
 <div class="sourceCode" id="cb16"><pre
@@ -1081,16 +1125,19 @@ class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb16-1"><a href=
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">roles</span><span class="kw">:</span></span>
 <span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> linux-system-roles.logging</span></span>
 <span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">vars</span><span class="kw">:</span></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_inputs</span><span class="kw">:</span></span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> system_input</span></span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> basics</span></span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_outputs</span><span class="kw">:</span></span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> files_output</span></span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> files</span></span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_flows</span><span class="kw">:</span></span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> flow0</span></span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">inputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">system_input</span><span class="kw">]</span></span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">outputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">files_output</span><span class="kw">]</span></span></code></pre></div>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_custom_config_files</span><span class="kw">:</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> files/90-my-custom-file.conf</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> files/my-custom-file.rulebase</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_inputs</span><span class="kw">:</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> system_input</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> basics</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_outputs</span><span class="kw">:</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> files_output</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> files</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_flows</span><span class="kw">:</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> flow0</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">inputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">system_input</span><span class="kw">]</span></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">outputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">files_output</span><span class="kw">]</span></span></code></pre></div>
 <p>Deploying <code>basics input</code> reading logs from systemd unix
 socket and <code>files output</code> to write to the local files.</p>
 <div class="sourceCode" id="cb17"><pre
@@ -1113,7 +1160,8 @@ class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb17-1"><a href=
 <span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">outputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">files_output</span><span class="kw">]</span></span></code></pre></div>
 <p>Deploying <code>basics input</code> reading logs from systemd journal
 and <code>files output</code> to write to the individually configured
-local files.</p>
+local files. This also shows how to specify ownership/permission for log
+files/directories created by the logger.</p>
 <div class="sourceCode" id="cb18"><pre
 class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="pp">---</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Deploying basic input and configured files output</span></span>
@@ -1138,10 +1186,20 @@ class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb18-1"><a href=
 <span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> files</span></span>
 <span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">facility</span><span class="kw">:</span><span class="at"> authpriv,auth</span></span>
 <span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">path</span><span class="kw">:</span><span class="at"> /var/log/secure</span></span>
-<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_flows</span><span class="kw">:</span></span>
-<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> flow0</span></span>
-<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">inputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">system_input</span><span class="kw">]</span></span>
-<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">outputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">files_output0</span><span class="kw">,</span><span class="at"> files_output1</span><span class="kw">]</span></span></code></pre></div>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> files_output2</span></span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">type</span><span class="kw">:</span><span class="at"> files</span></span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">severity</span><span class="kw">:</span><span class="at"> info</span></span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">path</span><span class="kw">:</span><span class="at"> /var/log/myapp/my_app.log</span></span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">mode</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;0600&quot;</span></span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">owner</span><span class="kw">:</span><span class="at"> logowner</span></span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">group</span><span class="kw">:</span><span class="at"> loggroup</span></span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">dir_mode</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;0700&quot;</span></span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">dir_owner</span><span class="kw">:</span><span class="at"> logowner</span></span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">dir_group</span><span class="kw">:</span><span class="at"> loggroup</span></span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">logging_flows</span><span class="kw">:</span></span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> flow0</span></span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">inputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">system_input</span><span class="kw">]</span></span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a><span class="at">        </span><span class="fu">outputs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">files_output0</span><span class="kw">,</span><span class="at"> files_output1</span><span class="kw">]</span></span></code></pre></div>
 <p>Deploying <code>files input</code> reading logs from local files and
 <code>files output</code> to write to the individually configured local
 files.</p>
