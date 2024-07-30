@@ -1,0 +1,17 @@
+---
+# input
+# * expected_content - the expected contents
+# * compare_file - the actual contents
+# NOTE: Have to sort because order of dict is not guaranteed to
+# be stable on all supported platforms
+- name: Get file to compare
+  slurp:
+    path: "{{ compare_file }}"
+  register: __actual_content
+
+- name: Compare expected to actual
+  assert:
+    that: __expected == __actual
+  vars:
+    __expected: "{{ expected_content.split('\n') | sort | select | list }}"
+    __actual: "{{ (__actual_content.content | b64decode).split('\n') | sort | select | list }}"
