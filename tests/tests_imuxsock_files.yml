@@ -112,12 +112,17 @@
         # odd idiosyncrasies
         - name: Restart journald units
           shell: |
+            set -euxo pipefail
+            exec 1>&2
             for service in {{ __journald_units | join(" ") }}; do
               if systemctl is-active "$service"; then
                 systemctl stop "$service" || :
                 sleep 1
               fi
             done
+            if [ "$(systemctl show -p SubState systemd-journald.service)" = SubState=dead-resources-pinned ]; then
+              systemctl clean --what fdstore systemd-journald.service
+            fi
             for service in {{ __journald_units | join(" ") }}; do
               if ! systemctl is-active "$service"; then
                 systemctl start "$service"
