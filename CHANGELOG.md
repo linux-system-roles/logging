@@ -1,6 +1,17 @@
 Changelog
 =========
 
+[1.13.1] - 2024-08-01
+--------------------
+
+### Other Changes
+
+- ci: Add tft plan and workflow (#403)
+- ci: Update fmf plan to add a separate job to prepare managed nodes (#405)
+- test: workaround a systemd issue in el10 restarting journald (#406)
+- test: sort files to compare (#407)
+- ci: Bump sclorg/testing-farm-as-github-action from 2 to 3 (#408)
+
 [1.13.0] - 2024-07-23
 --------------------
 
