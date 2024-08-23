@@ -12,6 +12,15 @@
 - name: Check firewall port status
   when: logging_manage_firewall | bool
   block:
+    # not sure what tests_imuxsock is doing on el10, but it leaves firewalld
+    # in a strange state such that it cannot connect to dbus and gives
+    # ERROR: Exception DBusException: org.freedesktop.DBus.Error.AccessDenied: Request to own name refused by policy
+    # restarting firewalld here seems to clear that state.
+    - name: Restart firewall to clear error state
+      service:
+        name: firewalld
+        state: restarted
+
     - name: Check firewall port status (manage - tcp)
       shell: |
         set -euo pipefail
@@ -29,6 +38,15 @@
       loop: "{{ logging_tls_udp_ports + logging_udp_ports }}"
       when:
         - (logging_tls_udp_ports + logging_udp_ports) | d([]) | length > 0
+  rescue:
+    - name: Debug errors
+      shell: |
+        set -x
+        exec 1>&2
+        systemctl status firewalld || :
+        grep type=AVC /var/log/audit/audit.log || :
+      failed_when: true
+      changed_when: false
 
 - name: Check SELinux port status
   when: logging_manage_selinux | bool
