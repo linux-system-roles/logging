@@ -1,6 +1,16 @@
 Changelog
 =========
 
+[1.13.2] - 2024-08-29
+--------------------
+
+### Other Changes
+
+- ci: Add workflow for ci_test bad, use remote fmf plan (#410)
+- ci: Fix missing slash in ARTIFACTS_URL (#411)
+- test: tests_combination.yml requires fact gathering (#413)
+- ci: Add tags to TF workflow, allow more [citest bad] formats (#414)
+
 [1.13.1] - 2024-08-01
 --------------------
 
