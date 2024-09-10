@@ -129,6 +129,17 @@
                 sleep 1
               fi
             done
+            # dbus needs to be restarted after journald or services will not be able to
+            # listen for dbus
+            for service in dbus dbus-broker; do
+              if systemctl is-active "$service"; then
+                systemctl restart "$service" || { systemctl status "$service" || :; journalctl -ex; }
+              fi
+            done
+            # ensure journal is working again
+            logger tests_imuxsock_files_ensure_journal_working
+            sleep 1
+            journalctl -ex | grep tests_imuxsock_files_ensure_journal_working
           changed_when: true
           vars:
             __journald_units:
