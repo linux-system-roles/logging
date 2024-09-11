@@ -1,6 +1,13 @@
 Changelog
 =========
 
+[1.13.3] - 2024-09-11
+--------------------
+
+### Other Changes
+
+- test: restart dbus broker after restarting journald (#416)
+
 [1.13.2] - 2024-08-29
 --------------------
 
