@@ -131,7 +131,7 @@
             done
             # dbus needs to be restarted after journald or services will not be able to
             # listen for dbus
-            for service in dbus dbus-broker; do
+            for service in dbus dbus-broker systemd-logind; do
               if systemctl is-active "$service"; then
                 systemctl restart "$service" || { systemctl status "$service" || :; journalctl -ex; }
               fi
@@ -140,6 +140,8 @@
             logger tests_imuxsock_files_ensure_journal_working
             sleep 1
             journalctl -ex | grep tests_imuxsock_files_ensure_journal_working
+            # ensure loginctl is working - if not it will error with a timeout
+            loginctl list-sessions
           changed_when: true
           vars:
             __journald_units:
