@@ -1,6 +1,15 @@
 Changelog
 =========
 
+[1.13.5] - 2024-10-30
+--------------------
+
+### Other Changes
+
+- ci: ansible-test action now requires ansible-core version (#420)
+- ci: add YAML header to github action workflow files (#421)
+- refactor: Use vars/RedHat_N.yml symlink for CentOS, Rocky, Alma wherever possible (#423)
+
 [1.13.4] - 2024-09-13
 --------------------
 
