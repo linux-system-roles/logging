@@ -130,6 +130,7 @@
       selectattr('type', 'defined') | selectattr('type', 'match', 'custom$') |
       selectattr('custom_config_files', 'defined') |
       map(attribute='custom_config_files') | flatten | list }}"
+    rsyslog_custom_templates: "{{ logging_custom_templates }}"
   include_role:
     name: "{{ role_path }}/roles/rsyslog"  # noqa role-name[path]
   when: logging_provider == 'rsyslog'

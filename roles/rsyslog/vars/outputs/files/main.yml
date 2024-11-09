@@ -27,6 +27,8 @@ __rsyslog_conf_files_output_modules:
           module(load="builtin:omfile" Template="RSYSLOG_TraditionalFileFormat")
           {% elif logging_files_template_format == "syslog" %}
           module(load="builtin:omfile" Template="RSYSLOG_SyslogProtocol23Format")
+          {% elif logging_files_template_format not in ["", "modern"] %}
+          module(load="builtin:omfile" Template="{{ logging_files_template_format }}")
           {% else %}
           module(load="builtin:omfile")
           {% endif %}

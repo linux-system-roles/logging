@@ -31,3 +31,11 @@ rsyslog_extra_packages: []
 # List of additional custom config files.
 # Each element: full paths to the files to be deployed.
 rsyslog_custom_config_files: []
+
+# rsyslog_custom_templates
+#
+# List of custom templates to provide
+# Each element is the string definition of
+# an rsyslog output template as defined here:
+# https://www.rsyslog.com/doc/configuration/templates.html
+rsyslog_custom_templates: []

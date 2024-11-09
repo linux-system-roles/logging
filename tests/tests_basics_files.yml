@@ -300,6 +300,10 @@
             facility: local2
             target: host.domain
             tcp_port: 2514
+          - name: custom_template
+            type: files
+            path: /var/log/logging_custom_template.log
+            template: BasicTestFormat
         logging_inputs:
           - name: basic_input0
             type: basics
@@ -311,6 +315,13 @@
               - files_output1
               - forwards_severity_and_facility
               - forwards_facility_only
+              - custom_template
+        logging_custom_templates:
+          - |
+            template(name="BasicTestFormat" type="list") {
+                property(name="timestamp" dateFormat="rfc3339")
+                constant(value=" ThisIsBasicTestFormat\n")
+                }
       include_role:
         name: linux-system-roles.logging
         public: true
@@ -372,6 +383,18 @@
 
     - name: Check ports managed by firewall and selinux
       include_tasks: tasks/check_firewall_selinux.yml
+
+    - name: Check that the custom template is in the templates file
+      command: grep BasicTestFormat /etc/rsyslog.d/20-templates.conf
+      changed_when: false
+
+    - name: Check that the custom template has an output action defined
+      command: cat /etc/rsyslog.d/30-output-files-custom_template.conf
+      changed_when: false
+
+    - name: Check that the custom template is being used
+      command: grep ThisIsBasicTestFormat$ /var/log/logging_custom_template.log
+      changed_when: false
 
     - name: Set firewall and selinux to false for cleanup
       set_fact:
