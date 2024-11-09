@@ -42,12 +42,19 @@ ruleset(name="{{ __rsyslog_output.name }}"
 ruleset(name="{{ __rsyslog_output.name }}") {
 {%   endif %}
 {{ print_file_attrs(__rsyslog_output) -}}
+{%   set template = " ;RSYSLOG_TraditionalFileFormat"
+       if __rsyslog_output.template | d("") == "traditional"
+       else " ;RSYSLOG_SyslogProtocol23Format"
+       if __rsyslog_output.template | d("") == "syslog"
+       else " ;" ~ __rsyslog_output.template
+       if __rsyslog_output.template | d("") not in ["", "modern"]
+       else "" %}
 {%   if __rsyslog_output.property | d() %}
-    :{{ __rsyslog_output.property }}, {{ __rsyslog_output.property_op | d('contains') }}, "{{ __rsyslog_output.property_value | d('error') }}" {{ __rsyslog_output.path }}
+    :{{ __rsyslog_output.property }}, {{ __rsyslog_output.property_op | d('contains') }}, "{{ __rsyslog_output.property_value | d('error') }}" {{ __rsyslog_output.path }}{{ template }}
 {%   elif __rsyslog_output.exclude | d([]) %}
-    {{ __rsyslog_output.facility | d('*') }}.{{ __rsyslog_output.severity | d('*') }};{{ __rsyslog_output.exclude | join(';') }} {{ __rsyslog_output.path }}
+    {{ __rsyslog_output.facility | d('*') }}.{{ __rsyslog_output.severity | d('*') }};{{ __rsyslog_output.exclude | join(';') }} {{ __rsyslog_output.path }}{{ template }}
 {%   else %}
-    {{ __rsyslog_output.facility | d('*') }}.{{ __rsyslog_output.severity | d('*') }} {{ __rsyslog_output.path }}
+    {{ __rsyslog_output.facility | d('*') }}.{{ __rsyslog_output.severity | d('*') }} {{ __rsyslog_output.path }}{{ template }}
 {%   endif %}
 }
 {% else %}

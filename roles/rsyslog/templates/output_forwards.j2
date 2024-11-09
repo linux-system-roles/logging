@@ -34,8 +34,10 @@ ruleset(name="{{ __rsyslog_output.name }}") {
         Template="RSYSLOG_TraditionalForwardFormat"
 {% elif __rsyslog_output.template | d('') == 'syslog' %}
         Template="RSYSLOG_SyslogProtocol23Format"
-{% else %}
+{% elif __rsyslog_output.template | d('modern') == 'modern' %}
         Template="RSYSLOG_ForwardFormat"
+{% else %}
+        Template="{{ __rsyslog_output.template }}"
 {% endif %}
 {% if __rsyslog_output.action is defined %}
         {{ lookup('template', 'general_action_params.j2') | indent(8) | trim }}

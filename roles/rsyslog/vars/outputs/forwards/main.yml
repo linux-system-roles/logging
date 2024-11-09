@@ -27,6 +27,8 @@ __rsyslog_conf_forwards_output_modules:
           module(load="builtin:omfwd" Template="RSYSLOG_TraditionalForwardFormat")
           {% elif logging_forwards_template_format == "syslog" %}
           module(load="builtin:omfwd" Template="RSYSLOG_SyslogProtocol23Format")
+          {% elif logging_forwards_template_format | length > 0 and logging_forwards_template_format != "modern" %}
+          module(load="builtin:omfwd" Template="{{ logging_forwards_template_format }}")
           {% else %}
           module(load="builtin:omfwd")
           {% endif %}

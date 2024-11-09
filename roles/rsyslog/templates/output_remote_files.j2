@@ -32,12 +32,19 @@ ruleset(name="{{ __rsyslog_output.name }}"
         {{ lookup('template', 'general_queue_params.j2') | indent(8) | trim }}
 {%   endif %}) {
     # Store remote logs in separate logfiles
+{%   set template = ' template="RSYSLOG_TraditionalFileFormat"'
+       if __rsyslog_output.template | d("") == "traditional"
+       else ' template="RSYSLOG_SyslogProtocol23Format"'
+       if __rsyslog_output.template | d("") == "syslog"
+       else ' template="' ~ __rsyslog_output.template ~ '"'
+       if __rsyslog_output.template | d("") not in ["", "modern"]
+       else "" %}
 {%   if __rsyslog_output.property | d() %}
-    :{{ __rsyslog_output.property }}, {{ __rsyslog_output.property_op | d('contains') }}, "{{ __rsyslog_output.property_value | d('error') }}" action(name="{{ __rsyslog_output.name }}" type="omfile" DynaFile="{{ __rsyslog_output.name }}_template" DynaFileCacheSize="{{ __rsyslog_output.client_count | d(10) }}" ioBufferSize="{{ __rsyslog_output.io_buffer_size | d('65536') }}" asyncWriting="{{ 'on' if __rsyslog_output.async_writing | d(false) | bool else 'off' }}"{{ lookup('template', 'general_action_params.j2') | indent(1,true) | regex_replace("\s?\n","") }})
+    :{{ __rsyslog_output.property }}, {{ __rsyslog_output.property_op | d('contains') }}, "{{ __rsyslog_output.property_value | d('error') }}" action(name="{{ __rsyslog_output.name }}" type="omfile"{{ template }} DynaFile="{{ __rsyslog_output.name }}_template" DynaFileCacheSize="{{ __rsyslog_output.client_count | d(10) }}" ioBufferSize="{{ __rsyslog_output.io_buffer_size | d('65536') }}" asyncWriting="{{ 'on' if __rsyslog_output.async_writing | d(false) | bool else 'off' }}"{{ lookup('template', 'general_action_params.j2') | indent(1,true) | regex_replace("\s?\n","") }})
 {%   elif __rsyslog_output.exclude | d([]) %}
-    {{ __rsyslog_output.facility | d('*') }}.{{ __rsyslog_output.severity | d('*') }};{{ __rsyslog_output.exclude | join(';') }} action(name="{{ __rsyslog_output.name }}" type="omfile" DynaFile="{{ __rsyslog_output.name }}_template" DynaFileCacheSize="{{ __rsyslog_output.client_count | d(10) }}" ioBufferSize="{{ __rsyslog_output.io_buffer_size | d('65536') }}" asyncWriting="{{ 'on' if __rsyslog_output.async_writing | d(false) | bool else 'off' }}"{{ lookup('template', 'general_action_params.j2') | indent(1,true) | regex_replace("\s?\n","") }})
+    {{ __rsyslog_output.facility | d('*') }}.{{ __rsyslog_output.severity | d('*') }};{{ __rsyslog_output.exclude | join(';') }} action(name="{{ __rsyslog_output.name }}" type="omfile"{{ template }} DynaFile="{{ __rsyslog_output.name }}_template" DynaFileCacheSize="{{ __rsyslog_output.client_count | d(10) }}" ioBufferSize="{{ __rsyslog_output.io_buffer_size | d('65536') }}" asyncWriting="{{ 'on' if __rsyslog_output.async_writing | d(false) | bool else 'off' }}"{{ lookup('template', 'general_action_params.j2') | indent(1,true) | regex_replace("\s?\n","") }})
 {%   else %}
-    {{ __rsyslog_output.facility | d('*') }}.{{ __rsyslog_output.severity | d('*') }} action(name="{{ __rsyslog_output.name }}" type="omfile" DynaFile="{{ __rsyslog_output.name }}_template" DynaFileCacheSize="{{ __rsyslog_output.client_count | d(10) }}" ioBufferSize="{{ __rsyslog_output.io_buffer_size | d('65536') }}" asyncWriting="{{ 'on' if __rsyslog_output.async_writing | d(false) | bool else 'off' }}"{{ lookup('template', 'general_action_params.j2') | indent(1,true) | regex_replace("\s?\n","") }})
+    {{ __rsyslog_output.facility | d('*') }}.{{ __rsyslog_output.severity | d('*') }} action(name="{{ __rsyslog_output.name }}" type="omfile"{{ template }} DynaFile="{{ __rsyslog_output.name }}_template" DynaFileCacheSize="{{ __rsyslog_output.client_count | d(10) }}" ioBufferSize="{{ __rsyslog_output.io_buffer_size | d('65536') }}" asyncWriting="{{ 'on' if __rsyslog_output.async_writing | d(false) | bool else 'off' }}"{{ lookup('template', 'general_action_params.j2') | indent(1,true) | regex_replace("\s?\n","") }})
 {%   endif %}
 }
 {% else %}

@@ -214,6 +214,42 @@ Available options:
     tcp_ports: [1514]
 ```
 
+### logging_custom_templates
+
+`logging_custom_templates`: A list of custom template definitions, for use with
+`logging_outputs` `type` `files` and `type` `forwards`.  You can specify the
+template for a particular output to use by setting the `template` field in a
+particular `logging_outputs` specification, or by setting the default for all
+such outputs to use in `logging_files_template_format` and
+`logging_forwards_template_format`.
+
+Specify custom templates like this, in either the legacy format or the new style
+format:
+
+```yaml
+logging_custom_templates:
+  - |
+    template(name="tpl1" type="list") {
+        constant(value="Syslog MSG is: '")
+        property(name="msg")
+        constant(value="', ")
+        property(name="timereported" dateFormat="rfc3339" caseConversion="lower")
+        constant(value="\n")
+        }
+  - >-
+    $template precise,"%syslogpriority%,%syslogfacility%,%timegenerated::fulltime%,%HOSTNAME%,%syslogtag%,%msg%\n"
+```
+
+Then use like this:
+
+```yaml
+logging_outputs:
+  - name: custom_file_output
+    type: files
+    path: /var/log/custom_file_output.log
+    template: tpl1  # override logging_files_template_format if set
+```
+
 ### Logging_outputs options
 
 `logging_outputs`: A list of following dictionary to configure outputs.
@@ -285,8 +321,6 @@ Available options:
 * `property_op`: Operation in property-based filter; In case of not `!`, put the `property_op` value in quotes; default to `contains`
 * `property_value`: Value in property-based filter; default to `error`
 * `path`: Path to the output file.
-* `logging_files_template_format`: Set default template for the files output.
-  Allowed values are `traditional`, `syslog`, and `modern`. Default to `modern`.
 * File/Directory properties - same as corresponding variables of the Ansible `file` module:
   * `mode` - sets the rsyslog `omfile` module `FileCreateMode` parameter
   * `owner` - sets the rsyslog `omfile` module `fileOwner` or `fileOwnerNum` parameter.  If the value
@@ -298,6 +332,15 @@ Available options:
     is an integer, set `dirOwnerNum`, otherwise, set `dirOwner`.
   * `dir_group` - sets the rsyslog `omfile` module `dirGroup` or `dirGroupNum` parameter.  If the value
     is an integer, set `dirGroupNum`, otherwise, set `dirGroup`.
+* `template`: Template format for the particular files output. Allowed values
+  are `traditional`, `syslog`, and `modern`, or one of the templates defined in
+  `logging_custom_templates`.  Default to `modern`.
+
+Global options:
+
+`logging_files_template_format`: Set default template for the files output.
+Allowed values are `traditional`, `syslog`, and `modern`, or one of the
+  templates defined in `logging_custom_templates`.  Default to `modern`.
 
 **Note:** Selector options and property-based filter options are exclusive. If Property-based filter options are defined, selector options will be ignored.
 
@@ -332,10 +375,15 @@ Available options:
 * `tls`: Set to `true` to encrypt the connection using the default TLS implementation used by the provider. Default to `false`.
 * `pki_authmode`: Specifying the default network driver authentication mode. `x509/name`, `x509/fingerprint`, or `anon` is accepted. Default to `x509/name`.
 * `permitted_server`: Hostname, IP address, fingerprint(sha1) or wildcard DNS domain of the server which this client will be allowed to connect and send logs over TLS. Default to `*.{{ logging_domain }}`
-* `template`: Template format for the particular forwards output. Allowed values are `traditional`, `syslog`, and `modern`. Default to `modern`.
+* `template`: Template format for the particular forwards output. Allowed values
+  are `traditional`, `syslog`, and `modern`, or one of the templates defined in
+  `logging_custom_templates`.  Default to `modern`.
 
-logging_forwards_template_format: Set default template for the forwards output.
-Allowed values are `traditional`, `syslog`, and `modern`. Default to `modern`.
+Global options:
+
+`logging_forwards_template_format`: Set default template for the forwards
+output. Allowed values are `traditional`, `syslog`, and `modern`, or one of the
+  templates defined in `logging_custom_templates`.  Default to `modern`.
 
 **Note:** Selector options and property-based filter options are exclusive. If Property-based filter options are defined, selector options will be ignored.
 

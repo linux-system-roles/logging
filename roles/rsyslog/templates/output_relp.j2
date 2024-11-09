@@ -41,6 +41,9 @@ ruleset(name="{{ __rsyslog_output.name }}") {
 {%   else %}
            tls.permittedpeer=["{{ '*.' + logging_domain }}"]
 {%   endif %}
+{%   if __rsyslog_output.template | d("") | length > 0 %}
+           template="{{ __rsyslog_output.template }}"
+{%   endif %}
 {% endif %}
     )
 }
