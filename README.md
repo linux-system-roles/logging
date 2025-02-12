@@ -262,7 +262,7 @@ logging_outputs:
 
 #### logging_outputs general queue parameters
 
-* `queue`: A dict containing general queue paramters that can be used by all output module types, see the official rsyslog documentation for full list of parameters and their function.
+* `queue`: A dict containing general queue parameters that can be used by all output module types, see the official rsyslog documentation for full list of parameters and their function.
 
 ```yaml
 logging_outputs:
@@ -274,7 +274,7 @@ logging_outputs:
 
 #### logging_outputs general action parameters
 
-* `action`: A dict containing general action paramters, see the official rsyslog documentation for full list of parameters and their function.
+* `action`: A dict containing general action parameters, see the official rsyslog documentation for full list of parameters and their function.
 
 ```yaml
 logging_outputs:
