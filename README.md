@@ -1,6 +1,6 @@
 # logging
 
-[![ansible-lint.yml](https://github.com/linux-system-roles/logging/actions/workflows/ansible-lint.yml/badge.svg)](https://github.com/linux-system-roles/logging/actions/workflows/ansible-lint.yml) [![ansible-test.yml](https://github.com/linux-system-roles/logging/actions/workflows/ansible-test.yml/badge.svg)](https://github.com/linux-system-roles/logging/actions/workflows/ansible-test.yml) [![markdownlint.yml](https://github.com/linux-system-roles/logging/actions/workflows/markdownlint.yml/badge.svg)](https://github.com/linux-system-roles/logging/actions/workflows/markdownlint.yml) [![tft.yml](https://github.com/linux-system-roles/logging/actions/workflows/tft.yml/badge.svg)](https://github.com/linux-system-roles/logging/actions/workflows/tft.yml) [![tft_citest_bad.yml](https://github.com/linux-system-roles/logging/actions/workflows/tft_citest_bad.yml/badge.svg)](https://github.com/linux-system-roles/logging/actions/workflows/tft_citest_bad.yml) [![woke.yml](https://github.com/linux-system-roles/logging/actions/workflows/woke.yml/badge.svg)](https://github.com/linux-system-roles/logging/actions/workflows/woke.yml)
+[![ansible-lint.yml](https://github.com/linux-system-roles/logging/actions/workflows/ansible-lint.yml/badge.svg)](https://github.com/linux-system-roles/logging/actions/workflows/ansible-lint.yml) [![ansible-test.yml](https://github.com/linux-system-roles/logging/actions/workflows/ansible-test.yml/badge.svg)](https://github.com/linux-system-roles/logging/actions/workflows/ansible-test.yml) [![codespell.yml](https://github.com/linux-system-roles/logging/actions/workflows/codespell.yml/badge.svg)](https://github.com/linux-system-roles/logging/actions/workflows/codespell.yml) [![markdownlint.yml](https://github.com/linux-system-roles/logging/actions/workflows/markdownlint.yml/badge.svg)](https://github.com/linux-system-roles/logging/actions/workflows/markdownlint.yml) [![tft.yml](https://github.com/linux-system-roles/logging/actions/workflows/tft.yml/badge.svg)](https://github.com/linux-system-roles/logging/actions/workflows/tft.yml) [![tft_citest_bad.yml](https://github.com/linux-system-roles/logging/actions/workflows/tft_citest_bad.yml/badge.svg)](https://github.com/linux-system-roles/logging/actions/workflows/tft_citest_bad.yml) [![woke.yml](https://github.com/linux-system-roles/logging/actions/workflows/woke.yml/badge.svg)](https://github.com/linux-system-roles/logging/actions/workflows/woke.yml)
 
 ## Background
 
@@ -262,7 +262,7 @@ logging_outputs:
 
 #### logging_outputs general queue parameters
 
-* `queue`: A dict containing general queue paramters that can be used by all output module types, see the official rsyslog documentation for full list of parameters and their function.
+* `queue`: A dict containing general queue parameters that can be used by all output module types, see the official rsyslog documentation for full list of parameters and their function.
 
 ```yaml
 logging_outputs:
@@ -274,7 +274,7 @@ logging_outputs:
 
 #### logging_outputs general action parameters
 
-* `action`: A dict containing general action paramters, see the official rsyslog documentation for full list of parameters and their function.
+* `action`: A dict containing general action parameters, see the official rsyslog documentation for full list of parameters and their function.
 
 ```yaml
 logging_outputs:

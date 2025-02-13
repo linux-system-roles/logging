@@ -3,7 +3,7 @@
 
 # If the input/output has a possibility to reveal some sensitive data,
 # include this deploy_nolog.yml file.
-# See tasks/outputs/elasticsearch/main.yml for an examle.
+# See tasks/outputs/elasticsearch/main.yml for an example.
 
 - name: Install/Update required packages
   package:
