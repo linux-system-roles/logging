@@ -1,0 +1,7 @@
+# __rsyslog_base_packages
+#
+# List of default rpm packages to install.
+# NOTE: iproute2 is needed for the ip command which
+# is needed for the default_ipv4 fact
+# package is named iproute2 for Debian/Ubuntu systems
+__rsyslog_base_packages: ['iproute2', 'rsyslog']
