@@ -8,20 +8,22 @@
     - logging_purge_confs | bool | d(false)
     - not (rsyslog_inputs and __rsyslog_enabled | bool)
     - not __logging_is_ostree | d(false)
+  vars:
+    __rsyslog_only_packages: "{{ __rsyslog_base_packages | select('search', 'rsyslog') | list }}"
   block:
     # it is assumed that the only packages providing config files that might
-    # be modified are the base packages - if this is not so, then additional
-    # packages will need to be added to this check
+    # be modified are the base packages (but not others like iproute);
+    # if this is not so, then additional packages will need to be added to this check
     - name: Get status of rsyslog packages
       command: rpm -V {{ item }}  # noqa command-instead-of-module
-      loop: "{{ __rsyslog_base_packages }}"
+      loop: "{{ __rsyslog_only_packages }}"
       register: __rsyslog_package_status
       failed_when: false
       changed_when: false
 
     - name: Reset original confs - logging package is absent
       package:
-        name: "{{ __rsyslog_base_packages }}"
+        name: "{{ __rsyslog_only_packages }}"
         state: absent
         use: "{{ (__logging_is_ostree | d(false)) |
                  ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
