@@ -124,7 +124,8 @@
               systemctl clean --what fdstore systemd-journald.service
             fi
             for service in {{ __journald_units | join(" ") }}; do
-              if ! systemctl is-active "$service"; then
+              # systemd-journald-dev-log.socket does not exist on RHEL 7, so check existence
+              if systemctl cat "$service" >/dev/null && ! systemctl is-active "$service"; then
                 systemctl start "$service"
                 sleep 1
               fi
@@ -153,7 +154,7 @@
           stat:
             path: /dev/log
           register: __dev_log
-          failed_when: __dev_log.stat.lnk_target != "/run/systemd/journal/dev-log"
+          failed_when: not __dev_log.stat.issock and __dev_log.stat.lnk_target != "/run/systemd/journal/dev-log"
 
       rescue:
         - name: Check journal for errors
