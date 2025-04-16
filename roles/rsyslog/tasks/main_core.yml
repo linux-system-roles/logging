@@ -22,11 +22,11 @@
       changed_when: false
 
     - name: Reset original confs - logging package is absent
-      package:
-        name: "{{ __rsyslog_only_packages }}"
-        state: absent
-        use: "{{ (__logging_is_ostree | d(false)) |
-                 ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
+      # we can't do this with "package", dnf5 does not remove reverse
+      # dependencies (such as rsyslog-gnutls) any more
+      command: "{{ ansible_pkg_mgr }} remove -y {{ __rsyslog_only_packages | join(' ') }}"
+      # we know it's a change here, as we just rpm -V'ed it above
+      changed_when: true
       register: __rsyslog_erased
       when: __rsyslog_package_status.results |
         rejectattr('stdout', 'match', '^package .* is not installed') |
@@ -43,7 +43,7 @@
              ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
   when:
     - __rsyslog_enabled | bool or
-      (__rsyslog_erased is success and __rsyslog_erased is changed)
+      __rsyslog_erased is success
 
 # make sure we do not pollute the global namespace for subsequent runs
 # of this role
