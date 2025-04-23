@@ -1,6 +1,25 @@
 Changelog
 =========
 
+[1.14.2] - 2025-04-23
+--------------------
+
+### Bug Fixes
+
+- fix: Add a variable for rsyslog base package on Debian (#436)
+- fix: Only remove rsyslog* packages, remove packages with command line (#440)
+
+### Other Changes
+
+- ci: ansible-plugin-scan is disabled for now (#430)
+- ci: bump ansible-lint to v25; provide collection requirements for ansible-lint (#433)
+- ci: Check spelling with codespell (#434)
+- ci: Add test plan that runs CI tests and customize it for each role (#435)
+- ci: In test plans, prefix all relate variables with SR_ (#437)
+- ci: Fix bug with ARTIFACTS_URL after prefixing with SR_ (#438)
+- ci: use tox-lsr 3.6.0; improve qemu test logging (#441)
+- ci: skip storage scsi, nvme tests in github qemu ci (#442)
+
 [1.14.1] - 2025-01-09
 --------------------
 
