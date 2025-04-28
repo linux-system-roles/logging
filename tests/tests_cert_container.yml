@@ -1,0 +1,31 @@
+---
+- name: "Certificate creation is not supported in container builds"
+  hosts: all
+  tasks:
+    - name: Set __logging_is_booted
+      include_tasks: ../tasks/set_vars.yml
+
+    - name: Try to run role with logging_certificates in container build
+      when: not __logging_is_booted
+      block:
+        - name: Run role
+          vars:
+            logging_certificates:
+              - name: logging_cert
+                dns: ['localhost', 'www.example.com']
+                ca: self-sign
+          include_role:
+            name: linux-system-roles.logging
+
+        - name: Unreachable task
+          fail:
+            msg: UNREACH
+
+      rescue:
+        - name: Expected error
+          debug:
+            msg: "{{ ansible_failed_result }}"
+
+        - name: Ensure the expected error message is issued
+          assert:
+            that: '"only supported in booted systems" in ansible_failed_result.msg'

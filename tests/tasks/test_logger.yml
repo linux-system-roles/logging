@@ -1,5 +1,6 @@
 ---
 - name: Check test log and check for errors
+  when: __logging_is_booted
   vars:
     __logging_message: testMessage{{ __logging_index }}
     __logging_tag: testTag{{ __logging_index }}

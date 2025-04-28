@@ -11,6 +11,9 @@
 - name: "Test the server configuration containing tls tcp,
   plain tcp and udp connection"
   hosts: all
+  tags:
+    # certmonger does not work in container builds
+    - tests::booted
   vars:
     __test_cert_name: logging_cert
     __test_ca_cert: "/etc/pki/tls/certs/{{ __test_cert_name }}.crt"
