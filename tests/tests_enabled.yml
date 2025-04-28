@@ -22,9 +22,16 @@
   hosts: all
 
   tasks:
+      # rsyslog package may not be installed
+    - name: Check if /etc/rsyslog.d exists
+      stat:
+        path: /etc/rsyslog.d
+      register: rsyslog_d_dir
+
     - name: Check /etc/rsyslog.d
       command: ls /etc/rsyslog.d
       changed_when: false
+      when: rsyslog_d_dir.stat.exists
 
     - name: Default run
       vars:
