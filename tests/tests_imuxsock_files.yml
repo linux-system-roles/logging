@@ -105,7 +105,9 @@
       register: __dev_log
 
     - name: Restore /dev/log by restarting journald units
-      when: not __dev_log.stat.exists
+      when:
+        - __logging_is_booted
+        - not __dev_log.stat.exists
       block:
         # This is really hacky - but I could not find a reliable way to do this
         # that works on older rhel8, newer rhel9, and fedora - each platform has

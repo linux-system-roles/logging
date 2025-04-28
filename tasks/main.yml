@@ -1,4 +1,7 @@
 ---
+- name: Set global variables
+  include_tasks: set_vars.yml
+
 - name: Set Rsyslog facts then include rsyslog role
   when:
     - logging_provider == 'rsyslog'

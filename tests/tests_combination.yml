@@ -171,6 +171,7 @@
       command: >-
         /bin/grep '{{ __test_tag }} .*abcdefghijklmnopqrstuvwxyz$' {{ __default_system_log }}
       changed_when: false
+      when: __logging_is_booted
     # yamllint enable rule:line-length
 
     # yamllint disable rule:line-length
@@ -189,6 +190,7 @@
       register: __result
       changed_when: false
       failed_when: __result.rc != 1
+      when: __logging_is_booted
     # yamllint enable rule:line-length
 
     - name: Check ports managed by firewall and selinux
@@ -364,6 +366,7 @@
       command: >-
         /bin/grep '{{ __test_tag }} .*ABCDEFGHIJKLMNOPQRSTUVWXYZ$' {{ __default_system_log }}
       changed_when: false
+      when: __logging_is_booted
     # yamllint enable rule:line-length
 
     - name: Check ports managed by firewall and selinux
@@ -555,6 +558,7 @@
       register: __result
       changed_when: false
       failed_when: "'error' in __result.stdout or __result is failed"
+      when: __logging_is_booted
 
     - name: Check ports managed by firewall and selinux
       include_tasks: tasks/check_firewall_selinux.yml

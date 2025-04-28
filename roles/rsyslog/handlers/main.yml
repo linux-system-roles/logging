@@ -3,8 +3,10 @@
   service:
     name: rsyslog
     state: restarted
+  when: __logging_is_booted
 
 - name: Stop rsyslogd
   service:
     name: rsyslog
     state: stopped
+  when: __logging_is_booted

@@ -62,6 +62,7 @@
       changed_when: false
       failed_when: "'error' in __result.stdout or
         'a RainerScript command' in __result.stdout or __result is failed"
+      when: __logging_is_booted
 
     - name: Install lsof
       package:
@@ -69,6 +70,7 @@
         state: present
         use: "{{ (__logging_is_ostree | d(false)) |
                  ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
+      when: __logging_is_booted
 
     - name: Check lsof outputs for rsyslogd
       shell: |-
@@ -76,10 +78,12 @@
         lsof -i -nP | grep rsyslogd
       register: __result
       changed_when: false
+      when: __logging_is_booted
 
     - name: Show lsof output
       debug:
         msg: "lsof returned {{ __result.stdout }}"
+      when: __logging_is_booted
 
     - name: Check port 514 and 40001 are open for TCP
       shell: |-
@@ -87,6 +91,7 @@
         lsof -i -nP | grep rsyslogd | grep TCP | grep {{ item }}
       loop: [514, 40001]
       changed_when: false
+      when: __logging_is_booted
 
     - name: Check port 514 and 40002 are open for UDP
       shell: |-
@@ -94,6 +99,7 @@
         lsof -i -nP | grep rsyslogd | grep UDP | grep {{ item }}
       loop: [514, 40002]
       changed_when: false
+      when: __logging_is_booted
 
     - name: Check ports managed by firewall and selinux
       include_tasks: tasks/check_firewall_selinux.yml
@@ -195,6 +201,7 @@
         state: present
         use: "{{ (__logging_is_ostree | d(false)) |
                  ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
+      when: __logging_is_booted
 
     - name: Check lsof outputs for rsyslogd
       shell: |-
@@ -202,10 +209,12 @@
         lsof -i -nP | grep rsyslogd
       register: __result
       changed_when: false
+      when: __logging_is_booted
 
     - name: Show lsof output
       debug:
         msg: "lsof returned {{ __result.stdout }}"
+      when: __logging_is_booted
 
     - name: Check port 514 and 40001 is open for TCP
       shell: |-
@@ -213,6 +222,7 @@
         lsof -i -nP | grep rsyslogd | grep TCP | grep {{ item }}
       loop: [514, 40001]
       changed_when: false
+      when: __logging_is_booted
 
     - name: Check port 514 and 40002 is open for UDP
       shell: |-
@@ -220,6 +230,7 @@
         lsof -i -nP | grep rsyslogd | grep UDP | grep {{ item }}
       loop: [514, 40002]
       changed_when: false
+      when: __logging_is_booted
 
     - name: Check ports managed by firewall and selinux
       include_tasks: tasks/check_firewall_selinux.yml

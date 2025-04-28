@@ -1,4 +1,11 @@
 ---
+- name: Certificates are only supported in a booted system
+  fail:
+    msg: "The logging_certificates option is only supported in booted systems, not container builds."
+  when:
+    - not __logging_is_booted
+    - logging_certificates | length > 0
+
 - name: Generate certificates
   include_role:
     name: fedora.linux_system_roles.certificate
