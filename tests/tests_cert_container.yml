@@ -3,7 +3,10 @@
   hosts: all
   tasks:
     - name: Set __logging_is_booted
-      include_tasks: ../tasks/set_vars.yml
+      include_role:
+        name: linux-system-roles.logging
+        tasks_from: set_vars.yml
+        public: true
 
     - name: Try to run role with logging_certificates in container build
       when: not __logging_is_booted
