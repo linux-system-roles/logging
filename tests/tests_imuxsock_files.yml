@@ -116,6 +116,11 @@
           shell: |
             set -euxo pipefail
             exec 1>&2
+            # see if firewalld is running
+            restart_firewalld=false
+            if systemctl is-active firewalld.service; then
+              restart_firewalld=true
+            fi
             for service in {{ __journald_units | join(" ") }}; do
               if systemctl is-active "$service"; then
                 systemctl stop "$service" || :
@@ -145,6 +150,12 @@
             journalctl -ex | grep tests_imuxsock_files_ensure_journal_working
             # ensure loginctl is working - if not it will error with a timeout
             loginctl list-sessions
+            # restart firewalld if firewalld is enabled - note that it might not
+            # be active due to the dbus stuff above, but the tests that use
+            # logging_manage_firewall: true usually (always?) enable it
+            if [ "$restart_firewalld" = true ]; then
+              systemctl restart firewalld.service
+            fi
           changed_when: true
           vars:
             __journald_units:
