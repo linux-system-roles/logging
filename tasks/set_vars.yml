@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 - name: Determine if system is booted with systemd
-  when: not __logging_is_booted is defined
+  when: __logging_is_booted is not defined
   block:
     - name: Run systemctl
       # noqa command-instead-of-module
@@ -14,7 +14,7 @@
     - name: Require installed systemd
       fail:
         msg: "Error: This role requires systemd to be installed."
-      when: __is_system_running.msg is defined and "No such file or directory" in __is_system_running.msg
+      when: '"No such file or directory" in __is_system_running.msg | d("")'
 
     - name: Set flag to indicate that systemd runtime operations are available
       set_fact:
