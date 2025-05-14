@@ -379,16 +379,8 @@
       systemd:
         name: rsyslog.service
         enabled: false
+        state: "{{ 'stopped' if __logging_is_booted else omit }}"
       when:
-        - not __rsyslog_enabled | bool
-        - not rsyslog_in_image | default(false) | bool
-
-    - name: Stop rsyslog service
-      systemd:
-        name: rsyslog.service
-        state: stopped
-      when:
-        - __logging_is_booted
         - not __rsyslog_enabled | bool
         - not rsyslog_in_image | default(false) | bool
 
