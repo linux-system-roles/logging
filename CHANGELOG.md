@@ -1,6 +1,24 @@
 Changelog
 =========
 
+[1.15.0] - 2025-05-15
+--------------------
+
+### New Features
+
+- feat: Support this role in container builds (#444)
+
+### Bug Fixes
+
+- fix: Consider "degraded" systemd state as booted (#449)
+
+### Other Changes
+
+- ci: bump sclorg/testing-farm-as-github-action from 3 to 4 (#445)
+- ci: bump tox-lsr to 3.8.0; rename qemu/kvm tests (#446)
+- test: restart firewalld after dbus if firewalld is running (#447)
+- refactor: Re-unify service disabling and stopping (#448)
+
 [1.14.2] - 2025-04-23
 --------------------
 
