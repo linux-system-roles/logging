@@ -78,12 +78,31 @@
       include_role:
         name: linux-system-roles.logging
         public: true
+      when: not __bootc_validation | d(false)
+
+    # role does not run during bootc QEMU validation, thus some variables are undefined
+    - name: Set __logging_is_booted for bootc validation tests
+      set_fact:
+        __logging_is_booted: true
+        logging_manage_firewall: false
+        logging_manage_selinux: false
+        logging_tcp_ports: []
+        logging_udp_ports: []
+        logging_tls_tcp_ports: []
+        logging_tls_udp_ports: []
+      when: __bootc_validation | d(false)
 
     # notify Restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points"
       meta: flush_handlers
+
+    - name: Create QEMU deployment during bootc end-to-end test
+      delegate_to: localhost
+      command: "{{ lsr_scriptdir }}/bootc-buildah-qcow.sh {{ ansible_host }}"
+      changed_when: true
+      when: ansible_connection == "buildah"
 
     - name: Ensure config file size and counts
       vars:
@@ -205,6 +224,11 @@
       include_role:
         name: linux-system-roles.logging
         public: true
+
+    # do just one image/verify cycle for the bootc end-to-end test
+    - name: Skip remaining steps in bootc end-to-end validation
+      meta: end_play
+      when: __bootc_validation | d(false)
 
     # notify Restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
