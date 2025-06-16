@@ -1,6 +1,16 @@
 Changelog
 =========
 
+[1.15.1] - 2025-06-16
+--------------------
+
+### Other Changes
+
+- ci: Add Fedora 42; use tox-lsr 3.9.0; use lsr-report-errors for qemu tests (#453)
+- ci: Add support for bootc end-to-end validation tests (#454)
+- tests: Update tests_combination for bootc end-to-end validation (#455)
+- ci: Use ansible 2.19 for fedora 42 testing; support python 3.13 (#456)
+
 [1.15.0] - 2025-05-15
 --------------------
 
