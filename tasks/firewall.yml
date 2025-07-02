@@ -2,8 +2,8 @@
 - name: Manage firewall
   when:
     - logging_manage_firewall | bool
-    - logging_tcp_ports or logging_udp_ports or
-      logging_tls_tcp_ports or logging_tls_udp_ports
+    - logging_tcp_ports | length > 0 or logging_udp_ports | length > 0 or
+      logging_tls_tcp_ports | length > 0 or logging_tls_udp_ports | length > 0
   block:
     - name: Initialize logging_firewall_ports
       set_fact:
@@ -30,5 +30,4 @@
         name: fedora.linux_system_roles.firewall
       vars:
         firewall: "{{ logging_firewall_ports }}"
-      when:
-        - logging_firewall_ports | d([])
+      when: logging_firewall_ports | d([]) | length > 0

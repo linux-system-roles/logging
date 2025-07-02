@@ -132,10 +132,10 @@
     # notify Restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
     - name: "Force all notified handlers to run at this point,
-      not waiting for normal sync points"
+      not waiting for normal sync points - 2"
       meta: flush_handlers
 
-    - name: Check ports managed by firewall and selinux
+    - name: Check ports managed by firewall and selinux - 2
       include_tasks: tasks/check_firewall_selinux.yml
 
     - name: Test case 1

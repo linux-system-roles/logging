@@ -117,10 +117,10 @@
     # notify Restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
     - name: "Force all notified handlers to run at this point,
-      not waiting for normal sync points"
+      not waiting for normal sync points - 2"
       meta: flush_handlers
 
-    - name: Check ports managed by firewall and selinux
+    - name: Check ports managed by firewall and selinux - 2
       include_tasks: tasks/check_firewall_selinux.yml
 
     # TEST CASE 1
@@ -170,10 +170,10 @@
     # notify Restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
     - name: "Force all notified handlers to run at this point,
-      not waiting for normal sync points"
+      not waiting for normal sync points - 3"
       meta: flush_handlers
 
-    - name: Ensure config file size and counts
+    - name: Ensure config file size and counts - 2
       vars:
         __conf_count: 9
         __conf_size: less
@@ -195,7 +195,7 @@
         grep ' queue.Size="49999"' {{ __test_output_remote0 }}
       changed_when: false
 
-    - name: Install lsof
+    - name: Install lsof - 2
       package:
         name: lsof
         state: present
@@ -203,7 +203,7 @@
                  ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
       when: __logging_is_booted
 
-    - name: Check lsof outputs for rsyslogd
+    - name: Check lsof outputs for rsyslogd - 2
       shell: |-
         set -euo pipefail
         lsof -i -nP | grep rsyslogd
@@ -211,7 +211,7 @@
       changed_when: false
       when: __logging_is_booted
 
-    - name: Show lsof output
+    - name: Show lsof output - 2
       debug:
         msg: "lsof returned {{ __result.stdout }}"
       when: __logging_is_booted
@@ -232,7 +232,7 @@
       changed_when: false
       when: __logging_is_booted
 
-    - name: Check ports managed by firewall and selinux
+    - name: Check ports managed by firewall and selinux - 3
       include_tasks: tasks/check_firewall_selinux.yml
 
     - name: END TEST CASE 1; Clean up the deployed config
@@ -248,10 +248,10 @@
     # notify Restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
     - name: "Force all notified handlers to run at this point,
-      not waiting for normal sync points"
+      not waiting for normal sync points - 6"
       meta: flush_handlers
 
-    - name: Check ports managed by firewall and selinux
+    - name: Check ports managed by firewall and selinux - 4
       include_tasks: tasks/check_firewall_selinux.yml
 
     - name: Assert {{ __default_system_log }}

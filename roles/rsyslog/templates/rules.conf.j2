@@ -6,14 +6,14 @@
 {% macro print_config(element) %}
 {%   if element is mapping %}
 {%     if element.state is undefined or element.state != 'absent' %}
-{%       if element.comment | d() %}
+{%       if element.comment | d("") | length > 0 %}
 {{ element.comment | comment }}
 {%       endif %}
-{%       if element.selector | d() and element.action | d() %}
+{%       if element.selector | d("") | length > 0 and element.action | d("") | length > 0 %}
 {%         set rsyslog_tpl_selector = element.selector | trim %}
 {{ '%-30s %s' | format(rsyslog_tpl_selector, element.action) }}
 
-{%       elif element.options | d() %}
+{%       elif element.options | d(none) is not none %}
 {{ element.options }}
 
 {%       endif %}
@@ -27,7 +27,7 @@
 {%     endfor %}
 {%   endif %}
 {% endmacro %}
-{% if inner_item.sections | d() %}
+{% if inner_item.sections | d([]) | length > 0 %}
 {%   for section in inner_item.sections %}
 {{ print_config(section) -}}
 {%   endfor %}

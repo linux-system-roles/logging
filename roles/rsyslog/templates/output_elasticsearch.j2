@@ -61,7 +61,7 @@ ruleset(name="{{ __rsyslog_output.name }}") {
             retryfailures="off"
 {% endif %}
             usehttps="{{ __rsyslog_output.usehttps | d(true) | ternary('on', 'off') }}"
-{% if (__rsyslog_output.tls is defined) | ternary(__rsyslog_output.tls, __rsyslog_output.use_cert | d(true)) %}
+{% if __rsyslog_output.tls | d((__rsyslog_output.use_cert | d(true, true)), true) %}
 {%   if __rsyslog_output.ca_cert is defined %}
 {%     set __cacert = __rsyslog_output.ca_cert %}
 {%   elif __rsyslog_output.ca_cert_src is defined %}

@@ -79,7 +79,7 @@
             logging_flows:
               - name: flow_0
                 inputs: [files_input]
-                outputs: "[{{ __test_el }}]"
+                outputs: "{{ [__test_el] }}"
           include_role:
             name: linux-system-roles.logging
             public: true
