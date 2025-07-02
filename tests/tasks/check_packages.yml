@@ -5,7 +5,7 @@
 
 - name: Check expected packages are installed
   assert:
-    that: "{{ item in ansible_facts.packages }}"
+    that: item in ansible_facts.packages
   loop: "{{ __expected }}"
 
 - name: Get not installed list
@@ -38,5 +38,5 @@
 
 - name: Check packages that should not be are not installed
   assert:
-    that: "{{ item not in ansible_facts.packages }}"
+    that: item not in ansible_facts.packages
   loop: "{{ __not_installed }}"

@@ -33,6 +33,7 @@
     $dirGroup {{ __rsyslog_output.dir_group }}
 {%     endif %}
 {%   endif %}
+{{- "" -}}
 {% endmacro %}
 {% if __rsyslog_output.path is defined %}
 {%   if __rsyslog_output.queue is defined %}
@@ -69,7 +70,7 @@ ruleset(name="{{ __rsyslog_output.name }}") {
     kern.*                                                 /dev/console
     # Log anything (except mail) of level info or higher.
     # Don't log private authentication messages!
-{{ print_file_attrs(__rsyslog_output) -}}
+{{ print_file_attrs(__rsyslog_output) }}
     *.info;mail.none;authpriv.none;cron.none                {{ __rsyslog_system_log_dir }}/messages
     # The authpriv file has restricted access.
     authpriv.*                                              {{ __rsyslog_system_log_dir }}/secure

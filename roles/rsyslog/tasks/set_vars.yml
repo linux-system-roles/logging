@@ -34,7 +34,7 @@
 - name: "Include /vars/main.yml from {{ role_path }}"
   include_vars: "{{ item }}"
   loop: "{{ lookup('lines',
-         '/bin/ls -1 {{ role_path }}/vars/main.yml
-          {{ role_path }}/vars/*/*/main.yml').split(',') }}"
+         '/bin/ls -1 ' ~ role_path ~ '/vars/main.yml
+         ' ~ role_path ~ '/vars/*/*/main.yml').split(',') }}"
   when: __snapshot_gather_vars is defined and
         __snapshot_gather_vars | bool

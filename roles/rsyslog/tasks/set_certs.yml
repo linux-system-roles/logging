@@ -1,13 +1,11 @@
 ---
 - name: Deploy certificates
-  when: __rsyslog_cert_subject | d([])
+  when: __rsyslog_cert_subject | d({}) | length > 0
   block:
     # This block collect certificates from local location and
     # copies them to the target host
     - name: Manage certificates if TLS is enabled
-      when: __rsyslog_cert_subject.tls is defined |
-            ternary(__rsyslog_cert_subject.tls,
-                __rsyslog_cert_subject.use_cert | d(true))
+      when: __rsyslog_cert_subject.tls | d((__rsyslog_cert_subject.use_cert | d(true, true)), true)
       block:
         - name: "Copy ca_cert on the control host to the specified path
             on the target host"
@@ -16,7 +14,7 @@
             dest: '{{ __rsyslog_cert_subject.ca_cert |
               d(__rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir) }}'
             mode: '0444'
-          when: __rsyslog_cert_subject.ca_cert_src | d()
+          when: __rsyslog_cert_subject.ca_cert_src | d("") | length > 0
 
         - name: "Copy cert on the control host to the specified path
             on the target host"
@@ -25,7 +23,7 @@
             dest: '{{ __rsyslog_cert_subject.cert |
               d(__rsyslog_default_pki_path + __rsyslog_default_pki_cert_dir) }}'
             mode: '0444'
-          when: __rsyslog_cert_subject.cert_src | d()
+          when: __rsyslog_cert_subject.cert_src | d("") | length > 0
 
         - name: "Copy key on the control host to the specified path
             on the target host"
@@ -34,7 +32,7 @@
             dest: '{{ __rsyslog_cert_subject.private_key |
               d(__rsyslog_default_pki_path + __rsyslog_default_pki_key_dir) }}'
             mode: '0400'
-          when: __rsyslog_cert_subject.private_key_src | d()
+          when: __rsyslog_cert_subject.private_key_src | d("") | length > 0
 
         - name: Check certs - tls is true, but triplets are not given
           fail:
@@ -42,12 +40,12 @@
               3 of ca_cert, cert, private_key, or all 3 of ca_cert_src,
               cert_src, private_key_src, or set tls: false in the
               configuration named {{ __rsyslog_cert_subject.name }}"
-          when: not ((__rsyslog_cert_subject.ca_cert | d() and
-                      __rsyslog_cert_subject.cert | d() and
-                      __rsyslog_cert_subject.private_key | d()) or
-                     (__rsyslog_cert_subject.ca_cert_src | d() and
-                      __rsyslog_cert_subject.cert_src | d() and
-                      __rsyslog_cert_subject.private_key_src | d()))
+          when: not ((__rsyslog_cert_subject.ca_cert | d("") | length > 0 and
+                      __rsyslog_cert_subject.cert | d("") | length > 0 and
+                      __rsyslog_cert_subject.private_key | d("") | length > 0) or
+                     (__rsyslog_cert_subject.ca_cert_src | d("") | length > 0 and
+                      __rsyslog_cert_subject.cert_src | d("") | length > 0 and
+                      __rsyslog_cert_subject.private_key_src | d("") | length > 0))
 
     - name: Check certs - key/certs data are provided, but tls is false
       debug:
@@ -55,12 +53,10 @@
           more cert/key files in the configuration named
           {{ __rsyslog_cert_subject.name }}"
       when:
-        - not (__rsyslog_cert_subject.tls is defined |
-               ternary(__rsyslog_cert_subject.tls,
-               __rsyslog_cert_subject.use_cert | d(true)))
-        - (__rsyslog_cert_subject.ca_cert | d() or
-           __rsyslog_cert_subject.cert | d() or
-           __rsyslog_cert_subject.private_key | d()) or
-          (__rsyslog_cert_subject.ca_cert_src | d() or
-           __rsyslog_cert_subject.cert_src | d() or
-           __rsyslog_cert_subject.private_key_src | d())
+        - not (__rsyslog_cert_subject.tls | d((__rsyslog_cert_subject.use_cert | d(true, true)), true))
+        - (__rsyslog_cert_subject.ca_cert | d("") | length > 0 or
+           __rsyslog_cert_subject.cert | d("") | length > 0 or
+           __rsyslog_cert_subject.private_key | d("") | length > 0) or
+          (__rsyslog_cert_subject.ca_cert_src | d("") | length > 0 or
+           __rsyslog_cert_subject.cert_src | d("") | length > 0 or
+           __rsyslog_cert_subject.private_key_src | d("") | length > 0)

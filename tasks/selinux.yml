@@ -2,8 +2,8 @@
 - name: Manage SELinux settings
   when:
     - logging_manage_selinux | bool
-    - logging_tcp_ports or logging_udp_ports or
-      logging_tls_tcp_ports or logging_tls_udp_ports
+    - logging_tcp_ports | length > 0 or logging_udp_ports | length > 0 or
+      logging_tls_tcp_ports | length > 0 or logging_tls_udp_ports | length > 0
   block:
     - name: Initialize logging_selinux_ports
       set_fact:
@@ -50,5 +50,4 @@
         name: fedora.linux_system_roles.selinux
       vars:
         selinux_ports: "{{ logging_selinux_ports }}"
-      when:
-        - logging_selinux_ports | d([])
+      when: logging_selinux_ports | d([]) | length > 0

@@ -27,10 +27,18 @@
   loop: '{{ __rsyslog_rules | flatten }}'
   loop_control:
     loop_var: inner_item
+  vars:
+    __default_flows:
+      - name: default_flow
+        inputs: ["{{ __rsyslog_input.name }}"]
+        outputs: [default_files]
+    rsyslog_flows: "{{ logging_flows | d(__default_flows, true) }}"
+    __output_list: "{{ rsyslog_flows | selectattr('inputs', 'contains', __rsyslog_input.name) |
+      map(attribute='outputs') | flatten | list }}"
   when:
     - __rsyslog_enabled | bool
-    - inner_item.filename | d() or inner_item.name | d()
-    - inner_item.options | d() or inner_item.sections | d()
+    - inner_item.filename | d("") | length > 0 or inner_item.name | d("") | length > 0
+    - inner_item.options | d([]) | length > 0 or inner_item.sections | d([]) | length > 0
     - inner_item.state is undefined or inner_item.state != 'absent'
   notify: Restart rsyslogd
   register: __rsyslog_deploy_templates
@@ -52,9 +60,17 @@
   loop: '{{ __rsyslog_rules | flatten }}'
   loop_control:
     loop_var: inner_item
+  vars:
+    __default_flows:
+      - name: default_flow
+        inputs: ["{{ __rsyslog_input.name }}"]
+        outputs: [default_files]
+    rsyslog_flows: "{{ logging_flows | d(__default_flows, true) }}"
+    __output_list: "{{ rsyslog_flows | selectattr('inputs', 'contains', __rsyslog_input.name) |
+      map(attribute='outputs') | flatten | list }}"
   when:
     - (not __rsyslog_enabled | bool) or
       (inner_item.state | d('present') == 'absent')
-    - inner_item.filename | d() or inner_item.name | d()
-    - inner_item.options | d() or inner_item.sections | d()
+    - inner_item.filename | d("") | length > 0 or inner_item.name | d("") | length > 0
+    - inner_item.options | d([]) | length > 0 or inner_item.sections | d([]) | length > 0
   notify: Restart rsyslogd

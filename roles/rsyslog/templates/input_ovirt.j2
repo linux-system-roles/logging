@@ -69,31 +69,14 @@ if $syslogtag == "{{ __rsyslog_input.name }}" then {
   }
 }
 {% endif %}
-{% set outdict = {} %}
-{% for flow in logging_flows %}
-{%   if flow.inputs | intersect([ __rsyslog_input.name ]) %}
-{%     for oname in flow.outputs %}
-{%       set _ = outdict.__setitem__(oname, outdict.get(oname,[])|union([ __rsyslog_input.name ])) %}
-{%     endfor %}
-{%   endif %}
-{% endfor %}
-{% for output in rsyslog_outputs %}
-{%   if outdict[output.name] | d(false) %}
+{% for output_name in __output_list %}
 if
-{%     for inputname in outdict[output.name] %}
-{%       if inputname == __rsyslog_input.name %}
-{%         if not loop.first %}
-  or
-{%         endif %}
-{%         if __rsyslog_ovirt_subtype == "collectd" %}
+{%   if __rsyslog_ovirt_subtype == "collectd" %}
   ($inputname == "{{ __rsyslog_input.name }}")
-{%         elif __rsyslog_ovirt_subtype == "engine" or __rsyslog_ovirt_subtype == "vdsm" %}
+{%   elif __rsyslog_ovirt_subtype == "engine" or __rsyslog_ovirt_subtype == "vdsm" %}
   ($syslogtag == "{{ __rsyslog_input.name }}")
-{%         endif %}
-{%       endif %}
-{%     endfor %}
-  then {
-    call {{ output.name }}
-}
 {%   endif %}
+  then {
+    call {{ output_name }}
+}
 {% endfor %}

@@ -180,7 +180,7 @@
     # notify Restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
     - name: "Force all notified handlers to run at this point,
-      not waiting for normal sync points"
+      not waiting for normal sync points - 2"
       meta: flush_handlers
 
     - name: TEST CASE 1; Ensure advanced ovirt configuration works
@@ -262,10 +262,10 @@
     # notify Restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
     - name: "Force all notified handlers to run at this point,
-      not waiting for normal sync points"
+      not waiting for normal sync points - 3"
       meta: flush_handlers
 
-    - name: Ensure config file size and counts
+    - name: Ensure config file size and counts - 2
       vars:
         __conf_count: 17
         __conf_size: less
@@ -276,7 +276,7 @@
         __check_systemctl_status: false
       include_tasks: tasks/check_daemon_config_files.yml
 
-    - name: Check ovirt config files
+    - name: Check ovirt config files - 2
       stat:
         path: "{{ item }}"
       register: __result
@@ -304,25 +304,25 @@
         {{ __test_ovirt_collectd_conf }}
       changed_when: false
 
-    - name: Check input file is configured in {{ __test_ovirt_engine_conf }}
+    - name: Check again input file is configured in {{ __test_ovirt_engine_conf }}
       command: >-
         /bin/grep 'input(type="imfile" file="{{ __test_engine_input }}"
         tag="{{ __test_engine_name }}"' {{ __test_ovirt_engine_conf }}
       changed_when: false
 
-    - name: Check index_prefix is configured in {{ __test_ovirt_engine_conf }}
+    - name: Check again index_prefix is configured in {{ __test_ovirt_engine_conf }}
       command: >-
         /bin/grep 'set $.index_prefix = "{{ __test_logs_index }}"'
         {{ __test_ovirt_engine_conf }}
       changed_when: false
 
-    - name: Check input file is configured in {{ __test_ovirt_vdsm_conf }}
+    - name: Check again input file is configured in {{ __test_ovirt_vdsm_conf }}
       command: >-
         /bin/grep 'input(type="imfile" file="{{ __test_vdsm_input }}"
         tag="{{ __test_vdsm_name }}"' {{ __test_ovirt_vdsm_conf }}
       changed_when: false
 
-    - name: Check index_prefix is configured in {{ __test_ovirt_vdsm_conf }}
+    - name: Check again index_prefix is configured in vdsm {{ __test_ovirt_vdsm_conf }}
       command: >-
         /bin/grep 'set $.index_prefix = "{{ __test_logs_index }}"'
         {{ __test_ovirt_vdsm_conf }}
@@ -350,13 +350,13 @@
         - "retryfailures=.off."
       changed_when: false
 
-    - name: Check server param in "{{ __test_es_conf }}"
+    - name: Check again server param in "{{ __test_es_conf }}"
       command: >-
         /bin/grep "server=\[\"logging-es0\", \"logging-es1\"\]"
                   {{ __test_es_conf }}
       changed_when: false
 
-    - name: Check server param in "{{ __test_es_ops_conf }}"
+    - name: Check again server param in "{{ __test_es_ops_conf }}"
       command: >-
         /bin/grep "server=\[\"logging-es-ops0\", \"logging-es-ops1\"\]"
                   {{ __test_es_ops_conf }}
@@ -374,7 +374,7 @@
     # notify Restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
     - name: "Force all notified handlers to run at this point,
-      not waiting for normal sync points"
+      not waiting for normal sync points - 4"
       meta: flush_handlers
 
     # This tests results in expected error in /var/log/messages on EL 7

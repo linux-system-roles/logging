@@ -220,10 +220,10 @@
     # notify Restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
     - name: "Force all notified handlers to run at this point,
-      not waiting for normal sync points"
+      not waiting for normal sync points - 2"
       meta: flush_handlers
 
-    - name: Check ports managed by firewall and selinux
+    - name: Check ports managed by firewall and selinux - 2
       include_tasks: tasks/check_firewall_selinux.yml
 
     # TEST CASE 1
@@ -277,10 +277,10 @@
     # notify Restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
     - name: "Force all notified handlers to run at this point,
-      not waiting for normal sync points"
+      not waiting for normal sync points - 3"
       meta: flush_handlers
 
-    - name: Ensure config file size and counts
+    - name: Ensure config file size and counts - 2
       vars:
         __conf_count: 8
         __conf_size: less
@@ -353,10 +353,10 @@
       failed_when: __result.stdout != "1"
     # yamllint enable rule:line-length
 
-    - name: Check ports managed by firewall and selinux
+    - name: Check ports managed by firewall and selinux - 3
       include_tasks: tasks/check_firewall_selinux.yml
 
-    - name: Set firewall and selinux to false for cleanup
+    - name: Set firewall and selinux to false for cleanup - 2
       set_fact:
         logging_manage_firewall: false
         logging_manage_selinux: false
@@ -374,7 +374,7 @@
     # notify Restart rsyslogd is executed at the end of this test task.
     # thus we have to force to invoke handlers
     - name: "Force all notified handlers to run at this point,
-      not waiting for normal sync points"
+      not waiting for normal sync points - 4"
       meta: flush_handlers
 
     - name: Stop tracking certificate
@@ -390,7 +390,7 @@
         - "{{ __test_key }}"
         - "{{ __test_cert }}"
 
-    - name: Check ports managed by firewall and selinux
+    - name: Check ports managed by firewall and selinux - 4
       include_tasks: tasks/check_firewall_selinux.yml
 
     - name: Assert {{ __default_system_log }}

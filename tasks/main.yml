@@ -18,7 +18,7 @@
           selectattr('type', 'defined') |
           selectattr('type', 'match', '^files$') |
           list | length == 0
-        - logging_inputs | d([])
+        - logging_inputs | d([]) | length > 0
 
     - name: Set rsyslog_outputs
       set_fact:

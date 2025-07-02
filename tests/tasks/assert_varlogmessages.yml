@@ -13,7 +13,9 @@
       | regex_search('rsyslogd: error.*') }}
   debug:
     var: errors
-  when: errors | length > 0
+  when:
+    - errors is not none
+    - errors | length > 0
 
 # /var/log/messages sometimes contains errors not visible in journalctl
 - name: Ensure no errors in {{ __default_system_log }}

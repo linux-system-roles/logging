@@ -2,7 +2,7 @@
    udp_ports are used in the rsyslog config and tcp_ports are dropped. \
    If both udp_ports and tcp_ports are not configured, \
    it is default to 'tcp_ports: [514]'. #}
-{% if __rsyslog_input.udp_ports | d([]) %}
+{% if __rsyslog_input.udp_ports | d([]) | length > 0 %}
 # Read messages sent over UDP
 module(load="imudp" threads="{{ logging_udp_threads }}"
        TimeRequery="{{ logging_udp_system_time_requery }}"

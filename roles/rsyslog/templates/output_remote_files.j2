@@ -1,10 +1,10 @@
-{% if __rsyslog_output.remote_log_path | d() or __rsyslog_output.remote_sub_path | d() %}
-{%   if __rsyslog_output.remote_log_path | d() %}
+{% if __rsyslog_output.remote_log_path | d("") | length > 0 or __rsyslog_output.remote_sub_path | d("") | length > 0 %}
+{%   if __rsyslog_output.remote_log_path | d("") | length > 0 %}
 {%     set __remote_log_path = __rsyslog_output.remote_log_path %}
 {%   else %}
 {%     set __remote_log_path = __rsyslog_system_log_dir ~ __rsyslog_output.remote_sub_path %}
 {%   endif %}
-{%   if __rsyslog_output.comment | d() %}
+{%   if __rsyslog_output.comment | d("") | length > 0 %}
 # {{ __rsyslog_output.comment }}
 {%   endif %}
 template(
@@ -12,20 +12,19 @@ template(
   type="string"
   string="{{ __remote_log_path }}"
 )
-{%   if __rsyslog_output.queue is defined %}
-{%     set __queue_options = dict() %}
-{%     for option in __rsyslog_output.queue.keys() %}
-{%       set _none = __queue_options.update({ option | lower : true }) %}
-{%     endfor %}
-{%   endif %}
 ruleset(name="{{ __rsyslog_output.name }}"
-{%   if __queue_options.type is not defined %}
+{%   if __rsyslog_output.queue is defined and __rsyslog_output.queue is mapping %}
+{%     set __queue_options = __rsyslog_output.queue.keys() | map('lower') | list %}
+{%   else %}
+{%     set __queue_options = [] %}
+{%   endif %}
+{%   if "type" not in __queue_options %}
         queue.type="{{ logging_server_queue_type }}"
 {%   endif %}
-{%   if __queue_options.size is not defined %}
+{%   if "size" not in __queue_options %}
         queue.size="{{ logging_server_queue_size }}"
 {%   endif %}
-{%   if __queue_options.workerthreads is not defined %}
+{%   if "workerthreads" not in __queue_options %}
         queue.workerThreads="{{ logging_server_threads }}"
 {%   endif %}
 {%   if __rsyslog_output.queue is defined %}
@@ -39,9 +38,9 @@ ruleset(name="{{ __rsyslog_output.name }}"
        else ' template="' ~ __rsyslog_output.template ~ '"'
        if __rsyslog_output.template | d("") not in ["", "modern"]
        else "" %}
-{%   if __rsyslog_output.property | d() %}
+{%   if __rsyslog_output.property | d("") | length > 0 %}
     :{{ __rsyslog_output.property }}, {{ __rsyslog_output.property_op | d('contains') }}, "{{ __rsyslog_output.property_value | d('error') }}" action(name="{{ __rsyslog_output.name }}" type="omfile"{{ template }} DynaFile="{{ __rsyslog_output.name }}_template" DynaFileCacheSize="{{ __rsyslog_output.client_count | d(10) }}" ioBufferSize="{{ __rsyslog_output.io_buffer_size | d('65536') }}" asyncWriting="{{ 'on' if __rsyslog_output.async_writing | d(false) | bool else 'off' }}"{{ lookup('template', 'general_action_params.j2') | indent(1,true) | regex_replace("\s?\n","") }})
-{%   elif __rsyslog_output.exclude | d([]) %}
+{%   elif __rsyslog_output.exclude | d([]) | length > 0 %}
     {{ __rsyslog_output.facility | d('*') }}.{{ __rsyslog_output.severity | d('*') }};{{ __rsyslog_output.exclude | join(';') }} action(name="{{ __rsyslog_output.name }}" type="omfile"{{ template }} DynaFile="{{ __rsyslog_output.name }}_template" DynaFileCacheSize="{{ __rsyslog_output.client_count | d(10) }}" ioBufferSize="{{ __rsyslog_output.io_buffer_size | d('65536') }}" asyncWriting="{{ 'on' if __rsyslog_output.async_writing | d(false) | bool else 'off' }}"{{ lookup('template', 'general_action_params.j2') | indent(1,true) | regex_replace("\s?\n","") }})
 {%   else %}
     {{ __rsyslog_output.facility | d('*') }}.{{ __rsyslog_output.severity | d('*') }} action(name="{{ __rsyslog_output.name }}" type="omfile"{{ template }} DynaFile="{{ __rsyslog_output.name }}_template" DynaFileCacheSize="{{ __rsyslog_output.client_count | d(10) }}" ioBufferSize="{{ __rsyslog_output.io_buffer_size | d('65536') }}" asyncWriting="{{ 'on' if __rsyslog_output.async_writing | d(false) | bool else 'off' }}"{{ lookup('template', 'general_action_params.j2') | indent(1,true) | regex_replace("\s?\n","") }})
