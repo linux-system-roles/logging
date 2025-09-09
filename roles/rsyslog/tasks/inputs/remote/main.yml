@@ -10,6 +10,8 @@
                               selectattr('tcp_ports', 'defined') | list }}"
     __logging_remote_tls: "{{ __logging_remote_tcp |
                               selectattr('tls', 'defined') | list }}"
+    # not really invalid - see https://github.com/ansible/ansible-lint/issues/4702
+    # noqa jinja[invalid]
     __logging_remote_ptcp: "{{ (__logging_remote_tcp |
                                selectattr('tls', 'undefined') | list) +
                                (__logging_remote_tls | rejectattr('tls')

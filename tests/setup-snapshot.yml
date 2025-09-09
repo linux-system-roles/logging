@@ -13,6 +13,8 @@
 
     - name: Install test packages
       package:
+        # not really invalid - see https://github.com/ansible/ansible-lint/issues/4702
+        # noqa jinja[invalid]
         name: "{{ __base_packages + ['lsof', 'openssl'] }}"
         state: present
       vars:
