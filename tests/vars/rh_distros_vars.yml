@@ -14,7 +14,7 @@ __logging_rh_distros:
 __logging_rh_distros_fedora: "{{ __logging_rh_distros + ['Fedora'] }}"
 
 # Use this in conditionals to check if distro is Red Hat or clone
-__logging_is_rh_distro: "{{ ansible_distribution in __logging_rh_distros }}"
+__logging_is_rh_distro: "{{ ansible_facts['distribution'] in __logging_rh_distros }}"
 
 # Use this in conditionals to check if distro is Red Hat or clone, or Fedora
-__logging_is_rh_distro_fedora: "{{ ansible_distribution in __logging_rh_distros_fedora }}"
+__logging_is_rh_distro_fedora: "{{ ansible_facts['distribution'] in __logging_rh_distros_fedora }}"

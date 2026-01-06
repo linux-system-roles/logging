@@ -190,8 +190,8 @@
       register: __result
       failed_when: __result.stdout != "1"
       when:
-        - ansible_distribution in ['CentOS', 'RedHat']
-        - ansible_distribution_major_version is version('7', '>')
+        - ansible_facts['distribution'] in ['CentOS', 'RedHat']
+        - ansible_facts['distribution_major_version'] is version('7', '>')
 
     - name: Check preserveFQDN is on
       command: grep -c 'preserveFQDN="on"' {{ __test_relp_global }}
