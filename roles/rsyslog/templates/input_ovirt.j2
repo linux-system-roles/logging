@@ -54,9 +54,9 @@ if $syslogtag == "{{ __rsyslog_input.name }}" then {
   set $!service = $syslogtag;
   set $!message = $.ovirt!message;
   set $!level = $.ovirt!level;
-  set $!hostname = '{{ ansible_fqdn }}';
+  set $!hostname = '{{ ansible_facts["fqdn"] }}';
   set $!ovirt!cluster_name = '{{ __ovirt_vds_cluster_name }}';
-  set $!ipaddr4 = '{{ ansible_default_ipv4.address }}';
+  set $!ipaddr4 = '{{ ansible_facts["default_ipv4"]["address"] }}';
   set $!ovirt!engine_fqdn = '{{ __ovirt_engine_fqdn }}';
   set $.input_type = "ovirt";
   set $!ovirt!class = $.ovirt!class;

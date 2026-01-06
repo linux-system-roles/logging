@@ -486,7 +486,7 @@ To configure the private key of the logging system, `private_key_src` and/or `pr
 
 #### logging_domain
 
-The default DNS domain used to accept remote incoming logs from remote hosts. Default to "{{ ansible_domain if ansible_domain else ansible_hostname }}"
+The default DNS domain used to accept remote incoming logs from remote hosts. Default to "{{ ansible_facts['domain'] if ansible_facts['domain'] else ansible_facts['hostname'] }}"
 
 ### Server performance optimization options
 

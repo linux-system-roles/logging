@@ -24,7 +24,7 @@
     - name: Reset original confs - logging package is absent
       # we can't do this with "package", dnf5 does not remove reverse
       # dependencies (such as rsyslog-gnutls) any more
-      command: "{{ ansible_pkg_mgr }} remove -y {{ __rsyslog_only_packages | join(' ') }}"
+      command: "{{ ansible_facts['pkg_mgr'] }} remove -y {{ __rsyslog_only_packages | join(' ') }}"
       # we know it's a change here, as we just rpm -V'ed it above
       changed_when: true
       register: __rsyslog_erased
