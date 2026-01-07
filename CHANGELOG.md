@@ -1,6 +1,16 @@
 Changelog
 =========
 
+[1.15.5] - 2026-01-07
+--------------------
+
+### Other Changes
+
+- ci: bump actions/checkout from 5 to 6 (#477)
+- ci: add qemu tests for Fedora 43, drop Fedora 41 (#478)
+- ci: bump actions/upload-artifact from 5 to 6 (#479)
+- refactor: handle INJECT_FACTS_AS_VARS=false by using ansible_facts instead (#480)
+
 [1.15.4] - 2025-11-17
 --------------------
 
