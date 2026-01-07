@@ -959,8 +959,8 @@ path is also used in the rsyslog config. default to
 </ul>
 <h3 id="logging_domain">logging_domain</h3>
 <p>The default DNS domain used to accept remote incoming logs from
-remote hosts. Default to "{{ ansible_domain if ansible_domain else
-ansible_hostname }}"</p>
+remote hosts. Default to "{{ ansible_facts['domain'] if
+ansible_facts['domain'] else ansible_facts['hostname'] }}"</p>
 <h2 id="server-performance-optimization-options">Server performance
 optimization options</h2>
 <p>These variables are set in the same level of the
