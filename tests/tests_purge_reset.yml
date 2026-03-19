@@ -49,12 +49,8 @@
         logging_inputs:
           - name: basic_input
             type: basics
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
-    # notify Restart rsyslogd is executed at the end of this test task.
-    # thus we have to force to invoke handlers
+        __sr_public: true
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points"
       meta: flush_handlers
@@ -90,10 +86,8 @@
         logging_inputs:
           - name: basic_input
             type: basics
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
+        __sr_public: true
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: Check11 rsyslog config files
       command: ls /etc/rsyslog.d
       changed_when: false
@@ -108,10 +102,8 @@
         logging_inputs: []
         logging_outputs: []
         logging_flows: []
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
+        __sr_public: true
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: Ensure config file size and counts - 2
       vars:
         __conf_count: 0
@@ -142,10 +134,8 @@
         logging_inputs: []
         logging_outputs: []
         logging_flows: []
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
+        __sr_public: true
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: Check3 rsyslog config files
       command: ls /etc/rsyslog.d
       changed_when: false

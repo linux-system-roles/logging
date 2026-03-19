@@ -16,9 +16,7 @@
               - name: logging_cert
                 dns: ['localhost', 'www.example.com']
                 ca: self-sign
-          include_role:
-            name: linux-system-roles.logging
-
+          include_tasks: tasks/run_role_with_clear_facts.yml
         - name: Unreachable task
           fail:
             msg: UNREACH

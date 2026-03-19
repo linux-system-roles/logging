@@ -65,12 +65,8 @@
           - name: flows
             inputs: [system_input, relp_server0, relp_server1]
             outputs: [files_output, forwards_output]
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
-    # notify Restart rsyslogd is executed at the end of this test task.
-    # thus we have to force to invoke handlers
+        __sr_public: true
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points"
       meta: flush_handlers
@@ -213,12 +209,8 @@
         logging_inputs: []
         logging_outputs: []
         logging_flows: []
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
-    # notify Restart rsyslogd is executed at the end of this test task.
-    # thus we have to force to invoke handlers
+        __sr_public: true
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points - 2"
       meta: flush_handlers
@@ -270,12 +262,8 @@
           - name: flows
             inputs: [system_input]
             outputs: [relp_client0, relp_client1]
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
-    # notify Restart rsyslogd is executed at the end of this test task.
-    # thus we have to force to invoke handlers
+        __sr_public: true
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points - 3"
       meta: flush_handlers
@@ -367,12 +355,8 @@
         logging_inputs: []
         logging_outputs: []
         logging_flows: []
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
-    # notify Restart rsyslogd is executed at the end of this test task.
-    # thus we have to force to invoke handlers
+        __sr_public: true
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points - 4"
       meta: flush_handlers

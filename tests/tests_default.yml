@@ -3,9 +3,7 @@
 #
 - name: Ensure that the role runs with default parameters
   hosts: all
-  gather_facts: false
 
   tasks:
     - name: Default run (NOOP)
-      include_role:
-        name: linux-system-roles.logging
+      include_tasks: tasks/run_role_with_clear_facts.yml

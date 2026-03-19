@@ -14,9 +14,7 @@
 
   tasks:
     - name: Default run
-      include_role:
-        name: linux-system-roles.logging
-
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: Check rsyslog version
       assert:
         that: __rsyslog_version != "0.0.0"

@@ -78,11 +78,7 @@
           - name: flow_1
             inputs: [basic_input]
             outputs: [default_files]
-      include_role:
-        name: linux-system-roles.logging
-
-    # notify Restart rsyslogd is executed at the end of this test task.
-    # thus we have to force to invoke handlers
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points"
       meta: flush_handlers
@@ -174,11 +170,7 @@
         logging_inputs: []
         logging_outputs: []
         logging_flows: []
-      include_role:
-        name: linux-system-roles.logging
-
-    # notify Restart rsyslogd is executed at the end of this test task.
-    # thus we have to force to invoke handlers
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points - 2"
       meta: flush_handlers
@@ -256,11 +248,7 @@
           - name: flow_1
             inputs: [basic_input]
             outputs: [default_files]
-      include_role:
-        name: linux-system-roles.logging
-
-    # notify Restart rsyslogd is executed at the end of this test task.
-    # thus we have to force to invoke handlers
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points - 3"
       meta: flush_handlers
@@ -368,11 +356,7 @@
         logging_inputs: []
         logging_outputs: []
         logging_flows: []
-      include_role:
-        name: linux-system-roles.logging
-
-    # notify Restart rsyslogd is executed at the end of this test task.
-    # thus we have to force to invoke handlers
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points - 4"
       meta: flush_handlers

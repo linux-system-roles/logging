@@ -2,7 +2,6 @@
 - name: "Combination test - test for (2 types of inputs) x
   (2 types of outputs) combination"
   hosts: all
-  gather_facts: true  # test needs facts
   vars:
     __test_files_conf: /etc/rsyslog.d/30-output-files-files_test0.conf
     __test_forwards_conf_s_f: >-
@@ -12,13 +11,19 @@
     __test_basics_conf: /etc/rsyslog.d/90-input-basics-basic_input.conf
     __test_inputfiles_dir: /var/log/inputdirectory
     __default_system_log: /var/log/messages
-
+  vars_files:
+    - vars/rh_distros_vars.yml
   tasks:
     - name: Generate an input log dir {{ __test_inputfiles_dir }}
       file:
         path: "{{ __test_inputfiles_dir }}"
         state: directory
         mode: "0700"
+
+    - name: Set fact for is_el7
+      set_fact:
+        is_el7: "{{ __logging_is_rh_distro and
+          ansible_facts['distribution_major_version'] is version('7', '==') }}"
 
     # TEST CASE 0
     - name: "TEST CASE 0; Ensure that the role runs with complicated flows
@@ -54,10 +59,7 @@
             type: files
             input_log_path: "{{ __test_inputfiles_dir }}/*.log"
             # Not supported on EL 7
-            endmsg_regex: "{{ omit
-              if ansible_facts['distribution'] in ['CentOS', 'RedHat'] and
-              ansible_facts['distribution_major_version'] is version('7', '==')
-              else 'xyz' }}"
+            endmsg_regex: "{{ omit if is_el7 else 'xyz' }}"
           - name: basic_input
             type: basics
             ratelimit_burst: 33333
@@ -75,9 +77,8 @@
           - name: flow_1
             inputs: ["{{ __test_tag }}"]
             outputs: [files_test0, files_test1]
-      include_role:
-        name: linux-system-roles.logging
-        public: true
+        __sr_public: true
+      include_tasks: tasks/run_role_with_clear_facts.yml
       when: not __bootc_validation | d(false)
 
     # role does not run during bootc QEMU validation, thus some variables are undefined
@@ -221,11 +222,8 @@
         logging_inputs: []
         logging_outputs: []
         logging_flows: []
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
-    # do just one image/verify cycle for the bootc end-to-end test
+        __sr_public: true
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: Skip remaining steps in bootc end-to-end validation
       meta: end_play
       when: __bootc_validation | d(false)
@@ -288,12 +286,8 @@
           - name: flow_3
             inputs: [basic_input]
             outputs: [forwards_facility_only]
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
-    # notify Restart rsyslogd is executed at the end of this test task.
-    # thus we have to force to invoke handlers
+        __sr_public: true
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points - 3"
       meta: flush_handlers
@@ -402,12 +396,8 @@
         logging_inputs: []
         logging_outputs: []
         logging_flows: []
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
-    # notify Restart rsyslogd is executed at the end of this test task.
-    # thus we have to force to invoke handlers
+        __sr_public: true
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points - 4"
       meta: flush_handlers
@@ -462,12 +452,8 @@
           - name: flow_1
             inputs: ["{{ __test_tag }}"]
             outputs: [files_test0, files_test1]
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
-    # notify Restart rsyslogd is executed at the end of this test task.
-    # thus we have to force to invoke handlers
+        __sr_public: true
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points - 5"
       meta: flush_handlers
@@ -549,12 +535,8 @@
           - name: flow_0
             inputs: [basic_input]
             outputs: [files_test0]
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
-    # notify Restart rsyslogd is executed at the end of this test task.
-    # thus we have to force to invoke handlers
+        __sr_public: true
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points - 7"
       meta: flush_handlers
@@ -593,10 +575,8 @@
         logging_inputs: []
         logging_outputs: []
         logging_flows: []
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
+        __sr_public: true
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: Cleaning up __testfile__
       file:
         path: "/tmp/__testfile__"

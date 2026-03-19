@@ -36,12 +36,8 @@
         logging_inputs:
           - name: basic_input
             type: basics
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
-    # notify Restart rsyslogd is executed at the end of this test task.
-    # thus we have to force to invoke handlers
+        __sr_public: true
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points"
       meta: flush_handlers
@@ -92,10 +88,8 @@
         logging_inputs: []
         logging_outputs: []
         logging_flows: []
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
+        __sr_public: true
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: Check ports managed by firewall and selinux - 2
       include_tasks: tasks/check_firewall_selinux.yml
 
@@ -125,12 +119,8 @@
           - name: flows0
             inputs: [basic_input]
             outputs: [files_output0]
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
-    # notify Restart rsyslogd is executed at the end of this test task.
-    # thus we have to force to invoke handlers
+        __sr_public: true
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points - 3"
       meta: flush_handlers
@@ -178,10 +168,8 @@
         logging_inputs: []
         logging_outputs: []
         logging_flows: []
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
+        __sr_public: true
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: Check ports managed by firewall and selinux - 4
       include_tasks: tasks/check_firewall_selinux.yml
 
@@ -235,9 +223,7 @@
                   - files_output1
                   - files_output2
                   - files_output3
-          include_role:
-            name: linux-system-roles.logging
-
+          include_tasks: tasks/run_role_with_clear_facts.yml
         - name: Unreachable task
           fail:
             msg: UNREACH
@@ -256,11 +242,7 @@
         logging_inputs: []
         logging_outputs: []
         logging_flows: []
-      include_role:
-        name: linux-system-roles.logging
-
-    # notify Restart rsyslogd is executed at the end of this test task.
-    # thus we have to force to invoke handlers
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points - 5"
       meta: flush_handlers
@@ -322,12 +304,8 @@
                 property(name="timestamp" dateFormat="rfc3339")
                 constant(value=" ThisIsBasicTestFormat\n")
                 }
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
-    # notify Restart rsyslogd is executed at the end of this test task.
-    # thus we have to force to invoke handlers
+        __sr_public: true
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: "Force all notified handlers to run at this point,
       not waiting for normal sync points - 6"
       meta: flush_handlers
@@ -407,10 +385,8 @@
         logging_inputs: []
         logging_outputs: []
         logging_flows: []
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
+        __sr_public: true
+      include_tasks: tasks/run_role_with_clear_facts.yml
     - name: Check ports managed by firewall and selinux - 6
       include_tasks: tasks/check_firewall_selinux.yml
 

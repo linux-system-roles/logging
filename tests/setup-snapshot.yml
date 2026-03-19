@@ -7,10 +7,9 @@
     __snapshot_gather_vars: true
   tasks:
     - name: Set platform/version specific variables
-      include_role:
-        name: linux-system-roles.logging
-        public: true
-
+      include_tasks: tasks/run_role_with_clear_facts.yml
+      vars:
+        __sr_public: true
     - name: Install test packages
       package:
         # not really invalid - see https://github.com/ansible/ansible-lint/issues/4702
