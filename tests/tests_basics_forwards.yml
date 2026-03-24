@@ -61,7 +61,7 @@
                 type: forwards
                 facility: local1
                 severity: info
-                target: host.domain
+                target: host@domain
                 tcp_port: 1514
                 template: syslog
                 queue:
@@ -74,27 +74,27 @@
               - name: forwards_facility_only
                 type: forwards
                 facility: local2
-                target: host.domain
+                target: host@domain
                 tcp_port: 2514
               - name: forwards_severity_only
                 type: forwards
                 severity: err
-                target: host.domain
+                target: host@domain
                 tcp_port: 3514
               - name: forwards_no_severity_and_facility
                 type: forwards
-                target: host.domain
+                target: host@domain
                 tcp_port: 4514
               - name: forwards_no_severity_and_facility_udp
                 type: forwards
-                target: host.domain
+                target: host@domain
                 udp_port: 6514
               - name: forwards_no_severity_and_facility_protocol_port
                 type: forwards
-                target: host.domain
+                target: host@domain
               - name: forwards_no_severity_and_facility_protocol_port_target
                 type: forwards
-                target: host.domain
+                target: host@domain
               - target: no_name.localdomain
                 type: forwards
             logging_inputs:
@@ -153,7 +153,7 @@
               ruleset(name="forwards_severity_and_facility") {
                   local1.info action(name="forwards_severity_and_facility"
                       type="omfwd"
-                      Target="host.domain"
+                      Target="host@domain"
                       Port="1514"
                       Protocol="tcp"
                       Template="{{ __test_template_sys }}"
@@ -176,7 +176,7 @@
               ruleset(name="forwards_facility_only") {
                   local2.* action(name="forwards_facility_only"
                       type="omfwd"
-                      Target="host.domain"
+                      Target="host@domain"
                       Port="2514"
                       Protocol="tcp"
                       Template="{{ __test_template }}"
@@ -195,7 +195,7 @@
               ruleset(name="forwards_severity_only") {
                   *.err action(name="forwards_severity_only"
                       type="omfwd"
-                      Target="host.domain"
+                      Target="host@domain"
                       Port="3514"
                       Protocol="tcp"
                       Template="{{ __test_template }}"
@@ -214,7 +214,7 @@
               ruleset(name="forwards_no_severity_and_facility") {
                   *.* action(name="forwards_no_severity_and_facility"
                       type="omfwd"
-                      Target="host.domain"
+                      Target="host@domain"
                       Port="4514"
                       Protocol="tcp"
                       Template="{{ __test_template }}"
@@ -233,7 +233,7 @@
               ruleset(name="forwards_no_severity_and_facility_udp") {
                   *.* action(name="forwards_no_severity_and_facility_udp"
                       type="omfwd"
-                      Target="host.domain"
+                      Target="host@domain"
                       Port="6514"
                       Protocol="udp"
                       Template="{{ __test_template }}"
@@ -253,7 +253,7 @@
               ruleset(name="forwards_no_severity_and_facility_protocol_port") {
                   *.* action(name="forwards_no_severity_and_facility_protocol_port"
                       type="omfwd"
-                      Target="host.domain"
+                      Target="host@domain"
                       Template="{{ __test_template }}"
                   )
               }
@@ -323,7 +323,7 @@
                 type: forwards
                 facility: local1
                 severity: info
-                target: host.domain
+                target: host@domain
                 tcp_port: 1514
                 tls: true
                 pki_authmode: anon
@@ -362,7 +362,7 @@
               ruleset(name="forwards_severity_and_facility") {
                   local1.info action(name="forwards_severity_and_facility"
                       type="omfwd"
-                      Target="host.domain"
+                      Target="host@domain"
                       StreamDriver="gtls"
                       StreamDriverMode="1"
                       StreamDriverAuthMode="anon"
@@ -430,7 +430,7 @@
                 type: forwards
                 facility: local1
                 severity: info
-                target: host.domain
+                target: host@domain
                 tcp_port: 1514
                 tls: true
                 permitted_server: '*.example.com'
@@ -468,7 +468,7 @@
               ruleset(name="forwards_severity_and_facility") {
                   local1.info action(name="forwards_severity_and_facility"
                       type="omfwd"
-                      Target="host.domain"
+                      Target="host@domain"
                       StreamDriver="gtls"
                       StreamDriverMode="1"
                       StreamDriverAuthMode="x509/name"
@@ -543,7 +543,7 @@
                     type: forwards
                     facility: local1
                     severity: info
-                    target: host.domain
+                    target: host@domain
                     tls: true
                     tcp_port: 1514
                 logging_inputs:

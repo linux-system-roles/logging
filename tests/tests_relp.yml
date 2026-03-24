@@ -59,7 +59,7 @@
             type: files
           - name: forwards_output
             type: forwards
-            target: host.domain
+            target: host@domain
             tcp_port: 1514
         logging_flows:
           - name: flows

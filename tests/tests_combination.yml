@@ -47,12 +47,12 @@
             type: forwards
             facility: local1
             severity: info
-            target: host.domain
+            target: host@domain
             tcp_port: 1514
           - name: forwards_facility_only
             type: forwards
             facility: local2
-            target: host.domain
+            target: host@domain
             tcp_port: 2514
         logging_inputs:
           - name: "{{ __test_tag }}"
@@ -148,7 +148,7 @@
           ruleset(name="forwards_severity_and_facility") {
               local1.info action(name="forwards_severity_and_facility"
                   type="omfwd"
-                  Target="host.domain"
+                  Target="host@domain"
                   Port="1514"
                   Protocol="tcp"
                   Template="RSYSLOG_ForwardFormat"
@@ -259,12 +259,12 @@
             type: forwards
             facility: local1
             severity: info
-            target: host.domain
+            target: host@domain
             tcp_port: 1514
           - name: forwards_facility_only
             type: forwards
             facility: local2
-            target: host.domain
+            target: host@domain
             tcp_port: 2514
         logging_inputs:
           - name: basic_input
@@ -341,7 +341,7 @@
           ruleset(name="forwards_severity_and_facility") {
               local1.info action(name="forwards_severity_and_facility"
                   type="omfwd"
-                  Target="host.domain"
+                  Target="host@domain"
                   Port="1514"
                   Protocol="tcp"
                   Template="RSYSLOG_ForwardFormat"
@@ -427,12 +427,12 @@
             type: forwards
             facility: local1
             severity: info
-            target: host.domain
+            target: host@domain
             tcp_port: 1514
           - name: forwards_facility_only
             type: forwards
             facility: local2
-            target: host.domain
+            target: host@domain
             tcp_port: 2514
         logging_inputs:
           - name: basic_input
@@ -514,13 +514,13 @@
             type: forwards
             facility: local1
             severity: info
-            target: host.domain
+            target: host@domain
             tcp_port: 1514
             state: absent
           - name: forwards_facility_only
             type: forwards
             facility: local2
-            target: host.domain
+            target: host@domain
             tcp_port: 2514
             state: absent
         logging_inputs:
