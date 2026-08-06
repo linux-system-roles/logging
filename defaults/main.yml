@@ -146,6 +146,8 @@ __logging_no_subsets_facts:
 __logging_required_facts_subsets: "{{ ['!all', '!min'] +
   __logging_required_facts | difference(__logging_no_subsets_facts) }}"
 
+__logging_write_log_file: false
+
 # BEGIN - DO NOT EDIT THIS BLOCK - rh distros variables
 # Ansible distribution identifiers that the role treats like RHEL
 __logging_rh_distros:
