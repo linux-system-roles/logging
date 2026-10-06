@@ -79,7 +79,9 @@ logging_pki_files: []
 # logging_domain
 #
 # The default DNS domain used to accept remote incoming logs from remote hosts.
-logging_domain: '{{ ansible_facts["domain"] if ansible_facts["domain"] else ansible_facts["hostname"] }}'
+# When empty, the role uses ansible_facts["domain"] if set, otherwise
+# ansible_facts["hostname"].
+logging_domain: ""
 
 # logging_elasticsearch_password
 #
