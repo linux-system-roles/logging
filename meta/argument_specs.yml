@@ -1,0 +1,866 @@
+# SPDX-License-Identifier: MIT
+---
+argument_specs:
+  main:
+    short_description: The logging role.
+    description: >
+      The logging role configures the system logging service. The default
+      provider is `rsyslog`. Inputs, outputs, and the flows that connect
+      them are specified with `logging_inputs`, `logging_outputs`, and
+      `logging_flows`.
+    options:
+      logging_provider:
+        type: str
+        default: rsyslog
+        choices:
+          - rsyslog
+        description: >
+          The logging provider used by the role. Currently only
+          `rsyslog` is supported.
+      logging_enabled:
+        type: bool
+        default: true
+        description: >
+          Whether the role deploys the specified logging configuration.
+          When `false`, the role does not configure the provider.
+      logging_outputs:
+        type: list
+        elements: dict
+        default: []
+        description: >
+          List of logging output specifications. Each item describes a
+          destination such as local files, a remote syslog server,
+          Elasticsearch, or RELP.
+        options:
+          name:
+            type: str
+            description: >
+              Unique name of the output. Used in `logging_flows`
+              outputs lists and as part of the generated configuration
+              file name. An item without `name` is ignored.
+          type:
+            type: str
+            required: true
+            choices:
+              - elasticsearch
+              - files
+              - forwards
+              - remote_files
+              - relp
+              - custom
+            description: >
+              Type of the output. `elasticsearch` sends logs to
+              Elasticsearch. `files` writes logs to local files.
+              `forwards` sends logs to a remote syslog server.
+              `remote_files` stores remote host logs in local files.
+              `relp` sends logs over RELP. `custom` is deprecated;
+              use `logging_custom_config_files` instead.
+          state:
+            type: str
+            choices:
+              - present
+              - absent
+            description: >
+              Whether the output configuration should exist
+              (`present`) or be removed (`absent`).
+          queue:
+            type: dict
+            description: >
+              Rsyslog general queue parameters for this output, such as
+              `size`. See the rsyslog documentation for supported keys.
+          action:
+            type: dict
+            description: >
+              Rsyslog general action parameters for this output, such
+              as `writeallmarkmessages`. See the rsyslog documentation
+              for supported keys.
+          facility:
+            type: str
+            description: >
+              Syslog facility used in the selector filter, such as
+              `*` or `authpriv,auth`.
+          severity:
+            type: str
+            description: >
+              Syslog severity used in the selector filter, such as
+              `*` or `info`.
+          exclude:
+            type: list
+            elements: str
+            description: >
+              Selector exclusions such as `mail.none` or `authpriv.none`.
+              Ignored when property-based filter options are set.
+          property:
+            type: str
+            description: >
+              Property name for a property-based filter. When set,
+              selector options are ignored.
+          property_op:
+            type: str
+            description: >
+              Comparison operator for the property-based filter, such
+              as `contains`. Quote the value when using `!`.
+          property_value:
+            type: str
+            description: >
+              Value compared against `property` in a property-based
+              filter.
+          path:
+            type: path
+            description: >
+              Path of the local output file for `files` outputs.
+          mode:
+            type: raw
+            description: >
+              File creation mode for `files` outputs, mapped to the
+              rsyslog `FileCreateMode` parameter. Accepts a string
+              such as `0660` or an integer.
+          owner:
+            type: raw
+            description: >
+              File owner for `files` outputs. Accepts a user name
+              string or a numeric uid.
+          group:
+            type: raw
+            description: >
+              File group for `files` outputs. Accepts a group name
+              string or a numeric gid.
+          dir_mode:
+            type: raw
+            description: >
+              Directory creation mode for `files` outputs, mapped to
+              the rsyslog `DirCreateMode` parameter. Accepts a string
+              such as `0770` or an integer.
+          dir_owner:
+            type: raw
+            description: >
+              Directory owner for `files` outputs. Accepts a user name
+              string or a numeric uid.
+          dir_group:
+            type: raw
+            description: >
+              Directory group for `files` outputs. Accepts a group
+              name string or a numeric gid.
+          template:
+            type: str
+            description: >
+              Output template for `files` and `forwards` outputs.
+              Allowed values are `traditional`, `syslog`, and
+              `modern`, or the name of a template defined in
+              `logging_custom_templates`.
+          server_host:
+            type: raw
+            description: >
+              Elasticsearch host name or list of host names for
+              `elasticsearch` outputs. Accepts a string or list of
+              strings.
+          server_port:
+            type: int
+            description: >
+              Port number the Elasticsearch server listens on.
+          index_prefix:
+            type: str
+            description: >
+              Elasticsearch index prefix used to index the log.
+          input_type:
+            type: str
+            choices:
+              - ovirt
+            description: >
+              Input type associated with the Elasticsearch output.
+              Currently only `ovirt` is supported.
+          retryfailures:
+            type: bool
+            description: >
+              Whether to retry Elasticsearch output actions after a
+              failure.
+          searchIndex:
+            type: str
+            description: >
+              Elasticsearch `searchIndex` template name for
+              `elasticsearch` outputs.
+          dynSearchIndex:
+            type: bool
+            description: >
+              Whether an `elasticsearch` output uses a dynamic search
+              index.
+          searchType:
+            type: str
+            description: >
+              Elasticsearch `searchType` value for `elasticsearch`
+              outputs.
+          bulkmode:
+            type: bool
+            description: >
+              Whether an `elasticsearch` output sends documents in
+              bulk mode.
+          writeoperation:
+            type: str
+            description: >
+              Elasticsearch write operation for `elasticsearch`
+              outputs, such as `create`.
+          bulkid:
+            type: str
+            description: >
+              Template name used as the bulk document id for
+              `elasticsearch` outputs.
+          dynbulkid:
+            type: bool
+            description: >
+              Whether an `elasticsearch` output uses a dynamic bulk
+              document id.
+          allowUnsignedCerts:
+            type: bool
+            description: >
+              Whether an `elasticsearch` output allows unsigned TLS
+              certificates.
+          retryruleset:
+            type: str
+            description: >
+              Rsyslog ruleset called when an `elasticsearch` output
+              retries a failed action.
+          usehttps:
+            type: bool
+            description: >
+              Whether an `elasticsearch` output connects with HTTPS.
+          tls:
+            type: bool
+            description: >
+              Whether to encrypt the connection with TLS. When `true`
+              for RELP or Elasticsearch, key and certificate paths
+              must be provided.
+          use_cert:
+            type: bool
+            description: >
+              Deprecated alias for `tls` on `elasticsearch` outputs.
+          ca_cert:
+            type: path
+            description: >
+              Path of the CA certificate on the managed host.
+          cert:
+            type: path
+            description: >
+              Path of the client or server certificate on the managed
+              host.
+          private_key:
+            type: path
+            description: >
+              Path of the private key on the managed host.
+          ca_cert_src:
+            type: path
+            description: >
+              Path of the CA certificate on the control host. The file
+              is copied to the managed host.
+          cert_src:
+            type: path
+            description: >
+              Path of the certificate on the control host. The file is
+              copied to the managed host.
+          private_key_src:
+            type: path
+            description: >
+              Path of the private key on the control host. The file is
+              copied to the managed host.
+          uid:
+            type: str
+            description: >
+              User name for Elasticsearch HTTP basic authentication.
+              Used together with `logging_elasticsearch_password`.
+          target:
+            type: str
+            description: >
+              Remote host for `forwards` and `relp` outputs.
+          udp_port:
+            type: int
+            description: >
+              UDP port for `forwards` outputs.
+          tcp_port:
+            type: int
+            description: >
+              TCP port for `forwards` outputs.
+          pki_authmode:
+            type: str
+            description: >
+              TLS authentication mode. For `forwards` outputs, one of
+              `x509/name`, `x509/fingerprint`, or `anon`. For `relp`
+              outputs, one of `name` or `fingerprint`.
+          permitted_server:
+            type: str
+            description: >
+              Hostname, IP address, SHA1 fingerprint, or wildcard DNS
+              domain of the TLS peer this `forwards` client may
+              connect to, such as `*.example.com`.
+          port:
+            type: int
+            description: >
+              Port number for `relp` outputs.
+          permitted_servers:
+            type: list
+            elements: str
+            description: >
+              Hostnames, IP addresses, SHA1 fingerprints, or wildcard
+              DNS domains this `relp` client may connect to over TLS.
+          async_writing:
+            type: bool
+            description: >
+              Whether `remote_files` outputs write files asynchronously.
+          client_count:
+            type: int
+            description: >
+              Number of remote clients supported by this
+              `remote_files` output, used as the dynamic file cache
+              size.
+          io_buffer_size:
+            type: int
+            description: >
+              Buffer size in bytes used when writing `remote_files`
+              output data.
+          remote_log_path:
+            type: str
+            description: >
+              Full path used to store filtered `remote_files` logs,
+              and may include rsyslog template properties such as
+              `%FROMHOST%`.
+          remote_sub_path:
+            type: str
+            description: >
+              Path relative to `logging_system_log_dir` used to store
+              filtered `remote_files` logs.
+          comment:
+            type: str
+            description: >
+              Comment written above a `remote_files` output template
+              in the generated configuration.
+          custom_config_files:
+            type: list
+            elements: path
+            description: >
+              Deprecated list of extra configuration files for
+              `custom` outputs. Use `logging_custom_config_files`
+              instead.
+      logging_inputs:
+        type: list
+        elements: dict
+        default: []
+        description: >
+          List of logging input specifications. Each item describes a
+          source such as the systemd journal, local files, oVirt, a
+          remote syslog sender, or RELP.
+        options:
+          name:
+            type: str
+            description: >
+              Unique name of the input. Used in `logging_flows`
+              inputs lists and as part of the generated configuration
+              file name. An item without `name` is ignored.
+          type:
+            type: str
+            required: true
+            choices:
+              - basics
+              - files
+              - ovirt
+              - remote
+              - relp
+            description: >
+              Type of the input. `basics` reads from the systemd
+              journal or a unix socket. `files` reads local files.
+              `ovirt` reads oVirt engine, VDSM, or collectd logs.
+              `remote` receives logs over the network. `relp`
+              receives logs over RELP.
+          state:
+            type: str
+            choices:
+              - present
+              - absent
+            description: >
+              Whether the input configuration should exist
+              (`present`) or be removed (`absent`).
+          kernel_message:
+            type: bool
+            description: >
+              Whether to load `imklog` for `basics` inputs.
+          use_imuxsock:
+            type: bool
+            description: >
+              Whether `basics` inputs use `imuxsock` instead of
+              `imjournal`.
+          ratelimit_burst:
+            type: int
+            description: >
+              Maximum number of messages allowed within
+              `ratelimit_interval` for `basics` inputs.
+          ratelimit_interval:
+            type: int
+            description: >
+              Interval in seconds used to evaluate `ratelimit_burst`
+              for `basics` inputs. `0` disables rate limiting.
+          journal_persist_state_interval:
+            type: int
+            description: >
+              Number of journal messages between persist operations
+              for `basics` inputs using `imjournal`.
+          input_log_path:
+            type: str
+            description: >
+              Full path of the file read by a `files` input. Wildcards
+              such as `*` are allowed. This field is required for
+              `files` inputs to be deployed.
+          facility:
+            type: str
+            description: >
+              Facility filter applied to `files` input messages.
+          severity:
+            type: str
+            description: >
+              Severity filter applied to `files` input messages.
+          startmsg_regex:
+            type: str
+            description: >
+              Regular expression that matches the start of a `files`
+              input message.
+          endmsg_regex:
+            type: str
+            description: >
+              Regular expression that matches the end of a `files`
+              input message.
+          reopen_on_truncate:
+            type: bool
+            description: >
+              Whether a `files` input reopens the file when it is
+              truncated.
+          subtype:
+            type: str
+            description: >
+              oVirt input subtype. `engine` and `vdsm` read log files.
+              `collectd` listens for collectd metrics. Any other value
+              is ignored and the input is not deployed.
+          ovirt_env_name:
+            type: str
+            description: >
+              oVirt environment name.
+          ovirt_env_uuid:
+            type: str
+            description: >
+              oVirt environment UUID.
+          ovirt_elasticsearch_index_prefix:
+            type: str
+            description: >
+              Elasticsearch index prefix for oVirt logs or metrics.
+          ovirt_engine_fqdn:
+            type: str
+            description: >
+              Fully qualified domain name of the oVirt engine.
+          ovirt_input_file:
+            type: path
+            description: >
+              Input log file for oVirt `engine` or `vdsm` subtypes.
+          ovirt_vds_cluster_name:
+            type: str
+            description: >
+              VDS cluster name for oVirt `engine` and `vdsm` inputs.
+          ovirt_collectd_port:
+            type: int
+            description: >
+              TCP port used to receive collectd metrics for the oVirt
+              `collectd` subtype.
+          port:
+            type: int
+            description: >
+              Port number a `relp` input listens on.
+          max_data_size:
+            type: int
+            description: >
+              Maximum message size in bytes for a `relp` input. When
+              unset, the input uses `logging_max_message_size`.
+          tls:
+            type: bool
+            description: >
+              Whether to encrypt the connection with TLS.
+          ca_cert:
+            type: path
+            description: >
+              Path of the CA certificate on the managed host.
+          cert:
+            type: path
+            description: >
+              Path of the server certificate on the managed host.
+          private_key:
+            type: path
+            description: >
+              Path of the private key on the managed host.
+          ca_cert_src:
+            type: path
+            description: >
+              Path of the CA certificate on the control host. The file
+              is copied to the managed host.
+          cert_src:
+            type: path
+            description: >
+              Path of the certificate on the control host. The file is
+              copied to the managed host.
+          private_key_src:
+            type: path
+            description: >
+              Path of the private key on the control host. The file is
+              copied to the managed host.
+          pki_authmode:
+            type: str
+            description: >
+              TLS authentication mode. For `relp` inputs, one of
+              `name` or `fingerprint`. For `remote` inputs, one of
+              `x509/name`, `x509/fingerprint`, or `anon`.
+          permitted_clients:
+            type: list
+            elements: str
+            description: >
+              Hostnames, IP addresses, SHA1 fingerprints, or wildcard
+              DNS domains allowed to send logs over TLS.
+          udp_ports:
+            type: list
+            elements: int
+            description: >
+              UDP port numbers a `remote` input listens on. When set,
+              `tcp_ports` in the same item is ignored.
+          tcp_ports:
+            type: list
+            elements: int
+            description: >
+              TCP port numbers a `remote` input listens on.
+      logging_flows:
+        type: list
+        elements: dict
+        default: []
+        description: >
+          List of relationships between logging inputs and outputs.
+          Each flow sends messages from the named inputs to the named
+          outputs.
+        options:
+          name:
+            type: str
+            required: true
+            description: >
+              Unique name of the flow.
+          inputs:
+            type: list
+            elements: str
+            required: true
+            description: >
+              List of `logging_inputs` `name` values that start
+              processing for this flow.
+          outputs:
+            type: list
+            elements: str
+            required: true
+            description: >
+              List of `logging_outputs` `name` values that receive
+              messages for this flow.
+      logging_purge_confs:
+        type: bool
+        default: false
+        description: >
+          Whether to remove files in `rsyslog.d` that do not belong to
+          any RPM package, including files generated by a previous
+          run of this role. When `true` and no `logging_inputs` are
+          provided, the rsyslog package may be reinstalled to restore
+          the system default `/etc/rsyslog.conf`.
+      logging_system_log_dir:
+        type: path
+        default: /var/log
+        description: >
+          Directory where local log output files are stored.
+      logging_preserve_fqdn:
+        type: bool
+        default: false
+        description: >
+          Whether log entries use the fully qualified domain name
+          instead of the short hostname.
+      logging_udp_threads:
+        type: int
+        default: 1
+        description: >
+          Number of input threads listening on UDP ports.
+      logging_tcp_threads:
+        type: int
+        default: 1
+        description: >
+          Number of input threads listening on plain TCP ports.
+      logging_udp_system_time_requery:
+        type: int
+        default: 2
+        description: >
+          Number of operating system calls between system time
+          queries for UDP input. Values above `10` are not
+          recommended.
+      logging_udp_batch_size:
+        type: int
+        default: 32
+        description: >
+          Maximum number of UDP messages read per operating system
+          call. Values above `128` are not recommended.
+      logging_server_queue_type:
+        type: str
+        default: LinkedList
+        choices:
+          - LinkedList
+          - FixedArray
+        description: >
+          Type of the server queue. `LinkedList` uses a linked list
+          queue. `FixedArray` uses a fixed-size array queue.
+      logging_server_queue_size:
+        type: int
+        default: 50000
+        description: >
+          Maximum number of messages in the server queue.
+      logging_server_threads:
+        type: int
+        default: >-
+          {{ logging_udp_threads | int + logging_tcp_threads | int }}
+        description: >
+          Number of server worker threads.
+      logging_mark:
+        type: bool
+        default: false
+        description: >
+          Whether rsyslog emits periodic mark messages via `immark`.
+      logging_mark_interval:
+        type: int
+        default: 3600
+        description: >
+          Interval in seconds between `immark` mark messages when
+          `logging_mark` is `true`.
+      logging_max_message_size:
+        type: int
+        default: 8192
+        description: >
+          Maximum supported message size in bytes for sending and
+          receiving. Must be greater than `1024`.
+      logging_pki_files:
+        type: list
+        elements: dict
+        default: []
+        description: >
+          List of PKI file specifications used when TLS is configured.
+          Each item may provide control-host source paths, managed-host
+          destination paths, or both.
+        options:
+          ca_cert_src:
+            type: path
+            description: >
+              Path of the CA certificate on the control host. The file
+              is copied to the managed host.
+          cert_src:
+            type: path
+            description: >
+              Path of the certificate on the control host. The file is
+              copied to the managed host.
+          private_key_src:
+            type: path
+            description: >
+              Path of the private key on the control host. The file is
+              copied to the managed host.
+          ca_cert:
+            type: path
+            description: >
+              Path of the CA certificate on the managed host. Also used
+              in the rsyslog configuration.
+          cert:
+            type: path
+            description: >
+              Path of the certificate on the managed host. Also used in
+              the rsyslog configuration.
+          private_key:
+            type: path
+            description: >
+              Path of the private key on the managed host. Also used in
+              the rsyslog configuration.
+      logging_domain:
+        type: str
+        default: ""
+        description: >
+          Default DNS domain used to accept remote incoming logs when
+          permitted peer lists are not set. When empty, the role uses
+          `ansible_facts['domain']` if set, otherwise
+          `ansible_facts['hostname']`.
+      logging_elasticsearch_password:
+        type: str
+        default: ""
+        description: >
+          Password for Elasticsearch HTTP basic authentication. Shared
+          by all Elasticsearch outputs and used only when the output
+          also sets `uid`.
+      logging_files_template_format:
+        type: str
+        default: ""
+        description: >
+          Default template for `files` outputs. Allowed values are
+          `traditional`, `syslog`, and `modern`, or the name of a
+          template defined in `logging_custom_templates`. An empty
+          value selects `modern`.
+      logging_forwards_template_format:
+        type: str
+        default: ""
+        description: >
+          Default template for `forwards` outputs. Allowed values are
+          `traditional`, `syslog`, and `modern`, or the name of a
+          template defined in `logging_custom_templates`. An empty
+          value selects `modern`.
+      logging_manage_firewall:
+        type: bool
+        default: false
+        description: >
+          Whether to configure firewalld for ports found in the role
+          parameters using the firewall system role. Limited to adding
+          ports.
+      logging_manage_selinux:
+        type: bool
+        default: false
+        description: >
+          Whether to configure SELinux policy for ports found in the
+          role parameters using the selinux system role. Limited to
+          adding policy.
+      logging_custom_config_files:
+        type: list
+        elements: path
+        default: []
+        description: >
+          List of extra configuration files copied into the provider
+          configuration directory, such as `/etc/rsyslog.d/`.
+      logging_certificates:
+        type: list
+        elements: dict
+        default: []
+        description: >
+          Certificate request specifications passed to the
+          `certificate` system role as `certificate_requests`. Used
+          to generate a private key and certificate for logging TLS.
+        options:
+          name:
+            type: str
+            required: true
+            description: >
+              The name of the certificate. A full path can be used to
+              choose the directory where files will be stored.
+          ca:
+            type: str
+            required: true
+            description: >
+              The CA that will issue the certificate, such as
+              `self-sign` or `ipa`.
+          dns:
+            type: raw
+            description: >
+              A domain name or list of domain names to include in the
+              certificate Subject Alternative Name (SAN).
+          email:
+            type: raw
+            description: >
+              An email address or list of email addresses to include
+              in the certificate Subject Alternative Name (SAN).
+          ip:
+            type: raw
+            description: >
+              An IP address or list of IP addresses to include in the
+              certificate Subject Alternative Name (SAN).
+          auto_renew:
+            type: bool
+            description: >
+              Whether the certificate should be renewed automatically
+              before it expires.
+          owner:
+            type: str
+            description: >
+              The user name or user id for the certificate and key
+              files.
+          group:
+            type: str
+            description: >
+              The group name or group id for the certificate and key
+              files.
+          mode:
+            type: raw
+            description: >
+              The file system permissions for the certificate and key
+              files. Accepts a string such as `0644` or an integer.
+          key_size:
+            type: int
+            description: >
+              The key size in bits.
+          common_name:
+            type: str
+            description: >
+              The Common Name requested for the certificate subject.
+          country:
+            type: str
+            description: >
+              The country code requested for the certificate subject.
+          state:
+            type: str
+            description: >
+              The state requested for the certificate subject.
+          locality:
+            type: str
+            description: >
+              The locality requested for the certificate subject.
+          organization:
+            type: str
+            description: >
+              The organization requested for the certificate subject.
+          organizational_unit:
+            type: str
+            description: >
+              The organizational unit requested for the certificate
+              subject.
+          contact_email:
+            type: str
+            description: >
+              The contact email requested for the certificate subject.
+          key_usage:
+            type: list
+            elements: str
+            choices:
+              - digitalSignature
+              - nonRepudiation
+              - keyEncipherment
+              - dataEncipherment
+              - keyAgreement
+              - keyCertSign
+              - cRLSign
+              - encipherOnly
+              - decipherOnly
+            description: >
+              The allowed Key Usage extensions for the certificate.
+          extended_key_usage:
+            type: list
+            elements: str
+            description: >
+              The Extended Key Usage attributes for the certificate.
+          run_before:
+            type: str
+            description: >
+              A command to run before saving the certificate.
+          run_after:
+            type: str
+            description: >
+              A command to run after saving the certificate.
+          principal:
+            type: raw
+            description: >
+              A Kerberos principal or list of Kerberos principals.
+          provider:
+            type: str
+            description: >
+              The underlying method used to request and manage the
+              certificate.
+          issuer:
+            type: str
+            description: >
+              The issuer certificate nickname or template name.
+      logging_custom_templates:
+        type: list
+        elements: str
+        default: []
+        description: >
+          List of rsyslog output template definitions. Each item is a
+          string in the legacy `$template` format or the RainerScript
+          `template()` format.

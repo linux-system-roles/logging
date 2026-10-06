@@ -1,0 +1,1166 @@
+# SPDX-License-Identifier: MIT
+---
+- name: Verify invalid parameters are rejected
+  hosts: all
+  tasks:
+    - name: Run invalid input tests
+      block:
+        # ====================================================
+        # Section 1: Verify role works with valid defaults
+        # ====================================================
+        - name: Run role with valid defaults
+          ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+
+        - name: Mark valid defaults succeeded
+          ansible.builtin.set_fact:
+            __valid_defaults_succeeded: true
+
+        - name: Assert role completed with valid defaults
+          ansible.builtin.assert:
+            that:
+              - __valid_defaults_succeeded | default(false)
+            fail_msg: >-
+              Role should succeed with default parameters
+
+        # ====================================================
+        # Section 2: argument_specs validation (Ansible 2.11+)
+        # ====================================================
+        - name: Run argument specs validation tests
+          when: ansible_version.full is version("2.11", ">=")
+          block:
+            # --- Test: logging_enabled wrong type ---
+            - name: Argument specs reject non-boolean logging_enabled
+              block:
+                - name: Run role with non-boolean logging_enabled
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_enabled: not_a_bool
+              rescue:
+                - name: Mark invalid logging_enabled type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_enabled_type_failed: true
+                  when: >-
+                    'logging_enabled' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid logging_enabled type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_enabled_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_enabled values
+                  that are not booleans
+
+            # --- Test: logging_purge_confs wrong type ---
+            - name: Argument specs reject non-boolean logging_purge_confs
+              block:
+                - name: Run role with non-boolean logging_purge_confs
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_purge_confs: not_a_bool
+              rescue:
+                - name: Mark invalid logging_purge_confs type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_purge_confs_type_failed: true
+                  when: >-
+                    'logging_purge_confs' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid logging_purge_confs type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_purge_confs_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_purge_confs values
+                  that are not booleans
+
+            # --- Test: logging_preserve_fqdn wrong type ---
+            - name: Argument specs reject non-boolean logging_preserve_fqdn
+              block:
+                - name: Run role with non-boolean logging_preserve_fqdn
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_preserve_fqdn: not_a_bool
+              rescue:
+                - name: Mark invalid logging_preserve_fqdn type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_preserve_fqdn_type_failed: true
+                  when: >-
+                    'logging_preserve_fqdn' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid logging_preserve_fqdn type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_preserve_fqdn_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_preserve_fqdn values
+                  that are not booleans
+
+            # --- Test: logging_mark wrong type ---
+            - name: Argument specs reject non-boolean logging_mark
+              block:
+                - name: Run role with non-boolean logging_mark
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_mark: not_a_bool
+              rescue:
+                - name: Mark invalid logging_mark type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_mark_type_failed: true
+                  when: >-
+                    'logging_mark' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid logging_mark type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_mark_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_mark values
+                  that are not booleans
+
+            # --- Test: logging_manage_firewall wrong type ---
+            - name: Argument specs reject non-boolean logging_manage_firewall
+              block:
+                - name: Run role with non-boolean logging_manage_firewall
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_manage_firewall: not_a_bool
+              rescue:
+                - name: Mark invalid logging_manage_firewall type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_manage_firewall_type_failed: true
+                  when: >-
+                    'logging_manage_firewall' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid logging_manage_firewall type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_manage_firewall_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_manage_firewall
+                  values that are not booleans
+
+            # --- Test: logging_manage_selinux wrong type ---
+            - name: Argument specs reject non-boolean logging_manage_selinux
+              block:
+                - name: Run role with non-boolean logging_manage_selinux
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_manage_selinux: not_a_bool
+              rescue:
+                - name: Mark invalid logging_manage_selinux type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_manage_selinux_type_failed: true
+                  when: >-
+                    'logging_manage_selinux' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid logging_manage_selinux type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_manage_selinux_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_manage_selinux
+                  values that are not booleans
+
+            # --- Test: logging_udp_threads wrong type ---
+            - name: Argument specs reject non-integer logging_udp_threads
+              block:
+                - name: Run role with non-integer logging_udp_threads
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_udp_threads: not_an_int
+              rescue:
+                - name: Mark invalid logging_udp_threads type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_udp_threads_type_failed: true
+                  when: >-
+                    'logging_udp_threads' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid logging_udp_threads type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_udp_threads_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_udp_threads values
+                  that are not integers
+
+            # --- Test: logging_tcp_threads wrong type ---
+            - name: Argument specs reject non-integer logging_tcp_threads
+              block:
+                - name: Run role with non-integer logging_tcp_threads
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_tcp_threads: not_an_int
+              rescue:
+                - name: Mark invalid logging_tcp_threads type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_tcp_threads_type_failed: true
+                  when: >-
+                    'logging_tcp_threads' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid logging_tcp_threads type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_tcp_threads_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_tcp_threads values
+                  that are not integers
+
+            # --- Test: logging_udp_system_time_requery wrong type ---
+            - name: Argument specs reject non-integer logging_udp_system_time_requery
+              block:
+                - name: Run role with non-integer logging_udp_system_time_requery
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_udp_system_time_requery: not_an_int
+              rescue:
+                - name: Mark invalid logging_udp_system_time_requery type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_udp_requery_type_failed: true
+                  when: >-
+                    'logging_udp_system_time_requery' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid logging_udp_system_time_requery type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_udp_requery_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject
+                  logging_udp_system_time_requery values that are not
+                  integers
+
+            # --- Test: logging_udp_batch_size wrong type ---
+            - name: Argument specs reject non-integer logging_udp_batch_size
+              block:
+                - name: Run role with non-integer logging_udp_batch_size
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_udp_batch_size: not_an_int
+              rescue:
+                - name: Mark invalid logging_udp_batch_size type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_udp_batch_size_type_failed: true
+                  when: >-
+                    'logging_udp_batch_size' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid logging_udp_batch_size type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_udp_batch_size_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_udp_batch_size
+                  values that are not integers
+
+            # --- Test: logging_server_queue_size wrong type ---
+            - name: Argument specs reject non-integer logging_server_queue_size
+              block:
+                - name: Run role with non-integer logging_server_queue_size
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_server_queue_size: not_an_int
+              rescue:
+                - name: Mark invalid logging_server_queue_size type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_server_queue_size_type_failed: true
+                  when: >-
+                    'logging_server_queue_size' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid logging_server_queue_size type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_server_queue_size_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_server_queue_size
+                  values that are not integers
+
+            # --- Test: logging_server_threads wrong type ---
+            - name: Argument specs reject non-integer logging_server_threads
+              block:
+                - name: Run role with non-integer logging_server_threads
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_server_threads: not_an_int
+              rescue:
+                - name: Mark invalid logging_server_threads type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_server_threads_type_failed: true
+                  when: >-
+                    'logging_server_threads' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid logging_server_threads type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_server_threads_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_server_threads
+                  values that are not integers
+
+            # --- Test: logging_mark_interval wrong type ---
+            - name: Argument specs reject non-integer logging_mark_interval
+              block:
+                - name: Run role with non-integer logging_mark_interval
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_mark_interval: not_an_int
+              rescue:
+                - name: Mark invalid logging_mark_interval type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_mark_interval_type_failed: true
+                  when: >-
+                    'logging_mark_interval' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid logging_mark_interval type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_mark_interval_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_mark_interval
+                  values that are not integers
+
+            # --- Test: logging_max_message_size wrong type ---
+            - name: Argument specs reject non-integer logging_max_message_size
+              block:
+                - name: Run role with non-integer logging_max_message_size
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_max_message_size: not_an_int
+              rescue:
+                - name: Mark invalid logging_max_message_size type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_max_message_size_type_failed: true
+                  when: >-
+                    'logging_max_message_size' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid logging_max_message_size type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_max_message_size_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_max_message_size
+                  values that are not integers
+
+            # --- Test: logging_inputs wrong type ---
+            - name: Argument specs reject non-list logging_inputs
+              block:
+                - name: Run role with non-list logging_inputs
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_inputs: not_a_list
+              rescue:
+                - name: Mark invalid logging_inputs type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_inputs_type_failed: true
+                  when: >-
+                    'logging_inputs' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid logging_inputs type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_inputs_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_inputs values
+                  that are not lists
+
+            # --- Test: logging_outputs wrong type ---
+            - name: Argument specs reject non-list logging_outputs
+              block:
+                - name: Run role with non-list logging_outputs
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_outputs: not_a_list
+              rescue:
+                - name: Mark invalid logging_outputs type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_outputs_type_failed: true
+                  when: >-
+                    'logging_outputs' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid logging_outputs type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_outputs_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_outputs values
+                  that are not lists
+
+            # --- Test: logging_flows wrong type ---
+            - name: Argument specs reject non-list logging_flows
+              block:
+                - name: Run role with non-list logging_flows
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_flows: not_a_list
+              rescue:
+                - name: Mark invalid logging_flows type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_flows_type_failed: true
+                  when: >-
+                    'logging_flows' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid logging_flows type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_flows_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_flows values
+                  that are not lists
+
+            # --- Test: logging_provider invalid choice ---
+            - name: Argument specs reject invalid logging_provider choice
+              block:
+                - name: Run role with invalid logging_provider value
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_provider: invalid_choice
+              rescue:
+                - name: Mark invalid logging_provider choice rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_provider_choice_failed: true
+                  when: >-
+                    'must be one of' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid logging_provider choice was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_provider_choice_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_provider value
+                  'invalid_choice'
+
+            # --- Test: logging_server_queue_type invalid choice ---
+            - name: Argument specs reject invalid logging_server_queue_type choice
+              block:
+                - name: Run role with invalid logging_server_queue_type value
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_server_queue_type: invalid_choice
+              rescue:
+                - name: Mark invalid logging_server_queue_type choice rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_queue_type_choice_failed: true
+                  when: >-
+                    'must be one of' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid logging_server_queue_type choice was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_queue_type_choice_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_server_queue_type
+                  value 'invalid_choice'
+
+            # --- Test: required input type missing ---
+            - name: Argument specs reject missing required input type
+              block:
+                - name: Run role without required input type
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_inputs:
+                      - name: basic_input
+              rescue:
+                - name: Mark missing input type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_missing_input_type_failed: true
+                  when: >-
+                    'missing required arguments' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert missing input type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_missing_input_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_inputs entries
+                  missing the required type field
+
+            # --- Test: required output type missing ---
+            - name: Argument specs reject missing required output type
+              block:
+                - name: Run role without required output type
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_outputs:
+                      - name: files_output
+              rescue:
+                - name: Mark missing output type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_missing_output_type_failed: true
+                  when: >-
+                    'missing required arguments' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert missing output type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_missing_output_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_outputs entries
+                  missing the required type field
+
+            # --- Test: required flow name missing ---
+            - name: Argument specs reject missing required flow name
+              block:
+                - name: Run role without required flow name
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_flows:
+                      - inputs: [basic_input]
+                        outputs: [files_output]
+              rescue:
+                - name: Mark missing flow name rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_missing_flow_name_failed: true
+                  when: >-
+                    'missing required arguments' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert missing flow name was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_missing_flow_name_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_flows entries
+                  missing the required name field
+
+            # --- Test: required flow inputs missing ---
+            - name: Argument specs reject missing required flow inputs
+              block:
+                - name: Run role without required flow inputs
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_flows:
+                      - name: flow0
+                        outputs: [files_output]
+              rescue:
+                - name: Mark missing flow inputs rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_missing_flow_inputs_failed: true
+                  when: >-
+                    'missing required arguments' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert missing flow inputs was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_missing_flow_inputs_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_flows entries
+                  missing the required inputs field
+
+            # --- Test: required flow outputs missing ---
+            - name: Argument specs reject missing required flow outputs
+              block:
+                - name: Run role without required flow outputs
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_flows:
+                      - name: flow0
+                        inputs: [basic_input]
+              rescue:
+                - name: Mark missing flow outputs rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_missing_flow_outputs_failed: true
+                  when: >-
+                    'missing required arguments' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert missing flow outputs was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_missing_flow_outputs_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_flows entries
+                  missing the required outputs field
+
+            # --- Test: required certificate name missing ---
+            - name: Argument specs reject missing required certificate name
+              block:
+                - name: Run role without required certificate name
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_certificates:
+                      - ca: self-sign
+                        dns: localhost
+              rescue:
+                - name: Mark missing certificate name rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_missing_cert_name_failed: true
+                  when: >-
+                    'missing required arguments' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert missing certificate name was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_missing_cert_name_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_certificates
+                  entries missing the required name field
+
+            # --- Test: required certificate ca missing ---
+            - name: Argument specs reject missing required certificate ca
+              block:
+                - name: Run role without required certificate ca
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_certificates:
+                      - name: logging_cert
+                        dns: localhost
+              rescue:
+                - name: Mark missing certificate ca rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_missing_cert_ca_failed: true
+                  when: >-
+                    'missing required arguments' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert missing certificate ca was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_missing_cert_ca_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_certificates
+                  entries missing the required ca field
+
+            # --- Test: invalid input type choice ---
+            - name: Argument specs reject invalid logging_inputs type
+              block:
+                - name: Run role with invalid logging_inputs type
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_inputs:
+                      - name: basic_input
+                        type: invalid_choice
+              rescue:
+                - name: Mark invalid input type choice rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_input_type_choice_failed: true
+                  when: >-
+                    'must be one of' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid input type choice was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_input_type_choice_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_inputs type
+                  'invalid_choice'
+
+            # --- Test: invalid output type choice ---
+            - name: Argument specs reject invalid logging_outputs type
+              block:
+                - name: Run role with invalid logging_outputs type
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_outputs:
+                      - name: files_output
+                        type: invalid_choice
+              rescue:
+                - name: Mark invalid output type choice rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_output_type_choice_failed: true
+                  when: >-
+                    'must be one of' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid output type choice was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_output_type_choice_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_outputs type
+                  'invalid_choice'
+
+            # --- Test: invalid input state choice ---
+            - name: Argument specs reject invalid logging_inputs state
+              block:
+                - name: Run role with invalid logging_inputs state
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_inputs:
+                      - name: basic_input
+                        type: basics
+                        state: invalid_choice
+              rescue:
+                - name: Mark invalid input state choice rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_input_state_choice_failed: true
+                  when: >-
+                    'must be one of' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid input state choice was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_input_state_choice_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_inputs state
+                  'invalid_choice'
+
+            # --- Test: nested tls wrong type ---
+            - name: Argument specs reject non-boolean logging_inputs tls
+              block:
+                - name: Run role with non-boolean logging_inputs tls
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_inputs:
+                      - name: remote_input
+                        type: remote
+                        tls: not_a_bool
+              rescue:
+                - name: Mark invalid input tls type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_tls_type_failed: true
+                  when: >-
+                    'tls' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid input tls type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_tls_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_inputs tls values
+                  that are not booleans
+
+            # --- Test: nested udp_ports wrong type ---
+            - name: Argument specs reject non-list logging_inputs udp_ports
+              block:
+                - name: Run role with non-list logging_inputs udp_ports
+                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+                  vars:
+                    logging_inputs:
+                      - name: remote_input
+                        type: remote
+                        udp_ports: not_a_list
+              rescue:
+                - name: Mark invalid udp_ports type rejected
+                  ansible.builtin.set_fact:
+                    __invalid_input_udp_ports_type_failed: true
+                  when: >-
+                    'udp_ports' in
+                    (ansible_failed_result | default({}) | to_json)
+
+            - name: Assert invalid udp_ports type was rejected
+              ansible.builtin.assert:
+                that:
+                  - __invalid_input_udp_ports_type_failed | default(false)
+                fail_msg: >-
+                  argument_specs should reject logging_inputs udp_ports
+                  values that are not lists
+
+        # ====================================================
+        # Section 3: assert_role_vars validation (all versions)
+        # ====================================================
+
+        # --- Test: logging_max_message_size out of range ---
+        - name: Assert rejects logging_max_message_size of 1024
+          block:
+            - name: Run role with logging_max_message_size of 1024
+              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+              vars:
+                logging_max_message_size: 1024
+          rescue:
+            - name: Mark logging_max_message_size range rejected
+              ansible.builtin.set_fact:
+                __invalid_input_max_message_size_range_failed: true
+              when: >-
+                'logging_max_message_size must be greater than 1024' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert logging_max_message_size of 1024 was rejected
+          ansible.builtin.assert:
+            that:
+              - >-
+                __invalid_input_max_message_size_range_failed
+                | default(false)
+            fail_msg: >-
+              assert_role_vars should reject logging_max_message_size
+              when given a value that is not greater than 1024
+
+        # --- Test: server_host as integer ---
+        - name: Assert rejects server_host as an integer
+          block:
+            - name: Run role with server_host as an integer
+              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+              vars:
+                logging_outputs:
+                  - name: es_output
+                    type: elasticsearch
+                    server_host: 123
+          rescue:
+            - name: Mark server_host integer rejected
+              ansible.builtin.set_fact:
+                __invalid_input_server_host_int_failed: true
+              when: >-
+                'server_host must be a string or list of strings' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert server_host as an integer was rejected
+          ansible.builtin.assert:
+            that:
+              - __invalid_input_server_host_int_failed | default(false)
+            fail_msg: >-
+              assert_role_vars should reject logging_outputs server_host
+              when given an integer value
+
+        # --- Test: owner as list ---
+        - name: Assert rejects owner as a list
+          block:
+            - name: Run role with owner as a list
+              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+              vars:
+                logging_outputs:
+                  - name: files_output
+                    type: files
+                    owner:
+                      - root
+          rescue:
+            - name: Mark owner list rejected
+              ansible.builtin.set_fact:
+                __invalid_input_owner_list_failed: true
+              when: >-
+                'owner must be a string or integer' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert owner as a list was rejected
+          ansible.builtin.assert:
+            that:
+              - __invalid_input_owner_list_failed | default(false)
+            fail_msg: >-
+              assert_role_vars should reject logging_outputs owner when
+              given a list value
+
+        # --- Test: group as dict ---
+        - name: Assert rejects group as a dict
+          block:
+            - name: Run role with group as a dict
+              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+              vars:
+                logging_outputs:
+                  - name: files_output
+                    type: files
+                    group:
+                      name: root
+          rescue:
+            - name: Mark group dict rejected
+              ansible.builtin.set_fact:
+                __invalid_input_group_dict_failed: true
+              when: >-
+                'group must be a string or integer' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert group as a dict was rejected
+          ansible.builtin.assert:
+            that:
+              - __invalid_input_group_dict_failed | default(false)
+            fail_msg: >-
+              assert_role_vars should reject logging_outputs group when
+              given a dict value
+
+        # --- Test: mode as list ---
+        - name: Assert rejects mode as a list
+          block:
+            - name: Run role with mode as a list
+              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+              vars:
+                logging_outputs:
+                  - name: files_output
+                    type: files
+                    mode:
+                      - "0644"
+          rescue:
+            - name: Mark mode list rejected
+              ansible.builtin.set_fact:
+                __invalid_input_mode_list_failed: true
+              when: >-
+                'mode must be a string or integer' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert mode as a list was rejected
+          ansible.builtin.assert:
+            that:
+              - __invalid_input_mode_list_failed | default(false)
+            fail_msg: >-
+              assert_role_vars should reject logging_outputs mode when
+              given a list value
+
+        # --- Test: dir_owner as list ---
+        - name: Assert rejects dir_owner as a list
+          block:
+            - name: Run role with dir_owner as a list
+              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+              vars:
+                logging_outputs:
+                  - name: files_output
+                    type: files
+                    dir_owner:
+                      - root
+          rescue:
+            - name: Mark dir_owner list rejected
+              ansible.builtin.set_fact:
+                __invalid_input_dir_owner_list_failed: true
+              when: >-
+                'dir_owner must be a string or integer' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert dir_owner as a list was rejected
+          ansible.builtin.assert:
+            that:
+              - __invalid_input_dir_owner_list_failed | default(false)
+            fail_msg: >-
+              assert_role_vars should reject logging_outputs dir_owner
+              when given a list value
+
+        # --- Test: dir_group as list ---
+        - name: Assert rejects dir_group as a list
+          block:
+            - name: Run role with dir_group as a list
+              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+              vars:
+                logging_outputs:
+                  - name: files_output
+                    type: files
+                    dir_group:
+                      - root
+          rescue:
+            - name: Mark dir_group list rejected
+              ansible.builtin.set_fact:
+                __invalid_input_dir_group_list_failed: true
+              when: >-
+                'dir_group must be a string or integer' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert dir_group as a list was rejected
+          ansible.builtin.assert:
+            that:
+              - __invalid_input_dir_group_list_failed | default(false)
+            fail_msg: >-
+              assert_role_vars should reject logging_outputs dir_group
+              when given a list value
+
+        # --- Test: dir_mode as list ---
+        - name: Assert rejects dir_mode as a list
+          block:
+            - name: Run role with dir_mode as a list
+              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+              vars:
+                logging_outputs:
+                  - name: files_output
+                    type: files
+                    dir_mode:
+                      - "0755"
+          rescue:
+            - name: Mark dir_mode list rejected
+              ansible.builtin.set_fact:
+                __invalid_input_dir_mode_list_failed: true
+              when: >-
+                'dir_mode must be a string or integer' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert dir_mode as a list was rejected
+          ansible.builtin.assert:
+            that:
+              - __invalid_input_dir_mode_list_failed | default(false)
+            fail_msg: >-
+              assert_role_vars should reject logging_outputs dir_mode
+              when given a list value
+
+        # --- Test: certificate dns as integer ---
+        - name: Assert rejects logging_certificates dns as an integer
+          block:
+            - name: Run role with logging_certificates dns as an integer
+              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+              vars:
+                logging_certificates:
+                  - name: logging_cert
+                    ca: self-sign
+                    dns: 123
+          rescue:
+            - name: Mark certificate dns integer rejected
+              ansible.builtin.set_fact:
+                __invalid_input_cert_dns_int_failed: true
+              when: >-
+                'dns must be a string or list of strings' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert logging_certificates dns as an integer was rejected
+          ansible.builtin.assert:
+            that:
+              - __invalid_input_cert_dns_int_failed | default(false)
+            fail_msg: >-
+              assert_role_vars should reject logging_certificates dns
+              when given an integer value
+
+        # --- Test: certificate email as integer ---
+        - name: Assert rejects logging_certificates email as an integer
+          block:
+            - name: Run role with logging_certificates email as an integer
+              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+              vars:
+                logging_certificates:
+                  - name: logging_cert
+                    ca: self-sign
+                    email: 123
+          rescue:
+            - name: Mark certificate email integer rejected
+              ansible.builtin.set_fact:
+                __invalid_input_cert_email_int_failed: true
+              when: >-
+                'email must be a string or list of strings' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert logging_certificates email as an integer was rejected
+          ansible.builtin.assert:
+            that:
+              - __invalid_input_cert_email_int_failed | default(false)
+            fail_msg: >-
+              assert_role_vars should reject logging_certificates email
+              when given an integer value
+
+        # --- Test: certificate ip as integer ---
+        - name: Assert rejects logging_certificates ip as an integer
+          block:
+            - name: Run role with logging_certificates ip as an integer
+              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+              vars:
+                logging_certificates:
+                  - name: logging_cert
+                    ca: self-sign
+                    ip: 123
+          rescue:
+            - name: Mark certificate ip integer rejected
+              ansible.builtin.set_fact:
+                __invalid_input_cert_ip_int_failed: true
+              when: >-
+                'ip must be a string or list of strings' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert logging_certificates ip as an integer was rejected
+          ansible.builtin.assert:
+            that:
+              - __invalid_input_cert_ip_int_failed | default(false)
+            fail_msg: >-
+              assert_role_vars should reject logging_certificates ip
+              when given an integer value
+
+        # --- Test: certificate principal as integer ---
+        - name: Assert rejects logging_certificates principal as an integer
+          block:
+            - name: Run role with logging_certificates principal as an integer
+              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+              vars:
+                logging_certificates:
+                  - name: logging_cert
+                    ca: self-sign
+                    principal: 123
+          rescue:
+            - name: Mark certificate principal integer rejected
+              ansible.builtin.set_fact:
+                __invalid_input_cert_principal_int_failed: true
+              when: >-
+                'principal must be a string or list of strings' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert logging_certificates principal as an integer was rejected
+          ansible.builtin.assert:
+            that:
+              - __invalid_input_cert_principal_int_failed | default(false)
+            fail_msg: >-
+              assert_role_vars should reject logging_certificates
+              principal when given an integer value
+
+        # --- Test: certificate mode as list ---
+        - name: Assert rejects logging_certificates mode as a list
+          block:
+            - name: Run role with logging_certificates mode as a list
+              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
+              vars:
+                logging_certificates:
+                  - name: logging_cert
+                    ca: self-sign
+                    mode:
+                      - "0644"
+          rescue:
+            - name: Mark certificate mode list rejected
+              ansible.builtin.set_fact:
+                __invalid_input_cert_mode_list_failed: true
+              when: >-
+                'mode must be a string or integer' in
+                (ansible_failed_result | default({}) | to_json)
+
+        - name: Assert logging_certificates mode as a list was rejected
+          ansible.builtin.assert:
+            that:
+              - __invalid_input_cert_mode_list_failed | default(false)
+            fail_msg: >-
+              assert_role_vars should reject logging_certificates mode
+              when given a list value
+
+      always:
+        - name: Clear test facts
+          ansible.builtin.set_fact:
+            __valid_defaults_succeeded:
+            __invalid_input_enabled_type_failed:
+            __invalid_input_purge_confs_type_failed:
+            __invalid_input_preserve_fqdn_type_failed:
+            __invalid_input_mark_type_failed:
+            __invalid_input_manage_firewall_type_failed:
+            __invalid_input_manage_selinux_type_failed:
+            __invalid_input_udp_threads_type_failed:
+            __invalid_input_tcp_threads_type_failed:
+            __invalid_input_udp_requery_type_failed:
+            __invalid_input_udp_batch_size_type_failed:
+            __invalid_input_server_queue_size_type_failed:
+            __invalid_input_server_threads_type_failed:
+            __invalid_input_mark_interval_type_failed:
+            __invalid_input_max_message_size_type_failed:
+            __invalid_input_inputs_type_failed:
+            __invalid_input_outputs_type_failed:
+            __invalid_input_flows_type_failed:
+            __invalid_input_provider_choice_failed:
+            __invalid_input_queue_type_choice_failed:
+            __invalid_input_missing_input_type_failed:
+            __invalid_input_missing_output_type_failed:
+            __invalid_input_missing_flow_name_failed:
+            __invalid_input_missing_flow_inputs_failed:
+            __invalid_input_missing_flow_outputs_failed:
+            __invalid_input_missing_cert_name_failed:
+            __invalid_input_missing_cert_ca_failed:
+            __invalid_input_input_type_choice_failed:
+            __invalid_input_output_type_choice_failed:
+            __invalid_input_input_state_choice_failed:
+            __invalid_input_tls_type_failed:
+            __invalid_input_udp_ports_type_failed:
+            __invalid_input_max_message_size_range_failed:
+            __invalid_input_server_host_int_failed:
+            __invalid_input_owner_list_failed:
+            __invalid_input_group_dict_failed:
+            __invalid_input_mode_list_failed:
+            __invalid_input_dir_owner_list_failed:
+            __invalid_input_dir_group_list_failed:
+            __invalid_input_dir_mode_list_failed:
+            __invalid_input_cert_dns_int_failed:
+            __invalid_input_cert_email_int_failed:
+            __invalid_input_cert_ip_int_failed:
+            __invalid_input_cert_principal_int_failed:
+            __invalid_input_cert_mode_list_failed:
+          tags: tests::cleanup

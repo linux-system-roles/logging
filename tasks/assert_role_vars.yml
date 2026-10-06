@@ -1,0 +1,195 @@
+# SPDX-License-Identifier: MIT
+---
+- name: Assert logging_max_message_size is greater than 1024
+  ansible.builtin.assert:
+    that:
+      - logging_max_message_size | int > 1024
+    fail_msg: >-
+      logging_max_message_size must be greater than 1024,
+      got {{ logging_max_message_size }}
+  when: logging_max_message_size is defined
+
+- name: Assert server_host in logging_outputs is a string or list of strings
+  ansible.builtin.assert:
+    that:
+      - >-
+        item.server_host is string
+        or (item.server_host is sequence and item.server_host is not mapping
+            and item.server_host | reject('string') | list | length == 0)
+    fail_msg: >-
+      logging_outputs[{{ idx }}].server_host must be a string or list of
+      strings, got {{ item.server_host | type_debug }}
+  loop: "{{ logging_outputs }}"
+  loop_control:
+    index_var: idx
+    label: "{{ item.name | d('unnamed') }}"
+  when: item.server_host is defined
+
+- name: Assert owner in logging_outputs is a string or integer
+  ansible.builtin.assert:
+    that:
+      - >-
+        item.owner is string
+        or (item.owner | type_debug) == 'int'
+    fail_msg: >-
+      logging_outputs[{{ idx }}].owner must be a string or integer,
+      got {{ item.owner | type_debug }}
+  loop: "{{ logging_outputs }}"
+  loop_control:
+    index_var: idx
+    label: "{{ item.name | d('unnamed') }}"
+  when: item.owner is defined
+
+- name: Assert group in logging_outputs is a string or integer
+  ansible.builtin.assert:
+    that:
+      - >-
+        item.group is string
+        or (item.group | type_debug) == 'int'
+    fail_msg: >-
+      logging_outputs[{{ idx }}].group must be a string or integer,
+      got {{ item.group | type_debug }}
+  loop: "{{ logging_outputs }}"
+  loop_control:
+    index_var: idx
+    label: "{{ item.name | d('unnamed') }}"
+  when: item.group is defined
+
+- name: Assert mode in logging_outputs is a string or integer
+  ansible.builtin.assert:
+    that:
+      - >-
+        item.mode is string
+        or (item.mode | type_debug) == 'int'
+    fail_msg: >-
+      logging_outputs[{{ idx }}].mode must be a string or integer,
+      got {{ item.mode | type_debug }}
+  loop: "{{ logging_outputs }}"
+  loop_control:
+    index_var: idx
+    label: "{{ item.name | d('unnamed') }}"
+  when: item.mode is defined
+
+- name: Assert dir_owner in logging_outputs is a string or integer
+  ansible.builtin.assert:
+    that:
+      - >-
+        item.dir_owner is string
+        or (item.dir_owner | type_debug) == 'int'
+    fail_msg: >-
+      logging_outputs[{{ idx }}].dir_owner must be a string or integer,
+      got {{ item.dir_owner | type_debug }}
+  loop: "{{ logging_outputs }}"
+  loop_control:
+    index_var: idx
+    label: "{{ item.name | d('unnamed') }}"
+  when: item.dir_owner is defined
+
+- name: Assert dir_group in logging_outputs is a string or integer
+  ansible.builtin.assert:
+    that:
+      - >-
+        item.dir_group is string
+        or (item.dir_group | type_debug) == 'int'
+    fail_msg: >-
+      logging_outputs[{{ idx }}].dir_group must be a string or integer,
+      got {{ item.dir_group | type_debug }}
+  loop: "{{ logging_outputs }}"
+  loop_control:
+    index_var: idx
+    label: "{{ item.name | d('unnamed') }}"
+  when: item.dir_group is defined
+
+- name: Assert dir_mode in logging_outputs is a string or integer
+  ansible.builtin.assert:
+    that:
+      - >-
+        item.dir_mode is string
+        or (item.dir_mode | type_debug) == 'int'
+    fail_msg: >-
+      logging_outputs[{{ idx }}].dir_mode must be a string or integer,
+      got {{ item.dir_mode | type_debug }}
+  loop: "{{ logging_outputs }}"
+  loop_control:
+    index_var: idx
+    label: "{{ item.name | d('unnamed') }}"
+  when: item.dir_mode is defined
+
+- name: Assert dns in logging_certificates is a string or list of strings
+  ansible.builtin.assert:
+    that:
+      - >-
+        item.dns is string
+        or (item.dns is sequence and item.dns is not mapping
+            and item.dns | reject('string') | list | length == 0)
+    fail_msg: >-
+      logging_certificates[{{ idx }}].dns must be a string or list of
+      strings, got {{ item.dns | type_debug }}
+  loop: "{{ logging_certificates }}"
+  loop_control:
+    index_var: idx
+    label: "{{ item.name | d('unnamed') }}"
+  when: item.dns is defined
+
+- name: Assert email in logging_certificates is a string or list of strings
+  ansible.builtin.assert:
+    that:
+      - >-
+        item.email is string
+        or (item.email is sequence and item.email is not mapping
+            and item.email | reject('string') | list | length == 0)
+    fail_msg: >-
+      logging_certificates[{{ idx }}].email must be a string or list of
+      strings, got {{ item.email | type_debug }}
+  loop: "{{ logging_certificates }}"
+  loop_control:
+    index_var: idx
+    label: "{{ item.name | d('unnamed') }}"
+  when: item.email is defined
+
+- name: Assert ip in logging_certificates is a string or list of strings
+  ansible.builtin.assert:
+    that:
+      - >-
+        item.ip is string
+        or (item.ip is sequence and item.ip is not mapping
+            and item.ip | reject('string') | list | length == 0)
+    fail_msg: >-
+      logging_certificates[{{ idx }}].ip must be a string or list of
+      strings, got {{ item.ip | type_debug }}
+  loop: "{{ logging_certificates }}"
+  loop_control:
+    index_var: idx
+    label: "{{ item.name | d('unnamed') }}"
+  when: item.ip is defined
+
+- name: Assert principal in logging_certificates is a string or list of strings
+  ansible.builtin.assert:
+    that:
+      - >-
+        item.principal is string
+        or (item.principal is sequence and item.principal is not mapping
+            and item.principal | reject('string') | list | length == 0)
+    fail_msg: >-
+      logging_certificates[{{ idx }}].principal must be a string or list of
+      strings, got {{ item.principal | type_debug }}
+  loop: "{{ logging_certificates }}"
+  loop_control:
+    index_var: idx
+    label: "{{ item.name | d('unnamed') }}"
+  when: item.principal is defined
+
+- name: Assert mode in logging_certificates is a string or integer
+  ansible.builtin.assert:
+    that:
+      - >-
+        item.mode is string
+        or (item.mode | type_debug) == 'int'
+    fail_msg: >-
+      logging_certificates[{{ idx }}].mode must be a string or integer,
+      got {{ item.mode | type_debug }}
+  loop: "{{ logging_certificates }}"
+  loop_control:
+    index_var: idx
+    label: "{{ item.name | d('unnamed') }}"
+  when: item.mode is defined
