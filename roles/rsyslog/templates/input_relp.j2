@@ -35,7 +35,7 @@ input(name="{{ __rsyslog_input.name }}"
 {%   if __rsyslog_input.permitted_clients is defined %}
       tls.permittedpeer=["{{ __rsyslog_input.permitted_clients | join('","') }}"]
 {%   else %}
-      tls.permittedpeer=["{{ '*.' + logging_domain }}"]
+      tls.permittedpeer=["{{ '*.' + __logging_domain }}"]
 {%   endif %}
 {% endif %}
 )

@@ -6,11 +6,10 @@
   when: __logging_required_facts |
     difference(ansible_facts.keys() | list) | length > 0
 
-- name: Set logging_domain from ansible facts
+- name: Set logging domain
   set_fact:
-    logging_domain: "{{ ansible_facts['domain'] | default(ansible_facts['hostname']
-      | default(inventory_hostname), true) }}"
-  when: logging_domain | d('') | length == 0
+    __logging_domain: "{{ logging_domain if logging_domain | d('') | length > 0
+      else ansible_facts['domain'] | d(ansible_facts['hostname']) }}"
 
 - name: Record role begin fingerprint
   sr_fingerprint:

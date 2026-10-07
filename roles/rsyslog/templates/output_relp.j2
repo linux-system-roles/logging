@@ -39,7 +39,7 @@ ruleset(name="{{ __rsyslog_output.name }}") {
 {%   if __rsyslog_output.permitted_servers is defined %}
            tls.permittedpeer=["{{ __rsyslog_output.permitted_servers | join('","') }}"]
 {%   else %}
-           tls.permittedpeer=["{{ '*.' + logging_domain }}"]
+           tls.permittedpeer=["{{ '*.' + __logging_domain }}"]
 {%   endif %}
 {%   if __rsyslog_output.template | d("") | length > 0 %}
            template="{{ __rsyslog_output.template }}"
