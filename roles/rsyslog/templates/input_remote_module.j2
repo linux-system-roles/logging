@@ -22,7 +22,7 @@ module(load="imtcp"
 {%       if __rsyslog_input.permitted_clients | d() %}
        PermittedPeer=["{{ __rsyslog_input.permitted_clients | join('","') }}"]
 {%       else %}
-       PermittedPeer=["*.{{ logging_domain }}"]
+       PermittedPeer=["*.{{ __logging_domain }}"]
 {%       endif %}
 {%     endif %}
 )

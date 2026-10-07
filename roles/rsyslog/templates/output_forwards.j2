@@ -22,7 +22,7 @@ ruleset(name="{{ __rsyslog_output.name }}") {
         StreamDriver="{{ __rsyslog_tls_netstream_driver }}"
         StreamDriverMode="1"
         StreamDriverAuthMode="{{ __rsyslog_output.pki_authmode | d(__rsyslog_default_pki_authmode) }}"
-        StreamDriverPermittedPeers="{{ __rsyslog_output.permitted_server | d('*.' + logging_domain) }}"
+        StreamDriverPermittedPeers="{{ __rsyslog_output.permitted_server | d('*.' + __logging_domain) }}"
 {% endif %}
 {% if __forwards_port != '' %}
         Port="{{ __forwards_port }}"
