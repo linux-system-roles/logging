@@ -11,6 +11,10 @@
     - __snapshot_gather_vars is not defined or
       not __snapshot_gather_vars | bool
   block:
+    - name: Reset default files output to avoid stale facts from previous runs
+      set_fact:
+        __rsyslog_output_files: []
+
     - name: "Set files output if files output is not defined
         and logging_inputs is not empty"
       set_fact:

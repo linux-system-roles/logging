@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: MIT
+---
+# packages needed to manage SELinux ports that the selinux role does not install
+__logging_selinux_packages: []
+
+# BEGIN - DO NOT EDIT THIS BLOCK - rh distros variables
+# Ansible distribution identifiers that the role treats like RHEL
+__logging_rh_distros:
+  - AlmaLinux
+  - CentOS
+  - RedHat
+  - Rocky
+
+# Same as above but includes Fedora
+__logging_rh_distros_fedora: "{{ __logging_rh_distros + ['Fedora'] }}"
+
+# Use this in conditionals to check if distro is Red Hat or clone
+__logging_is_rh_distro: "{{ ansible_facts['distribution'] in __logging_rh_distros }}"
+
+# Use this in conditionals to check if distro is Red Hat or clone, or Fedora
+__logging_is_rh_distro_fedora: "{{ ansible_facts['distribution'] in __logging_rh_distros_fedora }}"
+
+# Use these in conditionals to check if distro is Red Hat or clone of a specific major version
+__logging_is_rh_distro_7: "{{ __logging_is_rh_distro and ansible_facts['distribution_major_version'] == '7' }}"
+__logging_is_rh_distro_8: "{{ __logging_is_rh_distro and ansible_facts['distribution_major_version'] == '8' }}"
+__logging_is_rh_distro_9: "{{ __logging_is_rh_distro and ansible_facts['distribution_major_version'] == '9' }}"
+__logging_is_rh_distro_10: "{{ __logging_is_rh_distro and ansible_facts['distribution_major_version'] == '10' }}"
+# END - DO NOT EDIT THIS BLOCK - rh distros variables

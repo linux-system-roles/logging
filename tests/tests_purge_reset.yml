@@ -107,8 +107,8 @@
     - name: Ensure config file size and counts - 2
       vars:
         __conf_count: 0
-        __conf_size: "{{ 'less' if __logging_is_ostree | d(false)
-          else 'more' }}"
+        __conf_size: "{{ 'less' if __logging_is_ostree | d(false) or
+          __logging_is_transactional else 'more' }}"
         __check_systemctl_status: true
       include_tasks: tasks/check_daemon_config_files.yml
 

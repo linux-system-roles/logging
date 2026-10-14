@@ -114,3 +114,14 @@
     index_var: idx
     label: "{{ item.name | d('unnamed') }}"
   when: item.dir_mode is defined
+
+- name: Assert logging_transactional_update_reboot_ok is null or a boolean
+  ansible.builtin.assert:
+    that:
+      - >-
+        (logging_transactional_update_reboot_ok is none)
+        or (logging_transactional_update_reboot_ok is sameas true)
+        or (logging_transactional_update_reboot_ok is sameas false)
+    fail_msg: >-
+      logging_transactional_update_reboot_ok must be null or a boolean,
+      got {{ logging_transactional_update_reboot_ok | type_debug }}

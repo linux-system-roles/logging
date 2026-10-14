@@ -1,0 +1,13 @@
+---
+# SPDX-License-Identifier: GPL-3.0-only
+
+- name: Set platform/version specific variables for elasticsearch output
+  include_vars: "{{ item }}"
+  loop:
+    - "{{ role_path }}/vars/outputs/elasticsearch/{{ ansible_facts['os_family'] }}.yml"
+    - "{{ role_path }}/vars/outputs/elasticsearch/{{ ansible_facts['distribution'] }}.yml"
+    - "{{ role_path }}/vars/outputs/elasticsearch/{{ ansible_facts['distribution'] }}_\
+      {{ ansible_facts['distribution_major_version'] }}.yml"
+    - "{{ role_path }}/vars/outputs/elasticsearch/{{ ansible_facts['distribution'] }}_\
+      {{ ansible_facts['distribution_version'] }}.yml"
+  when: item is file

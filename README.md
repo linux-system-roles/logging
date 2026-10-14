@@ -12,7 +12,7 @@ To satisfy such requirements, logging role introduced 3 primary variables `loggi
 
 ## Requirements
 
-This role is supported on RHEL-7+, CentOS Stream-8+ and Fedora distributions.
+This role is supported on RHEL-7+, CentOS Stream-8+, Fedora, SLES 16+ and openSUSE Leap 16+ distributions.
 
 ### Collection requirements
 
@@ -25,9 +25,10 @@ If the `logging` is a role from the `fedora.linux_system_roles`
 collection or from the Fedora RPM package, the requirement is already
 satisfied.
 
-The role requires external collections for management of `rpm-ostree` nodes.
+The role requires external collections for management of `rpm-ostree` nodes,
+and `community.general` for package management on SUSE.
 These are listed in the `meta/collection-requirements.yml`.  You do not need
-them if you do not want to manage `rpm-ostree` systems.
+them if you do not want to manage `rpm-ostree` or SUSE systems.
 
 If you need to install additional collections based on the above, please run:
 
@@ -287,7 +288,7 @@ logging_outputs:
 
 #### logging_outputs elasticsearch type
 
-`elasticsearch` output supports sending logs to Elasticsearch. It is available only when the input is `ovirt`. Assuming Elasticsearch is already configured and running.
+`elasticsearch` output supports sending logs to Elasticsearch. It is available only when the input is `ovirt`. Assuming Elasticsearch is already configured and running. On SLES, `rsyslog-module-elasticsearch` is not in the product repositories; SUSE Package Hub, which must be enabled, provides it for SLES 16.0.
 
 Available options:
 
@@ -516,6 +517,10 @@ These variables are set in the same level of the `logging_inputs`, `logging_outp
   system default configuration.  On `ostree` systems, this does not work, so a minimal
   rsyslog.conf will be used, which is *not* the same as the default rsyslog.conf provided
   by the rpm package.  So please use caution if you use this option on `ostree` systems.
+  On transactional update systems the package cannot be reinstalled in place either,
+  so a minimal rsyslog.conf is used there as well. It includes the files in rsyslog.d
+  only when `logging_custom_config_files` is set, and it loads no input module, so
+  those files must load their own.
 * `logging_system_log_dir`: Directory where the local log output files are placed. Default to `/var/log`.
 * `logging_preserve_fqdn`: If set to `true`, rsyslog will use the fully qualified domain name (FQDN, ex. server1.example.com) instead of the short hostname (ex. server1). Default to `false`.
 * `logging_manage_firewall`: If set to `true` and ports are found in the logging role
@@ -533,6 +538,19 @@ These variables are set in the same level of the `logging_inputs`, `logging_outp
   NOTE: `logging_manage_selinux` is limited to _adding_ policy.
   It cannot be used for _removing_ policy.
   If you want to remove policy, you will need to use the `selinux` role directly.
+* `logging_transactional_update_reboot_ok`: This variable is used to handle
+  reboots required by transactional updates. If a transactional update requires
+  a reboot, the role will proceed with the reboot if set to `true`. If set to
+  `false`, the role will notify the user that a reboot is required, allowing for
+  custom handling of the reboot requirement. If this variable is not set, the
+  role will fail to ensure the reboot requirement is not overlooked. For
+  non-transactional update systems, this variable has no effect, but it must
+  still be a boolean or `null`. Default to `null`.
+  On a transactional update system, an input or output whose packages are not
+  installed yet, such as `relp`, installs them after part of the rsyslog
+  configuration is written. The reboot, or the failure when this variable is not
+  set, happens at that point, and rsyslog can log configuration errors until a
+  run of the role completes.
 * `logging_custom_config_files`: A list of files to copy to the remote logging configuration
   directory.  For `rsyslog`, this will be `/etc/rsyslog.d/`.  This assumes the
   default logging configuration will load and process the configuration files in

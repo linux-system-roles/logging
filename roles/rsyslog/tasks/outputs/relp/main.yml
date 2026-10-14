@@ -1,4 +1,7 @@
 ---
+- name: Set platform/version specific variables for relp output
+  include_tasks: "{{ role_path }}/tasks/outputs/relp/set_vars.yml"
+
 - name: Set and check certs and key for relp output
   include_tasks:
     file: "{{ role_path }}/tasks/set_certs.yml"

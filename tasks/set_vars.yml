@@ -6,6 +6,17 @@
   when: __logging_required_facts |
     difference(ansible_facts.keys() | list) | length > 0
 
+- name: Set platform/version specific variables
+  include_vars: "{{ item }}"
+  loop:
+    - "{{ role_path }}/vars/{{ ansible_facts['os_family'] }}.yml"
+    - "{{ role_path }}/vars/{{ ansible_facts['distribution'] }}.yml"
+    - "{{ role_path }}/vars/{{ ansible_facts['distribution'] }}_\
+      {{ ansible_facts['distribution_major_version'] }}.yml"
+    - "{{ role_path }}/vars/{{ ansible_facts['distribution'] }}_\
+      {{ ansible_facts['distribution_version'] }}.yml"
+  when: item is file
+
 - name: Set logging domain
   set_fact:
     __logging_domain: "{{ logging_domain if logging_domain | d('') | length > 0
@@ -40,3 +51,15 @@
       set_fact:
         # see https://www.man7.org/linux/man-pages/man1/systemctl.1.html#:~:text=is-system-running%20output
         __logging_is_booted: "{{ __is_system_running.stdout != 'offline' }}"
+
+- name: Determine if system is transactional update and set flag
+  when: not __logging_is_transactional is defined
+  block:
+    - name: Check if transactional-update exists in /sbin
+      stat:
+        path: /sbin/transactional-update
+      register: __transactional_update_stat
+
+    - name: Set flag if transactional-update exists
+      set_fact:
+        __logging_is_transactional: "{{ __transactional_update_stat.stat.exists }}"

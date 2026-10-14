@@ -5,9 +5,9 @@
     - tests::uses_selinux
   vars:
     __test_cert_name: logging_cert
-    __test_ca_cert: "/etc/pki/tls/certs/{{ __test_cert_name }}.crt"
-    __test_key: "/etc/pki/tls/private/{{ __test_cert_name }}.key"
-    __test_cert: "/etc/pki/tls/certs/{{ __test_cert_name }}.crt"
+    __test_ca_cert: "{{ __test_pki_path }}/certs/{{ __test_cert_name }}.crt"
+    __test_key: "{{ __test_pki_path }}/private/{{ __test_cert_name }}.key"
+    __test_cert: "{{ __test_pki_path }}/certs/{{ __test_cert_name }}.crt"
     __test_relp_server0: /etc/rsyslog.d/11-input-relp-relp_server0.conf
     __test_relp_server1: /etc/rsyslog.d/11-input-relp-relp_server1.conf
     __test_relp_client0: /etc/rsyslog.d/31-output-relp-relp_client0.conf
@@ -17,6 +17,11 @@
     logging_preserve_fqdn: true
     __default_system_log: /var/log/messages
   tasks:
+    - name: Set the PKI path the certificate role uses on the platform
+      set_fact:
+        __test_pki_path: "{{ '/etc/ssl' if ansible_facts['os_family'] == 'Suse'
+          else '/etc/pki/tls' }}"
+
     # TEST CASE 0
     # Note: Create a self-signed cert just for the "unit" test.
     #       In the real configuration, CA cert managed by IPA is required.
