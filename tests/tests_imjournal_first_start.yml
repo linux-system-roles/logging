@@ -1,0 +1,87 @@
+---
+- name: Ensure imjournal skips the journal history on its first start
+  hosts: all
+  tags:
+    - tests::booted
+  vars:
+    __default_system_log: /var/log/imjournal_first_start.log
+    __test_history_message: testHistoryMessage
+  tasks:
+    - name: Skip unless SUSE, the only platform that skips the journal history
+      meta: end_host
+      when: ansible_facts['os_family'] != 'Suse'
+
+    - name: Test the first start of imjournal
+      block:
+        - name: Remove the imjournal state file and the test log file
+          file:
+            path: "{{ item }}"
+            state: absent
+          loop:
+            - /var/lib/rsyslog/imjournal.state
+            - "{{ __default_system_log }}"
+
+        - name: Log a message before the role first starts imjournal
+          command: >-
+            /bin/logger -i -p local6.info -t testTagHistory
+            {{ __test_history_message | quote }}
+          changed_when: false
+
+        - name: Ensure the message is in the journal
+          command: journalctl -q --no-pager -o cat -t testTagHistory
+          register: __result
+          until: __test_history_message in __result.stdout
+          retries: 10
+          delay: 1
+          changed_when: false
+
+        - name: Deploy a basics input and a files output for local6
+          vars:
+            logging_inputs:
+              - name: basic_input
+                type: basics
+            logging_outputs:
+              - name: files_output0
+                type: files
+                facility: local6
+                path: "{{ __default_system_log }}"
+            logging_flows:
+              - name: flow_0
+                inputs: [basic_input]
+                outputs: [files_output0]
+          include_tasks: tasks/run_role_with_clear_facts.yml
+
+        - name: "Force all notified handlers to run at this point,
+          not waiting for normal sync points"
+          meta: flush_handlers
+
+        - name: Ensure a message logged after the role is in the log file
+          vars:
+            __logging_index: 0
+            __logging_file: "{{ __default_system_log }}"
+          include_tasks: tasks/test_logger.yml
+
+        - name: Get the log file
+          slurp:
+            src: "{{ __default_system_log }}"
+          register: __test_log_content
+
+        - name: Ensure the message logged before the role is not in the log file
+          assert:
+            that: __test_history_message not in
+              __test_log_content.content | b64decode
+
+      always:
+        - name: Clean up the deployed config
+          vars:
+            logging_purge_confs: true
+            logging_inputs: []
+            logging_outputs: []
+            logging_flows: []
+          include_tasks: tasks/run_role_with_clear_facts.yml
+          tags: tests::cleanup
+
+        - name: "Force all notified handlers to run at this point,
+          not waiting for normal sync points - 2"
+          meta: flush_handlers
+          tags: tests::cleanup

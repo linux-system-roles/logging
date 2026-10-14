@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: GPL-3.0-only
+---
+__rsyslog_base_packages:
+  - iproute2
+  - rsyslog
+
+# nothing here runs imjournal before the role, so there is no state to resume
+__rsyslog_imjournal_ignore_previous: true
+
+__rsyslog_tls_packages:
+  - rsyslog-module-gtls
+  - ca-certificates

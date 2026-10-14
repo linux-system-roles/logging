@@ -1,0 +1,7 @@
+---
+# SPDX-License-Identifier: GPL-3.0-only
+__rsyslog_ovirt_packages:
+  - rsyslog-module-mmnormalize
+  - libfastjson4
+  - liblognorm5
+  - libestr0

@@ -45,6 +45,24 @@
                   'local': 'true'}]) }}"
       loop: "{{ logging_tls_udp_ports }}"
 
+    - name: Ensure packages needed to manage selinux ports are installed
+      package:
+        name: "{{ __logging_selinux_packages }}"
+        state: present
+      when: __logging_selinux_packages | length > 0
+      register: __logging_selinux_package_result
+
+    - name: Handle reboot for transactional update systems
+      include_role:
+        name: "{{ role_path }}/roles/rsyslog"  # noqa role-name[path]
+        tasks_from: transactional_reboot.yml
+      vars:
+        __rsyslog_tu_result: "{{ __logging_selinux_package_result }}"
+        __rsyslog_tu_packages: "{{ __logging_selinux_packages }}"
+      when:
+        - __logging_is_transactional
+        - __logging_selinux_packages | length > 0
+
     - name: Manage selinux for specified ports
       include_role:
         name: fedora.linux_system_roles.selinux

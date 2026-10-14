@@ -21,8 +21,11 @@ galaxy_info:
     - el9
     - el10
     - fedora
+    - leap16
     - logging
     - redhat
     - rsyslog
+    - sles
+    - sles16
     - containerbuild
 allow_duplicates: true

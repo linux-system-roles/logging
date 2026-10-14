@@ -11,6 +11,17 @@
     - __rsyslog_packages | length > 0
     - not rsyslog_in_image | bool
   notify: Restart rsyslogd
+  register: __rsyslog_deploy_package_result
+
+- name: Handle reboot for transactional update systems
+  include_tasks: transactional_reboot.yml
+  vars:
+    __rsyslog_tu_result: "{{ __rsyslog_deploy_package_result }}"
+    __rsyslog_tu_packages: "{{ __rsyslog_packages }}"
+  when:
+    - __logging_is_transactional
+    - __rsyslog_packages | length > 0
+    - not rsyslog_in_image | bool
 
 - name: Generate role configuration files in rsyslog.d
   template:
