@@ -2,6 +2,13 @@
 ---
 - name: Verify invalid parameters are rejected
   hosts: all
+  vars:
+    __invalid_input_failure_messages: >-
+      {{ ([ansible_failed_result.msg | default('') | string,
+           ansible_failed_result.msg.msg | default('') | string]
+          + (ansible_failed_result.results | default([])
+             | map(attribute='msg') | map('default', '') | list))
+         | join(' ') }}
   tasks:
     - name: Run invalid input tests
       block:
@@ -39,9 +46,13 @@
                 - name: Mark invalid logging_enabled type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_enabled_type_failed: true
-                  when: >-
-                    'logging_enabled' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      "argument 'logging_enabled' is of type" in
+                      __invalid_input_failure_messages
+                    - >-
+                      'unable to convert to bool' in
+                      __invalid_input_failure_messages
 
             - name: Assert invalid logging_enabled type was rejected
               ansible.builtin.assert:
@@ -62,9 +73,13 @@
                 - name: Mark invalid logging_purge_confs type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_purge_confs_type_failed: true
-                  when: >-
-                    'logging_purge_confs' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      "argument 'logging_purge_confs' is of type" in
+                      __invalid_input_failure_messages
+                    - >-
+                      'unable to convert to bool' in
+                      __invalid_input_failure_messages
 
             - name: Assert invalid logging_purge_confs type was rejected
               ansible.builtin.assert:
@@ -85,9 +100,13 @@
                 - name: Mark invalid logging_preserve_fqdn type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_preserve_fqdn_type_failed: true
-                  when: >-
-                    'logging_preserve_fqdn' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      "argument 'logging_preserve_fqdn' is of type" in
+                      __invalid_input_failure_messages
+                    - >-
+                      'unable to convert to bool' in
+                      __invalid_input_failure_messages
 
             - name: Assert invalid logging_preserve_fqdn type was rejected
               ansible.builtin.assert:
@@ -108,9 +127,13 @@
                 - name: Mark invalid logging_mark type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_mark_type_failed: true
-                  when: >-
-                    'logging_mark' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      "argument 'logging_mark' is of type" in
+                      __invalid_input_failure_messages
+                    - >-
+                      'unable to convert to bool' in
+                      __invalid_input_failure_messages
 
             - name: Assert invalid logging_mark type was rejected
               ansible.builtin.assert:
@@ -131,9 +154,13 @@
                 - name: Mark invalid logging_manage_firewall type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_manage_firewall_type_failed: true
-                  when: >-
-                    'logging_manage_firewall' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      "argument 'logging_manage_firewall' is of type" in
+                      __invalid_input_failure_messages
+                    - >-
+                      'unable to convert to bool' in
+                      __invalid_input_failure_messages
 
             - name: Assert invalid logging_manage_firewall type was rejected
               ansible.builtin.assert:
@@ -154,9 +181,13 @@
                 - name: Mark invalid logging_manage_selinux type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_manage_selinux_type_failed: true
-                  when: >-
-                    'logging_manage_selinux' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      "argument 'logging_manage_selinux' is of type" in
+                      __invalid_input_failure_messages
+                    - >-
+                      'unable to convert to bool' in
+                      __invalid_input_failure_messages
 
             - name: Assert invalid logging_manage_selinux type was rejected
               ansible.builtin.assert:
@@ -177,9 +208,13 @@
                 - name: Mark invalid logging_udp_threads type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_udp_threads_type_failed: true
-                  when: >-
-                    'logging_udp_threads' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      "argument 'logging_udp_threads' is of type" in
+                      __invalid_input_failure_messages
+                    - >-
+                      'unable to convert to int' in
+                      __invalid_input_failure_messages
 
             - name: Assert invalid logging_udp_threads type was rejected
               ansible.builtin.assert:
@@ -200,9 +235,13 @@
                 - name: Mark invalid logging_tcp_threads type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_tcp_threads_type_failed: true
-                  when: >-
-                    'logging_tcp_threads' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      "argument 'logging_tcp_threads' is of type" in
+                      __invalid_input_failure_messages
+                    - >-
+                      'unable to convert to int' in
+                      __invalid_input_failure_messages
 
             - name: Assert invalid logging_tcp_threads type was rejected
               ansible.builtin.assert:
@@ -223,9 +262,13 @@
                 - name: Mark invalid logging_udp_system_time_requery type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_udp_requery_type_failed: true
-                  when: >-
-                    'logging_udp_system_time_requery' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      "argument 'logging_udp_system_time_requery' is of type" in
+                      __invalid_input_failure_messages
+                    - >-
+                      'unable to convert to int' in
+                      __invalid_input_failure_messages
 
             - name: Assert invalid logging_udp_system_time_requery type was rejected
               ansible.builtin.assert:
@@ -247,9 +290,13 @@
                 - name: Mark invalid logging_udp_batch_size type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_udp_batch_size_type_failed: true
-                  when: >-
-                    'logging_udp_batch_size' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      "argument 'logging_udp_batch_size' is of type" in
+                      __invalid_input_failure_messages
+                    - >-
+                      'unable to convert to int' in
+                      __invalid_input_failure_messages
 
             - name: Assert invalid logging_udp_batch_size type was rejected
               ansible.builtin.assert:
@@ -270,9 +317,13 @@
                 - name: Mark invalid logging_server_queue_size type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_server_queue_size_type_failed: true
-                  when: >-
-                    'logging_server_queue_size' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      "argument 'logging_server_queue_size' is of type" in
+                      __invalid_input_failure_messages
+                    - >-
+                      'unable to convert to int' in
+                      __invalid_input_failure_messages
 
             - name: Assert invalid logging_server_queue_size type was rejected
               ansible.builtin.assert:
@@ -293,9 +344,13 @@
                 - name: Mark invalid logging_server_threads type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_server_threads_type_failed: true
-                  when: >-
-                    'logging_server_threads' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      "argument 'logging_server_threads' is of type" in
+                      __invalid_input_failure_messages
+                    - >-
+                      'unable to convert to int' in
+                      __invalid_input_failure_messages
 
             - name: Assert invalid logging_server_threads type was rejected
               ansible.builtin.assert:
@@ -316,9 +371,13 @@
                 - name: Mark invalid logging_mark_interval type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_mark_interval_type_failed: true
-                  when: >-
-                    'logging_mark_interval' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      "argument 'logging_mark_interval' is of type" in
+                      __invalid_input_failure_messages
+                    - >-
+                      'unable to convert to int' in
+                      __invalid_input_failure_messages
 
             - name: Assert invalid logging_mark_interval type was rejected
               ansible.builtin.assert:
@@ -339,9 +398,13 @@
                 - name: Mark invalid logging_max_message_size type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_max_message_size_type_failed: true
-                  when: >-
-                    'logging_max_message_size' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      "argument 'logging_max_message_size' is of type" in
+                      __invalid_input_failure_messages
+                    - >-
+                      'unable to convert to int' in
+                      __invalid_input_failure_messages
 
             - name: Assert invalid logging_max_message_size type was rejected
               ansible.builtin.assert:
@@ -362,9 +425,13 @@
                 - name: Mark invalid logging_inputs type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_inputs_type_failed: true
-                  when: >-
-                    'logging_inputs' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      "Elements value for option 'logging_inputs'" in
+                      __invalid_input_failure_messages
+                    - >-
+                      'unable to convert to dict' in
+                      __invalid_input_failure_messages
 
             - name: Assert invalid logging_inputs type was rejected
               ansible.builtin.assert:
@@ -385,9 +452,13 @@
                 - name: Mark invalid logging_outputs type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_outputs_type_failed: true
-                  when: >-
-                    'logging_outputs' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      "Elements value for option 'logging_outputs'" in
+                      __invalid_input_failure_messages
+                    - >-
+                      'unable to convert to dict' in
+                      __invalid_input_failure_messages
 
             - name: Assert invalid logging_outputs type was rejected
               ansible.builtin.assert:
@@ -408,9 +479,13 @@
                 - name: Mark invalid logging_flows type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_flows_type_failed: true
-                  when: >-
-                    'logging_flows' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      "Elements value for option 'logging_flows'" in
+                      __invalid_input_failure_messages
+                    - >-
+                      'unable to convert to dict' in
+                      __invalid_input_failure_messages
 
             - name: Assert invalid logging_flows type was rejected
               ansible.builtin.assert:
@@ -431,9 +506,10 @@
                 - name: Mark invalid logging_provider choice rejected
                   ansible.builtin.set_fact:
                     __invalid_input_provider_choice_failed: true
-                  when: >-
-                    'must be one of' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      'value of logging_provider must be one of: rsyslog, got: invalid_choice' in
+                      __invalid_input_failure_messages
 
             - name: Assert invalid logging_provider choice was rejected
               ansible.builtin.assert:
@@ -454,9 +530,13 @@
                 - name: Mark invalid logging_server_queue_type choice rejected
                   ansible.builtin.set_fact:
                     __invalid_input_queue_type_choice_failed: true
-                  when: >-
-                    'must be one of' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      'value of logging_server_queue_type must be one of' in
+                      __invalid_input_failure_messages
+                    - >-
+                      'got: invalid_choice' in
+                      __invalid_input_failure_messages
 
             - name: Assert invalid logging_server_queue_type choice was rejected
               ansible.builtin.assert:
@@ -478,9 +558,10 @@
                 - name: Mark missing input type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_missing_input_type_failed: true
-                  when: >-
-                    'missing required arguments' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      'missing required arguments: type found in logging_inputs' in
+                      __invalid_input_failure_messages
 
             - name: Assert missing input type was rejected
               ansible.builtin.assert:
@@ -502,9 +583,10 @@
                 - name: Mark missing output type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_missing_output_type_failed: true
-                  when: >-
-                    'missing required arguments' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      'missing required arguments: type found in logging_outputs' in
+                      __invalid_input_failure_messages
 
             - name: Assert missing output type was rejected
               ansible.builtin.assert:
@@ -527,9 +609,10 @@
                 - name: Mark missing flow name rejected
                   ansible.builtin.set_fact:
                     __invalid_input_missing_flow_name_failed: true
-                  when: >-
-                    'missing required arguments' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      'missing required arguments: name found in logging_flows' in
+                      __invalid_input_failure_messages
 
             - name: Assert missing flow name was rejected
               ansible.builtin.assert:
@@ -552,9 +635,10 @@
                 - name: Mark missing flow inputs rejected
                   ansible.builtin.set_fact:
                     __invalid_input_missing_flow_inputs_failed: true
-                  when: >-
-                    'missing required arguments' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      'missing required arguments: inputs found in logging_flows' in
+                      __invalid_input_failure_messages
 
             - name: Assert missing flow inputs was rejected
               ansible.builtin.assert:
@@ -577,9 +661,10 @@
                 - name: Mark missing flow outputs rejected
                   ansible.builtin.set_fact:
                     __invalid_input_missing_flow_outputs_failed: true
-                  when: >-
-                    'missing required arguments' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      'missing required arguments: outputs found in logging_flows' in
+                      __invalid_input_failure_messages
 
             - name: Assert missing flow outputs was rejected
               ansible.builtin.assert:
@@ -602,9 +687,10 @@
                 - name: Mark missing certificate name rejected
                   ansible.builtin.set_fact:
                     __invalid_input_missing_cert_name_failed: true
-                  when: >-
-                    'missing required arguments' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      'missing required arguments: name found in logging_certificates' in
+                      __invalid_input_failure_messages
 
             - name: Assert missing certificate name was rejected
               ansible.builtin.assert:
@@ -627,9 +713,10 @@
                 - name: Mark missing certificate ca rejected
                   ansible.builtin.set_fact:
                     __invalid_input_missing_cert_ca_failed: true
-                  when: >-
-                    'missing required arguments' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      'missing required arguments: ca found in logging_certificates' in
+                      __invalid_input_failure_messages
 
             - name: Assert missing certificate ca was rejected
               ansible.builtin.assert:
@@ -652,9 +739,13 @@
                 - name: Mark invalid input type choice rejected
                   ansible.builtin.set_fact:
                     __invalid_input_input_type_choice_failed: true
-                  when: >-
-                    'must be one of' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      'value of type must be one of: basics, files' in
+                      __invalid_input_failure_messages
+                    - >-
+                      'got: invalid_choice found in logging_inputs' in
+                      __invalid_input_failure_messages
 
             - name: Assert invalid input type choice was rejected
               ansible.builtin.assert:
@@ -677,9 +768,13 @@
                 - name: Mark invalid output type choice rejected
                   ansible.builtin.set_fact:
                     __invalid_input_output_type_choice_failed: true
-                  when: >-
-                    'must be one of' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      'value of type must be one of: elasticsearch, files' in
+                      __invalid_input_failure_messages
+                    - >-
+                      'got: invalid_choice found in logging_outputs' in
+                      __invalid_input_failure_messages
 
             - name: Assert invalid output type choice was rejected
               ansible.builtin.assert:
@@ -703,9 +798,10 @@
                 - name: Mark invalid input state choice rejected
                   ansible.builtin.set_fact:
                     __invalid_input_input_state_choice_failed: true
-                  when: >-
-                    'must be one of' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      'value of state must be one of: present, absent, got: invalid_choice found in logging_inputs' in
+                      __invalid_input_failure_messages
 
             - name: Assert invalid input state choice was rejected
               ansible.builtin.assert:
@@ -729,9 +825,16 @@
                 - name: Mark invalid input tls type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_tls_type_failed: true
-                  when: >-
-                    'tls' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      "argument 'tls' is of type" in
+                      __invalid_input_failure_messages
+                    - >-
+                      "found in 'logging_inputs'" in
+                      __invalid_input_failure_messages
+                    - >-
+                      'unable to convert to bool' in
+                      __invalid_input_failure_messages
 
             - name: Assert invalid input tls type was rejected
               ansible.builtin.assert:
@@ -755,9 +858,13 @@
                 - name: Mark invalid udp_ports type rejected
                   ansible.builtin.set_fact:
                     __invalid_input_udp_ports_type_failed: true
-                  when: >-
-                    'udp_ports' in
-                    (ansible_failed_result | default({}) | to_json)
+                  when:
+                    - >-
+                      "Elements value for option 'udp_ports' found in 'logging_inputs'" in
+                      __invalid_input_failure_messages
+                    - >-
+                      'unable to convert to int' in
+                      __invalid_input_failure_messages
 
             - name: Assert invalid udp_ports type was rejected
               ansible.builtin.assert:
@@ -782,9 +889,10 @@
             - name: Mark logging_max_message_size range rejected
               ansible.builtin.set_fact:
                 __invalid_input_max_message_size_range_failed: true
-              when: >-
-                'logging_max_message_size must be greater than 1024' in
-                (ansible_failed_result | default({}) | to_json)
+              when:
+                - >-
+                  'logging_max_message_size must be greater than 1024, got 1024' in
+                  __invalid_input_failure_messages
 
         - name: Assert logging_max_message_size of 1024 was rejected
           ansible.builtin.assert:
@@ -810,9 +918,10 @@
             - name: Mark server_host integer rejected
               ansible.builtin.set_fact:
                 __invalid_input_server_host_int_failed: true
-              when: >-
-                'server_host must be a string or list of strings' in
-                (ansible_failed_result | default({}) | to_json)
+              when:
+                - >-
+                  'logging_outputs[0].server_host must be a string or list of strings, got int' in
+                  __invalid_input_failure_messages
 
         - name: Assert server_host as an integer was rejected
           ansible.builtin.assert:
@@ -837,9 +946,10 @@
             - name: Mark owner list rejected
               ansible.builtin.set_fact:
                 __invalid_input_owner_list_failed: true
-              when: >-
-                'owner must be a string or integer' in
-                (ansible_failed_result | default({}) | to_json)
+              when:
+                - >-
+                  'logging_outputs[0].owner must be a string or integer, got list' in
+                  __invalid_input_failure_messages
 
         - name: Assert owner as a list was rejected
           ansible.builtin.assert:
@@ -864,9 +974,10 @@
             - name: Mark group dict rejected
               ansible.builtin.set_fact:
                 __invalid_input_group_dict_failed: true
-              when: >-
-                'group must be a string or integer' in
-                (ansible_failed_result | default({}) | to_json)
+              when:
+                - >-
+                  'logging_outputs[0].group must be a string or integer, got dict' in
+                  __invalid_input_failure_messages
 
         - name: Assert group as a dict was rejected
           ansible.builtin.assert:
@@ -891,9 +1002,10 @@
             - name: Mark mode list rejected
               ansible.builtin.set_fact:
                 __invalid_input_mode_list_failed: true
-              when: >-
-                'mode must be a string or integer' in
-                (ansible_failed_result | default({}) | to_json)
+              when:
+                - >-
+                  'logging_outputs[0].mode must be a string or integer, got list' in
+                  __invalid_input_failure_messages
 
         - name: Assert mode as a list was rejected
           ansible.builtin.assert:
@@ -918,9 +1030,10 @@
             - name: Mark dir_owner list rejected
               ansible.builtin.set_fact:
                 __invalid_input_dir_owner_list_failed: true
-              when: >-
-                'dir_owner must be a string or integer' in
-                (ansible_failed_result | default({}) | to_json)
+              when:
+                - >-
+                  'logging_outputs[0].dir_owner must be a string or integer, got list' in
+                  __invalid_input_failure_messages
 
         - name: Assert dir_owner as a list was rejected
           ansible.builtin.assert:
@@ -945,9 +1058,10 @@
             - name: Mark dir_group list rejected
               ansible.builtin.set_fact:
                 __invalid_input_dir_group_list_failed: true
-              when: >-
-                'dir_group must be a string or integer' in
-                (ansible_failed_result | default({}) | to_json)
+              when:
+                - >-
+                  'logging_outputs[0].dir_group must be a string or integer, got list' in
+                  __invalid_input_failure_messages
 
         - name: Assert dir_group as a list was rejected
           ansible.builtin.assert:
@@ -972,9 +1086,10 @@
             - name: Mark dir_mode list rejected
               ansible.builtin.set_fact:
                 __invalid_input_dir_mode_list_failed: true
-              when: >-
-                'dir_mode must be a string or integer' in
-                (ansible_failed_result | default({}) | to_json)
+              when:
+                - >-
+                  'logging_outputs[0].dir_mode must be a string or integer, got list' in
+                  __invalid_input_failure_messages
 
         - name: Assert dir_mode as a list was rejected
           ansible.builtin.assert:
@@ -998,9 +1113,10 @@
             - name: Mark certificate dns integer rejected
               ansible.builtin.set_fact:
                 __invalid_input_cert_dns_int_failed: true
-              when: >-
-                'dns must be a string or list of strings' in
-                (ansible_failed_result | default({}) | to_json)
+              when:
+                - >-
+                  'logging_certificates[0].dns must be a string or list of strings, got int' in
+                  __invalid_input_failure_messages
 
         - name: Assert logging_certificates dns as an integer was rejected
           ansible.builtin.assert:
@@ -1024,9 +1140,10 @@
             - name: Mark certificate email integer rejected
               ansible.builtin.set_fact:
                 __invalid_input_cert_email_int_failed: true
-              when: >-
-                'email must be a string or list of strings' in
-                (ansible_failed_result | default({}) | to_json)
+              when:
+                - >-
+                  'logging_certificates[0].email must be a string or list of strings, got int' in
+                  __invalid_input_failure_messages
 
         - name: Assert logging_certificates email as an integer was rejected
           ansible.builtin.assert:
@@ -1050,9 +1167,10 @@
             - name: Mark certificate ip integer rejected
               ansible.builtin.set_fact:
                 __invalid_input_cert_ip_int_failed: true
-              when: >-
-                'ip must be a string or list of strings' in
-                (ansible_failed_result | default({}) | to_json)
+              when:
+                - >-
+                  'logging_certificates[0].ip must be a string or list of strings, got int' in
+                  __invalid_input_failure_messages
 
         - name: Assert logging_certificates ip as an integer was rejected
           ansible.builtin.assert:
@@ -1076,9 +1194,10 @@
             - name: Mark certificate principal integer rejected
               ansible.builtin.set_fact:
                 __invalid_input_cert_principal_int_failed: true
-              when: >-
-                'principal must be a string or list of strings' in
-                (ansible_failed_result | default({}) | to_json)
+              when:
+                - >-
+                  'logging_certificates[0].principal must be a string or list of strings, got int' in
+                  __invalid_input_failure_messages
 
         - name: Assert logging_certificates principal as an integer was rejected
           ansible.builtin.assert:
@@ -1103,9 +1222,10 @@
             - name: Mark certificate mode list rejected
               ansible.builtin.set_fact:
                 __invalid_input_cert_mode_list_failed: true
-              when: >-
-                'mode must be a string or integer' in
-                (ansible_failed_result | default({}) | to_json)
+              when:
+                - >-
+                  'logging_certificates[0].mode must be a string or integer, got list' in
+                  __invalid_input_failure_messages
 
         - name: Assert logging_certificates mode as a list was rejected
           ansible.builtin.assert:
