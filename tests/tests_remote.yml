@@ -173,11 +173,26 @@
         __check_systemctl_status: true
       include_tasks: tasks/check_daemon_config_files.yml
 
-    - name: Check action parameters in remote0 output
+    - name: Check action parameters in remote0 output - order 1
       command: >-
         grep 'authpriv.none action.* action.reportsuspension="on"
         action.reportsuspensioncontinuation="off"' {{ __test_output_remote0 }}
       changed_when: false
+      failed_when: false
+      register: __test_order1
+
+    - name: Check action parameters in remote0 output - order 2
+      command: >-
+        grep 'authpriv.none action.* action.reportsuspensioncontinuation="off"
+        action.reportsuspension="on"' {{ __test_output_remote0 }}
+      changed_when: false
+      failed_when: false
+      register: __test_order2
+
+    - name: Assert action parameters in remote0 output
+      assert:
+        that: __test_order1.rc == 0 or __test_order2.rc == 0
+
     - name: Check queue parameters in remote0 output
       command: >-
         grep ' queue.Size="49999"' {{ __test_output_remote0 }}

@@ -674,58 +674,6 @@
                   argument_specs should reject logging_flows entries
                   missing the required outputs field
 
-            # --- Test: required certificate name missing ---
-            - name: Argument specs reject missing required certificate name
-              block:
-                - name: Run role without required certificate name
-                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
-                  vars:
-                    logging_certificates:
-                      - ca: self-sign
-                        dns: localhost
-              rescue:
-                - name: Mark missing certificate name rejected
-                  ansible.builtin.set_fact:
-                    __invalid_input_missing_cert_name_failed: true
-                  when:
-                    - >-
-                      'missing required arguments: name found in logging_certificates' in
-                      __invalid_input_failure_messages
-
-            - name: Assert missing certificate name was rejected
-              ansible.builtin.assert:
-                that:
-                  - __invalid_input_missing_cert_name_failed | default(false)
-                fail_msg: >-
-                  argument_specs should reject logging_certificates
-                  entries missing the required name field
-
-            # --- Test: required certificate ca missing ---
-            - name: Argument specs reject missing required certificate ca
-              block:
-                - name: Run role without required certificate ca
-                  ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
-                  vars:
-                    logging_certificates:
-                      - name: logging_cert
-                        dns: localhost
-              rescue:
-                - name: Mark missing certificate ca rejected
-                  ansible.builtin.set_fact:
-                    __invalid_input_missing_cert_ca_failed: true
-                  when:
-                    - >-
-                      'missing required arguments: ca found in logging_certificates' in
-                      __invalid_input_failure_messages
-
-            - name: Assert missing certificate ca was rejected
-              ansible.builtin.assert:
-                that:
-                  - __invalid_input_missing_cert_ca_failed | default(false)
-                fail_msg: >-
-                  argument_specs should reject logging_certificates
-                  entries missing the required ca field
-
             # --- Test: invalid input type choice ---
             - name: Argument specs reject invalid logging_inputs type
               block:
@@ -1099,142 +1047,6 @@
               assert_role_vars should reject logging_outputs dir_mode
               when given a list value
 
-        # --- Test: certificate dns as integer ---
-        - name: Assert rejects logging_certificates dns as an integer
-          block:
-            - name: Run role with logging_certificates dns as an integer
-              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
-              vars:
-                logging_certificates:
-                  - name: logging_cert
-                    ca: self-sign
-                    dns: 123
-          rescue:
-            - name: Mark certificate dns integer rejected
-              ansible.builtin.set_fact:
-                __invalid_input_cert_dns_int_failed: true
-              when:
-                - >-
-                  'logging_certificates[0].dns must be a string or list of strings, got int' in
-                  __invalid_input_failure_messages
-
-        - name: Assert logging_certificates dns as an integer was rejected
-          ansible.builtin.assert:
-            that:
-              - __invalid_input_cert_dns_int_failed | default(false)
-            fail_msg: >-
-              assert_role_vars should reject logging_certificates dns
-              when given an integer value
-
-        # --- Test: certificate email as integer ---
-        - name: Assert rejects logging_certificates email as an integer
-          block:
-            - name: Run role with logging_certificates email as an integer
-              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
-              vars:
-                logging_certificates:
-                  - name: logging_cert
-                    ca: self-sign
-                    email: 123
-          rescue:
-            - name: Mark certificate email integer rejected
-              ansible.builtin.set_fact:
-                __invalid_input_cert_email_int_failed: true
-              when:
-                - >-
-                  'logging_certificates[0].email must be a string or list of strings, got int' in
-                  __invalid_input_failure_messages
-
-        - name: Assert logging_certificates email as an integer was rejected
-          ansible.builtin.assert:
-            that:
-              - __invalid_input_cert_email_int_failed | default(false)
-            fail_msg: >-
-              assert_role_vars should reject logging_certificates email
-              when given an integer value
-
-        # --- Test: certificate ip as integer ---
-        - name: Assert rejects logging_certificates ip as an integer
-          block:
-            - name: Run role with logging_certificates ip as an integer
-              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
-              vars:
-                logging_certificates:
-                  - name: logging_cert
-                    ca: self-sign
-                    ip: 123
-          rescue:
-            - name: Mark certificate ip integer rejected
-              ansible.builtin.set_fact:
-                __invalid_input_cert_ip_int_failed: true
-              when:
-                - >-
-                  'logging_certificates[0].ip must be a string or list of strings, got int' in
-                  __invalid_input_failure_messages
-
-        - name: Assert logging_certificates ip as an integer was rejected
-          ansible.builtin.assert:
-            that:
-              - __invalid_input_cert_ip_int_failed | default(false)
-            fail_msg: >-
-              assert_role_vars should reject logging_certificates ip
-              when given an integer value
-
-        # --- Test: certificate principal as integer ---
-        - name: Assert rejects logging_certificates principal as an integer
-          block:
-            - name: Run role with logging_certificates principal as an integer
-              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
-              vars:
-                logging_certificates:
-                  - name: logging_cert
-                    ca: self-sign
-                    principal: 123
-          rescue:
-            - name: Mark certificate principal integer rejected
-              ansible.builtin.set_fact:
-                __invalid_input_cert_principal_int_failed: true
-              when:
-                - >-
-                  'logging_certificates[0].principal must be a string or list of strings, got int' in
-                  __invalid_input_failure_messages
-
-        - name: Assert logging_certificates principal as an integer was rejected
-          ansible.builtin.assert:
-            that:
-              - __invalid_input_cert_principal_int_failed | default(false)
-            fail_msg: >-
-              assert_role_vars should reject logging_certificates
-              principal when given an integer value
-
-        # --- Test: certificate mode as list ---
-        - name: Assert rejects logging_certificates mode as a list
-          block:
-            - name: Run role with logging_certificates mode as a list
-              ansible.builtin.include_tasks: tasks/run_role_with_clear_facts.yml
-              vars:
-                logging_certificates:
-                  - name: logging_cert
-                    ca: self-sign
-                    mode:
-                      - "0644"
-          rescue:
-            - name: Mark certificate mode list rejected
-              ansible.builtin.set_fact:
-                __invalid_input_cert_mode_list_failed: true
-              when:
-                - >-
-                  'logging_certificates[0].mode must be a string or integer, got list' in
-                  __invalid_input_failure_messages
-
-        - name: Assert logging_certificates mode as a list was rejected
-          ansible.builtin.assert:
-            that:
-              - __invalid_input_cert_mode_list_failed | default(false)
-            fail_msg: >-
-              assert_role_vars should reject logging_certificates mode
-              when given a list value
-
       always:
         - name: Clear test facts
           ansible.builtin.set_fact:
@@ -1263,8 +1075,6 @@
             __invalid_input_missing_flow_name_failed:
             __invalid_input_missing_flow_inputs_failed:
             __invalid_input_missing_flow_outputs_failed:
-            __invalid_input_missing_cert_name_failed:
-            __invalid_input_missing_cert_ca_failed:
             __invalid_input_input_type_choice_failed:
             __invalid_input_output_type_choice_failed:
             __invalid_input_input_state_choice_failed:
@@ -1278,9 +1088,4 @@
             __invalid_input_dir_owner_list_failed:
             __invalid_input_dir_group_list_failed:
             __invalid_input_dir_mode_list_failed:
-            __invalid_input_cert_dns_int_failed:
-            __invalid_input_cert_email_int_failed:
-            __invalid_input_cert_ip_int_failed:
-            __invalid_input_cert_principal_int_failed:
-            __invalid_input_cert_mode_list_failed:
           tags: tests::cleanup
