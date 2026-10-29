@@ -25,8 +25,7 @@
   tasks:
     - name: Skip on SLES, which does not ship the elasticsearch module
       meta: end_host
-      # Ansible reports SLES Immutable as SL-Micro
-      when: ansible_facts['distribution'] in ['SLES', 'SLES_SAP', 'SL-Micro']
+      when: ansible_facts['distribution'] in ['SLES', 'SLES_SAP']
 
     - name: Run test
       block:
