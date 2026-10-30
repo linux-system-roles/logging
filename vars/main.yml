@@ -1,8 +1,5 @@
 # SPDX-License-Identifier: MIT
 ---
-# packages needed to manage SELinux ports that the selinux role does not install
-__logging_selinux_packages: []
-
 # BEGIN - DO NOT EDIT THIS BLOCK - rh distros variables
 # Ansible distribution identifiers that the role treats like RHEL
 __logging_rh_distros:
