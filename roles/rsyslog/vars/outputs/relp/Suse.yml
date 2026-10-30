@@ -1,5 +1,6 @@
 ---
 # SPDX-License-Identifier: GPL-3.0-only
+# Assisted by Claude Code using model(s) Claude Fable 5.1, Claude Opus 5.5
 __rsyslog_output_relp_packages:
   - rsyslog-module-relp
   - librelp0
