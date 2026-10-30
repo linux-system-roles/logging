@@ -385,14 +385,44 @@
             - logging_pki_files.0.ca_cert_src | d("") | length == 0
             - logging_pki_files.0.ca_cert | d("") | length == 0
 
-        # a dest ending in / makes copy create a missing default directory
+        - name: Check the default PKI directories
+          stat:
+            path: '{{ __rsyslog_default_pki_path + item }}'
+          loop:
+            - '{{ __rsyslog_default_pki_cert_dir }}'
+            - '{{ __rsyslog_default_pki_key_dir }}'
+          when:
+            - __logging_forwards_tls | length > 0 or
+              __logging_remote_tls | length > 0
+            - logging_pki_files.0.ca_cert_src | d("") | length > 0 or
+              logging_pki_files.0.cert_src | d("") | length > 0 or
+              logging_pki_files.0.private_key_src | d("") | length > 0
+          register: __rsyslog_pki_dirs
+
+        # the default directories do not exist on every platform, e.g. SUSE
+        - name: Create the default PKI directories if missing
+          file:
+            path: '{{ __rsyslog_default_pki_path + item.item }}'
+            state: directory
+            mode: "0755"
+            owner: root
+            group: root
+          loop: '{{ __rsyslog_pki_dirs.results }}'
+          loop_control:
+            label: '{{ item.item }}'
+          when:
+            - item.stat is defined
+            - not item.stat.exists
+
         - name: Copy local ca_cert file to the target if needed
+          vars:
+            __pki_file: '{{ logging_pki_files.0.ca_cert_src | basename }}'
           copy:
             src: '{{ logging_pki_files.0.ca_cert_src }}'
             dest: '{{ logging_pki_files.0.ca_cert
               if logging_pki_files.0.ca_cert is defined
               else (__rsyslog_default_pki_path +
-                __rsyslog_default_pki_cert_dir) }}'
+                __rsyslog_default_pki_cert_dir + __pki_file) }}'
             mode: "0600"
           when:
             - __logging_forwards_tls | length > 0 or
@@ -401,12 +431,14 @@
           notify: Restart rsyslogd
 
         - name: Copy local cert file to the target if needed
+          vars:
+            __pki_file: '{{ logging_pki_files.0.cert_src | basename }}'
           copy:
             src: '{{ logging_pki_files.0.cert_src }}'
             dest: '{{ logging_pki_files.0.cert
               if logging_pki_files.0.cert is defined
               else (__rsyslog_default_pki_path +
-                __rsyslog_default_pki_cert_dir) }}'
+                __rsyslog_default_pki_cert_dir + __pki_file) }}'
             mode: "0600"
           when:
             - __logging_forwards_tls | length > 0 or
@@ -415,12 +447,14 @@
           notify: Restart rsyslogd
 
         - name: Copy local key file to the target if needed
+          vars:
+            __pki_file: '{{ logging_pki_files.0.private_key_src | basename }}'
           copy:
             src: '{{ logging_pki_files.0.private_key_src }}'
             dest: '{{ logging_pki_files.0.private_key
               if logging_pki_files.0.private_key is defined
               else (__rsyslog_default_pki_path +
-                __rsyslog_default_pki_key_dir) }}'
+                __rsyslog_default_pki_key_dir + __pki_file) }}'
             mode: "0400"
           when:
             - __logging_forwards_tls | length > 0 or
