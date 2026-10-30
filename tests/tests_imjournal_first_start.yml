@@ -1,3 +1,4 @@
+# Assisted by Claude Code using model(s) Claude Fable 5.1, Claude Opus 5.5
 ---
 - name: Ensure imjournal skips the journal history on its first start
   hosts: all
