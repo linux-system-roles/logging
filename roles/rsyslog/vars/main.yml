@@ -13,6 +13,9 @@ __rsyslog_config_dir: /etc/rsyslog.d
 # rsyslog work directory
 __rsyslog_work_dir: '/var/lib/rsyslog'
 
+# Skip the existing journal when imjournal starts without a valid state file
+__rsyslog_imjournal_ignore_previous: false
+
 # __rsyslog_tls_packages
 #
 # List of rpm packages required for TLS support.

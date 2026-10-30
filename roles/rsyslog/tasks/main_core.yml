@@ -28,10 +28,35 @@
       # we know it's a change here, as we just rpm -V'ed it above
       changed_when: true
       register: __rsyslog_erased
-      when: __rsyslog_package_status.results |
-        rejectattr('stdout', 'match', '^package .* is not installed') |
-        selectattr('stdout', 'search', ' /etc/rsyslog[.]conf($|\n)') |
-        list | length > 0
+      when:
+        - not __logging_is_transactional
+        - __rsyslog_package_status.results |
+          rejectattr('stdout', 'match', '^package .* is not installed') |
+          selectattr('stdout', 'search', ' /etc/rsyslog[.]conf($|\n)') |
+          list | length > 0
+
+    - name: Get mode of rsyslog.conf - transactional update system
+      stat:
+        path: /etc/rsyslog.conf
+      register: __rsyslog_purge_stat_conf
+      when: __logging_is_transactional
+
+    # a transactional update system cannot reinstall the package in place
+    - name: Reset to a minimal rsyslog.conf - transactional update system
+      template:
+        src: rsyslog.conf.j2
+        dest: /etc/rsyslog.conf
+        mode: "{{ __rsyslog_purge_stat_conf.stat.mode | d('0700') }}"
+      vars:
+        __rsyslog_has_config_files: "{{ __rsyslog_enabled | bool and
+          rsyslog_custom_config_files | flatten | length > 0 }}"
+      notify: "{{ 'Restart rsyslogd' if logging_enabled else 'Stop rsyslogd' }}"
+      when:
+        - __logging_is_transactional
+        - __rsyslog_package_status.results |
+          rejectattr('stdout', 'match', '^package .* is not installed') |
+          selectattr('stdout', 'search', ' /etc/rsyslog[.]conf($|\n)') |
+          list | length > 0
 
 - name: Install/Update required packages
   package:
@@ -42,6 +67,19 @@
     use: "{{ (__logging_is_ostree | d(false)) |
              ternary('ansible.posix.rhel_rpm_ostree', omit) }}"
   when:
+    - __rsyslog_enabled | bool or
+      __rsyslog_erased is success
+  register: __rsyslog_core_package_result
+
+- name: Handle reboot for transactional update systems
+  include_tasks: transactional_reboot.yml
+  vars:
+    __rsyslog_tu_result: "{{ __rsyslog_core_package_result }}"
+    __rsyslog_tu_packages: "{{ __rsyslog_base_packages + (__rsyslog_tls_packages
+      if (logging_pki_files | d([]) | length > 0) else []) +
+      (rsyslog_extra_packages | flatten) }}"
+  when:
+    - __logging_is_transactional
     - __rsyslog_enabled | bool or
       __rsyslog_erased is success
 
@@ -346,6 +384,35 @@
             - item | length > 0
             - logging_pki_files.0.ca_cert_src | d("") | length == 0
             - logging_pki_files.0.ca_cert | d("") | length == 0
+
+        - name: Check the default PKI directories
+          stat:
+            path: '{{ __rsyslog_default_pki_path + item }}'
+          loop:
+            - '{{ __rsyslog_default_pki_cert_dir }}'
+            - '{{ __rsyslog_default_pki_key_dir }}'
+          when:
+            - __logging_forwards_tls | length > 0 or
+              __logging_remote_tls | length > 0
+            - logging_pki_files.0.ca_cert_src | d("") | length > 0 or
+              logging_pki_files.0.cert_src | d("") | length > 0 or
+              logging_pki_files.0.private_key_src | d("") | length > 0
+          register: __rsyslog_pki_dirs
+
+        # the default directories do not exist on every platform, e.g. SUSE
+        - name: Create the default PKI directories if missing
+          file:
+            path: '{{ __rsyslog_default_pki_path + item.item }}'
+            state: directory
+            mode: "0755"
+            owner: root
+            group: root
+          loop: '{{ __rsyslog_pki_dirs.results }}'
+          loop_control:
+            label: '{{ item.item }}'
+          when:
+            - item.stat is defined
+            - not item.stat.exists
 
         - name: Copy local ca_cert file to the target if needed
           vars:

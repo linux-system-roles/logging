@@ -50,4 +50,5 @@
         name: fedora.linux_system_roles.selinux
       vars:
         selinux_ports: "{{ logging_selinux_ports }}"
+        selinux_transactional_update_reboot_ok: "{{ logging_transactional_update_reboot_ok }}"
       when: logging_selinux_ports | d([]) | length > 0

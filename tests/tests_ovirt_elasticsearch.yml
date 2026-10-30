@@ -26,6 +26,10 @@
     __test_vdsm_input: /var/log/vdsm/vdsm.log
     __default_system_log: /var/log/messages
   tasks:
+    - name: Skip on SLES, which does not ship the elasticsearch module
+      meta: end_host
+      when: ansible_facts['distribution'] in ['SLES', 'SLES_SAP']
+
     - name: TEST CASE 0; Ensure basic ovirt default configuration works
       vars:
         logging_elasticsearch_password: password0
