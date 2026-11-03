@@ -14,6 +14,21 @@
 
     - name: Test the first start of imjournal
       block:
+        - name: Check whether rsyslog is installed
+          stat:
+            path: /usr/lib/systemd/system/rsyslog.service
+          register: __test_rsyslog_unit
+
+        # a running imjournal would save its cursor on the role's restart
+        - name: Stop rsyslog and its socket
+          service:
+            name: "{{ item }}"
+            state: stopped
+          loop:
+            - syslog.socket
+            - rsyslog
+          when: __test_rsyslog_unit.stat.exists
+
         - name: Remove the imjournal state file and the test log file
           file:
             path: "{{ item }}"

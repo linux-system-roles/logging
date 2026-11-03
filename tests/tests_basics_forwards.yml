@@ -520,9 +520,8 @@
         - name: Post - move back files to /etc/rsyslog.d
           shell: |-
             set -euo pipefail
-            mv /tmp/rsyslog.d-backup/* /etc/rsyslog.d
             for conf in $( ls /tmp/rsyslog.d-backup ); do
-              mv /tmp/rsyslog.d-backup/$conf /tmp/rsyslog.d
+              mv /tmp/rsyslog.d-backup/$conf /etc/rsyslog.d
             done
             rmdir /tmp/rsyslog.d-backup
           changed_when: false
