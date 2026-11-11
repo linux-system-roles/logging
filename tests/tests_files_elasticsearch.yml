@@ -86,6 +86,7 @@
                 outputs: "{{ [__test_el] }}"
             __sr_public: true
           include_tasks: tasks/run_role_with_clear_facts.yml
+
         - name: "Force all notified handlers to run at this point,
           not waiting for normal sync points"
           meta: flush_handlers
@@ -149,6 +150,7 @@
             logging_outputs: []
             logging_flows: []
           include_tasks: tasks/run_role_with_clear_facts.yml
+
         - name: "Force all notified handlers to run at this point,
           not waiting for normal sync points"
           meta: flush_handlers
@@ -189,6 +191,7 @@
                 inputs: [files_input]
                 outputs: [elasticsearch_output]
           include_tasks: tasks/run_role_with_clear_facts.yml
+
         - name: "Force all notified handlers to run at this point,
           not waiting for normal sync points"
           meta: flush_handlers
@@ -232,6 +235,7 @@
             logging_outputs: []
             logging_flows: []
           include_tasks: tasks/run_role_with_clear_facts.yml
+
         - name: "Force all notified handlers to run at this point,
           not waiting for normal sync points"
           meta: flush_handlers
@@ -270,6 +274,7 @@
                 inputs: [files_input]
                 outputs: [elasticsearch_output]
           include_tasks: tasks/run_role_with_clear_facts.yml
+
         - name: "Force all notified handlers to run at this point,
           not waiting for normal sync points"
           meta: flush_handlers
@@ -310,6 +315,26 @@
           changed_when: false
           failed_when: __result.rc != 1
 
+        - name: Check no tls parameters in {{ __test_outputfiles_conf }}
+          command: >-
+            /bin/grep 'tls\.'
+            {{ __test_outputfiles_conf }}
+          register: __result
+          changed_when: false
+          failed_when: __result.rc != 1
+
+        - name: >-
+            Check the certs are not copied to the target host
+            with the default configuration path
+          stat:
+            path: "{{ item }}"
+          register: __result
+          failed_when: __result.stat.exists
+          loop:
+            - "{{ __certdir }}{{ __test_ca_cert_name }}"
+            - "{{ __certdir }}{{ __test_cert_name }}"
+            - "{{ __keydir }}{{ __test_key_name }}"
+
         - name: END TEST CASE 2; Clean up the deployed config
           vars:
             logging_purge_confs: true
@@ -317,6 +342,7 @@
             logging_outputs: []
             logging_flows: []
           include_tasks: tasks/run_role_with_clear_facts.yml
+
         - name: "Force all notified handlers to run at this point,
           not waiting for normal sync points"
           meta: flush_handlers
@@ -367,6 +393,7 @@
             logging_outputs: []
             logging_flows: []
           include_tasks: tasks/run_role_with_clear_facts.yml
+
         - name: "Force all notified handlers to run at this point,
           not waiting for normal sync points"
           meta: flush_handlers
@@ -422,9 +449,140 @@
             logging_outputs: []
             logging_flows: []
           include_tasks: tasks/run_role_with_clear_facts.yml
+
         - name: "Force all notified handlers to run at this point,
           not waiting for normal sync points"
           meta: flush_handlers
+
+        # TEST CASE 5
+        - name: Test case 5
+          block:
+            - name: "TEST CASE 5; Elasticsearch config -
+              tls is false and no cert data are given"
+              vars:
+                logging_outputs:
+                  - name: elasticsearch_output
+                    type: elasticsearch
+                    server_host: logging-es
+                    server_port: 9200
+                    index_prefix: project.
+                    input_type: ovirt
+                    retryfailures: false
+                    tls: false
+                logging_inputs:
+                  - name: basic_input
+                    type: basics
+                logging_flows:
+                  - name: flow_0
+                    inputs: [basic_input]
+                    outputs: [elasticsearch_output]
+              include_tasks: tasks/run_role_with_clear_facts.yml
+
+            - name: "Force all notified handlers to run at this point,
+              not waiting for normal sync points"
+              meta: flush_handlers
+
+            - name: Ensure config file size and counts
+              vars:
+                __conf_count: 9
+                __conf_size: less
+                __conf_files:
+                  - /etc/rsyslog.d/90-input-basics-basic_input.conf
+                  - "{{ __test_outputfiles_conf }}"
+                __check_systemctl_status: true
+              include_tasks: tasks/check_daemon_config_files.yml
+
+            - name: Check if the output files config exists
+              stat:
+                path: "{{ __test_outputfiles_conf }}"
+
+            - name: Check no tls parameters in {{ __test_outputfiles_conf }}
+              command: >-
+                /bin/grep 'tls\.'
+                {{ __test_outputfiles_conf }}
+              register: __result
+              changed_when: false
+              failed_when: __result.rc != 1
+
+          always:
+            - name: END TEST CASE 5; Clean up the deployed config
+              vars:
+                logging_purge_confs: true
+                logging_inputs: []
+                logging_outputs: []
+                logging_flows: []
+              include_tasks: tasks/run_role_with_clear_facts.yml
+              tags: tests::cleanup
+
+            - name: "Force all notified handlers to run at this point,
+              not waiting for normal sync points"
+              meta: flush_handlers
+              tags: tests::cleanup
+
+        # TEST CASE 6
+        - name: Test case 6
+          block:
+            - name: "TEST CASE 6; Elasticsearch config -
+              use_cert is false and no cert data are given"
+              vars:
+                logging_outputs:
+                  - name: elasticsearch_output
+                    type: elasticsearch
+                    server_host: logging-es
+                    server_port: 9200
+                    index_prefix: project.
+                    input_type: ovirt
+                    retryfailures: false
+                    use_cert: false
+                logging_inputs:
+                  - name: basic_input
+                    type: basics
+                logging_flows:
+                  - name: flow_0
+                    inputs: [basic_input]
+                    outputs: [elasticsearch_output]
+              include_tasks: tasks/run_role_with_clear_facts.yml
+
+            - name: "Force all notified handlers to run at this point,
+              not waiting for normal sync points"
+              meta: flush_handlers
+
+            - name: Ensure config file size and counts
+              vars:
+                __conf_count: 9
+                __conf_size: less
+                __conf_files:
+                  - /etc/rsyslog.d/90-input-basics-basic_input.conf
+                  - "{{ __test_outputfiles_conf }}"
+                __check_systemctl_status: true
+              include_tasks: tasks/check_daemon_config_files.yml
+
+            - name: Check if the output files config exists
+              stat:
+                path: "{{ __test_outputfiles_conf }}"
+
+            - name: Check no tls parameters in {{ __test_outputfiles_conf }}
+              command: >-
+                /bin/grep 'tls\.'
+                {{ __test_outputfiles_conf }}
+              register: __result
+              changed_when: false
+              failed_when: __result.rc != 1
+
+          always:
+            - name: END TEST CASE 6; Clean up the deployed config
+              vars:
+                logging_purge_confs: true
+                logging_inputs: []
+                logging_outputs: []
+                logging_flows: []
+              include_tasks: tasks/run_role_with_clear_facts.yml
+              tags: tests::cleanup
+
+            - name: "Force all notified handlers to run at this point,
+              not waiting for normal sync points"
+              meta: flush_handlers
+              tags: tests::cleanup
 
         - name: Assert {{ __default_system_log }}
           include_tasks: tasks/assert_varlogmessages.yml

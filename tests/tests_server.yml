@@ -22,6 +22,9 @@
     __test_server_ptcp: /etc/rsyslog.d/11-input-remote-remote_ptcp.conf
     __test_server_tcp: /etc/rsyslog.d/11-input-remote-remote_tcp.conf
     __test_server_udp: /etc/rsyslog.d/11-input-remote-remote_udp.conf
+    __test_server_notls: /etc/rsyslog.d/11-input-remote-remote_tcp_notls.conf
+    __test_server_notls_modules: >-
+      /etc/rsyslog.d/10-input-remote-modules-remote_tcp_notls.conf
     __expected_error: "Error: remote_tcp_0 and remote_tcp_1 conflict."
     __default_system_log: /var/log/messages
   tasks:
@@ -207,18 +210,94 @@
           debug:
             msg: Caught an expected error - {{ ansible_failed_result }}
 
-    - name: Stop tracking certificate
-      command: getcert stop-tracking -f {{ __test_ca_cert }}
-      changed_when: false
+    # TEST CASE 2
+    - name: Test case 2
+      block:
+        - name: "TEST CASE 2; Test the server configuration
+          using a remote input with tls: false and no cert data are given"
+          vars:
+            logging_inputs:
+              - name: system_input
+                type: basics
+              - name: remote_tcp_notls
+                type: remote
+                tcp_ports: [6514]
+                tls: false
+            logging_outputs:
+              - name: files_output
+                type: files
+            logging_flows:
+              - name: flows
+                inputs: [system_input, remote_tcp_notls]
+                outputs: [files_output]
+            __sr_public: true
+          include_tasks: tasks/run_role_with_clear_facts.yml
+        - name: "Force all notified handlers to run at this point,
+          not waiting for normal sync points - 3"
+          meta: flush_handlers
 
-    - name: Clean up pki files
-      file:
-        path: "{{ item }}"
-        state: absent
-      loop:
-        - "{{ __test_ca_cert }}"
-        - "{{ __test_key }}"
-        - "{{ __test_cert }}"
+        - name: Ensure config file size and counts - 2
+          vars:
+            __conf_count: 8
+            __conf_size: less
+            __conf_files:
+              - "{{ __test_server_notls }}"
+              - "{{ __test_server_notls_modules }}"
+            __check_systemctl_status: true
+          include_tasks: tasks/check_daemon_config_files.yml
+
+        - name: Check the plain TCP module is used in {{ __test_server_notls_modules }}
+          command: >-
+            /bin/grep 'module(load="imptcp"' {{ __test_server_notls_modules }}
+          changed_when: false
+
+        - name: Check the plain TCP input is used in {{ __test_server_notls }}
+          command: >-
+            /bin/grep 'type="imptcp"' {{ __test_server_notls }}
+          changed_when: false
+
+        - name: Check no TLS driver is used in {{ __test_server_notls_modules }}
+          command: /bin/grep 'StreamDriver' {{ __test_server_notls_modules }}
+          register: __result
+          changed_when: false
+          failed_when: __result.rc != 1
+
+        - name: Check ports managed by firewall and selinux - 3
+          include_tasks: tasks/check_firewall_selinux.yml
+
+      always:
+        - name: END TEST CASE 2; Clean up the deployed config
+          vars:
+            logging_purge_confs: true
+            logging_inputs: []
+            logging_outputs: []
+            logging_flows: []
+            __sr_public: true
+          include_tasks: tasks/run_role_with_clear_facts.yml
+          tags: tests::cleanup
+
+        - name: "Force all notified handlers to run at this point,
+          not waiting for normal sync points - 4"
+          meta: flush_handlers
+          tags: tests::cleanup
+
+        - name: Stop tracking certificate
+          command: getcert stop-tracking -f {{ __test_ca_cert }}
+          changed_when: false
+          tags: tests::cleanup
+
+        - name: Clean up pki files
+          file:
+            path: "{{ item }}"
+            state: absent
+          loop:
+            - "{{ __test_ca_cert }}"
+            - "{{ __test_key }}"
+            - "{{ __test_cert }}"
+          tags: tests::cleanup
+
+    - name: Check ports managed by firewall and selinux - 4
+      include_tasks: tasks/check_firewall_selinux.yml
 
     - name: Assert {{ __default_system_log }}
       include_tasks: tasks/assert_varlogmessages.yml

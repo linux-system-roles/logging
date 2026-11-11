@@ -12,6 +12,8 @@
     __test_relp_server1: /etc/rsyslog.d/11-input-relp-relp_server1.conf
     __test_relp_client0: /etc/rsyslog.d/31-output-relp-relp_client0.conf
     __test_relp_client1: /etc/rsyslog.d/31-output-relp-relp_client1.conf
+    __test_relp_server_plain: /etc/rsyslog.d/11-input-relp-relp_server_plain.conf
+    __test_relp_client_plain: /etc/rsyslog.d/31-output-relp-relp_client_plain.conf
     __test_relp_global: /etc/rsyslog.d/00-global.conf
     logging_max_message_size: 16384
     logging_preserve_fqdn: true
@@ -384,3 +386,93 @@
 
     - name: Assert {{ __default_system_log }}
       include_tasks: tasks/assert_varlogmessages.yml
+
+    # TEST CASE 2
+    - name: Set firewall and selinux to true - 2
+      set_fact:
+        logging_manage_firewall: true
+        logging_manage_selinux: true
+
+    - name: Test case 2
+      block:
+        - name: "TEST CASE 2; Test the server and client configuration
+          using relp with tls: false and no cert data are given"
+          vars:
+            logging_inputs:
+              - name: system_input
+                type: basics
+              - name: relp_server_plain
+                type: relp
+                port: 6514
+                tls: false
+            logging_outputs:
+              - name: files_output
+                type: files
+              - name: relp_client_plain
+                type: relp
+                target: localhost
+                port: 6514
+                tls: false
+            logging_flows:
+              - name: flows
+                inputs: [system_input]
+                outputs: [files_output, relp_client_plain]
+              - name: flows1
+                inputs: [relp_server_plain]
+                outputs: [files_output]
+            __sr_public: true
+          include_tasks: tasks/run_role_with_clear_facts.yml
+
+        - name: "Force all notified handlers to run at this point,
+          not waiting for normal sync points - 5"
+          meta: flush_handlers
+
+        - name: Ensure config file size and counts - 3
+          vars:
+            __conf_count: 10
+            __conf_size: less
+            __conf_files:
+              - "{{ __test_relp_server_plain }}"
+              - "{{ __test_relp_client_plain }}"
+            __check_systemctl_status: true
+          include_tasks: tasks/check_daemon_config_files.yml
+
+        - name: Check no tls parameters in {{ __test_relp_server_plain }}
+          command: /bin/grep 'tls' {{ __test_relp_server_plain }}
+          register: __result
+          changed_when: false
+          failed_when: __result.rc != 1
+
+        - name: Check no tls parameters in {{ __test_relp_client_plain }}
+          command: /bin/grep 'tls' {{ __test_relp_client_plain }}
+          register: __result
+          changed_when: false
+          failed_when: __result.rc != 1
+
+        - name: Check ports managed by firewall and selinux - 5
+          include_tasks: tasks/check_firewall_selinux.yml
+
+      always:
+        - name: Set firewall and selinux to false for cleanup - 3
+          set_fact:
+            logging_manage_firewall: false
+            logging_manage_selinux: false
+          tags: tests::cleanup
+
+        - name: END TEST CASE 2; Clean up the deployed config
+          vars:
+            logging_purge_confs: true
+            logging_inputs: []
+            logging_outputs: []
+            logging_flows: []
+            __sr_public: true
+          include_tasks: tasks/run_role_with_clear_facts.yml
+          tags: tests::cleanup
+
+        - name: "Force all notified handlers to run at this point,
+          not waiting for normal sync points - 6"
+          meta: flush_handlers
+          tags: tests::cleanup
+
+    - name: Check ports managed by firewall and selinux - 6
+      include_tasks: tasks/check_firewall_selinux.yml

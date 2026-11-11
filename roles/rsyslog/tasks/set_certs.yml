@@ -5,7 +5,7 @@
     # This block collect certificates from local location and
     # copies them to the target host
     - name: Manage certificates if TLS is enabled
-      when: __rsyslog_cert_subject.tls | d((__rsyslog_cert_subject.use_cert | d(true, true)), true)
+      when: __rsyslog_cert_subject.tls | d(__rsyslog_cert_subject.use_cert | d(true)) | bool
       block:
         - name: "Copy ca_cert on the control host to the specified path
             on the target host"
@@ -53,7 +53,7 @@
           more cert/key files in the configuration named
           {{ __rsyslog_cert_subject.name }}"
       when:
-        - not (__rsyslog_cert_subject.tls | d((__rsyslog_cert_subject.use_cert | d(true, true)), true))
+        - not (__rsyslog_cert_subject.tls | d(__rsyslog_cert_subject.use_cert | d(true)) | bool)
         - (__rsyslog_cert_subject.ca_cert | d("") | length > 0 or
            __rsyslog_cert_subject.cert | d("") | length > 0 or
            __rsyslog_cert_subject.private_key | d("") | length > 0) or
