@@ -577,6 +577,88 @@
           not waiting for normal sync points"
           meta: flush_handlers
 
+        # TEST CASE 4
+        - name: Test case 4
+          block:
+            - name: "TEST CASE 4; Test the configuration, basics input
+              and a forwards output with tls: false and no pki files"
+              vars:
+                logging_outputs:
+                  - name: forwards_severity_and_facility
+                    type: forwards
+                    facility: local1
+                    severity: info
+                    target: host@domain
+                    tcp_port: 1514
+                    tls: false
+                logging_inputs:
+                  - name: basic_input
+                    type: basics
+                logging_flows:
+                  - name: flows0
+                    inputs: [basic_input]
+                    outputs: [forwards_severity_and_facility]
+              include_tasks: tasks/run_role_with_clear_facts.yml
+            - name: "Force all notified handlers to run at this point,
+              not waiting for normal sync points"
+              meta: flush_handlers
+
+            - name: Ensure config file size and counts
+              vars:
+                __conf_count: 6
+                __conf_size: less
+                __conf_files:
+                  - "{{ __test_forward_conf_s_f }}"
+                  - "{{ __test_files_conf }}"
+                __check_systemctl_status: true
+              include_tasks: tasks/check_daemon_config_files.yml
+
+            - name: Check severity_and_facility without TLS
+              include_tasks: tasks/compare_file_to_content.yml
+              vars:
+                compare_file: "{{ __test_forward_conf_s_f }}"
+                expected_content: |
+                  #
+                  # Ansible managed
+                  #
+                  # system_role:logging
+                  ruleset(name="forwards_severity_and_facility") {
+                      local1.info action(name="forwards_severity_and_facility"
+                          type="omfwd"
+                          Target="host@domain"
+                          Port="1514"
+                          Protocol="tcp"
+                          Template="{{ __test_template }}"
+                      )
+                  }
+
+            - name: Check no TLS driver is used in {{ __test_forward_conf_s_f }}
+              command: /bin/grep 'StreamDriver' {{ __test_forward_conf_s_f }}
+              register: __result
+              changed_when: false
+              failed_when: __result.rc != 1
+
+            - name: Check no TLS CA cert is set in the global config
+              command: >-
+                /bin/grep 'defaultNetstreamDriverCAFile' /etc/rsyslog.d/00-global.conf
+              register: __result
+              changed_when: false
+              failed_when: __result.rc != 1
+
+          always:
+            - name: END TEST CASE 4; Clean up the deployed config
+              vars:
+                logging_purge_confs: true
+                logging_inputs: []
+                logging_outputs: []
+                logging_flows: []
+              include_tasks: tasks/run_role_with_clear_facts.yml
+              tags: tests::cleanup
+            - name: "Force all notified handlers to run at this point,
+              not waiting for normal sync points"
+              meta: flush_handlers
+              tags: tests::cleanup
+
         - name: Clean up fake pki files
           file:
             path: "{{ item }}"

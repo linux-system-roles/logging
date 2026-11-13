@@ -4,7 +4,7 @@
   shell: cat {{ __default_system_log }} || true
   register: __default_system_log_content
   changed_when: false
-  no_log: true
+  no_log: "{{ ansible_verbosity < 4 }}"
 
 - name: Print possible errors in {{ __default_system_log }}
   vars:
