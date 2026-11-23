@@ -259,8 +259,8 @@ details are described in <a
 href="#logging-configuration-overview">Logging Configuration
 Overview</a>.</p>
 <h1 id="requirements">Requirements</h1>
-<p>This role is supported on RHEL-7+, CentOS Stream-8+ and Fedora
-distributions.</p>
+<p>This role is supported on RHEL-7+, CentOS Stream-8+, Fedora, SLES 16+
+and openSUSE Leap 16+ distributions.</p>
 <h2 id="collection-requirements">Collection requirements</h2>
 <p>The role requires the <code>firewall</code> role and the
 <code>selinux</code> role from the
@@ -273,9 +273,10 @@ href="#other-options"><code>Other options</code></a> section.)</p>
 <code>fedora.linux_system_roles</code> collection or from the Fedora RPM
 package, the requirement is already satisfied.</p>
 <p>The role requires external collections for management of
-<code>rpm-ostree</code> nodes. These are listed in the
+<code>rpm-ostree</code> nodes, and <code>community.general</code> for
+package management on SUSE. These are listed in the
 <code>meta/collection-requirements.yml</code>. You do not need them if
-you do not want to manage <code>rpm-ostree</code> systems.</p>
+you do not want to manage <code>rpm-ostree</code> or SUSE systems.</p>
 <p>If you need to install additional collections based on the above,
 please run:</p>
 <div class="sourceCode" id="cb1"><pre
@@ -639,7 +640,9 @@ elasticsearch type</h3>
 <p><code>elasticsearch</code> output supports sending logs to
 Elasticsearch. It is available only when the input is
 <code>ovirt</code>. Assuming Elasticsearch is already configured and
-running.</p>
+running. On SLES, <code>rsyslog-module-elasticsearch</code> is not in
+the product repositories; SUSE Package Hub, which must be enabled,
+provides it for SLES 16.0.</p>
 <p>Available options:</p>
 <ul>
 <li><code>server_host</code>: Host name Elasticsearch is running on. The
@@ -1010,7 +1013,11 @@ the original system default configuration. On <code>ostree</code>
 systems, this does not work, so a minimal rsyslog.conf will be used,
 which is <em>not</em> the same as the default rsyslog.conf provided by
 the rpm package. So please use caution if you use this option on
-<code>ostree</code> systems.</p></li>
+<code>ostree</code> systems. On transactional update systems the package
+cannot be reinstalled in place either, so a minimal rsyslog.conf is used
+there as well. It includes the files in rsyslog.d only when
+<code>logging_custom_config_files</code> is set, and it loads no input
+module, so those files must load their own.</p></li>
 <li><p><code>logging_system_log_dir</code>: Directory where the local
 log output files are placed. Default to <code>/var/log</code>.</p></li>
 <li><p><code>logging_preserve_fqdn</code>: If set to <code>true</code>,
@@ -1035,6 +1042,21 @@ SELinux. Default to <code>false</code>. NOTE:
 policy. It cannot be used for <em>removing</em> policy. If you want to
 remove policy, you will need to use the <code>selinux</code> role
 directly.</p></li>
+<li><p><code>logging_transactional_update_reboot_ok</code>: This
+variable is used to handle reboots required by transactional updates. If
+a transactional update requires a reboot, the role will proceed with the
+reboot if set to <code>true</code>. If set to <code>false</code>, the
+role will notify the user that a reboot is required, allowing for custom
+handling of the reboot requirement. If this variable is not set, the
+role will fail to ensure the reboot requirement is not overlooked. For
+non-transactional update systems, this variable has no effect, but it
+must still be a boolean or <code>null</code>. Default to
+<code>null</code>. On a transactional update system, an input or output
+whose packages are not installed yet, such as <code>relp</code>,
+installs them after part of the rsyslog configuration is written. The
+reboot, or the failure when this variable is not set, happens at that
+point, and rsyslog can log configuration errors until a run of the role
+completes.</p></li>
 <li><p><code>logging_custom_config_files</code>: A list of files to copy
 to the remote logging configuration directory. For <code>rsyslog</code>,
 this will be <code>/etc/rsyslog.d/</code>. This assumes the default
